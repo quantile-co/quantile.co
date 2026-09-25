@@ -19,11 +19,6 @@ variable "gcp_wif_pool" {
   type        = string
 }
 
-variable "gcp_wif_provider" {
-  description = "Full WIF provider resource path for quantile-co."
-  type        = string
-}
-
 variable "github_quantile_co_organization" {
   description = "GitHub organization containing this repository."
   type        = string
