@@ -3,12 +3,12 @@ output "repository_id" {
   value       = github_repository.self.repo_id
 }
 
-output "state_project_id" {
-  description = "GCP project containing this repository's OpenTofu state."
-  value       = google_project.state.project_id
-}
-
 output "state_bucket" {
   description = "GCS bucket containing this repository's OpenTofu state."
   value       = google_storage_bucket.state.name
+}
+
+output "state_project_id" {
+  description = "GCP project containing this repository's OpenTofu state."
+  value       = google_project.state.project_id
 }
