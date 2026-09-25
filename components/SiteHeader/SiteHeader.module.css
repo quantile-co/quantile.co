@@ -1,0 +1,88 @@
+.header {
+  position: sticky;
+  z-index: 1003;
+  top: 0;
+  height: var(--site-header-height);
+  border-bottom: 1px solid var(--site-divider-color);
+  background-color: color-mix(
+    in srgb,
+    var(--mantine-color-body) 92%,
+    transparent
+  );
+  backdrop-filter: blur(16px);
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  max-width: calc(var(--site-content-width) + (2 * var(--site-page-padding)));
+  height: var(--site-header-height);
+  padding-inline: var(--site-page-padding);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.link {
+  display: block;
+  padding: 8px 10px;
+  color: var(--site-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  transition: color 150ms ease;
+
+  @mixin hover {
+    color: var(--site-text-primary);
+    text-decoration: none;
+  }
+}
+
+.navButton {
+  height: 32px;
+  padding-inline: 14px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.drawerClose {
+  color: var(--site-text-primary);
+}
+
+.drawerTitle {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding-left: 36px;
+}
+
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--mantine-spacing-xl) var(--mantine-spacing-md);
+  gap: var(--mantine-spacing-xl);
+}
+
+.mobileActions {
+  width: min(100%, 128px);
+}
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  text-align: center;
+}
+
+.mobileNav .link {
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-xl);
+  color: var(--site-text-secondary);
+  font-size: var(--mantine-font-size-xl);
+  line-height: 1.4;
+}

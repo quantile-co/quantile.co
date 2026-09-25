@@ -1,0 +1,191 @@
+@import "@mantine/core/styles/baseline.css";
+@import "@mantine/core/styles/default-css-variables.css";
+@import "@mantine/core/styles/global.css";
+@import "@mantine/core/styles/ScrollArea.css";
+@import "@mantine/core/styles/UnstyledButton.css";
+@import "@mantine/core/styles/VisuallyHidden.css";
+@import "@mantine/core/styles/Paper.css";
+@import "@mantine/core/styles/CloseButton.css";
+@import "@mantine/core/styles/Group.css";
+@import "@mantine/core/styles/Overlay.css";
+@import "@mantine/core/styles/ModalBase.css";
+@import "@mantine/core/styles/Accordion.css";
+@import "@mantine/core/styles/Avatar.css";
+@import "@mantine/core/styles/Burger.css";
+@import "@mantine/core/styles/Button.css";
+@import "@mantine/core/styles/Container.css";
+@import "@mantine/core/styles/Divider.css";
+@import "@mantine/core/styles/Drawer.css";
+@import "@mantine/core/styles/Flex.css";
+@import "@mantine/core/styles/SimpleGrid.css";
+@import "@mantine/core/styles/Stack.css";
+@import "@mantine/core/styles/Text.css";
+@import "@mantine/core/styles/Title.css";
+
+:root {
+  --site-zinc-50: #fafafa;
+  --site-zinc-100: #f4f4f5;
+  --site-zinc-200: #e4e4e7;
+  --site-zinc-300: #d4d4d8;
+  --site-zinc-400: #a1a1aa;
+  --site-zinc-700: #3f3f46;
+  --site-zinc-800: #27272a;
+  --site-zinc-900: #18181b;
+  --site-zinc-950: #09090b;
+  --site-header-height: 64px;
+  --site-anchor-gap: clamp(3rem, 5vw, 4.5rem);
+  --site-content-width: 75rem;
+  --site-page-padding: 24px;
+  --site-focus-ring: var(--site-zinc-950);
+  --site-lower-background: color-mix(
+    in srgb,
+    var(--site-zinc-50) 85%,
+    var(--site-zinc-100)
+  );
+  --site-divider-color: var(--site-zinc-200);
+  --site-surface-outline: var(--site-zinc-300);
+  --site-calendly-background: var(--site-zinc-50);
+  --site-calendly-outline: var(--site-zinc-400);
+  --site-calendly-shadow: 0 0.5rem 1.75rem rgb(9 9 11 / 4%);
+  --site-surface-raised: var(--site-zinc-50);
+  --site-surface-raised-hover: var(--site-zinc-100);
+  --site-text-primary: var(--site-zinc-950);
+  --site-text-secondary: var(--site-zinc-800);
+  --site-workstream-column-background: rgb(9 9 11 / 2.5%);
+  --section-padding-block: 112px;
+}
+
+html {
+  scroll-padding-top: calc(var(--site-header-height) + var(--site-anchor-gap));
+}
+
+body {
+  margin: 0;
+  background-color: var(--mantine-color-body);
+  color: var(--site-text-primary);
+}
+
+[data-section-content] {
+  padding-block: var(--section-padding-block);
+}
+
+@media (max-width: 62em) {
+  :root {
+    --section-padding-block: 80px;
+  }
+}
+
+@media (max-width: 36em) {
+  :root {
+    --site-page-padding: 20px;
+    --section-padding-block: 64px;
+  }
+}
+
+[data-section-heading] {
+  margin: 0;
+  color: var(--site-text-primary);
+  font-family: Outfit, var(--mantine-font-family);
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+:root[data-mantine-color-scheme="light"] {
+  --mantine-color-body: var(--site-zinc-50);
+  --mantine-color-dimmed: var(--site-text-secondary);
+  --mantine-color-text: var(--site-text-primary);
+}
+
+:root[data-mantine-color-scheme="dark"] {
+  --mantine-color-body: var(--site-zinc-950);
+  --mantine-color-dimmed: var(--site-text-secondary);
+  --mantine-color-text: var(--site-text-primary);
+  --site-focus-ring: var(--site-zinc-50);
+  --site-lower-background: color-mix(
+    in srgb,
+    var(--site-zinc-950) 85%,
+    var(--site-zinc-900)
+  );
+  --site-divider-color: var(--site-zinc-800);
+  --site-surface-outline: var(--site-zinc-700);
+  --site-calendly-background: var(--site-zinc-950);
+  --site-calendly-outline: var(--site-zinc-300);
+  --site-calendly-shadow: 0 0.5rem 1.75rem rgb(9 9 11 / 28%);
+  --site-surface-raised: var(--site-zinc-950);
+  --site-surface-raised-hover: var(--site-zinc-900);
+  --site-text-primary: var(--site-zinc-50);
+  --site-text-secondary: var(--site-zinc-300);
+  --site-workstream-column-background: rgb(250 250 250 / 4%);
+}
+
+::selection {
+  color: var(--mantine-color-body);
+  background: var(--mantine-primary-color-filled);
+}
+
+:focus-visible {
+  outline: 2px solid var(--site-focus-ring);
+  outline-offset: 2px;
+}
+
+#main-content:focus {
+  outline: none;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+.mantine-Button-root[data-variant="outline"] {
+  border-color: var(--site-surface-outline);
+  background-color: transparent;
+  color: var(--site-text-primary);
+}
+
+.mantine-Button-root[data-site-cta] {
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.mantine-Button-root[data-site-cta="hero"] {
+  height: 2.75em;
+  padding-inline: 1.5em;
+  font-size: clamp(0.875rem, 1.111vw, 1rem);
+}
+
+@media (max-width: 20em) {
+  .mantine-Button-root[data-site-cta="hero"] {
+    font-size: 0.8125rem;
+  }
+}
+
+.mantine-Button-root[data-site-cta="section"] {
+  height: 40px;
+  padding-inline: var(--mantine-spacing-md);
+  font-size: var(--mantine-font-size-sm);
+}
+
+.mantine-Button-root[data-variant="filled"],
+.mantine-Button-root[data-variant="outline"] {
+  transition:
+    border-color 150ms ease,
+    color 150ms ease,
+    background-color 150ms ease;
+}
+
+@media (hover: hover) {
+  .mantine-Button-root[data-variant="outline"]:hover {
+    background-color: var(--site-surface-raised-hover);
+  }
+
+  .mantine-Button-root[data-variant="filled"]:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--site-text-primary) 84%,
+      var(--mantine-color-body)
+    );
+    color: var(--mantine-color-body);
+  }
+}

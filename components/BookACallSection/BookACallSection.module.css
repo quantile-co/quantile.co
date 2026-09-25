@@ -1,0 +1,112 @@
+.wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: calc(var(--site-content-width) + (2 * var(--site-page-padding)));
+  padding-top: var(--section-padding-block);
+  padding-right: var(--site-page-padding);
+  padding-bottom: calc(var(--section-padding-block) * 0.75);
+  padding-left: var(--site-page-padding);
+}
+
+.title {
+  max-width: 52rem;
+  margin: 0 auto;
+  color: var(--site-text-primary);
+  font-family: var(--mantine-font-family-headings);
+  font-size: clamp(3rem, 5.5vw, 4.5rem);
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 0.98;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.emailCard {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.625rem var(--mantine-spacing-md);
+  margin: var(--mantine-spacing-md) auto 0;
+  border: 1px solid var(--site-calendly-outline);
+  border-radius: var(--mantine-radius-md);
+  column-gap: var(--mantine-spacing-md);
+  background-color: var(--site-calendly-background);
+  box-shadow: var(--site-calendly-shadow);
+  color: var(--site-text-primary);
+  text-decoration: none;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+
+  @mixin hover {
+    background-color: var(--site-surface-raised-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mantine-primary-color-filled);
+    outline-offset: 3px;
+  }
+}
+
+@media (min-width: 42.625em) {
+  .emailCard {
+    width: min(680px, calc(100% - 32px));
+    margin-top: calc(-1 * var(--mantine-spacing-md));
+  }
+}
+
+@media (min-width: 65.4375em) {
+  .emailCard {
+    width: min(800px, 100%);
+    margin-top: -18px;
+  }
+}
+
+.emailIcon,
+.emailArrow {
+  color: var(--site-text-primary);
+}
+
+.emailCopy {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: var(--mantine-spacing-md);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.emailCopy span {
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.4;
+}
+
+.emailLabel {
+  color: var(--site-text-primary);
+  font-weight: 400;
+}
+
+.emailAddress {
+  color: var(--site-text-primary);
+  font-weight: 400;
+}
+
+@media (max-width: $mantine-breakpoint-xs) {
+  .emailCard {
+    width: calc(100% - 2px);
+    column-gap: var(--mantine-spacing-sm);
+  }
+
+  .emailCopy {
+    gap: var(--mantine-spacing-sm);
+  }
+
+  .emailCopy span {
+    font-size: clamp(0.75rem, 3.4vw, 1rem);
+  }
+}

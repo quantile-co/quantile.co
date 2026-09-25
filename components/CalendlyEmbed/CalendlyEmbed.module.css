@@ -1,0 +1,80 @@
+.root {
+  width: 100%;
+}
+
+.embed {
+  position: relative;
+  width: 100%;
+  min-width: 320px;
+  height: 902px;
+  margin-top: var(--mantine-spacing-xl);
+  /* Matching Calendly's document scheme keeps the iframe canvas transparent. */
+  color-scheme: light;
+
+  @media (min-width: 42.625em) {
+    height: 952px;
+  }
+
+  /* At this width, the iframe reaches Calendly's 1000px desktop breakpoint. */
+  @media (min-width: 65.4375em) {
+    height: 800px;
+  }
+
+  @media (max-width: $mantine-breakpoint-xs) {
+    overflow: hidden;
+    min-width: 0;
+    height: 904px;
+    border: 1px solid var(--site-calendly-outline);
+    border-radius: var(--mantine-radius-md);
+    box-shadow: var(--site-calendly-shadow);
+  }
+}
+
+.placeholder {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--site-calendly-outline);
+  border-radius: var(--mantine-radius-md);
+  place-items: center;
+  background-color: var(--site-calendly-background);
+  box-shadow: var(--site-calendly-shadow);
+  color: var(--site-text-primary);
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+
+  @media (min-width: 42.625em) {
+    top: 66px;
+    right: auto;
+    bottom: 32px;
+    left: 50%;
+    width: min(680px, calc(100% - 32px));
+    height: auto;
+    transform: translateX(-50%);
+  }
+
+  @media (min-width: 65.4375em) {
+    bottom: 34px;
+    width: min(800px, 100%);
+  }
+
+  @media (max-width: $mantine-breakpoint-xs) {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+.widget {
+  width: 100%;
+  height: 100%;
+}
+
+.widget :global(.calendly-spinner) {
+  display: none;
+}

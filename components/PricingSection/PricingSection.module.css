@@ -1,0 +1,182 @@
+.section {
+  position: relative;
+}
+
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: calc(var(--site-content-width) + (2 * var(--site-page-padding)));
+  padding-inline: var(--site-page-padding);
+}
+
+.title {
+  margin: 0;
+  color: var(--site-text-primary);
+  font-size: clamp(2.5rem, 4vw, 3rem);
+  font-weight: 550;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  text-align: left;
+}
+
+.subtitle {
+  margin-top: var(--mantine-spacing-sm);
+  color: var(--site-text-secondary);
+  font-size: clamp(1rem, 1.35vw, 1.125rem);
+  line-height: 1.5;
+}
+
+.pricingGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  margin-top: var(--mantine-spacing-xl);
+  gap: var(--mantine-spacing-xl);
+}
+
+.mobileProof {
+  display: none;
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+}
+
+.priceRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--mantine-spacing-lg);
+}
+
+.currentPrice {
+  display: flex;
+  align-items: baseline;
+  gap: var(--mantine-spacing-sm);
+}
+
+.price {
+  color: var(--site-text-primary);
+  font-family: Outfit, var(--mantine-font-family);
+  font-size: clamp(2.5rem, 4.25vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.perMonth {
+  color: var(--site-text-secondary);
+  font-size: var(--mantine-font-size-lg);
+  font-weight: 500;
+}
+
+.originalPrice {
+  color: var(--site-text-secondary);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 600;
+  text-decoration-line: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.planSummary {
+  margin-top: var(--mantine-spacing-md);
+  color: var(--site-text-secondary);
+  font-size: var(--mantine-font-size-lg);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.planSummary span {
+  display: block;
+}
+
+.detailsGrid {
+  margin-top: var(--mantine-spacing-xl);
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, auto);
+  padding: 0;
+  margin: 0;
+  gap: var(--mantine-spacing-lg) var(--mantine-spacing-xl);
+  list-style: none;
+}
+
+.features li {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  gap: var(--mantine-spacing-sm);
+  color: var(--site-text-secondary);
+  font-size: var(--mantine-font-size-md);
+  line-height: 1.45;
+}
+
+.features span {
+  white-space: nowrap;
+}
+
+.features svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--site-text-primary);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--mantine-spacing-sm);
+}
+
+.action {
+  width: auto;
+  min-width: 8rem;
+}
+
+@media (max-width: $mantine-breakpoint-md) {
+  .plan {
+    order: -2;
+  }
+
+  .actions {
+    order: -1;
+  }
+
+}
+
+@media (min-width: 48em) and (max-width: 64em) {
+  .features {
+    column-gap: var(--mantine-spacing-lg);
+  }
+
+  .features li {
+    font-size: clamp(0.875rem, 1.5625vw, 1rem);
+  }
+}
+
+@media (max-width: 47.9375em) {
+  .features {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+}
+
+@media (max-width: $mantine-breakpoint-xs) {
+  .pricingGrid {
+    gap: var(--mantine-spacing-lg);
+  }
+
+  .mobileProof {
+    display: block;
+    order: -1;
+    width: calc(100% + (2 * var(--site-page-padding)));
+    margin-left: calc(-1 * var(--site-page-padding));
+  }
+
+}

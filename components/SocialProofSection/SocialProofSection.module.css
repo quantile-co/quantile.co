@@ -1,0 +1,372 @@
+.section {
+  --proof-foreground: var(--site-text-secondary);
+
+  position: relative;
+  overflow: hidden;
+
+  @media (max-width: $mantine-breakpoint-xs) {
+    &[data-hide-mobile] {
+      display: none;
+    }
+
+    &[data-embedded] .experiencePage {
+      padding-block: 0;
+    }
+  }
+}
+
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: calc(var(--site-content-width) + (2 * var(--site-page-padding)));
+  padding-block: 0;
+  padding-inline: var(--site-page-padding);
+
+  @media (max-width: 26.5625em) {
+    padding-inline: 0;
+  }
+}
+
+.experienceGrid {
+  overflow: hidden;
+}
+
+.experiencePage {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 0;
+  row-gap: 0;
+  background-color: transparent;
+
+  @media (max-width: 47.9375em) {
+    grid-template-columns: none;
+    grid-auto-columns: 50%;
+    grid-auto-flow: column;
+    overflow-x: hidden;
+    touch-action: pan-y;
+  }
+
+  @media (max-width: $mantine-breakpoint-xs) {
+    grid-template-columns: none;
+    grid-auto-columns: calc(
+      100vw - (2 * var(--mantine-spacing-md))
+    );
+    grid-auto-flow: column;
+    overflow-x: hidden;
+    padding: var(--mantine-spacing-md);
+    gap: var(--mantine-spacing-md);
+    background-color: transparent;
+    touch-action: pan-y;
+  }
+}
+
+.inactiveCard {
+  visibility: hidden;
+}
+
+.proofCard {
+  --proof-card-height: 8.75rem;
+  --proof-padding-block: 0.625rem;
+  --proof-padding-right: 0.5rem;
+  --proof-column-gap: 0.5rem;
+  --proof-media-size: 5rem;
+
+  display: grid;
+  height: var(--proof-card-height);
+  min-width: 0;
+  overflow: visible;
+  padding-block: var(--proof-padding-block);
+  padding-right: var(--proof-padding-right);
+  padding-left: 0;
+  column-gap: var(--proof-column-gap);
+  grid-template-columns: var(--proof-media-size) minmax(0, 1fr);
+  background-color: var(--mantine-color-body);
+  container-type: inline-size;
+}
+
+.mediaSquare {
+  position: relative;
+  display: grid;
+  width: var(--proof-media-size);
+  height: var(--proof-media-size);
+  align-self: start;
+  margin-top: calc(
+    (
+        var(--proof-card-height) - (2 * var(--proof-padding-block)) -
+          var(--proof-media-size)
+      ) / 2
+  );
+  overflow: hidden;
+  border: 2px solid var(--proof-foreground);
+  border-radius: var(--mantine-radius-sm);
+  place-items: center;
+  background: var(--mantine-color-body);
+}
+
+.mediaSquare[data-company="AJ Welch"]::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background-color: var(--proof-foreground);
+  content: "";
+  mix-blend-mode: color;
+  pointer-events: none;
+}
+
+.profileImage {
+  object-fit: cover;
+  filter: grayscale(1);
+}
+
+.googleMark {
+  width: 60%;
+  height: 60%;
+  color: var(--proof-foreground);
+}
+
+.companyMarkImage {
+  width: 54%;
+  height: 54%;
+  background-color: var(--proof-foreground);
+  mask: var(--logo-image) center / contain no-repeat;
+}
+
+.proofContent {
+  display: grid;
+  min-width: 0;
+  height: var(--proof-media-size);
+  align-self: start;
+  margin-top: calc(
+    (
+        var(--proof-card-height) - (2 * var(--proof-padding-block)) -
+          var(--proof-media-size)
+      ) / 2
+  );
+  grid-template-rows: auto auto auto;
+  align-content: space-between;
+  text-align: left;
+}
+
+.profileContent {
+  grid-template-rows: auto auto 1fr;
+  align-content: stretch;
+  row-gap: 0.0625rem;
+}
+
+.proofTitle {
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  color: var(--proof-foreground);
+  font-size: clamp(0.875rem, 7.5cqw, 1.375rem);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.experienceContext,
+.profileRole,
+.profileDescription {
+  color: var(--proof-foreground);
+  font-size: clamp(0.40625rem, 3.6cqw, 0.8125rem);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.profileRole {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.experienceContext {
+  display: flex;
+  min-width: 0;
+  min-height: 1.42em;
+  align-content: flex-start;
+  align-items: flex-start;
+  margin-top: 0.1875rem;
+  overflow: hidden;
+  gap: clamp(0.0625rem, 0.75cqw, 0.1875rem);
+  flex-wrap: nowrap;
+
+  & span {
+    white-space: nowrap;
+  }
+
+  & span + span {
+    padding-left: clamp(0.0625rem, 0.75cqw, 0.1875rem);
+    border-left: 1px solid var(--proof-foreground);
+  }
+}
+
+.profileDescription {
+  align-self: end;
+  margin: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.profileLastLine {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(0.125rem, 0.75cqw, 0.25rem);
+}
+
+.socialLinks {
+  --social-icon-size: clamp(0.625rem, 5.333cqw, 1rem);
+
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: clamp(0.0625rem, 0.5cqw, 0.125rem);
+}
+
+.socialLink {
+  display: grid;
+  width: calc(var(--social-icon-size) + 0.125rem);
+  height: var(--social-icon-size);
+  border: 0;
+  place-items: center;
+  background-color: transparent;
+  color: var(--proof-foreground);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-1px);
+      opacity: 0.78;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--proof-foreground);
+    outline-offset: 2px;
+  }
+
+  & svg {
+    width: var(--social-icon-size);
+    height: var(--social-icon-size);
+  }
+}
+
+.customerLogos {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  align-self: end;
+  align-items: end;
+  justify-content: start;
+  gap: clamp(0.5rem, 4cqw, 1rem);
+  grid-template-columns: repeat(3, max-content);
+}
+
+.customer {
+  display: grid;
+  min-width: 0;
+  align-content: end;
+  justify-items: start;
+  gap: clamp(0.0625rem, 0.75cqw, 0.1875rem);
+  grid-template-rows: auto max-content;
+}
+
+.customerLogo {
+  width: clamp(0.875rem, 7cqw, 1.5rem);
+  height: clamp(0.875rem, 7cqw, 1.5rem);
+  background-color: var(--proof-foreground);
+  mask: var(--logo-image) left center / contain no-repeat;
+}
+
+.customerName {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: flex-start;
+  color: var(--proof-foreground);
+  overflow: hidden;
+  font-size: clamp(0.4375rem, 3cqw, 0.75rem);
+  line-height: 1.2;
+  text-align: left;
+  white-space: nowrap;
+}
+
+@media (min-width: 48em) {
+  .experiencePage > .proofCard:last-child {
+    --proof-padding-right: 0;
+  }
+}
+
+@media (min-width: 48em) and (max-width: 64em) {
+  .proofCard {
+    --proof-card-height: clamp(7rem, 11.6667vw, 8.75rem);
+    --proof-padding-block: clamp(0.375rem, 0.8333vw, 0.625rem);
+    --proof-padding-right: 0.125rem;
+    --proof-column-gap: 0.5rem;
+    --proof-media-size: clamp(3.125rem, calc(7.03125vw - 0.25rem), 4.25rem);
+  }
+}
+
+@media (min-width: 36.0625em) and (max-width: 41.25em) {
+  .proofCard {
+    --proof-padding-right: 0.5rem;
+    --proof-column-gap: 0.5rem;
+  }
+}
+
+@media (max-width: 26.5625em) {
+  .experiencePage {
+    grid-auto-columns: calc(100vw - (2 * var(--site-page-padding)));
+    padding: var(--site-page-padding);
+    gap: var(--site-page-padding);
+  }
+
+  .proofCard {
+    --proof-card-height: clamp(6.25rem, calc(4.344rem + 9.52vw), 6.875rem);
+    --proof-padding-block: clamp(
+      0.1875rem,
+      calc(-0.1935rem + 1.905vw),
+      0.3125rem
+    );
+    --proof-padding-right: 0.25rem;
+    --proof-column-gap: 0.375rem;
+    --proof-media-size: clamp(
+      3.5rem,
+      calc(1.786rem + 8.57vw),
+      4.0625rem
+    );
+  }
+
+  .proofTitle {
+    font-size: clamp(0.6875rem, 5.55cqw, 1.0625rem);
+  }
+
+  .experienceContext,
+  .profileRole,
+  .profileDescription {
+    font-size: clamp(0.4375rem, 2.65cqw, 0.59375rem);
+    line-height: 1.15;
+  }
+
+  .customerLogo {
+    width: clamp(0.6875rem, 4.8cqw, 1rem);
+    height: clamp(0.6875rem, 4.8cqw, 1rem);
+  }
+
+  .customerName {
+    font-size: clamp(0.4375rem, 2.15cqw, 0.53125rem);
+  }
+
+  .socialLinks {
+    --social-icon-size: clamp(0.46875rem, 3.75cqw, 0.71875rem);
+  }
+}
+
+@media (forced-colors: active) {
+  .mediaSquare,
+  .socialLink:focus-visible {
+    border-color: CanvasText;
+  }
+}

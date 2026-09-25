@@ -1,0 +1,228 @@
+.section {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  scroll-margin-top: var(--site-header-height);
+}
+
+.wrapper {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(var(--site-content-width) + (2 * var(--site-page-padding)));
+  padding: var(--section-padding-block) var(--site-page-padding);
+}
+
+.section[data-has-visual] .wrapper {
+  display: grid;
+  min-height: 48rem;
+  align-items: center;
+}
+
+.layout {
+  position: relative;
+  z-index: 2;
+}
+
+.section[data-has-visual] .layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+  align-items: center;
+  gap: clamp(2rem, 6vw, 5rem);
+}
+
+.content {
+  position: relative;
+  max-width: 43rem;
+}
+
+.content[data-section-scale] {
+  max-width: none;
+}
+
+.eyebrow {
+  margin-bottom: var(--mantine-spacing-md);
+  color: var(--site-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--site-text-primary);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 1;
+  white-space: pre-line;
+}
+
+.heroTitle {
+  font-size: clamp(3rem, 5vw, 4rem);
+}
+
+.sectionTitle {
+  font-size: clamp(2.5rem, 4vw, 3rem);
+  font-weight: 550;
+  letter-spacing: -0.05em;
+}
+
+.description {
+  max-width: 39rem;
+  margin-top: var(--mantine-spacing-lg);
+  color: var(--site-text-secondary);
+  line-height: 1.55;
+  text-wrap: balance;
+  white-space: pre-line;
+}
+
+.heroDescription {
+  font-size: clamp(1.125rem, 1.7vw, 1.375rem);
+}
+
+.compactDescription {
+  display: none;
+}
+
+.sectionDescription {
+  font-size: clamp(1rem, 1.35vw, 1.125rem);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: var(--mantine-spacing-xl);
+  gap: var(--mantine-spacing-sm);
+}
+
+.visual {
+  display: grid;
+  width: min(36rem, calc(100% + 9rem));
+  max-height: 18.25rem;
+  align-self: center;
+  justify-self: end;
+  place-items: center;
+}
+
+.visual > * {
+  max-height: inherit;
+}
+
+@media (max-width: $mantine-breakpoint-lg) {
+  .section[data-has-visual] .wrapper {
+    min-height: 48rem;
+  }
+
+  .section[data-has-visual] .layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(15rem, 0.9fr);
+    gap: var(--mantine-spacing-xl);
+  }
+
+  .defaultDescription {
+    display: none;
+  }
+
+  .compactDescription {
+    display: block;
+    max-width: 29rem;
+  }
+}
+
+@media (min-width: 48em) and (max-width: 63.99em) {
+  .visual {
+    width: min(32rem, calc(100% + 4rem));
+  }
+}
+
+@media (min-width: 48em) and (max-width: 50em) {
+  .visual {
+    width: min(32rem, calc(100% + 1rem));
+  }
+}
+
+@media (max-width: 47.99em) {
+  .section[data-has-visual] .wrapper {
+    min-height: 0;
+  }
+
+  .section[data-has-visual] .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--mantine-spacing-xl);
+  }
+
+  .visual {
+    order: -1;
+    width: min(100vw, 32rem);
+    max-height: 14rem;
+    margin-inline: auto;
+    justify-self: center;
+    transform: none;
+  }
+
+  .content,
+  .description {
+    margin-inline: 0;
+  }
+}
+
+@media (max-width: 26.5625em) {
+  .section[data-has-visual] .wrapper {
+    padding-top: var(--section-padding-block);
+    padding-bottom: 0;
+  }
+
+  .section[data-has-visual] .layout {
+    gap: 0;
+  }
+
+  .section[data-has-visual] .content {
+    display: contents;
+  }
+
+  .section[data-has-visual] .title {
+    grid-row: 1;
+  }
+
+  .section[data-has-visual] .description {
+    grid-row: 2;
+  }
+
+  .section[data-has-visual] .visual {
+    width: 100%;
+    margin-top: var(--mantine-spacing-lg);
+    margin-inline: 0;
+    grid-row: 3;
+    order: initial;
+    justify-self: stretch;
+  }
+
+  .section[data-has-visual] .controls {
+    grid-row: 4;
+  }
+}
+
+@media (max-width: $mantine-breakpoint-xs) {
+  .heroTitle {
+    font-size: clamp(2.75rem, 12vw, 3rem);
+  }
+
+  .sectionTitle {
+    font-size: clamp(2.25rem, 10vw, 2.75rem);
+  }
+
+  .heroDescription {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 20em) {
+  .heroTitle {
+    font-size: 2.4375rem;
+  }
+
+  .heroDescription {
+    font-size: 1rem;
+  }
+}
