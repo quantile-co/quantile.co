@@ -1,7 +1,7 @@
 provider "google" {}
 
 provider "github" {
-  alias = "co"
+  alias = "quantile_co"
   owner = var.github_quantile_co_organization
   token = var.github_quantile_co_token
 }

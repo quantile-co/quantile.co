@@ -72,7 +72,7 @@ resource "google_storage_bucket" "state" {
 # GitHub — repository
 # ==============================================================================
 resource "github_repository" "self" {
-  provider = github.co
+  provider = github.quantile_co
 
   name        = "quantile.co"
   description = "Quantile marketing site."
@@ -96,14 +96,14 @@ resource "github_repository" "self" {
 }
 
 resource "github_repository_vulnerability_alerts" "self" {
-  provider = github.co
+  provider = github.quantile_co
 
   repository = github_repository.self.name
   enabled    = true
 }
 
 resource "github_repository_dependabot_security_updates" "self" {
-  provider   = github.co
+  provider   = github.quantile_co
   depends_on = [github_repository_vulnerability_alerts.self]
 
   repository = github_repository.self.name
@@ -111,14 +111,14 @@ resource "github_repository_dependabot_security_updates" "self" {
 }
 
 data "github_user" "maintainer" {
-  provider = github.co
+  provider = github.quantile_co
   for_each = toset(var.github_maintainers)
 
   username = each.value
 }
 
 resource "github_branch_protection" "main" {
-  provider = github.co
+  provider = github.quantile_co
 
   repository_id  = github_repository.self.node_id
   pattern        = "main"
@@ -145,7 +145,7 @@ resource "github_branch_protection" "main" {
 }
 
 resource "github_repository_environment" "prod" {
-  provider = github.co
+  provider = github.quantile_co
 
   repository  = github_repository.self.name
   environment = "prod"
