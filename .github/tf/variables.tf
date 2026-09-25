@@ -1,3 +1,29 @@
+variable "gcp_billing_account" {
+  description = "GCP billing account ID."
+  type        = string
+}
+
+variable "gcp_co_folder_id" {
+  description = "GCP folder ID for public repository support projects."
+  type        = string
+}
+
+variable "gcp_state_location" {
+  description = "Location for the OpenTofu state bucket."
+  type        = string
+  default     = "US"
+}
+
+variable "gcp_wif_pool" {
+  description = "Full GitHub workload identity pool resource path."
+  type        = string
+}
+
+variable "gcp_wif_provider" {
+  description = "Full WIF provider resource path for quantile-co."
+  type        = string
+}
+
 variable "github_quantile_co_organization" {
   description = "GitHub organization containing this repository."
   type        = string
