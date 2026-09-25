@@ -19,6 +19,17 @@ variable "gcp_wif_pool" {
   type        = string
 }
 
+variable "github_maintainers" {
+  description = "GitHub usernames trusted to merge and deploy this repository."
+  type        = list(string)
+  default     = ["aj-welch"]
+
+  validation {
+    condition     = length(var.github_maintainers) > 0
+    error_message = "At least one maintainer is required."
+  }
+}
+
 variable "github_quantile_co_organization" {
   description = "GitHub organization containing this repository."
   type        = string
@@ -29,15 +40,4 @@ variable "github_quantile_co_token" {
   description = "Fine-grained PAT targeting quantile-co."
   type        = string
   sensitive   = true
-}
-
-variable "github_maintainers" {
-  description = "GitHub usernames trusted to merge and deploy this repository."
-  type        = list(string)
-  default     = ["aj-welch"]
-
-  validation {
-    condition     = length(var.github_maintainers) > 0
-    error_message = "At least one maintainer is required."
-  }
 }
