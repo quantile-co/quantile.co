@@ -155,20 +155,3 @@ resource "github_repository_environment" "prod" {
     custom_branch_policies = false
   }
 }
-
-resource "github_actions_variable" "context" {
-  provider = github.co
-  for_each = {
-    GCP_BILLING_ACCOUNT = var.gcp_billing_account
-    GCP_CO_FOLDER_ID    = var.gcp_co_folder_id
-    GCP_PROJECT_ID      = google_project.state.project_id
-    GCP_WIF_POOL        = var.gcp_wif_pool
-    GCP_WIF_PROVIDER    = var.gcp_wif_provider
-    GH_MAINTAINERS      = jsonencode(var.github_maintainers)
-    TF_STATE_BUCKET     = google_storage_bucket.state.name
-  }
-
-  repository    = github_repository.self.name
-  variable_name = each.key
-  value         = each.value
-}
