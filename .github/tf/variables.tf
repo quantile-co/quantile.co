@@ -3,8 +3,8 @@ variable "gcp_billing_account" {
   type        = string
 }
 
-variable "gcp_co_folder_id" {
-  description = "GCP folder ID for public repository support projects."
+variable "gcp_quantile_co_folder_id" {
+  description = "GCP quantile-co folder ID for public repository support projects."
   type        = string
 }
 
