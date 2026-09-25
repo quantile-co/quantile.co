@@ -1,3 +1,13 @@
+# OpenTofu
+/.terraform/
+/.github/tf/.terraform/
+/.github/tf/backend_override.tf
+*.tfstate
+*.tfstate.*
+*.tfplan
+plan.json
+crash.log
+
 # Generated files
 
 # dependencies
