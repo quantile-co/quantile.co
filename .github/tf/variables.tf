@@ -26,7 +26,7 @@ variable "github_quantile_co_organization" {
 }
 
 variable "github_quantile_co_token" {
-  description = "Fine-grained PAT for this repository."
+  description = "Fine-grained PAT targeting quantile-co."
   type        = string
   sensitive   = true
 }
