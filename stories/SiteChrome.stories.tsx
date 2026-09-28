@@ -6,7 +6,7 @@ import { SkipLink } from "@/components/SkipLink/SkipLink";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
 
 const sections = [
-  { href: "#how-it-works", label: "Benefits" },
+  { href: "#benefits", label: "Benefits" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
 ] as const;

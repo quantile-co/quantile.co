@@ -1,8 +1,8 @@
-import classes from "./HowItWorksSection.module.css";
+import classes from "./BenefitsSection.module.css";
 
 const categories = [
   {
-    id: "how-it-works",
+    id: "benefits",
     title: "Immediate onboarding.\nMinimal overhead.",
     subtitle:
       "Subscribe without recruiting or lengthy scoping. Connect your tools and prioritize the first issue.",
@@ -25,7 +25,7 @@ const categories = [
     ],
   },
   {
-    id: "how-it-works-expertise",
+    id: "benefits-expertise",
     title: "Intelligent implementation.\nDirect accountability.",
     subtitle:
       "Work directly with AJ, bringing 15+ years of experience to each issue from development through PR approval.",
@@ -48,7 +48,7 @@ const categories = [
     ],
   },
   {
-    id: "how-it-works-capacity",
+    id: "benefits-capacity",
     title: "Fixed spend.\nFlexible capacity.",
     subtitle:
       "Scale capacity up or down without hiring, variable billing, or long-term commitments.",
@@ -72,7 +72,7 @@ const categories = [
   },
 ] as const;
 
-export function HowItWorksSection() {
+export function BenefitsSection() {
   return (
     <div className={classes.group}>
       {categories.map((category) => (
@@ -85,9 +85,7 @@ export function HowItWorksSection() {
             <div className={classes.categoryText}>
               <h2
                 className={classes.categoryTitle}
-                data-section-anchor={
-                  category.id === "how-it-works" || undefined
-                }
+                data-section-anchor={category.id === "benefits" || undefined}
                 data-section-heading
                 id={category.id}
               >

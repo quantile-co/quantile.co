@@ -1,10 +1,10 @@
+import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
 import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
 import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
 import { CalendlyEmbed } from "@/components/CalendlyEmbed/CalendlyEmbed";
 import { FaqSection } from "@/components/FaqSection/FaqSection";
 import { HeroAnimation } from "@/components/HeroAnimation/HeroAnimation";
 import { HeroSection } from "@/components/HeroSection/HeroSection";
-import { HowItWorksSection } from "@/components/HowItWorksSection/HowItWorksSection";
 import { PricingSection } from "@/components/PricingSection/PricingSection";
 import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
@@ -14,7 +14,7 @@ import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
 
 const signUpHref = "https://checkout.stripe.dev/";
 const primarySections = [
-  { href: "#how-it-works", label: "Benefits" },
+  { href: "#benefits", label: "Benefits" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
 ] as const;
@@ -44,7 +44,7 @@ export default function Home() {
           visual={<HeroAnimation />}
         />
         <SocialProofSection ariaLabel="AJ Welch's experience and client work" />
-        <HowItWorksSection />
+        <BenefitsSection />
         <PricingSection
           mobileProof={<SocialProofSection embedded />}
           signUpHref={signUpHref}
