@@ -51,12 +51,12 @@ const categories = [
     id: "benefits-capacity",
     title: "Predictable spend.\nFlexible capacity.",
     subtitle:
-      "Know your monthly cost upfront. Choose the number of in-progress issues that fits your backlog, then scale as needs change. No surprise hourly bills, agency change orders, or long-term contracts.",
+      "Know your monthly cost upfront. Choose how many concurrent in-progress issues fit your backlog, then scale as needs change. No surprise hourly bills, agency change orders, or long-term contracts.",
     steps: [
       {
-        title: "One subscription",
+        title: "One simple subscription",
         description:
-          "One subscription, billed at a fixed monthly rate per in-progress issue. No usage-based fees or change orders.",
+          "Pay a fixed monthly rate based on how many concurrent in-progress issues you need.",
       },
       {
         title: "Scale up or down",
