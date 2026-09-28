@@ -1,82 +1,120 @@
 import classes from "./HowItWorksSection.module.css";
 
-const workflowSteps = [
+const categories = [
   {
-    title: "Subscribe",
-    description:
-      "Subscribe and get started today. No lengthy calls, SOWs, or red tape.",
+    id: "how-it-works",
+    title: "Immediate onboarding.\nMinimal overhead.",
+    subtitle:
+      "Subscribe without recruiting or lengthy scoping. Connect your tools and prioritize the first issue.",
+    steps: [
+      {
+        title: "Subscribe",
+        description:
+          "Subscribe and get started today. No lengthy calls, SOWs, or red tape.",
+      },
+      {
+        title: "Share access",
+        description:
+          "Grant access to your existing systems: GitHub, Linear, Slack, AWS, GCP, etc.",
+      },
+      {
+        title: "Assign issues",
+        description:
+          "Assign a backlog of issues. Prioritize one issue for active development.",
+      },
+    ],
   },
   {
-    title: "Share access",
-    description:
-      "Grant access to your existing systems: GitHub, Linear, Slack, AWS, GCP, etc.",
+    id: "how-it-works-expertise",
+    title: "Intelligent implementation.\nDirect accountability.",
+    subtitle:
+      "Work directly with AJ, bringing 15+ years of experience to each issue from development through PR approval.",
+    steps: [
+      {
+        title: "Senior engineering + AI",
+        description:
+          "AJ handles each issue directly, with AI tools under human review. Most PRs are ready in 2-3 business days. No junior handoffs or outsourcing.",
+      },
+      {
+        title: "Unlimited revisions",
+        description:
+          "Review and revise until the code meets your standards and the PR is approved, then begin the next prioritized issue.",
+      },
+      {
+        title: "Optional weekly call",
+        description:
+          "Async collaboration by default. Optional weekly call to use as you wish.",
+      },
+    ],
   },
   {
-    title: "Assign issues",
-    description:
-      "Assign a backlog of issues. Prioritize one issue for active development.",
-  },
-  {
-    title: "2-3 day turnaround",
-    description:
-      "AJ handles each issue directly. No junior handoffs, outsourcing or AI slop.",
-  },
-  {
-    title: "Unlimited revisions",
-    description:
-      "Review and revise until the code meets your standards and the PR is approved, then begin the next prioritized issue.",
-  },
-  {
-    title: "Concurrent PRs",
-    description:
-      "Additional subscriptions allow for concurrent PR development.",
-  },
-  {
-    title: "Optional weekly call",
-    description:
-      "Async collaboration by default. Optional weekly call to use as you wish.",
-  },
-  {
-    title: "Try it for a week",
-    description:
-      "Not loving it after a week? Get 75% back, no questions asked.",
-  },
-  {
-    title: "Pause or cancel anytime",
-    description:
-      "Self-serve billing via Stripe. No long-term contracts, commitments, or fees.",
+    id: "how-it-works-capacity",
+    title: "Fixed spend.\nFlexible capacity.",
+    subtitle:
+      "Scale capacity up or down without hiring, variable billing, or long-term commitments.",
+    steps: [
+      {
+        title: "One subscription",
+        description:
+          "One active PR at a fixed monthly rate. No variable billing or change orders.",
+      },
+      {
+        title: "Concurrent PRs",
+        description:
+          "Additional subscriptions allow for concurrent PR development.",
+      },
+      {
+        title: "Pause or cancel anytime",
+        description:
+          "Self-serve billing via Stripe. No long-term contracts, commitments, or fees.",
+      },
+    ],
   },
 ] as const;
 
 export function HowItWorksSection() {
   return (
-    <section aria-label="How it works" className={classes.section}>
-      <ol className={classes.steps}>
-        {workflowSteps.map((step, index) => (
-          <li className={classes.step} key={step.title}>
-            <div className={classes.layout}>
-              <div className={classes.content}>
-                <h2
-                  className={classes.title}
-                  data-section-anchor={index === 0 ? true : undefined}
-                  data-section-heading
-                  id={index === 0 ? "how-it-works" : undefined}
-                >
-                  {step.title}
-                </h2>
-                <p className={classes.description}>{step.description}</p>
-              </div>
-              <div
-                className={classes.placeholder}
-                role="img"
-                aria-label={`${step.title} animation placeholder`}
+    <div className={classes.group}>
+      {categories.map((category) => (
+        <section
+          aria-labelledby={category.id}
+          className={classes.category}
+          key={category.id}
+        >
+          <div className={classes.categoryHeader}>
+            <div className={classes.categoryText}>
+              <h2
+                className={classes.categoryTitle}
+                data-section-anchor={
+                  category.id === "how-it-works" || undefined
+                }
+                data-section-heading
+                id={category.id}
               >
-                Animation coming soon
-              </div>
+                {category.title}
+              </h2>
+              <p className={classes.categorySubtitle}>{category.subtitle}</p>
             </div>
-          </li>
-        ))}
-      </ol>
-    </section>
+            <div
+              aria-label={`${category.title.replace("\n", " ")} animation placeholder`}
+              className={classes.placeholder}
+              role="img"
+            >
+              Animation coming soon
+            </div>
+          </div>
+          <ol className={classes.steps}>
+            {category.steps.map((step) => (
+              <li className={classes.step} key={step.title}>
+                <h3 className={classes.title} data-section-heading>
+                  {step.title}
+                </h3>
+                <p className={classes.description}>{step.description}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
+    </div>
   );
 }
