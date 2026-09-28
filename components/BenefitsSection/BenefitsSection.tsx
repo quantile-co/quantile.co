@@ -54,7 +54,7 @@ const categories = [
       "Know your monthly cost upfront. Choose how many concurrent in-progress issues fit your backlog, then scale as needs change. No surprise hourly bills, agency change orders, or long-term contracts.",
     steps: [
       {
-        title: "One simple subscription",
+        title: "One monthly rate",
         description:
           "Pay a fixed monthly rate based on how many concurrent in-progress issues you need.",
       },
