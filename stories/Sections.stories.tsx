@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
 import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
 import { CalendlyEmbed } from "@/components/CalendlyEmbed/CalendlyEmbed";
 import { FaqSection } from "@/components/FaqSection/FaqSection";
 import { HeroAnimation } from "@/components/HeroAnimation/HeroAnimation";
 import { HeroSection } from "@/components/HeroSection/HeroSection";
-import { HowItWorksSection } from "@/components/HowItWorksSection/HowItWorksSection";
 import { PricingSection } from "@/components/PricingSection/PricingSection";
 import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
 
@@ -33,8 +33,8 @@ export const Hero: Story = {
   ),
 };
 
-export const HowItWorks: Story = {
-  render: () => <HowItWorksSection />,
+export const Benefits: Story = {
+  render: () => <BenefitsSection />,
 };
 
 export const Pricing: Story = {
