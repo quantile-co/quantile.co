@@ -26,7 +26,7 @@ const categories = [
   },
   {
     id: "benefits-expertise",
-    title: "Intelligent implementation.\nDirect accountability.",
+    title: "Intelligent implementation.\nGuaranteed code quality.",
     subtitle:
       "Work directly with AJ, bringing 15+ years of experience to each issue from development through PR approval.",
     steps: [
