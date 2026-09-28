@@ -1,4 +1,3 @@
-import { Container, SimpleGrid, Stack, Text } from "@mantine/core";
 import classes from "./HowItWorksSection.module.css";
 
 const workflowSteps = [
@@ -25,7 +24,7 @@ const workflowSteps = [
   {
     title: "Unlimited revisions",
     description:
-      "Review and revise until PR approval, then begin the next prioritized issue.",
+      "Review and revise until the code meets your standards and the PR is approved, then begin the next prioritized issue.",
   },
   {
     title: "Concurrent PRs",
@@ -38,6 +37,11 @@ const workflowSteps = [
       "Async collaboration by default. Optional weekly call to use as you wish.",
   },
   {
+    title: "Try it for a week",
+    description:
+      "Not loving it after a week? Get 75% back, no questions asked.",
+  },
+  {
     title: "Pause or cancel anytime",
     description:
       "Self-serve billing via Stripe. No long-term contracts, commitments, or fees.",
@@ -46,49 +50,33 @@ const workflowSteps = [
 
 export function HowItWorksSection() {
   return (
-    <section className={classes.section}>
-      <Container className={classes.container} data-section-content size="lg">
-        <Stack gap="xl">
-          <Stack
-            className={classes.heading}
-            data-section-anchor
-            gap="sm"
-            id="how-it-works"
-            py="md"
-          >
-            <Text className={classes.eyebrow}>How it works</Text>
-            <Text className={classes.title} component="h2" data-section-heading>
-              <span className={classes.titleLine}>Subscribe. Assign.</span>
-              <span className={classes.titleLine}>Review. Repeat.</span>
-            </Text>
-            <Text className={classes.subtitle}>
-              <span className={classes.subtitleLine}>
-                From backlog issue to reviewed PR.
-              </span>
-              <span className={classes.subtitleLine}>
-                One focused cycle at a time.
-              </span>
-            </Text>
-          </Stack>
-
-          <SimpleGrid
-            className={classes.workflow}
-            cols={{ base: 1, sm: 2 }}
-            component="ol"
-            spacing={0}
-            verticalSpacing={0}
-          >
-            {workflowSteps.map((step) => (
-              <li key={step.title}>
-                <Text className={classes.stepTitle}>{step.title}</Text>
-                <Text className={classes.stepDescription}>
-                  {step.description}
-                </Text>
-              </li>
-            ))}
-          </SimpleGrid>
-        </Stack>
-      </Container>
+    <section aria-label="How it works" className={classes.section}>
+      <ol className={classes.steps}>
+        {workflowSteps.map((step, index) => (
+          <li className={classes.step} key={step.title}>
+            <div className={classes.layout}>
+              <div className={classes.content}>
+                <h2
+                  className={classes.title}
+                  data-section-anchor={index === 0 ? true : undefined}
+                  data-section-heading
+                  id={index === 0 ? "how-it-works" : undefined}
+                >
+                  {step.title}
+                </h2>
+                <p className={classes.description}>{step.description}</p>
+              </div>
+              <div
+                className={classes.placeholder}
+                role="img"
+                aria-label={`${step.title} animation placeholder`}
+              >
+                Animation coming soon
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }

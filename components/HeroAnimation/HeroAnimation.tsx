@@ -2,7 +2,7 @@
 
 import { useAnimate } from "motion/react-mini";
 import { useEffect, useState } from "react";
-import classes from "./FractionalWorkstream.module.css";
+import classes from "./HeroAnimation.module.css";
 
 const tasks = [
   {
@@ -189,7 +189,7 @@ const wrapTaskIndex = (index: number) => (index + tasks.length) % tasks.length;
 const initialPosition = (index: number) =>
   index < queueDepth ? `todo-${index + 1}` : undefined;
 
-export function FractionalWorkstream() {
+export function HeroAnimation() {
   const [scope, animate] = useAnimate<HTMLDivElement>();
   const [activeTaskIndex, setActiveTaskIndex] = useState(0);
   const activeTask = tasks[activeTaskIndex];

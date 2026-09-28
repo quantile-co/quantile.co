@@ -1,0 +1,40 @@
+.main {
+  min-height: 70vh;
+  background: var(--mantine-color-body);
+  color: var(--site-text-primary);
+}
+
+.main:focus {
+  outline: none;
+}
+
+.container {
+  max-width: calc(var(--site-content-width) + (2 * var(--site-page-padding)));
+  padding: clamp(4rem, 8vw, 7rem) var(--site-page-padding);
+}
+
+.intro {
+  max-width: 40rem;
+}
+
+.title {
+  margin: 0;
+  color: var(--site-text-primary);
+  font-size: clamp(2.75rem, 6vw, 4.5rem);
+  font-weight: 550;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+}
+
+.lede {
+  margin-top: var(--mantine-spacing-md);
+  color: var(--site-text-secondary);
+  font-size: clamp(1rem, 1.5vw, 1.125rem);
+  line-height: 1.5;
+}
+
+@media (max-width: 36em) {
+  .container {
+    padding-top: 3.5rem;
+  }
+}
