@@ -3,7 +3,7 @@ import classes from "./BenefitsSection.module.css";
 const categories = [
   {
     id: "benefits",
-    title: "Immediate onboarding.\nMinimal overhead.",
+    title: "Fast onboarding.\nMinimal overhead.",
     subtitle:
       "Subscribe without recruiting or lengthy scoping. Connect your tools and prioritize the first issue.",
     steps: [
