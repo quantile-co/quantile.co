@@ -48,8 +48,11 @@ const questions = [
   {
     value: "who-does-the-work",
     question: "Who does the work?",
-    answer:
-      "AJ Welch is a staff data engineer with 15+ years of experience across Google, CompilerWorks, and Chartio. He handles every issue from development through approval and is accountable for every line of code delivered. AI tools support development under direct human review. They are not used to run unattended agent swarms or mass-produce AI slop. Development is never outsourced, delegated to junior developers, or passed between rotating agency teams.",
+    answer: [
+      "AJ Welch is a staff data engineer with 15+ years of experience across Google, CompilerWorks, and Chartio. He handles every issue from development through approval and is accountable for every line of code delivered.",
+      "AI tools support development under direct human review. They are not used to run unattended agent swarms or mass-produce AI slop.",
+      "Development is never outsourced, delegated to junior developers, or passed between rotating agency teams.",
+    ],
   },
   {
     value: "communication",
@@ -131,7 +134,12 @@ export function FaqSection() {
                   >
                     <AccordionControl>{item.question}</AccordionControl>
                     <AccordionPanel className={classes.panel}>
-                      {item.answer}
+                      {(typeof item.answer === "string"
+                        ? [item.answer]
+                        : item.answer
+                      ).map((paragraph) => (
+                        <p key={paragraph}>{paragraph}</p>
+                      ))}
                     </AccordionPanel>
                   </AccordionItem>
                 ))}

@@ -99,6 +99,14 @@
   line-height: 1.6;
 }
 
+.panel p {
+  margin: 0;
+}
+
+.panel p + p {
+  margin-top: var(--mantine-spacing-sm);
+}
+
 @media (max-width: $mantine-breakpoint-sm) {
   .accordionGrid {
     grid-template-columns: minmax(0, 1fr);

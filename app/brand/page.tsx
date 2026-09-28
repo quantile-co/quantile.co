@@ -1,13 +1,15 @@
+import { Container, Text, Title } from "@mantine/core";
 import type { Metadata } from "next";
 import {
   type BrandAssetGroup,
-  BrandAssetsPage,
-} from "@/components/BrandAssetsPage/BrandAssetsPage";
+  BrandAssetsSection,
+} from "@/components/BrandAssetsSection/BrandAssetsSection";
 import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
 import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
+import classes from "./page.module.css";
 
 const brandDescription =
   "Download the Quantile logo, wordmark, and social banners.";
@@ -190,7 +192,19 @@ export default function BrandPage() {
         sections={primarySections}
         signUpHref={signUpHref}
       />
-      <BrandAssetsPage groups={groups} />
+      <main className={classes.main} id="main-content" tabIndex={-1}>
+        <Container className={classes.container} size="xl">
+          <div className={classes.intro}>
+            <Title className={classes.title} order={1}>
+              Brand assets
+            </Title>
+            <Text className={classes.lede}>
+              Download the Quantile logo, wordmark, and social banners.
+            </Text>
+          </div>
+          <BrandAssetsSection groups={groups} />
+        </Container>
+      </main>
       <SiteFooter
         homeHref="/"
         logo={<BrandLogo />}
