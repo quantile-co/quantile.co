@@ -14,7 +14,7 @@ import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
 
 const signUpHref = "https://checkout.stripe.dev/";
 const primarySections = [
-  { href: "#how-it-works", label: "How it works" },
+  { href: "#how-it-works", label: "Benefits" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
 ] as const;

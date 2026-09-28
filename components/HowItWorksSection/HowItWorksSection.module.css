@@ -1,49 +1,48 @@
-.section {
+.group {
   position: relative;
   overflow: clip;
 }
 
-.steps {
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-
-.step {
+.category {
   box-sizing: border-box;
   max-width: calc(var(--site-content-width) + (2 * var(--site-page-padding)));
   padding: var(--section-padding-block) var(--site-page-padding);
   margin-inline: auto;
 }
 
-.layout {
+/* Match the space after social proof to the gap between categories. */
+.category:first-child {
+  padding-top: calc(var(--section-padding-block) * 2);
+}
+
+.categoryHeader {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(18rem, 1.15fr);
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 1fr);
   align-items: center;
-  min-height: 24rem;
   gap: clamp(2rem, 6vw, 5rem);
 }
 
-.content {
+.categoryText {
   min-width: 0;
 }
 
-.title {
-  font-size: clamp(1.875rem, 2.8vw, 2.375rem);
+.categoryTitle {
+  font-size: clamp(2.5rem, 4vw, 3rem);
   font-weight: 550;
   letter-spacing: -0.05em;
+  white-space: pre-line;
 }
 
-/* The visual sits higher than the heading; offset only the link destination. */
-.title[data-section-anchor] {
-  scroll-margin-top: 5rem;
+/* Leave the category heading and its visual visible below the sticky header. */
+.categoryTitle[data-section-anchor] {
+  scroll-margin-top: var(--mantine-spacing-xl);
 }
 
-.description {
-  max-width: 34ch;
+.categorySubtitle {
+  max-width: 38ch;
   margin: var(--mantine-spacing-lg) 0 0;
   color: var(--site-text-secondary);
-  font-size: clamp(1.0625rem, 1.4vw, 1.1875rem);
+  font-size: clamp(1.0625rem, 1.45vw, 1.1875rem);
   line-height: 1.55;
   text-wrap: balance;
 }
@@ -51,7 +50,7 @@
 .placeholder {
   display: grid;
   width: 100%;
-  min-height: 18.25rem;
+  min-height: 20rem;
   place-items: center;
   border: 1px dashed var(--site-surface-outline);
   border-radius: var(--mantine-radius-md);
@@ -61,30 +60,54 @@
   text-align: center;
 }
 
-@media (max-width: $mantine-breakpoint-lg) {
-  .layout {
-    grid-template-columns: minmax(0, 0.85fr) minmax(15rem, 1.15fr);
-    gap: var(--mantine-spacing-xl);
+.steps {
+  display: grid;
+  padding: 0;
+  margin: clamp(2rem, 4vw, 3rem) 0 0;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+}
+
+.step {
+  min-width: 0;
+}
+
+.title {
+  font-size: clamp(1.375rem, 2vw, 1.75rem);
+  font-weight: 550;
+  letter-spacing: -0.035em;
+}
+
+.description {
+  max-width: 34ch;
+  margin: var(--mantine-spacing-md) 0 0;
+  color: var(--site-text-secondary);
+  font-size: clamp(1rem, 1.15vw, 1.0625rem);
+  line-height: 1.55;
+  text-wrap: balance;
+}
+
+@media (max-width: $mantine-breakpoint-md) {
+  .categoryHeader {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 47.99em) {
-  .title[data-section-anchor] {
-    scroll-margin-top: 0;
-  }
-
-  .layout {
+  .steps {
     grid-template-columns: minmax(0, 1fr);
-    min-height: 0;
   }
 
   .placeholder {
     min-height: 14rem;
   }
-}
 
-@media (max-width: $mantine-breakpoint-xs) {
-  .title {
-    font-size: clamp(1.875rem, 8vw, 2.125rem);
+  .categoryTitle {
+    font-size: clamp(1.8125rem, 8.6vw, 2.25rem);
+  }
+
+  .category:nth-child(2) .categoryTitle {
+    font-size: clamp(1.625rem, 8vw, 2.125rem);
   }
 }

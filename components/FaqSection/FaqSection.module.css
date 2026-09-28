@@ -121,6 +121,12 @@
   }
 }
 
+@media (max-width: 47.99em) {
+  .label {
+    font-size: clamp(1.8125rem, 8.6vw, 2.25rem);
+  }
+}
+
 @media (max-width: $mantine-breakpoint-xs) {
   .section {
     padding-top: var(--section-padding-block);
