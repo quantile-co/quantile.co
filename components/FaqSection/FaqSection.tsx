@@ -29,21 +29,15 @@ const questions = [
   },
   {
     value: "issue-backlog",
-    question: "How are issues and active PRs managed?",
+    question: "How many issues can be in progress at once?",
     answer:
-      "The issue backlog is unlimited, with one active PR per subscription. Upon PR approval, development starts on the next prioritized issue. Additional subscriptions enable concurrent PR development.",
+      "Your subscription starts with capacity for one in-progress issue. Adjust the number of in-progress issues as needed; the backlog is unlimited.",
   },
   {
     value: "larger-issues",
     question: "How are large issues handled?",
     answer:
-      "Large issues are split into smaller, reviewable PRs. Each PR is reviewed, revised, and approved before development on the next PR begins.",
-  },
-  {
-    value: "turnaround",
-    question: "What is the typical PR turnaround time?",
-    answer:
-      "Most PRs are ready for review in 2-3 business days. Complex issues may require more time and may be split into smaller, reviewable PRs.",
+      "Large issues can be split into smaller, reviewable PRs. Multiple PRs may be under development or review for the same in-progress issue.",
   },
   {
     value: "who-does-the-work",

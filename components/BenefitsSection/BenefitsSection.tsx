@@ -5,12 +5,12 @@ const categories = [
     id: "benefits",
     title: "Fast onboarding.\nMinimal overhead.",
     subtitle:
-      "Subscribe without recruiting or lengthy scoping. Connect your tools and prioritize the first issue.",
+      "Staff up quickly without costly hiring cycles, recruiter fees, or FTE overhead. No agency red tape, endless discovery calls or protracted SOW/contract negotiations.",
     steps: [
       {
         title: "Subscribe",
         description:
-          "Subscribe and get started today. No lengthy calls, SOWs, or red tape.",
+          "Subscribe today via Stripe and you'll be sent a welcome email with next steps.",
       },
       {
         title: "Share access",
@@ -20,59 +20,63 @@ const categories = [
       {
         title: "Assign issues",
         description:
-          "Assign a backlog of issues. Prioritize one issue for active development.",
+          "Assign a backlog of issues. Prioritize which issues are worked on next.",
       },
     ],
   },
   {
     id: "benefits-expertise",
-    title: "Intelligent implementation.\nGuaranteed code quality.",
+    title: "Senior engineering.\nAccelerated with AI.",
     subtitle:
-      "Work directly with AJ, bringing 15+ years of experience to each issue from development through PR approval.",
+      "AJ works directly with your team and within your AI tooling and workflows, bringing 15+ years of data engineering judgment to every issue. No agency PMs, junior handoffs, or offshore teams.",
     steps: [
       {
-        title: "Senior engineering + AI",
+        title: "Daily updates",
         description:
-          "AJ handles each issue directly, with AI tools under human review. Most PRs are ready in 2-3 business days. No junior handoffs or outsourcing.",
+          "AJ keeps your team in the loop through daily updates to issues and PRs in your existing tools.",
       },
       {
         title: "Unlimited revisions",
         description:
-          "Review and revise until the code meets your standards and the PR is approved, then begin the next prioritized issue.",
+          "AJ revises each PR until it meets your team's standards and has been approved and merged.",
       },
       {
         title: "Optional weekly call",
         description:
-          "Async collaboration by default. Optional weekly call to use as you wish.",
+          "AJ collaborates with your team async, with a weekly 30-minute call available as needed.",
       },
     ],
   },
   {
     id: "benefits-capacity",
-    title: "Fixed spend.\nFlexible capacity.",
+    title: "Predictable spend.\nFlexible capacity.",
     subtitle:
-      "Scale capacity up or down without hiring, variable billing, or long-term commitments.",
+      "Know your monthly cost upfront. Choose the number of in-progress issues that fits your backlog, then scale as needs change. No surprise hourly bills, agency change orders, or long-term contracts.",
     steps: [
       {
         title: "One subscription",
         description:
-          "One active PR at a fixed monthly rate. No variable billing or change orders.",
+          "One subscription, billed at a fixed monthly rate per in-progress issue. No usage-based fees or change orders.",
       },
       {
-        title: "Concurrent PRs",
+        title: "Scale up or down",
         description:
-          "Additional subscriptions allow for concurrent PR development.",
+          "Adjust the number of in-progress issues on your subscription as your needs change.",
       },
       {
         title: "Pause or cancel anytime",
         description:
-          "Self-serve billing via Stripe. No long-term contracts, commitments, or fees.",
+          "Pause your subscription via Stripe to bank remaining time. Cancel when no longer needed.",
       },
     ],
   },
 ] as const;
 
-export function BenefitsSection() {
+type BenefitsSectionProps = {
+  signUpHref: string;
+};
+
+export function BenefitsSection({ signUpHref }: BenefitsSectionProps) {
   return (
     <div className={classes.group}>
       {categories.map((category) => (
@@ -81,33 +85,33 @@ export function BenefitsSection() {
           className={classes.category}
           key={category.id}
         >
-          <div className={classes.categoryHeader}>
-            <div className={classes.categoryText}>
-              <h2
-                className={classes.categoryTitle}
-                data-section-anchor={category.id === "benefits" || undefined}
-                data-section-heading
-                id={category.id}
-              >
-                {category.title}
-              </h2>
-              <p className={classes.categorySubtitle}>{category.subtitle}</p>
-            </div>
-            <div
-              aria-label={`${category.title.replace("\n", " ")} animation placeholder`}
-              className={classes.placeholder}
-              role="img"
-            >
-              Animation coming soon
-            </div>
-          </div>
+          <h2
+            className={classes.categoryTitle}
+            data-section-anchor={category.id === "benefits" || undefined}
+            data-section-heading
+            id={category.id}
+          >
+            {category.title}
+          </h2>
+          <p className={classes.categorySubtitle}>{category.subtitle}</p>
           <ol className={classes.steps}>
             {category.steps.map((step) => (
               <li className={classes.step} key={step.title}>
                 <h3 className={classes.title} data-section-heading>
                   {step.title}
                 </h3>
-                <p className={classes.description}>{step.description}</p>
+                <p className={classes.description}>
+                  {step.title === "Subscribe" ? (
+                    <>
+                      <a className={classes.stepLink} href={signUpHref}>
+                        Subscribe
+                      </a>
+                      {step.description.slice(step.title.length)}
+                    </>
+                  ) : (
+                    step.description
+                  )}
+                </p>
               </li>
             ))}
           </ol>

@@ -44,7 +44,7 @@ export default function Home() {
           visual={<HeroAnimation />}
         />
         <SocialProofSection ariaLabel="AJ Welch's experience and client work" />
-        <BenefitsSection />
+        <BenefitsSection signUpHref={signUpHref} />
         <PricingSection
           mobileProof={<SocialProofSection embedded />}
           signUpHref={signUpHref}

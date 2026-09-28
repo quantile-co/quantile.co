@@ -34,7 +34,7 @@ export const Hero: Story = {
 };
 
 export const Benefits: Story = {
-  render: () => <BenefitsSection />,
+  render: () => <BenefitsSection signUpHref={signUpHref} />,
 };
 
 export const Pricing: Story = {
