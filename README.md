@@ -14,9 +14,10 @@
 
 ## Repositories
 
-`quantile-co/quantile.co` owns the application, reusable Terraform module and
-application Firebase configuration. `quantile-q1/quantile.co` selects the
-production project and handles private configuration and manual deployment.
+- `quantile-co/quantile.co` owns the application, reusable Terraform module and
+  application Firebase configuration.
+- `quantile-q1/quantile.co` selects the production project and handles private
+  configuration and manual deployment.
 
 ## Prerequisites
 
