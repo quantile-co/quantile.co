@@ -8,102 +8,285 @@ import {
 } from "@mantine/core";
 import classes from "./FaqSection.module.css";
 
-const questions = [
-  {
-    value: "existing-stack",
-    question: "Will you work with our existing systems?",
-    answer:
-      "Yes. Development happens in your existing repos, tools, cloud accounts, and data systems.",
-  },
-  {
-    value: "good-fit",
-    question: "What kinds of issues can I assign?",
-    answer:
-      "Issues can cover AI agents and RAG systems, data analytics, data orchestration and transformation, data storage and processing, data integration and streaming, data observability and governance, and related data platform work.",
-  },
-  {
-    value: "outside-scope",
-    question: "What happens if an issue is outside your scope?",
-    answer:
-      "The issue is flagged before development begins. You can revise it to fit our scope or prioritize another issue from the backlog.",
-  },
-  {
-    value: "issue-backlog",
-    question: "How many issues can be in progress at once?",
-    answer:
-      "Your subscription starts with capacity for one in-progress issue. Adjust the number of in-progress issues as needed; the backlog is unlimited.",
-  },
-  {
-    value: "larger-issues",
-    question: "How are large issues handled?",
-    answer:
-      "Large issues can be split into smaller, reviewable PRs. Multiple PRs may be under development or review for the same in-progress issue.",
-  },
-  {
-    value: "who-does-the-work",
-    question: "Who does the work?",
-    answer: [
-      "AJ Welch is a staff data engineer with 15+ years of experience across Google, CompilerWorks, and Chartio. He handles every issue from development through approval and is accountable for every line of code delivered.",
-      "AI tools support development under direct human review. They are not used to run unattended agent swarms or mass-produce AI slop.",
-      "Development is never outsourced, delegated to junior developers, or passed between rotating agency teams.",
-    ],
-  },
-  {
-    value: "communication",
-    question: "How do we communicate?",
-    answer:
-      "Async collaboration happens in your existing tools, such as GitHub, GitLab, Linear, Jira, or Slack. One optional weekly call is available to use as you wish.",
-  },
-  {
-    value: "revisions",
-    question: "What if a PR is not approved?",
-    answer:
-      "Leave code review feedback and request revisions. Revisions continue until PR approval, with no limit on the number of revisions.",
-  },
-  {
-    value: "code-ownership",
-    question: "Who owns the code?",
-    answer: "You own all submitted code, even after you pause or cancel.",
-  },
-  {
-    value: "single-issue-or-month",
-    question: "Can I subscribe for one issue or one month?",
-    answer:
-      "Yes. When the work is complete, pause to bank remaining time for later or cancel if you do not plan to return.",
-  },
-  {
-    value: "contracts",
-    question: "Are there any contracts or commitments?",
-    answer:
-      "No. The subscription is month to month, with no minimum term or long-term commitment.",
-  },
-  {
-    value: "pause-or-cancel",
-    question: "How does pausing or canceling work?",
-    answer:
-      "Pause to bank remaining time until you resume. Cancel without banking remaining time. Manage either option through Stripe.",
-  },
-  {
-    value: "first-week-guarantee",
-    question: "How does the one-week trial work?",
-    answer:
-      "Try the service for one week. If it is not a fit, request 75% back, no questions asked.",
-  },
-  {
-    value: "refunds",
-    question: "Are there any refunds?",
-    answer:
-      "A 75% refund is available during the one-week trial. After the first week, subscription payments are non-refundable.",
-  },
-  {
-    value: "getting-started",
-    question: "How do we get started?",
-    answer:
-      "If you would like an intro call, book a free call through Calendly below. Otherwise, select Start building and begin sharing access and assigning issues.",
-  },
-];
+type FaqSectionProps = {
+  signUpHref: string;
+};
 
-export function FaqSection() {
+export function FaqSection({ signUpHref }: FaqSectionProps) {
+  const questions = [
+    {
+      value: "who-does-the-work",
+      question: "Who works on my issues?",
+      answer: (
+        <p>
+          AJ Welch is a staff data engineer with 15+ years of experience across
+          Google, CompilerWorks, and Chartio. He works directly on your issues
+          and there are no agency PMs, junior handoffs, or offshore teams.
+        </p>
+      ),
+    },
+    {
+      value: "pricing",
+      question: "How does pricing work?",
+      answer: (
+        <>
+          <p>
+            Pricing starts at $4,995 per month for one issue in progress at a
+            time. As each issue is completed, work moves to the next issue in
+            your backlog. This continues throughout the month.
+          </p>
+          <p>
+            Your monthly rate scales with the number of issues you want in
+            progress at once, not the number of issues or PRs completed
+            throughout the course of the month.
+          </p>
+        </>
+      ),
+    },
+    {
+      value: "capacity",
+      question: "How do I scale up or down?",
+      answer: (
+        <>
+          <p>
+            Adjust the number of in-progress issues on your subscription through
+            Stripe.
+          </p>
+          <p>
+            Upgrades take effect immediately, with a prorated charge for the
+            remainder of your billing period. Downgrades take effect at the end
+            of your current billing period, so you keep the capacity you've
+            already paid for.
+          </p>
+        </>
+      ),
+    },
+    {
+      value: "issue-progress",
+      question: "How do I manage in-progress issues?",
+      answer: (
+        <>
+          <p>
+            Your team decides how to mark issues as in progress, for example
+            with an assignment, a label, or a board column.
+          </p>
+          <p>
+            An issue remains in progress through development and code review. It
+            is complete when a PR closes it.
+          </p>
+          <p>
+            You can move blocked or deprioritized issues out of “in progress” to
+            free up capacity for other work.
+          </p>
+        </>
+      ),
+    },
+    {
+      value: "larger-issues",
+      question: "How big should an issue be?",
+      answer: (
+        <>
+          <p>
+            Aim for a focused piece of work rather than an entire project.
+            Larger work can be broken into smaller issues that you can
+            prioritize individually.
+          </p>
+          <p>
+            One issue can span multiple PRs, but work proceeds one PR at a time,
+            with PRs submitted sequentially.
+          </p>
+        </>
+      ),
+    },
+    {
+      value: "good-fit",
+      question: "What kinds of issues can I assign?",
+      answer: (
+        <>
+          <p>
+            You can assign data engineering issues covering development,
+            maintenance, support, and operations. Examples include:
+          </p>
+          <ul>
+            <li>
+              <strong>Analytics and modeling:</strong> dbt, pandas, Jupyter,
+              etc.
+            </li>
+            <li>
+              <strong>AI agents and workflows:</strong> LangChain, Pydantic AI,
+              Anthropic SDKs, OpenAI SDKs, etc.
+            </li>
+            <li>
+              <strong>Orchestration and transformation:</strong> Airflow,
+              Prefect, Dagster, dbt, SQLMesh, etc.
+            </li>
+            <li>
+              <strong>Storage and query processing:</strong> BigQuery,
+              Snowflake, Databricks, ClickHouse, etc.
+            </li>
+            <li>
+              <strong>Integration and streaming:</strong> Fivetran, Airbyte,
+              dlt, Debezium, Kafka, Flink, etc.
+            </li>
+            <li>
+              <strong>Performance optimization:</strong> Data platform, query,
+              and pipeline tuning, etc.
+            </li>
+            <li>
+              <strong>Observability and governance:</strong> Databricks Unity
+              Catalog, Snowflake Horizon Catalog, GCP Dataplex, DataHub, Great
+              Expectations, Langfuse, etc.
+            </li>
+            <li>
+              <strong>Infrastructure and automation:</strong> AWS, GCP,
+              Terraform, Pulumi, Docker, Kubernetes, etc.
+            </li>
+          </ul>
+        </>
+      ),
+    },
+    {
+      value: "outside-scope",
+      question: "What if an issue is out of scope?",
+      answer: (
+        <p>
+          The issue is flagged before development starts. You can revise it to
+          fit the scope or prioritize another issue from your backlog.
+        </p>
+      ),
+    },
+    {
+      value: "ai-use",
+      question: "How is AI used?",
+      answer: (
+        <p>
+          AJ uses a multiplexed AI workflow to explore, build, and revise
+          solutions. He handles complex design decisions, weighs tradeoffs, and
+          resolves blockers, while coding agents speed up the implementation and
+          take on the rote, low-level grunt work. That means less time spent on
+          repetitive coding and more time spent on the efficiency, scalability,
+          and maintainability of the solution.
+        </p>
+      ),
+    },
+    {
+      value: "ai-workflows",
+      question: "Can you use our existing AI tools and workflows?",
+      answer: (
+        <p>
+          Yes, your existing AI tools, agents, software factories, and workflows
+          can be used if you prefer.
+        </p>
+      ),
+    },
+    {
+      value: "existing-stack",
+      question: "Can you work in our existing systems?",
+      answer: (
+        <p>
+          Yes. Work happens wherever you prefer, including your existing repos
+          and infrastructure.
+        </p>
+      ),
+    },
+    {
+      value: "communication",
+      question: "How does collaboration work?",
+      answer: (
+        <>
+          <p>
+            Collaboration is async. Issues and PRs are updated daily with
+            progress, next steps, and any blockers.
+          </p>
+          <p>
+            An optional weekly 30-minute call is available for deeper technical
+            discussions.
+          </p>
+        </>
+      ),
+    },
+    {
+      value: "revisions",
+      question: "What if a PR needs changes?",
+      answer: (
+        <p>
+          Request changes through code review. PRs are revised until they meet
+          your team's standards and are approved and merged, with no limit on
+          revisions.
+        </p>
+      ),
+    },
+    {
+      value: "code-ownership",
+      question: "Who owns the code?",
+      answer: (
+        <p>You own all submitted code, even after you pause or cancel.</p>
+      ),
+    },
+    {
+      value: "contracts",
+      question: "Is there a minimum commitment?",
+      answer: (
+        <p>
+          You can subscribe for just one month. There's no long-term contract,
+          and you can pause or cancel anytime.
+        </p>
+      ),
+    },
+    {
+      value: "pause-or-cancel",
+      question: "How do I pause or cancel?",
+      answer: (
+        <>
+          <p>
+            Manage your subscription through Stripe. Pausing banks your
+            remaining subscription time for when you return.
+          </p>
+          <p>
+            Canceling stops renewal. Your subscription stays active until the
+            end of your current billing period.
+          </p>
+        </>
+      ),
+    },
+    {
+      value: "first-week-guarantee",
+      question: "How does the first-week guarantee work?",
+      answer: (
+        <p>
+          Cancel within the first week and get 75% back, no questions asked.
+        </p>
+      ),
+    },
+    {
+      value: "refunds",
+      question: "Can I get a refund after the first week?",
+      answer: (
+        <p>
+          Cancel within the first week and get 75% back, no questions asked.
+          Subscription payments are non-refundable after the first week.
+        </p>
+      ),
+    },
+    {
+      value: "getting-started",
+      question: "How do I get started?",
+      answer: (
+        <>
+          <p>
+            <a className={classes.subscribeLink} href={signUpHref}>
+              Subscribe
+            </a>{" "}
+            whenever you're ready via Stripe. You will receive a welcome email
+            with next steps for sharing access and assigning and prioritizing
+            issues.
+          </p>
+          <p>If you'd prefer to talk first, book a free intro call below.</p>
+        </>
+      ),
+    },
+  ];
+
   return (
     <section className={classes.section}>
       <Title className={classes.label} data-section-anchor id="faq" order={2}>
@@ -112,7 +295,7 @@ export function FaqSection() {
 
       <Container className={classes.wrapper} data-section-content size="xl">
         <div className={classes.accordionGrid}>
-          {[questions.slice(0, 8), questions.slice(8)].map(
+          {[questions.slice(0, 9), questions.slice(9)].map(
             (columnQuestions, columnIndex) => (
               <Accordion
                 className={classes.accordion}
@@ -128,12 +311,7 @@ export function FaqSection() {
                   >
                     <AccordionControl>{item.question}</AccordionControl>
                     <AccordionPanel className={classes.panel}>
-                      {(typeof item.answer === "string"
-                        ? [item.answer]
-                        : item.answer
-                      ).map((paragraph) => (
-                        <p key={paragraph}>{paragraph}</p>
-                      ))}
+                      {item.answer}
                     </AccordionPanel>
                   </AccordionItem>
                 ))}

@@ -3,9 +3,9 @@ import classes from "./BenefitsSection.module.css";
 const categories = [
   {
     id: "benefits",
-    title: "Fast onboarding.\nMinimal overhead.",
+    title: "Rapid onboarding.\nMinimal overhead.",
     subtitle:
-      "Staff up quickly without costly hiring cycles, recruiter fees, or FTE overhead. No agency red tape, endless discovery calls or protracted SOW/contract negotiations.",
+      "Staff up quickly without lengthy hiring cycles, recruiter fees, or FTE overhead. No agency red tape, endless discovery calls or protracted SOW and contract negotiations.",
     steps: [
       {
         title: "Subscribe",
@@ -20,7 +20,7 @@ const categories = [
       {
         title: "Assign issues",
         description:
-          "Assign a backlog of issues. Prioritize which issues are worked on next.",
+          "Assign and prioritize issues from your backlog, with the freedom to adjust as priorities shift.",
       },
     ],
   },
@@ -28,22 +28,22 @@ const categories = [
     id: "benefits-expertise",
     title: "Senior engineering.\nAccelerated with AI.",
     subtitle:
-      "AJ works directly with your team and within your AI tooling and workflows, bringing 15+ years of data engineering judgment to every issue. No agency PMs, junior handoffs, or offshore teams.",
+      "AJ works directly with your team using your preferred AI tools and workflows, bringing 15+ years of data engineering judgment to every issue. No agency PMs, junior handoffs, or offshore teams.",
     steps: [
       {
         title: "Daily updates",
         description:
-          "AJ keeps your team in the loop through daily updates to issues and PRs in your existing tools.",
+          "Issues and PRs are updated daily with progress, next steps, and any blockers.",
       },
       {
         title: "Unlimited revisions",
         description:
-          "AJ revises each PR until it meets your team's standards and has been approved and merged.",
+          "PRs are revised until they meet your team's standards and are approved and merged.",
       },
       {
         title: "Optional weekly call",
         description:
-          "AJ collaborates with your team async, with a weekly 30-minute call available as needed.",
+          "Collaboration is async, with a weekly 30-minute call available for deeper technical discussions.",
       },
     ],
   },
@@ -51,7 +51,7 @@ const categories = [
     id: "benefits-capacity",
     title: "Predictable spend.\nFlexible capacity.",
     subtitle:
-      "Know your monthly cost upfront. Choose how many concurrent in-progress issues fit your backlog, then scale as needs change. No surprise hourly bills, agency change orders, or long-term contracts.",
+      "Know your monthly cost upfront. Choose how many concurrent in-progress issues you need, then adjust as your backlog changes. No long-term contracts, hourly billing surprises, or agency change orders.",
     steps: [
       {
         title: "One monthly rate",
@@ -61,12 +61,12 @@ const categories = [
       {
         title: "Scale up or down",
         description:
-          "Adjust the number of in-progress issues on your subscription as your needs change.",
+          "Adjust the number of concurrent in-progress issues as your backlog changes.",
       },
       {
         title: "Pause or cancel anytime",
         description:
-          "Pause your subscription via Stripe to bank remaining time. Cancel when no longer needed.",
+          "Pause your subscription via Stripe and bank the remainder. Cancel when no longer needed.",
       },
     ],
   },

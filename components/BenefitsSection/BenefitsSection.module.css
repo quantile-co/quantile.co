@@ -75,6 +75,19 @@
   text-wrap: balance;
 }
 
+/* Keep the nine descriptions at three lines while the cards share a row. */
+@media (min-width: 48em) and (max-width: 74.99em) {
+  .description {
+    max-width: 15.625rem;
+  }
+}
+
+@media (min-width: 48em) and (max-width: 50em) {
+  .steps {
+    column-gap: 1rem;
+  }
+}
+
 @media (max-width: 47.99em) {
   .steps {
     grid-template-columns: minmax(0, 1fr);
@@ -83,8 +96,20 @@
   .categoryTitle {
     font-size: clamp(1.8125rem, 8.6vw, 2.25rem);
   }
+}
 
-  .category:nth-child(2) .categoryTitle {
-    font-size: clamp(1.625rem, 8vw, 2.125rem);
+@media (max-width: 26.5625em) {
+  .categorySubtitle {
+    max-width: 19.375rem;
+  }
+
+  .description {
+    max-width: 15.625rem;
+  }
+}
+
+@media (max-width: 21.5em) {
+  .categorySubtitle {
+    max-width: 16.875rem;
   }
 }

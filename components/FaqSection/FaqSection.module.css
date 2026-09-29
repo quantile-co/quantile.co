@@ -107,6 +107,29 @@
   margin-top: var(--mantine-spacing-sm);
 }
 
+.panel ul {
+  margin: var(--mantine-spacing-sm) 0 0;
+  padding-left: 1.25rem;
+}
+
+.panel li + li {
+  margin-top: var(--mantine-spacing-xs);
+}
+
+.panel strong {
+  color: var(--site-text-primary);
+}
+
+.subscribeLink {
+  color: var(--site-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+
+  @mixin hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
 @media (max-width: $mantine-breakpoint-sm) {
   .accordionGrid {
     grid-template-columns: minmax(0, 1fr);

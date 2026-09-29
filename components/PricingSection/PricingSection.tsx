@@ -48,8 +48,8 @@ export function PricingSection({
               Scale up or down
             </h3>
             <p className={classes.highlightDescription}>
-              Pricing scales with the number of in-progress issues. Add or
-              remove as needed.
+              Pricing scales with how many concurrent in-progress issues you
+              need. Adjust as needed.
             </p>
           </li>
           <li className={classes.highlight}>

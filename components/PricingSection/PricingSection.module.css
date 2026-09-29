@@ -123,13 +123,18 @@
   min-width: 8rem;
 }
 
-@media (max-width: 47.99em) {
-  .highlights {
-    grid-template-columns: minmax(0, 1fr);
+/* Keep all three descriptions at three lines at intermediate widths. */
+@media (min-width: 48em) and (max-width: 59em) {
+  .highlightDescription {
+    max-width: 13.75rem;
   }
 }
 
 @media (max-width: 47.99em) {
+  .highlights {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .title {
     font-size: clamp(1.8125rem, 8.6vw, 2.25rem);
   }
@@ -145,5 +150,4 @@
     width: calc(100% + (2 * var(--site-page-padding)));
     margin-left: calc(-1 * var(--site-page-padding));
   }
-
 }
