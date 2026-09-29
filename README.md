@@ -5,7 +5,8 @@
   <p>Quantile marketing site.</p>
   <p>
     <a href="#prerequisites">Prerequisites</a> ·
-    <a href="#local-development">Local Development</a>
+    <a href="#local-development">Local Development</a> ·
+    <a href="#deployment">Deployment</a>
   </p>
 </div>
 
@@ -47,3 +48,9 @@ Install Chromium and its system dependencies once, then run the complete checks:
 pnpm exec playwright install --with-deps chromium
 pnpm check
 ```
+
+## Deployment
+
+`quantile-co/quantile.co` owns the application, reusable Terraform module and
+application Firebase configuration. `quantile-q1/quantile.co` selects the
+production project and handles private configuration and manual deployment.
