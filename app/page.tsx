@@ -33,10 +33,10 @@ export default function Home() {
       <main id="main-content" tabIndex={-1}>
         <HeroSection
           compactDescription={
-            "Add senior data engineering capacity\nwithout FTE overhead, agency\nheadaches, or AI guesswork."
+            "Fast, flexible, senior data engineering capacity without expensive hires or agency headaches."
           }
           description={
-            "Add senior data engineering capacity without\nFTE overhead, agency headaches, or AI guesswork."
+            "Fast, flexible, senior data engineering capacity\nwithout expensive hires or agency headaches."
           }
           id="top-hero"
           signUpHref={signUpHref}
@@ -44,13 +44,13 @@ export default function Home() {
           visual={<HeroAnimation />}
         />
         <SocialProofSection ariaLabel="AJ Welch's experience and client work" />
-        <BenefitsSection />
+        <BenefitsSection signUpHref={signUpHref} />
         <PricingSection
           mobileProof={<SocialProofSection embedded />}
           signUpHref={signUpHref}
         />
         <SocialProofSection hideOnMobile />
-        <FaqSection />
+        <FaqSection signUpHref={signUpHref} />
       </main>
       <SiteFooter
         callToAction={<BookACallSection calendar={<CalendlyEmbed />} />}

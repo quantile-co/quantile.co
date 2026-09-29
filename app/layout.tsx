@@ -7,7 +7,7 @@ import { Providers } from "./providers";
 
 const metadataTitle = "Quantile | Fractional data engineering";
 const metadataDescription =
-  "Senior data engineering on subscription. Assign issues, review one active PR per subscription, and pause or cancel anytime.";
+  "Senior data engineering on subscription. Start with capacity for one in-progress issue, add more as needed, and pause or cancel anytime.";
 const organizationStructuredData = {
   "@context": "https://schema.org",
   "@type": "Organization",

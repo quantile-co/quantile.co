@@ -39,7 +39,17 @@ export function PricingSection({
               Try it for a week
             </h3>
             <p className={classes.highlightDescription}>
-              Not loving it? Get 75% back, no questions asked.
+              Not loving it? Cancel within the first week and get 75% back, no
+              questions asked.
+            </p>
+          </li>
+          <li className={classes.highlight}>
+            <h3 className={classes.highlightTitle} data-section-heading>
+              Scale up or down
+            </h3>
+            <p className={classes.highlightDescription}>
+              Pricing scales with how many concurrent in-progress issues you
+              need. Adjust as needed.
             </p>
           </li>
           <li className={classes.highlight}>
@@ -49,14 +59,6 @@ export function PricingSection({
             <p className={classes.highlightDescription}>
               Self-serve billing via Stripe. No long-term contracts,
               commitments, or fees.
-            </p>
-          </li>
-          <li className={classes.highlight}>
-            <h3 className={classes.highlightTitle} data-section-heading>
-              Add concurrent PRs
-            </h3>
-            <p className={classes.highlightDescription}>
-              Add subscriptions for concurrent PR development.
             </p>
           </li>
         </ul>

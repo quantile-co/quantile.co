@@ -15,17 +15,6 @@
   padding-top: calc(var(--section-padding-block) * 2);
 }
 
-.categoryHeader {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(18rem, 1fr);
-  align-items: center;
-  gap: clamp(2rem, 6vw, 5rem);
-}
-
-.categoryText {
-  min-width: 0;
-}
-
 .categoryTitle {
   font-size: clamp(2.5rem, 4vw, 3rem);
   font-weight: 550;
@@ -33,7 +22,7 @@
   white-space: pre-line;
 }
 
-/* Leave the category heading and its visual visible below the sticky header. */
+/* Leave the category heading visible below the sticky header. */
 .categoryTitle[data-section-anchor] {
   scroll-margin-top: var(--mantine-spacing-xl);
 }
@@ -45,19 +34,6 @@
   font-size: clamp(1.0625rem, 1.45vw, 1.1875rem);
   line-height: 1.55;
   text-wrap: balance;
-}
-
-.placeholder {
-  display: grid;
-  width: 100%;
-  min-height: 20rem;
-  place-items: center;
-  border: 1px dashed var(--site-surface-outline);
-  border-radius: var(--mantine-radius-md);
-  background: var(--site-workstream-column-background);
-  color: var(--site-text-secondary);
-  font-size: var(--mantine-font-size-sm);
-  text-align: center;
 }
 
 .steps {
@@ -79,6 +55,17 @@
   letter-spacing: -0.035em;
 }
 
+.stepLink {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--site-surface-outline);
+  text-underline-offset: 0.15em;
+}
+
+.stepLink:hover {
+  text-decoration-color: currentColor;
+}
+
 .description {
   max-width: 34ch;
   margin: var(--mantine-spacing-md) 0 0;
@@ -88,9 +75,16 @@
   text-wrap: balance;
 }
 
-@media (max-width: $mantine-breakpoint-md) {
-  .categoryHeader {
-    grid-template-columns: minmax(0, 1fr);
+/* Keep the nine descriptions at three lines while the cards share a row. */
+@media (min-width: 48em) and (max-width: 74.99em) {
+  .description {
+    max-width: 15.625rem;
+  }
+}
+
+@media (min-width: 48em) and (max-width: 50em) {
+  .steps {
+    column-gap: 1rem;
   }
 }
 
@@ -99,15 +93,23 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .placeholder {
-    min-height: 14rem;
-  }
-
   .categoryTitle {
     font-size: clamp(1.8125rem, 8.6vw, 2.25rem);
   }
+}
 
-  .category:nth-child(2) .categoryTitle {
-    font-size: clamp(1.625rem, 8vw, 2.125rem);
+@media (max-width: 26.5625em) {
+  .categorySubtitle {
+    max-width: 19.375rem;
+  }
+
+  .description {
+    max-width: 15.625rem;
+  }
+}
+
+@media (max-width: 21.5em) {
+  .categorySubtitle {
+    max-width: 16.875rem;
   }
 }
