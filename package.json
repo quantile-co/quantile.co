@@ -9,13 +9,16 @@
     "storybook": "storybook dev -p 6006 --disable-telemetry",
     "storybook:build": "storybook build --quiet --disable-telemetry --output-dir storybook-static",
     "storybook:test": "vitest --project=storybook --run",
+    "test": "vitest --project=unit --run",
+    "test:integration:local": "vitest --project=integration-local --run",
+    "test:integration:preview": "vitest --project=integration-preview --run",
     "assets:generate": "node scripts/assets.mjs generate",
     "assets:check": "node scripts/assets.mjs check",
     "lint": "biome check .",
     "format": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "knip": "knip",
-    "check": "pnpm lint && pnpm typecheck && pnpm knip && pnpm assets:check && pnpm build && pnpm storybook:build && pnpm storybook:test",
+    "check": "pnpm lint && pnpm typecheck && pnpm knip && pnpm test && pnpm assets:check && pnpm build && pnpm storybook:build && pnpm storybook:test",
     "prepare": "husky"
   },
   "dependencies": {
@@ -24,10 +27,14 @@
     "@mantine/core": "9.6.1",
     "@mantine/hooks": "9.6.1",
     "@tabler/icons-react": "3.46.0",
+    "google-auth-library": "10.6.2",
     "motion": "13.4.2",
     "next": "16.3.5",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "react-email": "6.11.0",
+    "server-only": "0.0.1",
+    "stripe": "22.6.2"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",

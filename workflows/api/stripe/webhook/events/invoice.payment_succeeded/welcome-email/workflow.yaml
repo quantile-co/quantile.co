@@ -1,0 +1,178 @@
+# Business workflow; deployment, IAM, secret resources and alerts belong to the
+# private infrastructure repository. Only Workflows invokers can supply input.
+main:
+  params: [job]
+  steps:
+    - configure:
+        assign:
+          - mode: ${sys.get_env("WELCOME_MODE")}
+          - stripeOrigin: "https://api.stripe.com"
+          - resendOrigin: "https://api.resend.com"
+          - retryCount: ${int(sys.get_env("WELCOME_RETRY_COUNT", "12"))}
+          - retryDelay: ${double(sys.get_env("WELCOME_RETRY_DELAY", "10"))}
+          - retryMaxDelay: ${double(sys.get_env("WELCOME_RETRY_MAX_DELAY", "600"))}
+    - validate:
+        switch:
+          - condition: ${not(mode in ["test", "live"]) or job.mode != mode}
+            raise: "Wrong welcome workflow mode"
+          - condition: ${not(text.match_regex(job.subscriptionId, "^sub_[A-Za-z0-9_]+$"))}
+            raise: "Invalid subscription ID"
+          - condition: ${job.idempotencyKey != "welcome/" + mode + "/" + job.subscriptionId}
+            raise: "Invalid email idempotency key"
+          - condition: ${mode == "test" and (len(job.mail.to) != 1 or not(text.match_regex(job.mail.to[0], "^((delivered|bounced|complained)([+][A-Za-z0-9_-]+)?|suppressed)@resend[.]dev$")))}
+            raise: "Test email must use a Resend simulator address"
+    - validateTestNamespace:
+        switch:
+          - condition: ${mode == "test"}
+            steps:
+              - namespace:
+                  switch:
+                    - condition: ${job.testScope != sys.get_env("WELCOME_TEST_SCOPE") or not(text.match_regex(job.testRun, "^[a-f0-9]{32}$"))}
+                      raise: "Wrong PR or test run"
+    - stripeCredential:
+        call: loadSecret
+        args:
+          resource: ${sys.get_env("WELCOME_STRIPE_SECRET")}
+        result: stripeKey
+    - readCurrentSubscription:
+        try:
+          call: http.get
+          args:
+            url: ${stripeOrigin + "/v1/subscriptions/" + job.subscriptionId}
+            timeout: 20
+            headers:
+              Authorization: ${"Bearer " + stripeKey}
+              Stripe-Version: "2026-08-26.dahlia"
+          result: subscription
+        retry:
+          predicate: ${transientFailure}
+          max_retries: ${retryCount}
+          backoff:
+            initial_delay: ${retryDelay}
+            max_delay: ${retryMaxDelay}
+            multiplier: 2
+    - verifySubscriptionMode:
+        switch:
+          - condition: ${subscription.body.livemode != (mode == "live")}
+            raise: "Wrong Stripe subscription mode"
+    - verifyTestOwnership:
+        switch:
+          - condition: ${mode == "test"}
+            steps:
+              - ownership:
+                  switch:
+                    - condition: ${map.get(subscription.body.metadata, "quantile_test_scope") != job.testScope or map.get(subscription.body.metadata, "quantile_test_run") != job.testRun or map.get(subscription.body.metadata, "quantile_test_target") != job.testTarget}
+                      raise: "Subscription belongs to a different test"
+    - existingReceipt:
+        assign:
+          - receipt: ${map.get(subscription.body.metadata, "quantile_welcome_email_id")}
+    - skipAlreadyAccepted:
+        switch:
+          - condition: ${get_type(receipt) == "string" and receipt != ""}
+            return:
+              result: duplicate
+              resendId: ${receipt}
+              subscriptionId: ${job.subscriptionId}
+    - resendCredential:
+        call: loadSecret
+        args:
+          resource: ${sys.get_env("WELCOME_RESEND_SECRET")}
+        result: resendKey
+    - sendEmail:
+        try:
+          call: http.post
+          args:
+            url: ${resendOrigin + "/emails"}
+            timeout: 20
+            headers:
+              Authorization: ${"Bearer " + resendKey}
+              Content-Type: application/json
+              Idempotency-Key: ${job.idempotencyKey}
+            body: ${job.mail}
+          result: email
+        retry:
+          predicate: ${transientFailure}
+          max_retries: ${retryCount}
+          backoff:
+            initial_delay: ${retryDelay}
+            max_delay: ${retryMaxDelay}
+            multiplier: 2
+    - captureReceipt:
+        assign:
+          - receipt: ${map.get(email.body, "id")}
+    - validateReceipt:
+        switch:
+          - condition: ${not(text.match_regex(default(receipt, ""), "^[A-Za-z0-9_-]+$"))}
+            raise: "Resend did not return an email ID"
+    # Crucially, only this update is retried after Resend accepts. Never wrap
+    # sending + recording in one retry block. Accepted means queued by Resend,
+    # not inbox delivery; bounces are visible in Resend rather than resent here.
+    - saveReceipt:
+        try:
+          call: http.post
+          args:
+            url: ${stripeOrigin + "/v1/subscriptions/" + job.subscriptionId}
+            timeout: 20
+            headers:
+              Authorization: ${"Bearer " + stripeKey}
+              Stripe-Version: "2026-08-26.dahlia"
+              Content-Type: application/x-www-form-urlencoded
+            body: ${"metadata[quantile_welcome_email_id]=" + text.url_encode(receipt)}
+          result: saved
+        retry:
+          predicate: ${transientFailure}
+          max_retries: ${retryCount}
+          backoff:
+            initial_delay: ${retryDelay}
+            max_delay: ${retryMaxDelay}
+            multiplier: 2
+    - verifySavedReceipt:
+        switch:
+          - condition: ${map.get(saved.body.metadata, "quantile_welcome_email_id") != receipt}
+            raise: "Stripe did not confirm the welcome receipt"
+    - done:
+        return:
+          result: accepted
+          resendId: ${receipt}
+          subscriptionId: ${job.subscriptionId}
+
+loadSecret:
+  params: [resource]
+  steps:
+    - access:
+        try:
+          call: http.get
+          args:
+            url: ${"https://secretmanager.googleapis.com/v1/" + resource + ":access"}
+            timeout: 20
+            auth:
+              type: OAuth2
+          result: secret
+        retry:
+          predicate: ${transientFailure}
+          max_retries: ${int(sys.get_env("WELCOME_RETRY_COUNT", "12"))}
+          backoff:
+            initial_delay: ${double(sys.get_env("WELCOME_RETRY_DELAY", "10"))}
+            max_delay: ${double(sys.get_env("WELCOME_RETRY_MAX_DELAY", "600"))}
+            multiplier: 2
+    - decode:
+        return: ${text.decode(base64.decode(secret.body.payload.data))}
+
+transientFailure:
+  params: [error]
+  steps:
+    - inspect:
+        assign:
+          - code: ${default(map.get(error, "code"), 0)}
+          - tags: ${default(map.get(error, "tags"), [])}
+          - body: ${map.get(error, "body")}
+    - retryable:
+        switch:
+          - condition: ${"ConnectionError" in tags or "ConnectionFailedError" in tags or "TimeoutError" in tags}
+            return: true
+          - condition: ${code == 429 or (code >= 500 and code < 600)}
+            return: true
+          - condition: ${code == 409 and get_type(body) == "map"}
+            return: ${map.get(body, "name") == "concurrent_idempotent_requests"}
+    - permanent:
+        return: false
