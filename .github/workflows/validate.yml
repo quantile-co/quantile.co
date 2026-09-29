@@ -43,10 +43,10 @@ jobs:
           tofu_version: 1.12.3
 
       - name: Initialize without backend
-        run: tofu -chdir=.github/tf init -backend=false -input=false
+        run: tofu -chdir=tf init -backend=false -input=false
 
       - name: Check formatting
-        run: tofu -chdir=.github/tf fmt -check
+        run: tofu -chdir=tf fmt -check
 
       - name: Validate
-        run: tofu -chdir=.github/tf validate
+        run: tofu -chdir=tf validate

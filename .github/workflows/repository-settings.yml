@@ -51,16 +51,16 @@ jobs:
 
       - name: Initialize state
         run: >-
-          tofu -chdir=.github/tf init -input=false -reconfigure
+          tofu -chdir=tf init -input=false -reconfigure
           -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
           -backend-config="prefix=repository/prod"
 
       - name: Validate
-        run: tofu -chdir=.github/tf validate
+        run: tofu -chdir=tf validate
 
       - name: Plan
-        run: tofu -chdir=.github/tf plan -input=false -out=plan.tfplan
+        run: tofu -chdir=tf plan -input=false -out=plan.tfplan
 
       - name: Apply exact plan
         if: inputs.apply
-        run: tofu -chdir=.github/tf apply -input=false -auto-approve plan.tfplan
+        run: tofu -chdir=tf apply -input=false -auto-approve plan.tfplan

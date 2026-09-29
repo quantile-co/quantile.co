@@ -1,7 +1,7 @@
 # OpenTofu
 /.terraform/
-/.github/tf/.terraform/
-/.github/tf/backend_override.tf
+/tf/.terraform/
+/tf/backend_override.tf
 *.tfstate
 *.tfstate.*
 *.tfplan
