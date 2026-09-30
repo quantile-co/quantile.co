@@ -24,7 +24,9 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "style": { "noProcessEnv": "error" },
+      "suspicious": { "noImportCycles": "error" }
     },
     "domains": {
       "next": "recommended",
@@ -39,6 +41,52 @@
     }
   },
   "overrides": [
+    {
+      "includes": [
+        "app/**/route.ts",
+        "app/**/page.tsx",
+        "app/**/layout.tsx",
+        "scripts/**/*.ts",
+        "lib/**/run.ts",
+        "**/*.test.{ts,tsx}",
+        "**/test.ts",
+        "**/*.config.{ts,js,mjs,cjs}"
+      ],
+      "linter": { "rules": { "style": { "noProcessEnv": "off" } } }
+    },
+    {
+      "includes": [
+        "lib/**/*.{ts,tsx}",
+        "!lib/**/run.ts",
+        "!lib/**/*.test.{ts,tsx}",
+        "!lib/**/test.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@/app/**",
+                      "@/scripts/**",
+                      "**/scripts/**",
+                      "**/route",
+                      "**/route.ts",
+                      "**/run",
+                      "**/run.ts"
+                    ],
+                    "message": "Library modules must not import application entrypoints. Inject dependencies from the composition root."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     {
       "includes": ["components/**/*.{ts,tsx}"],
       "linter": {
