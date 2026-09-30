@@ -23,6 +23,13 @@
 
 - [Node.js](https://nodejs.org) 22
 - [pnpm](https://pnpm.io)
+- [Java JDK](https://adoptium.net) 21 or later (for the Firebase Emulator Suite)
+
+For optional local integration (`pnpm dev --integration`):
+
+- [Stripe CLI](https://docs.stripe.com/stripe-cli)
+- [Resend CLI](https://resend.com/docs/cli)
+- [ngrok](https://ngrok.com/docs/start)
 
 ## Local Development
 
@@ -31,7 +38,8 @@ pnpm install
 pnpm dev
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:3000>. This also starts an isolated Firestore emulator.
+Use `pnpm dev --integration` to additionally connect Stripe and Resend.
 
 ### Components
 
