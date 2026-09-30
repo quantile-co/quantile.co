@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { DocumentReference } from "@google-cloud/firestore";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { getFirestore } from "@/lib/gcp/firestore";
 import { createWelcomeStore } from "./store";
 import { memoryStore, pending } from "./test";
@@ -76,6 +76,19 @@ describe("official Firestore emulator: atomic persistence", () => {
       }),
     };
   }
+  beforeAll(async () => {
+    // Initialize the cold SDK/emulator data path separately from the store's
+    // production deadline. A listening emulator port does not establish this.
+    const { client } = setup();
+    const probe = client.doc(`test-probes/store-${randomUUID()}`);
+    try {
+      await probe.create({ ready: true });
+      expect((await probe.get()).data()).toEqual({ ready: true });
+    } finally {
+      await probe.delete();
+    }
+  }, 15_000);
+
   describe.each([
     "memory",
     "Firestore SDK",

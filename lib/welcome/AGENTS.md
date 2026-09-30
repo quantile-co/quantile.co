@@ -128,8 +128,14 @@ custom recovery worker. Investigate a specific owned operation before replaying 
 
 `delivery.test.ts` covers immutable reuse, lost responses and callback recovery.
 `store.test.ts` exercises the official SDK against the emulator and runs a common
-contract against the memory implementation. Preserve concurrent preparation,
-API/callback races, ownership rejection, immutable fields, and timestamp replay.
+contract against the memory implementation. Its fixture establishes SDK/emulator
+create/read/delete readiness on a unique probe document before contract assertions,
+with a separate 15-second setup budget and exact-document cleanup. A listening port
+alone does not establish data-path readiness. This is test setup, not a production
+warm-up or deadline increase; fake-timer tests retain the three-second caller bound.
+Neither warmed emulator tests nor mocked deadlines prove production cold-start latency.
+Preserve concurrent preparation, API/callback races, ownership rejection, immutable
+fields, and timestamp replay.
 SDK emulator contention can retry ABORTED writes for seconds; tests permit a safe
 bounded failure but require retry to converge on the same winning request. Do not
 raise production deadlines merely to force every concurrent attempt to succeed.
