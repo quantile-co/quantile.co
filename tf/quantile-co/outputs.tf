@@ -3,7 +3,7 @@ output "checkout_url" {
   value       = stripe_payment_link.capacity.url
 }
 
-output "capacity_price_id" {
+output "price_id" {
   value = stripe_price.capacity_monthly.id
 }
 
