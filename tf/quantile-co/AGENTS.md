@@ -1,5 +1,9 @@
 # Stripe catalog module
 
+**README edits:** Be very judicious. Ask the user and get explicit approval
+before editing any README. Propose only necessary, succinct changes. Keep
+workflow details and agent implementation guidance in `AGENTS.md`, not READMEs.
+
 This module owns a reusable billing catalog, not application runtime topology.
 The caller supplies explicit `mode = "test" | "live"` and a matching Stripe provider.
 The provider credential selects the account and actual mode; the `mode` input does
