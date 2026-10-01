@@ -1,13 +1,7 @@
-name: Deploy repository settings
+name: Apply
 
 on:
   workflow_dispatch:
-    inputs:
-      apply:
-        description: Apply the reviewed plan in this run
-        required: true
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -18,12 +12,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Plan and optionally apply
+  apply:
+    name: Infrastructure
     if: >-
       github.ref == 'refs/heads/main' &&
       contains(fromJSON(vars.GH_MAINTAINERS), github.actor)
-    runs-on: ubuntu-latest
+    runs-on: namespace-profile-quantile
     environment: prod
     timeout-minutes: 15
     env:
@@ -37,6 +31,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
@@ -62,5 +58,4 @@ jobs:
         run: tofu -chdir=tf plan -input=false -out=plan.tfplan
 
       - name: Apply exact plan
-        if: inputs.apply
         run: tofu -chdir=tf apply -input=false -auto-approve plan.tfplan
