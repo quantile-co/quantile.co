@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  application:
-    name: Application
+  all-checks:
+    name: All
     runs-on: namespace-profile-quantile
     steps:
       - name: Check out repository
@@ -27,15 +27,8 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm exec playwright install --with-deps chromium
 
-      - name: Check
+      - name: Check application
         run: pnpm check
-
-  infrastructure:
-    name: Infrastructure
-    runs-on: namespace-profile-quantile
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Set up OpenTofu
         uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1
@@ -59,16 +52,3 @@ jobs:
 
       - name: Test application module with mocked providers
         run: tofu -chdir=tf/quantile-co test
-
-  all-checks:
-    name: All
-    needs: [application, infrastructure]
-    if: always()
-    runs-on: namespace-profile-quantile
-    timeout-minutes: 5
-    steps:
-      - name: Require every check to pass
-        env:
-          APPLICATION_RESULT: ${{ needs.application.result }}
-          INFRASTRUCTURE_RESULT: ${{ needs.infrastructure.result }}
-        run: test "$APPLICATION_RESULT" = success && test "$INFRASTRUCTURE_RESULT" = success

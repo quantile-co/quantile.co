@@ -5,10 +5,9 @@ before editing any README. Propose only necessary, succinct changes. Keep
 workflow details and agent implementation guidance in `AGENTS.md`, not READMEs.
 
 Use `check.yaml` (Check → All), `plan.yaml` (Plan → Infrastructure) and
-`apply.yaml` (Apply → Infrastructure). The All gate requires every existing
-application and OpenTofu check to succeed, including mocked module tests.
-All is the required status. Application and Infrastructure run in parallel;
-All must fail if either component fails, is cancelled, or is skipped.
+`apply.yaml` (Apply → Infrastructure). Check has exactly one job, All, which runs
+all application and OpenTofu checks, including mocked module tests. All is the
+required status. Don't split Check into tool-specific jobs or an aggregate gate.
 
 Use the shared `namespace-profile-quantile` runner: Restricted runtime API access,
 no persistent cache volumes. This rollout changes runners and naming only;
