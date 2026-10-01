@@ -9,9 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  check:
-    # Retain the legacy required name until protection switches to All.
-    name: Checks
+  application:
+    name: Application
     runs-on: namespace-profile-quantile
     steps:
       - name: Check out repository
@@ -31,9 +30,8 @@ jobs:
       - name: Check
         run: pnpm check
 
-  tofu:
-    # Retain the legacy required name until protection switches to All.
-    name: OpenTofu
+  infrastructure:
+    name: Infrastructure
     runs-on: namespace-profile-quantile
     steps:
       - name: Check out repository
@@ -64,13 +62,13 @@ jobs:
 
   all-checks:
     name: All
-    needs: [check, tofu]
+    needs: [application, infrastructure]
     if: always()
     runs-on: namespace-profile-quantile
     timeout-minutes: 5
     steps:
       - name: Require every check to pass
         env:
-          CHECK_RESULT: ${{ needs.check.result }}
-          TOFU_RESULT: ${{ needs.tofu.result }}
-        run: test "$CHECK_RESULT" = success && test "$TOFU_RESULT" = success
+          APPLICATION_RESULT: ${{ needs.application.result }}
+          INFRASTRUCTURE_RESULT: ${{ needs.infrastructure.result }}
+        run: test "$APPLICATION_RESULT" = success && test "$INFRASTRUCTURE_RESULT" = success
