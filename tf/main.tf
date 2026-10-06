@@ -95,6 +95,44 @@ resource "github_repository" "self" {
   }
 }
 
+# The GitHub provider has no resource for release immutability. Bootstrap it
+# through the supported API; the read-only check below detects later drift.
+resource "terraform_data" "immutable_releases" {
+  input = github_repository.self.name
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      set -eu
+      gh api --method PUT "repos/${var.github_quantile_co_organization}/${self.input}/immutable-releases"
+      test "$(gh api "repos/${var.github_quantile_co_organization}/${self.input}/immutable-releases" --jq '.enabled')" = true
+    EOT
+    environment = {
+      GH_TOKEN = var.github_quantile_co_token
+    }
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+data "external" "immutable_releases" {
+  depends_on = [terraform_data.immutable_releases]
+
+  program = [
+    "gh", "api",
+    "repos/${var.github_quantile_co_organization}/${github_repository.self.name}/immutable-releases",
+    "--jq", "{enabled: (.enabled | tostring)}",
+  ]
+
+  lifecycle {
+    postcondition {
+      condition     = self.result.enabled == "true"
+      error_message = "GitHub release immutability is disabled; review and restore it before continuing."
+    }
+  }
+}
+
 resource "github_repository_vulnerability_alerts" "self" {
   provider = github.quantile_co
 

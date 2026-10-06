@@ -1,0 +1,112 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_sha:
+        description: Reviewed 40-character public application commit
+        required: true
+        type: string
+      check_run_id:
+        description: Successful protected-main public Check run for this commit
+        required: true
+        type: string
+      version:
+        description: Reviewed application release version (for example v0.1.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      contains(fromJSON(vars.GH_MAINTAINERS), github.actor)
+    runs-on: namespace-profile-quantile
+    permissions:
+      actions: read
+      contents: write
+    env:
+      APP_SHA: ${{ inputs.app_sha }}
+      CHECK_RUN_ID: ${{ inputs.check_run_id }}
+      RELEASE_VERSION: ${{ inputs.version }}
+    steps:
+      - name: Verify quantile-co/quantile.co Check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$APP_SHA" =~ ^[0-9a-f]{40}$ && "$CHECK_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          test "$GITHUB_REPOSITORY" = quantile-co/quantile.co
+          checked=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CHECK_RUN_ID")
+          jq -e --arg repo "$GITHUB_REPOSITORY" --arg sha "$APP_SHA" '
+            .repository.full_name == $repo and
+            .path == ".github/workflows/check.yaml" and
+            .event == "push" and .head_branch == "main" and
+            .head_sha == $sha and .conclusion == "success"
+          ' <<< "$checked" > /dev/null
+
+      - name: Check out quantile-co/quantile.co
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.app_sha }}
+          persist-credentials: false
+
+      - name: Package reviewed source and client rules
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$APP_SHA"
+          [[ "$RELEASE_VERSION" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+          test "$RELEASE_VERSION" = "v$(jq -er '.version' package.json)"
+          jq -e '.firestore | (type == "object" and .rules == "firestore.rules")' firebase.json > /dev/null
+          test -s firestore.rules
+          git archive --format=zip --output="$RUNNER_TEMP/source.zip" HEAD
+          printf '%s\n' "$APP_SHA" > "$RUNNER_TEMP/source.sha"
+          (cd "$RUNNER_TEMP" && sha256sum source.zip > source.zip.sha256)
+          cp firestore.rules "$RUNNER_TEMP/firestore.rules"
+
+      - name: Publish reviewed source release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag="$RELEASE_VERSION"
+          if gh api "repos/$GH_REPO/git/ref/tags/$tag" > /dev/null 2>&1; then
+            echo "Tag $tag already exists; inspect any partial release before retrying." >&2
+            exit 1
+          fi
+          notes=$(jq -nc --arg sha "$APP_SHA" --arg check "$CHECK_RUN_ID" \
+            --arg build "$GITHUB_RUN_ID" \
+            '{app_sha: $sha, check_run_id: $check, build_run_id: $build}')
+          gh release create "$tag" \
+            "$RUNNER_TEMP/source.zip#source.zip" \
+            "$RUNNER_TEMP/source.sha#source.sha" \
+            "$RUNNER_TEMP/source.zip.sha256#source.zip.sha256" \
+            "$RUNNER_TEMP/firestore.rules#firestore.rules" \
+            --target "$APP_SHA" --title "Application source $tag" \
+            --notes "$notes" --latest=false --draft
+          release=$(gh api "repos/$GH_REPO/releases/tags/$tag")
+          asset_id=$(jq -er --arg tag "$tag" '
+            if .tag_name == $tag and .draft == true and
+               ([.assets[].name] | sort) ==
+                 (["firestore.rules", "source.sha", "source.zip", "source.zip.sha256"] | sort)
+            then .assets[] | select(.name == "source.zip") | .id
+            else error("Incomplete source release") end
+          ' <<< "$release")
+          gh release edit "$tag" --draft=false
+          published=$(gh api "repos/$GH_REPO/releases/tags/$tag")
+          jq -e --arg tag "$tag" '.tag_name == $tag and .draft == false and .immutable == true' \
+            <<< "$published" > /dev/null || {
+              echo "Release $tag is not immutable. Stop; enable GitHub release immutability before any private Build." >&2
+              exit 1
+            }
+          digest=$(cut -d' ' -f1 "$RUNNER_TEMP/source.zip.sha256")
+          jq -e --argjson asset "$asset_id" --arg digest "sha256:$digest" \
+            'any(.assets[]; .id == $asset and .name == "source.zip" and .digest == $digest)' \
+            <<< "$published" > /dev/null
+          printf 'Published immutable source release `%s` from Check `%s` (SHA `%s`). Source asset ID `%s`, SHA256 `%s`. No deployment.\n' \
+            "$tag" "$CHECK_RUN_ID" "$APP_SHA" "$asset_id" "$digest" >> "$GITHUB_STEP_SUMMARY"
