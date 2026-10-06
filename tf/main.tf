@@ -97,6 +97,7 @@ resource "github_repository" "self" {
 
 # The GitHub provider has no resource for release immutability. Bootstrap it
 # through the supported API; the read-only check below detects later drift.
+# Destroying this state marker never disables the setting in GitHub.
 resource "terraform_data" "immutable_releases" {
   input = github_repository.self.name
 
@@ -104,15 +105,18 @@ resource "terraform_data" "immutable_releases" {
     command = <<-EOT
       set -eu
       gh api --method PUT "repos/${var.github_quantile_co_organization}/${self.input}/immutable-releases"
-      test "$(gh api "repos/${var.github_quantile_co_organization}/${self.input}/immutable-releases" --jq '.enabled')" = true
+      for attempt in $(seq 1 12); do
+        if [ "$(gh api -H 'Cache-Control: no-cache' "repos/${var.github_quantile_co_organization}/${self.input}/immutable-releases" --jq '.enabled')" = true ]; then
+          exit 0
+        fi
+        sleep 5
+      done
+      echo 'GitHub release immutability was not readable as enabled after the API update.' >&2
+      exit 1
     EOT
     environment = {
       GH_TOKEN = var.github_quantile_co_token
     }
-  }
-
-  lifecycle {
-    prevent_destroy = true
   }
 }
 
