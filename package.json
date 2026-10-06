@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "web-only:check": "node scripts/check-web-only.mjs",
     "storybook": "storybook dev -p 6006 --disable-telemetry",
     "storybook:build": "storybook build --quiet --disable-telemetry --output-dir storybook-static",
     "storybook:test": "vitest --project=storybook --run",
@@ -15,7 +16,7 @@
     "format": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "knip": "knip",
-    "check": "pnpm lint && pnpm typecheck && pnpm knip && pnpm assets:check && pnpm build && pnpm storybook:build && pnpm storybook:test",
+    "check": "pnpm lint && pnpm typecheck && pnpm knip && pnpm assets:check && pnpm build && pnpm web-only:check && pnpm storybook:build && pnpm storybook:test",
     "prepare": "husky"
   },
   "dependencies": {
