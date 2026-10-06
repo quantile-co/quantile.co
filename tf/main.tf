@@ -96,7 +96,7 @@ resource "github_repository" "self" {
 }
 
 # The GitHub provider has no resource for release immutability. Bootstrap it
-# through the supported API; publication checks guard against later drift.
+# through the supported API; the read-only check below detects later drift.
 resource "terraform_data" "immutable_releases" {
   input = github_repository.self.name
 
@@ -113,6 +113,23 @@ resource "terraform_data" "immutable_releases" {
 
   lifecycle {
     prevent_destroy = true
+  }
+}
+
+data "external" "immutable_releases" {
+  depends_on = [terraform_data.immutable_releases]
+
+  program = [
+    "gh", "api",
+    "repos/${var.github_quantile_co_organization}/${github_repository.self.name}/immutable-releases",
+    "--jq", "{enabled: (.enabled | tostring)}",
+  ]
+
+  lifecycle {
+    postcondition {
+      condition     = self.result.enabled == "true"
+      error_message = "GitHub release immutability is disabled; review and restore it before continuing."
+    }
   }
 }
 

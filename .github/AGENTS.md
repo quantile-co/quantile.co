@@ -22,5 +22,8 @@ workflow changes. Do not introduce Nix or cache tooling.
 
 Plan and Apply remain manual, maintainer-only, protected-main/prod operations.
 Preserve WIF, the concurrency group, state bucket/prefix and state locking.
-Plan never applies. Apply creates and applies its own exact saved plan; do not
-transfer sensitive plan artifacts or dispatch Apply without explicit approval.
+Plan never applies. The repository-settings Apply bootstraps release
+immutability once; subsequent Plans read its live state and fail on drift rather
+than silently changing it. Repair drift only after separate review. Apply creates
+and applies its own exact saved plan; do not transfer sensitive plan artifacts
+or dispatch Apply without explicit approval.

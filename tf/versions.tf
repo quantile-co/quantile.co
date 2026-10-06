@@ -3,6 +3,10 @@ terraform {
 
   # Keep registry hosts explicit so Dependabot matches the OpenTofu lockfile.
   required_providers {
+    external = {
+      source  = "registry.opentofu.org/hashicorp/external"
+      version = ">= 2.0, < 3.0"
+    }
     google = {
       source  = "registry.opentofu.org/hashicorp/google"
       version = ">= 6.0, < 7.0"

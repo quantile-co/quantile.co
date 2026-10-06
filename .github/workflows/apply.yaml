@@ -27,6 +27,7 @@ jobs:
       TF_VAR_gcp_wif_pool: ${{ vars.GCP_WIF_POOL }}
       TF_VAR_github_maintainers: ${{ vars.GH_MAINTAINERS }}
       TF_VAR_github_quantile_co_token: ${{ secrets.TERRAFORM_GITHUB_QUANTILE_CO_TOKEN }}
+      GH_TOKEN: ${{ secrets.TERRAFORM_GITHUB_QUANTILE_CO_TOKEN }}
 
     steps:
       - name: Check out repository
