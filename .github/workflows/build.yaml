@@ -11,6 +11,10 @@ on:
         description: Successful protected-main public Check run for this commit
         required: true
         type: string
+      version:
+        description: Reviewed application release version (for example v0.1.0)
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -28,6 +32,7 @@ jobs:
     env:
       APP_SHA: ${{ inputs.app_sha }}
       CHECK_RUN_ID: ${{ inputs.check_run_id }}
+      RELEASE_VERSION: ${{ inputs.version }}
     steps:
       - name: Verify quantile-co/quantile.co Check
         env:
@@ -54,6 +59,8 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$APP_SHA"
+          [[ "$RELEASE_VERSION" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+          test "$RELEASE_VERSION" = "v$(jq -er '.version' package.json)"
           jq -e '.firestore | (type == "object" and .rules == "firestore.rules")' firebase.json > /dev/null
           test -s firestore.rules
           git archive --format=zip --output="$RUNNER_TEMP/source.zip" HEAD
@@ -67,7 +74,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          tag="app-$APP_SHA"
+          tag="$RELEASE_VERSION"
           if gh api "repos/$GH_REPO/git/ref/tags/$tag" > /dev/null 2>&1; then
             echo "Tag $tag already exists; inspect any partial release before retrying." >&2
             exit 1
@@ -80,16 +87,26 @@ jobs:
             "$RUNNER_TEMP/source.sha#source.sha" \
             "$RUNNER_TEMP/source.zip.sha256#source.zip.sha256" \
             "$RUNNER_TEMP/firestore.rules#firestore.rules" \
-            --target "$APP_SHA" --title "Application source $APP_SHA" \
-            --notes "$notes" --latest=false
+            --target "$APP_SHA" --title "Application source $tag" \
+            --notes "$notes" --latest=false --draft
           release=$(gh api "repos/$GH_REPO/releases/tags/$tag")
           asset_id=$(jq -er --arg tag "$tag" '
-            if .tag_name == $tag and
+            if .tag_name == $tag and .draft == true and
                ([.assets[].name] | sort) ==
                  (["firestore.rules", "source.sha", "source.zip", "source.zip.sha256"] | sort)
             then .assets[] | select(.name == "source.zip") | .id
             else error("Incomplete source release") end
           ' <<< "$release")
+          gh release edit "$tag" --draft=false
+          published=$(gh api "repos/$GH_REPO/releases/tags/$tag")
+          jq -e --arg tag "$tag" '.tag_name == $tag and .draft == false and .immutable == true' \
+            <<< "$published" > /dev/null || {
+              echo "Release $tag is not immutable. Stop; enable GitHub release immutability before any private Build." >&2
+              exit 1
+            }
           digest=$(cut -d' ' -f1 "$RUNNER_TEMP/source.zip.sha256")
-          printf 'Published source release `%s` from Check `%s` (SHA `%s`). Source asset ID `%s`, SHA256 `%s`. No deployment.\n' \
+          jq -e --argjson asset "$asset_id" --arg digest "sha256:$digest" \
+            'any(.assets[]; .id == $asset and .name == "source.zip" and .digest == $digest)' \
+            <<< "$published" > /dev/null
+          printf 'Published immutable source release `%s` from Check `%s` (SHA `%s`). Source asset ID `%s`, SHA256 `%s`. No deployment.\n' \
             "$tag" "$CHECK_RUN_ID" "$APP_SHA" "$asset_id" "$digest" >> "$GITHUB_STEP_SUMMARY"
