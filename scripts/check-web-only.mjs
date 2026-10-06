@@ -27,7 +27,6 @@ const nextHeaders = new Map(
 );
 for (const [firebaseSource, nextSource] of [
   ["**", "/:path*"],
-  ["/_next/static/**", "/_next/static/:path*"],
   ["/images/**", "/images/:path*"],
 ]) {
   const rule = firebase.hosting.headers.find(

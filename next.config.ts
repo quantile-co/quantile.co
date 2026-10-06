@@ -13,12 +13,11 @@ function hostingHeaders(source: string) {
 
 const nextConfig: NextConfig = {
   async headers() {
+    // Leave development caching/HMR intact; App Hosting builds run in production.
+    // Next itself sets immutable caching on its hashed /_next/static assets.
+    if (process.env.NODE_ENV !== "production") return [];
     return [
       { source: "/:path*", headers: hostingHeaders("**") },
-      {
-        source: "/_next/static/:path*",
-        headers: hostingHeaders("/_next/static/**"),
-      },
       { source: "/images/:path*", headers: hostingHeaders("/images/**") },
     ];
   },
