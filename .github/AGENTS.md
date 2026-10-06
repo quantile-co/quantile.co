@@ -10,9 +10,11 @@ Check has exactly one job, All, which runs all application and OpenTofu checks,
 including mocked module tests. All is the required status. Don't split Check
 into tool-specific jobs or an aggregate gate. Build manually packages a reviewed
 protected-main revision into a versioned GitHub Release; it never runs app scripts
-or deploys. Enable repository release immutability before the first Build: create
-a draft, attach all assets, then publish. Private Build must verify immutability,
-protected-main Check/Build provenance and source bytes before cloud credentials.
+or deploys. A separately approved repository-settings Apply must enable release
+immutability before the first Build; a source merge is not Apply authorization.
+Build creates a draft, attaches all assets, then publishes. Private Build must
+verify immutability, protected-main Check/Build provenance and source bytes
+before cloud credentials.
 
 Use the shared `namespace-profile-quantile` runner: restricted runtime API access,
 no persistent cache volumes. Retain Node.js, pnpm and OpenTofu versions during
