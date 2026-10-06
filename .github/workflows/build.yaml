@@ -82,31 +82,88 @@ jobs:
           notes=$(jq -nc --arg sha "$APP_SHA" --arg check "$CHECK_RUN_ID" \
             --arg build "$GITHUB_RUN_ID" \
             '{app_sha: $sha, check_run_id: $check, build_run_id: $build}')
-          gh release create "$tag" \
-            "$RUNNER_TEMP/source.zip#source.zip" \
-            "$RUNNER_TEMP/source.sha#source.sha" \
-            "$RUNNER_TEMP/source.zip.sha256#source.zip.sha256" \
-            "$RUNNER_TEMP/firestore.rules#firestore.rules" \
-            --target "$APP_SHA" --title "Application source $tag" \
-            --notes "$notes" --latest=false --draft
-          release=$(gh api "repos/$GH_REPO/releases/tags/$tag")
-          asset_id=$(jq -er --arg tag "$tag" '
-            if .tag_name == $tag and .draft == true and
-               ([.assets[].name] | sort) ==
-                 (["firestore.rules", "source.sha", "source.zip", "source.zip.sha256"] | sort)
-            then .assets[] | select(.name == "source.zip") | .id
-            else error("Incomplete source release") end
-          ' <<< "$release")
-          gh release edit "$tag" --draft=false
-          published=$(gh api "repos/$GH_REPO/releases/tags/$tag")
-          jq -e --arg tag "$tag" '.tag_name == $tag and .draft == false and .immutable == true' \
-            <<< "$published" > /dev/null || {
-              echo "Release $tag is not immutable. Stop; enable GitHub release immutability before any private Build." >&2
-              exit 1
-            }
-          digest=$(cut -d' ' -f1 "$RUNNER_TEMP/source.zip.sha256")
-          jq -e --argjson asset "$asset_id" --arg digest "sha256:$digest" \
-            'any(.assets[]; .id == $asset and .name == "source.zip" and .digest == $digest)' \
-            <<< "$published" > /dev/null
+          existing=$(gh api "repos/$GH_REPO/releases?per_page=100" \
+            | jq -c --arg tag "$tag" '[.[] | select(.tag_name == $tag)]')
+          case "$(jq 'length' <<< "$existing")" in
+            0)
+              gh release create "$tag" \
+                "$RUNNER_TEMP/source.zip#source.zip" \
+                "$RUNNER_TEMP/source.sha#source.sha" \
+                "$RUNNER_TEMP/source.zip.sha256#source.zip.sha256" \
+                "$RUNNER_TEMP/firestore.rules#firestore.rules" \
+                --target "$APP_SHA" --title "Application source $tag" \
+                --notes "$notes" --latest=false --draft
+              ;;
+            1)
+              jq -e '.[0].draft == true' <<< "$existing" > /dev/null
+              ;;
+            *) echo "Multiple releases for $tag; inspect before publishing." >&2; exit 1 ;;
+          esac
+
+          # Draft releases are absent from REST /releases/tags until publication.
+          release=$(gh release view "$tag" --json tagName,isDraft,targetCommitish,body,assets)
+          jq -e --arg tag "$tag" --arg sha "$APP_SHA" --arg check "$CHECK_RUN_ID" '
+            .tagName == $tag and .isDraft == true and .targetCommitish == $sha and
+            (.body | fromjson | .app_sha == $sha and .check_run_id == $check and
+              (.build_run_id | test("^[1-9][0-9]*$"))) and
+            ([.assets[].name] | sort) ==
+              (["firestore.rules", "source.sha", "source.zip", "source.zip.sha256"] | sort)
+          ' <<< "$release" > /dev/null
+          mkdir -p "$RUNNER_TEMP/release"
+          gh release download "$tag" --dir "$RUNNER_TEMP/release"
+          for name in source.zip source.sha source.zip.sha256 firestore.rules; do
+            digest=$(jq -er --arg name "$name" '.assets[] | select(.name == $name) | .digest' <<< "$release")
+            test "$digest" = "sha256:$(sha256sum "$RUNNER_TEMP/release/$name" | cut -d' ' -f1)"
+          done
+          test "$(< "$RUNNER_TEMP/release/source.sha")" = "$APP_SHA"
+          (cd "$RUNNER_TEMP/release" && sha256sum -c source.zip.sha256)
+          cmp "$RUNNER_TEMP/release/firestore.rules" "$RUNNER_TEMP/firestore.rules"
+          python3 - "$RUNNER_TEMP/source.zip" "$RUNNER_TEMP/release/source.zip" <<'PY'
+          import sys
+          from zipfile import ZipFile
+
+          def files(path):
+              with ZipFile(path) as archive:
+                  entries = archive.infolist()
+                  names = [item.filename for item in entries]
+                  if len(names) != len(set(names)):
+                      raise SystemExit("Duplicate names in source archive")
+                  return {
+                      item.filename: (
+                          item.external_attr >> 16,
+                          item.create_system,
+                          None if item.is_dir() else archive.read(item),
+                      )
+                      for item in entries
+                  }
+
+          if files(sys.argv[1]) != files(sys.argv[2]):
+              raise SystemExit("Draft source differs from reviewed tracked source")
+          PY
+
+          # A previous failed Build may leave an intact draft. Point its notes
+          # at this run only after confirming that its assets match this commit.
+          gh release edit "$tag" --notes "$notes" --draft=false
+          published=
+          for attempt in $(seq 1 12); do
+            candidate=$(gh api "repos/$GH_REPO/releases/tags/$tag" 2>/dev/null) || { sleep 5; continue; }
+            if jq -e --arg tag "$tag" '.tag_name == $tag and .draft == false and .immutable == true' \
+              <<< "$candidate" > /dev/null; then
+              published=$candidate
+              break
+            fi
+            sleep 5
+          done
+          test -n "$published" || {
+            echo "Release $tag is not verifiably immutable; inspect before any private Build." >&2
+            exit 1
+          }
+          digest=$(sha256sum "$RUNNER_TEMP/release/source.zip" | cut -d' ' -f1)
+          asset_id=$(jq -er --arg digest "sha256:$digest" '
+            .assets[] | select(.name == "source.zip" and .digest == $digest) | .id
+          ' <<< "$published")
+          jq -e --arg sha "$APP_SHA" --arg check "$CHECK_RUN_ID" --arg build "$GITHUB_RUN_ID" '
+            .body | fromjson | .app_sha == $sha and .check_run_id == $check and .build_run_id == $build
+          ' <<< "$published" > /dev/null
           printf 'Published immutable source release `%s` from Check `%s` (SHA `%s`). Source asset ID `%s`, SHA256 `%s`. No deployment.\n' \
             "$tag" "$CHECK_RUN_ID" "$APP_SHA" "$asset_id" "$digest" >> "$GITHUB_STEP_SUMMARY"
