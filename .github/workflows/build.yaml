@@ -72,13 +72,16 @@ jobs:
             echo "Tag $tag already exists; inspect any partial release before retrying." >&2
             exit 1
           fi
+          notes=$(jq -nc --arg sha "$APP_SHA" --arg check "$CHECK_RUN_ID" \
+            --arg build "$GITHUB_RUN_ID" \
+            '{app_sha: $sha, check_run_id: $check, build_run_id: $build}')
           gh release create "$tag" \
             "$RUNNER_TEMP/source.zip#source.zip" \
             "$RUNNER_TEMP/source.sha#source.sha" \
             "$RUNNER_TEMP/source.zip.sha256#source.zip.sha256" \
             "$RUNNER_TEMP/firestore.rules#firestore.rules" \
             --target "$APP_SHA" --title "Application source $APP_SHA" \
-            --notes "Validated by public Check run $CHECK_RUN_ID." --latest=false
+            --notes "$notes" --latest=false
           release=$(gh api "repos/$GH_REPO/releases/tags/$tag")
           asset_id=$(jq -er --arg tag "$tag" '
             if .tag_name == $tag and
