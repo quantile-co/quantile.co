@@ -28,6 +28,7 @@ passing local tests or merging source does not authorize a deployment.
 | Provider routes, verification, eligibility and runtime wiring | `guides/webhooks` | `"Quantile guide webhooks"` |
 | Components, page/story composition, approved copy and visual checks | `guides/marketing` | `"Quantile guide marketing"` |
 | Local commands, configuration, integration ownership and cleanup | `guides/development` | `"Quantile guide development"` |
+| Public Check, Build, Plan and Apply workflows | `guides/workflows` | `"Quantile guide workflows"` |
 | Shared Firestore SDK, emulator and authentication boundaries | `guides/firestore` | `"Quantile guide firestore"` |
 | Welcome persistence, receipts, audit, races and recovery | `guides/welcome` | `"Quantile guide welcome"` |
 | Reusable Stripe catalog, modes, outputs and mocked validation | `guides/catalog` | `"Quantile guide catalog"` |
