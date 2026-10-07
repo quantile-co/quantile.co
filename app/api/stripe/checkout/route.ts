@@ -79,7 +79,7 @@ export async function POST(request: Request) {
         ],
         subscription_data: { metadata },
         metadata,
-        success_url: `${settings.origin}/?checkout=success`,
+        success_url: `${settings.origin}/welcome${settings.livemode ? "" : "?sandbox=1"}`,
         cancel_url: `${settings.origin}/#pricing`,
       },
       { idempotencyKey: `checkout/${operationId}` },

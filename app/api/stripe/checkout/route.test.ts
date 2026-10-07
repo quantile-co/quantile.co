@@ -92,7 +92,7 @@ describe("Checkout start", () => {
           adjustable_quantity: { enabled: true, minimum: 1, maximum: 5 },
         },
       ],
-      success_url: `${origin}/?checkout=success`,
+      success_url: `${origin}/welcome?sandbox=1`,
       cancel_url: `${origin}/#pricing`,
     });
     const metadata = params.subscription_data.metadata;
@@ -115,7 +115,7 @@ describe("Checkout start", () => {
     const local = "http://localhost:3000";
     expect((await submit(local, local)).status).toBe(303);
     expect(provider.create.mock.calls[0][0].success_url).toBe(
-      `${origin}/?checkout=success`,
+      `${origin}/welcome?sandbox=1`,
     );
     for (const [from, target] of [
       ["http://localhost:3001", "http://localhost:3001"],
@@ -208,6 +208,9 @@ describe("Checkout start", () => {
       {
         quantile_app_instance: "sample",
       },
+    );
+    expect(provider.create.mock.calls[0][0].success_url).toBe(
+      "https://example.com/welcome",
     );
     expect(provider.create.mock.calls[0][1].idempotencyKey).toMatch(
       /^checkout\/sample-[a-f0-9]{32}$/,
