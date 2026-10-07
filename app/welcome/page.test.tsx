@@ -1,28 +1,38 @@
+import { MantineProvider } from "@mantine/core";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import WelcomePage, { metadata } from "./page";
 
-async function render(sandbox?: string | string[]) {
+function render() {
   return renderToStaticMarkup(
-    await WelcomePage({ searchParams: Promise.resolve({ sandbox }) }),
+    <MantineProvider>
+      <WelcomePage />
+    </MantineProvider>,
   );
 }
 
 describe("Welcome return page", () => {
-  it("does not imply a redirect proves payment or email fulfillment", async () => {
-    const html = await render();
-    expect(html).toContain("Thanks for subscribing.");
-    expect(html).toContain("We’re confirming your payment.");
-    expect(html).toContain("Once it’s confirmed");
+  it("pairs a thank-you heading with Calendly and the existing email card", () => {
+    const html = render();
+    expect(html).toContain(">Thanks for subscribing.</h1>");
+    expect(html.match(/Thanks for subscribing\./g)).toHaveLength(1);
+    expect(html).toContain("a welcome email with next steps");
+    expect(html).toContain("feel free to book an intro call below");
+    expect(html).toContain("Calendly loading...");
+    expect(html).toContain('href="mailto:aj@quantile.co"');
+    expect(html).toContain("Prefer email?");
+    expect(html).not.toContain(">Welcome</p>");
     expect(html).not.toContain("Sandbox purchase");
-    expect(metadata.robots).toEqual({ index: false, follow: false });
+    expect(html).not.toContain("confirming your payment");
   });
 
-  it("explains why Sandbox purchases do not send to the buyer's inbox", async () => {
-    const html = await render("1");
-    expect(html).toContain("Sandbox purchase");
-    expect(html).toContain("Resend’s simulator");
-    expect(html).toContain("not the address entered at Checkout");
-    expect(await render(["1", "1"])).not.toContain("Sandbox purchase");
+  it("uses the shared site header and footer without indexing the page", () => {
+    const html = render();
+    expect(html).toContain('href="/#benefits"');
+    expect(html).toContain('href="/#pricing"');
+    expect(html).toContain('href="/#faq"');
+    expect(html).toContain('form="subscription-checkout"');
+    expect(html).toContain("Quantile LLC");
+    expect(metadata.robots).toEqual({ index: false, follow: false });
   });
 });

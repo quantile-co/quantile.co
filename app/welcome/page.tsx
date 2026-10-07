@@ -1,46 +1,52 @@
 import type { Metadata } from "next";
+import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
 import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
+import { CalendlyEmbed } from "@/components/CalendlyEmbed/CalendlyEmbed";
+import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
-import classes from "./page.module.css";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
+
+const primarySections = [
+  { href: "/#benefits", label: "Benefits" },
+  { href: "/#pricing", label: "Pricing" },
+  { href: "/#faq", label: "FAQ" },
+] as const;
 
 export const metadata: Metadata = {
-  title: "Thanks for subscribing | Quantile",
+  title: "Welcome | Quantile",
   robots: { index: false, follow: false },
 };
 
-export default async function WelcomePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ sandbox?: string | string[] }>;
-}) {
-  // This hint changes copy only. A return URL is never proof of payment or
-  // email delivery; only the verified paid-invoice webhook handles fulfillment.
-  const sandbox = (await searchParams).sandbox === "1";
+// This page is a friendly return from Checkout, never proof of fulfillment.
+// The verified paid-invoice webhook alone sends the welcome email.
+export default function WelcomePage() {
   return (
-    <div className={classes.page}>
+    <div>
       <SkipLink href="#main-content">Skip to content</SkipLink>
-      <header className={classes.header}>
-        <a aria-label="Quantile homepage" href="/">
-          <BrandLogo />
-        </a>
-      </header>
-      <main className={classes.main} id="main-content" tabIndex={-1}>
-        <p className={classes.label}>Checkout complete</p>
-        <h1 className={classes.title}>Thanks for subscribing.</h1>
-        <p className={classes.message}>
-          We’re confirming your payment. Once it’s confirmed, we’ll send a
-          welcome email with next steps.
-        </p>
-        {sandbox && (
-          <p className={classes.sandbox}>
-            This is a Sandbox purchase. The test welcome email goes to Resend’s
-            simulator, not the address entered at Checkout.
-          </p>
-        )}
-        <a className={classes.home} href="/">
-          Back to Quantile
-        </a>
+      <SiteHeader
+        bookCallHref="#book-a-call"
+        homeHref="/"
+        logo={<BrandLogo />}
+        sections={primarySections}
+        signUpFormId="subscription-checkout"
+      />
+      <main id="main-content" tabIndex={-1}>
+        <BookACallSection
+          calendar={<CalendlyEmbed />}
+          description={
+            "Keep an eye out for a welcome email with next steps, or feel free to book an intro call below."
+          }
+          headingLevel={1}
+          title="Thanks for subscribing."
+        />
       </main>
+      <SiteFooter
+        homeHref="/"
+        logo={<BrandLogo />}
+        sections={primarySections}
+        themeSwitcher={<ThemeSwitcher />}
+      />
     </div>
   );
 }
