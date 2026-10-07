@@ -111,6 +111,11 @@ describe("provider-backed welcome completion", () => {
           await page.locator("#billingCountry").selectOption("US");
         if (await page.locator("#billingPostalCode").isVisible())
           await page.locator("#billingPostalCode").fill("10001");
+        // Checkout may preselect optional one-click saving, which requires a
+        // phone even when the Session does not collect one. Keep this test
+        // email-only and avoid enrolling its disposable customer.
+        const saveForLater = page.locator("#enableStripePass");
+        if (await saveForLater.isVisible()) await saveForLater.uncheck();
         await page.getByRole("button", { name: /Subscribe|Pay/i }).click();
         const id = session.id;
         session = await until(async () => {
