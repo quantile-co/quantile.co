@@ -40,4 +40,5 @@ variable "github_quantile_co_token" {
   description = "Fine-grained PAT managing this repository in quantile-co."
   type        = string
   sensitive   = true
+  ephemeral   = true
 }
