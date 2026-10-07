@@ -9,6 +9,10 @@ plan.json
 crash.log
 
 # Generated files
+/.quantile/
+/firebase-debug.log
+/firestore-debug.log
+/ui-debug.log
 
 # dependencies
 /node_modules
