@@ -6,6 +6,7 @@ import { z } from "zod";
 import { appInstanceSchema } from "@/lib/env/env";
 import { type FirestoreConfig, getFirestore } from "@/lib/gcp/firestore";
 import {
+  assertEligibleTestPrice,
   assertTestOwnership,
   createTestOperation,
   readIntegrationTarget,
@@ -70,12 +71,7 @@ describe("provider-backed welcome completion", () => {
     console.info(`Integration test operation: ${operation.id}`);
     try {
       const price = await stripe.prices.retrieve(env.STRIPE_PRICE_ID);
-      expect(price).toMatchObject({
-        livemode: false,
-        currency: "usd",
-        unit_amount: 499500,
-        recurring: { interval: "month" },
-      });
+      assertEligibleTestPrice(price);
       stage = "test checkout creation";
       customer = await stripe.customers.create(
         { email: operation.recipient, metadata: operation.metadata },

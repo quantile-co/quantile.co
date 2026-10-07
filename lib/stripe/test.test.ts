@@ -1,7 +1,36 @@
 import { describe, expect, it } from "vitest";
-import { assertTestOwnership, createTestOperation } from "./test";
+import {
+  assertEligibleTestPrice,
+  assertTestOwnership,
+  createTestOperation,
+} from "./test";
 
 describe("integration test isolation", () => {
+  it("accepts Q1 or developer-owned paid monthly test prices", () => {
+    const price = {
+      active: true,
+      livemode: false,
+      currency: "usd",
+      unit_amount: 499500,
+      recurring: { interval: "month", usage_type: "licensed" },
+    };
+    expect(() => assertEligibleTestPrice(price)).not.toThrow();
+    expect(() =>
+      assertEligibleTestPrice({ ...price, unit_amount: 100 }),
+    ).not.toThrow();
+    for (const invalid of [
+      { ...price, active: false },
+      { ...price, livemode: true },
+      { ...price, currency: "eur" },
+      { ...price, unit_amount: 0 },
+      { ...price, unit_amount: null },
+      { ...price, recurring: null },
+      { ...price, recurring: { interval: "year", usage_type: "licensed" } },
+      { ...price, recurring: { interval: "month", usage_type: "metered" } },
+    ])
+      expect(() => assertEligibleTestPrice(invalid)).toThrow();
+  });
+
   it("uses distinct operation IDs within one app instance", () => {
     const operations = Array.from({ length: 3 }, () =>
       createTestOperation("sample", "delivered"),

@@ -26,6 +26,29 @@ export function readIntegrationTarget(value: string): string {
   return url.href;
 }
 
+// A developer-owned Price need not have Q1's exact amount, but must still
+// support the same paid monthly subscription flow as the selected catalog.
+export function assertEligibleTestPrice(price: {
+  active: boolean;
+  livemode: boolean;
+  currency: string;
+  unit_amount: number | null;
+  recurring: { interval: string; usage_type: string } | null;
+}) {
+  if (
+    !price.active ||
+    price.livemode ||
+    price.currency !== "usd" ||
+    price.unit_amount === null ||
+    price.unit_amount <= 0 ||
+    price.recurring?.interval !== "month" ||
+    price.recurring.usage_type !== "licensed"
+  )
+    throw new Error(
+      "Expected an active, positive USD monthly licensed test Price.",
+    );
+}
+
 // This is an operation correlation/idempotency token, not another app instance.
 export function createTestOperation(
   appInstance: string,
