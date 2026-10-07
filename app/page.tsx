@@ -12,7 +12,7 @@ import { SkipLink } from "@/components/SkipLink/SkipLink";
 import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
 
-const signUpHref = "https://checkout.stripe.dev/";
+const checkoutFormId = "subscription-checkout";
 const primarySections = [
   { href: "#benefits", label: "Benefits" },
   { href: "#pricing", label: "Pricing" },
@@ -28,7 +28,7 @@ export default function Home() {
         homeHref="#top"
         logo={<BrandLogo />}
         sections={primarySections}
-        signUpHref={signUpHref}
+        signUpFormId={checkoutFormId}
       />
       <main id="main-content" tabIndex={-1}>
         <HeroSection
@@ -39,18 +39,18 @@ export default function Home() {
             "Fast, flexible, senior data engineering capacity\nwithout expensive hires or agency headaches."
           }
           id="top-hero"
-          signUpHref={signUpHref}
+          signUpFormId={checkoutFormId}
           title={"Fractional\ndata engineering."}
           visual={<HeroAnimation />}
         />
         <SocialProofSection ariaLabel="AJ Welch's experience and client work" />
-        <BenefitsSection signUpHref={signUpHref} />
+        <BenefitsSection signUpFormId={checkoutFormId} />
         <PricingSection
           mobileProof={<SocialProofSection embedded />}
-          signUpHref={signUpHref}
+          signUpFormId={checkoutFormId}
         />
         <SocialProofSection hideOnMobile />
-        <FaqSection signUpHref={signUpHref} />
+        <FaqSection signUpFormId={checkoutFormId} />
       </main>
       <SiteFooter
         callToAction={<BookACallSection calendar={<CalendlyEmbed />} />}

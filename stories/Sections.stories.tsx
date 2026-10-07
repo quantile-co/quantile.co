@@ -9,7 +9,7 @@ import { HeroSection } from "@/components/HeroSection/HeroSection";
 import { PricingSection } from "@/components/PricingSection/PricingSection";
 import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
 
-const signUpHref = "https://checkout.stripe.dev/";
+const checkoutFormId = "subscription-checkout";
 
 const meta = {
   title: "Sections",
@@ -27,7 +27,7 @@ export const Hero: Story = {
       description={
         "Fast, flexible, senior data engineering capacity\nwithout expensive hires or agency headaches."
       }
-      signUpHref={signUpHref}
+      signUpFormId={checkoutFormId}
       title={"Fractional\ndata engineering."}
       visual={<HeroAnimation />}
     />
@@ -35,14 +35,14 @@ export const Hero: Story = {
 };
 
 export const Benefits: Story = {
-  render: () => <BenefitsSection signUpHref={signUpHref} />,
+  render: () => <BenefitsSection signUpFormId={checkoutFormId} />,
 };
 
 export const Pricing: Story = {
   render: () => (
     <PricingSection
       mobileProof={<SocialProofSection embedded />}
-      signUpHref={signUpHref}
+      signUpFormId={checkoutFormId}
     />
   ),
 };
@@ -54,7 +54,7 @@ export const SocialProof: Story = {
 };
 
 export const Faq: Story = {
-  render: () => <FaqSection signUpHref={signUpHref} />,
+  render: () => <FaqSection signUpFormId={checkoutFormId} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const questions = canvas.getAllByRole("button");
@@ -83,8 +83,8 @@ export const Faq: Story = {
     });
     await userEvent.click(gettingStarted);
     await expect(
-      await canvas.findByRole("link", { name: "Subscribe" }),
-    ).toHaveAttribute("href", signUpHref);
+      await canvas.findByRole("button", { name: "Subscribe" }),
+    ).toHaveAttribute("form", checkoutFormId);
 
     // Leave the story collapsed for normal browsing and screenshots.
     await userEvent.click(scope);

@@ -240,6 +240,13 @@ export async function runDevelopment(args = process.argv.slice(2)) {
     } else {
       env.QUANTILE_APP_INSTANCE = appInstance;
       env.PORT = String(port);
+      env.QUANTILE_SITE_ORIGIN = `http://127.0.0.1:${port}`;
+      // Only launcher-owned tests may start Checkout against this process.
+      if (command.kind === "integrated-test")
+        env.QUANTILE_CHECKOUT_TEST_ORIGIN = env.QUANTILE_SITE_ORIGIN;
+      // The ordinary dev server has no provider access. Integrated dev uses
+      // exactly the validated Sandbox key, never an ambient live key.
+      env.STRIPE_API_KEY = config?.stripeKey ?? "";
       if (config) {
         let ngrokConfig: string;
         try {
@@ -352,6 +359,8 @@ export async function runDevelopment(args = process.argv.slice(2)) {
       throw new Error(
         "QUANTILE_STRIPE_WEBHOOK_URL is internal. Use pnpm test:integration --target <url>.",
       );
+    if (env.QUANTILE_CHECKOUT_TEST_ORIGIN)
+      throw new Error("QUANTILE_CHECKOUT_TEST_ORIGIN is internal.");
     if (command.kind === "cleanup") {
       const owner = await readOwner(root);
       if (ownerIsRunning(owner))

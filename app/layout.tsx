@@ -53,6 +53,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </script>
       </head>
       <body>
+        <form
+          action="/api/stripe/checkout"
+          id="subscription-checkout"
+          method="post"
+        />
         <Providers>{children}</Providers>
       </body>
     </html>

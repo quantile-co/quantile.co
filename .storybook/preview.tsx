@@ -40,6 +40,11 @@ const preview: Preview = {
         forceColorScheme={context.globals.theme === "dark" ? "dark" : "light"}
         theme={theme}
       >
+        <form
+          action="/api/stripe/checkout"
+          id="subscription-checkout"
+          method="post"
+        />
         <Story />
       </MantineProvider>
     ),

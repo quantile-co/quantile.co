@@ -32,7 +32,12 @@ export function childEnvironment(
   const result = { ...env };
   const allowed =
     purpose === "runtime"
-      ? ["STRIPE_WEBHOOK_SECRET", "RESEND_API_KEY", "RESEND_WEBHOOK_SECRET"]
+      ? [
+          "STRIPE_API_KEY",
+          "STRIPE_WEBHOOK_SECRET",
+          "RESEND_API_KEY",
+          "RESEND_WEBHOOK_SECRET",
+        ]
       : purpose === "integration-test"
         ? [
             "STRIPE_TEST_API_KEY",

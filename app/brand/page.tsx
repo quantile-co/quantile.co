@@ -13,7 +13,7 @@ import classes from "./page.module.css";
 
 const brandDescription =
   "Download the Quantile logo, wordmark, and social banners.";
-const signUpHref = "https://checkout.stripe.dev/";
+const checkoutFormId = "subscription-checkout";
 const primarySections = [
   { href: "/#benefits", label: "Benefits" },
   { href: "/#pricing", label: "Pricing" },
@@ -190,7 +190,7 @@ export default function BrandPage() {
         homeHref="/"
         logo={<BrandLogo />}
         sections={primarySections}
-        signUpHref={signUpHref}
+        signUpFormId={checkoutFormId}
       />
       <main className={classes.main} id="main-content" tabIndex={-1}>
         <Container className={classes.container} size="xl">

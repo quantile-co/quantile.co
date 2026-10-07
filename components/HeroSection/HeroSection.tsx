@@ -9,7 +9,7 @@ type HeroSectionProps = {
   id?: string;
   compactDescription?: string;
   order?: 1 | 2;
-  signUpHref: string;
+  signUpFormId: string;
   title: string;
   titleSize?: "hero" | "section";
   visual?: ReactNode;
@@ -22,7 +22,7 @@ export function HeroSection({
   eyebrow,
   id,
   order = 1,
-  signUpHref,
+  signUpFormId,
   title,
   titleSize = "hero",
   visual,
@@ -95,10 +95,10 @@ export function HeroSection({
               </Button>
               <Button
                 autoContrast
-                component="a"
                 data-site-cta={ctaScale}
-                href={signUpHref}
+                form={signUpFormId}
                 size={ctaSize}
+                type="submit"
                 variant="filled"
               >
                 Start building

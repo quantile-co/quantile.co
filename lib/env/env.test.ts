@@ -3,6 +3,7 @@ import {
   belongsToAppInstance,
   parseAppInstance,
   readAppInstance,
+  readCheckoutSettings,
   readEmailAddresses,
   readFirestoreTarget,
   readResendSendingKey,
@@ -43,6 +44,54 @@ describe("app instance", () => {
     `sample-${"a".repeat(31)}`,
   ])("rejects an unowned or malformed operation ID: %s", (operationId) => {
     expect(belongsToAppInstance("sample", operationId)).toBe(false);
+  });
+});
+
+describe("Checkout settings", () => {
+  const test = {
+    STRIPE_EVENT_LIVEMODE: "false",
+    STRIPE_API_KEY: "rk_test_fixture",
+    STRIPE_PRICE_ID: "price_fixture",
+    QUANTILE_APP_INSTANCE: "sample",
+    QUANTILE_SITE_ORIGIN: "http://127.0.0.1:3000",
+  };
+  it("uses only the selected Sandbox key and origin", () => {
+    expect(readCheckoutSettings(test)).toEqual({
+      key: "rk_test_fixture",
+      livemode: false,
+      mode: "test",
+      priceId: "price_fixture",
+      appInstance: "sample",
+      origin: "http://127.0.0.1:3000",
+    });
+  });
+  it("requires an explicitly enabled, restricted live key and HTTPS origin", () => {
+    const live = {
+      ...test,
+      STRIPE_EVENT_LIVEMODE: "true",
+      STRIPE_API_KEY: "rk_live_fixture",
+      QUANTILE_SITE_ORIGIN: "https://example.com",
+    };
+    expect(readCheckoutSettings(live).livemode).toBe(true);
+    for (const invalid of [
+      { STRIPE_API_KEY: "rk_test_fixture" },
+      { STRIPE_API_KEY: "sk_live_fixture" },
+      { QUANTILE_SITE_ORIGIN: "http://example.com" },
+      { FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080" },
+    ])
+      expect(() => readCheckoutSettings({ ...live, ...invalid })).toThrow();
+  });
+  it.each([
+    { STRIPE_EVENT_LIVEMODE: undefined },
+    { STRIPE_API_KEY: "rk_live_fixture" },
+    { STRIPE_API_KEY: undefined },
+    { STRIPE_PRICE_ID: "not-a-price" },
+    { QUANTILE_SITE_ORIGIN: "https://example.com/path" },
+    { QUANTILE_SITE_ORIGIN: "https://example.com?q=redirect" },
+    { QUANTILE_SITE_ORIGIN: "https://user:pass@example.com" },
+    { QUANTILE_SITE_ORIGIN: "http://example.com" },
+  ])("rejects invalid test Checkout configuration", (invalid) => {
+    expect(() => readCheckoutSettings({ ...test, ...invalid })).toThrow();
   });
 });
 

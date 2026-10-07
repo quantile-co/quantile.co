@@ -143,6 +143,7 @@ describe("integration configuration and process boundaries", () => {
       GCP_PROJECT_ID: "demo-quantile",
       FIRESTORE_EMULATOR_HOST: "localhost:8080",
       STRIPE_WEBHOOK_SECRET: "whsec_x",
+      STRIPE_API_KEY: "rk_test_fixture",
       RESEND_WEBHOOK_SECRET: "whsec_y",
       PATH: "/bin",
       CUSTOM_TOOL_CONFIG: "tool-value",
@@ -151,16 +152,19 @@ describe("integration configuration and process boundaries", () => {
     };
     const app = childEnvironment(full, "runtime");
     expect(app.RESEND_API_KEY).toBe(env.RESEND_API_KEY);
+    expect(app.STRIPE_API_KEY).toBe(full.STRIPE_API_KEY);
     expect(app.STRIPE_TEST_API_KEY).toBe("");
     expect(app.RESEND_MANAGEMENT_API_KEY).toBe("");
     expect(app.CUSTOM_TOOL_CONFIG).toBe("tool-value");
     expect(app.XDG_CACHE_HOME).toBe("/normal-cache");
     const tests = childEnvironment(full, "integration-test");
     expect(tests.RESEND_API_KEY).toBe("");
+    expect(tests.STRIPE_API_KEY).toBe("");
     expect(tests.RESEND_WEBHOOK_SECRET).toBe("");
     expect(tests.RESEND_MANAGEMENT_API_KEY).toBe(env.RESEND_MANAGEMENT_API_KEY);
     const unit = childEnvironment(full, "unit-test");
     expect(unit.GOOGLE_APPLICATION_CREDENTIALS).toBe("");
+    expect(unit.STRIPE_API_KEY).toBe("");
     expect(unit.STRIPE_TEST_API_KEY).toBe("");
     expect(childEnvironment(full, "tools")).toMatchObject({
       PATH: "/bin",

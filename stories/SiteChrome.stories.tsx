@@ -26,7 +26,7 @@ export const Header: Story = {
         homeHref="#top"
         logo={<BrandLogo />}
         sections={sections}
-        signUpHref="https://checkout.stripe.dev/"
+        signUpFormId="subscription-checkout"
       />
     </div>
   ),

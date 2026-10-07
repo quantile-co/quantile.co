@@ -143,6 +143,45 @@ export function readStripePriceId(env: Environment) {
   return stripePriceIdSchema.parse(env.STRIPE_PRICE_ID);
 }
 
+// Only a visitor starting Checkout needs the API key. A build, homepage view or
+// incoming webhook never does. The key and selected Price must target one account.
+export function readCheckoutSettings(env: Environment) {
+  const { livemode, mode } = readStripeEventMode(env);
+  const key = z.string().min(1).parse(env.STRIPE_API_KEY);
+  if (
+    !key.startsWith(`rk_${mode}_`) &&
+    !(mode === "test" && key.startsWith("sk_test_"))
+  )
+    throw new Error("Checkout API key does not match Stripe mode.");
+  if (livemode && env.FIRESTORE_EMULATOR_HOST)
+    throw new Error("Live billing cannot use an emulator.");
+  const origin = z.string().url().parse(env.QUANTILE_SITE_ORIGIN);
+  const url = new URL(origin);
+  if (
+    (url.protocol !== "https:" &&
+      !(
+        url.protocol === "http:" &&
+        !livemode &&
+        ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
+      )) ||
+    url.username ||
+    url.password ||
+    url.pathname !== "/" ||
+    url.search ||
+    url.hash ||
+    url.origin !== origin
+  )
+    throw new Error("Invalid Checkout return origin.");
+  return {
+    key,
+    livemode,
+    mode,
+    origin,
+    priceId: readStripePriceId(env),
+    appInstance: readAppInstance(env),
+  };
+}
+
 export function readFirestoreTarget(env: Environment, mode: "test" | "live") {
   const emulatorHost = env.FIRESTORE_EMULATOR_HOST || undefined;
   if (mode === "live" && emulatorHost)
