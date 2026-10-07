@@ -29,11 +29,11 @@ const keys = [
 ] as const;
 const original = new Map<string, string | undefined>();
 
-function submit(from = origin) {
+function submit(from = origin, target = origin) {
   return POST(
-    new Request(`${origin}/api/stripe/checkout`, {
+    new Request(`${target}/api/stripe/checkout`, {
       method: "POST",
-      headers: { Origin: from },
+      headers: { Origin: from, Host: new URL(target).host },
     }),
   );
 }
@@ -109,6 +109,37 @@ describe("Checkout start", () => {
     expect(provider.create.mock.calls[1][0].metadata.quantile_test_id).not.toBe(
       metadata.quantile_test_id,
     );
+  });
+
+  it("accepts only same-port localhost aliases in local test mode", async () => {
+    const local = "http://localhost:3000";
+    expect((await submit(local, local)).status).toBe(303);
+    expect(provider.create.mock.calls[0][0].success_url).toBe(
+      `${origin}/?checkout=success`,
+    );
+    for (const [from, target] of [
+      ["http://localhost:3001", "http://localhost:3001"],
+      [local, origin],
+      ["http://attacker.example:3000", "http://attacker.example:3000"],
+      ["http://localhost:3000/", local],
+    ])
+      expect((await submit(from, target)).status).toBe(403);
+    expect(provider.create).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not allow local aliases in live mode or for a public test origin", async () => {
+    const local = "http://localhost:3000";
+    process.env.QUANTILE_SITE_ORIGIN = "https://example.com";
+    expect((await submit(local, local)).status).toBe(403);
+    Object.assign(process.env, {
+      QUANTILE_SITE_ORIGIN: "https://127.0.0.1:3000",
+      STRIPE_EVENT_LIVEMODE: "true",
+      STRIPE_API_KEY: "rk_live_fixture",
+    });
+    expect(
+      (await submit("https://localhost:3000", "https://localhost:3000")).status,
+    ).toBe(403);
+    expect(provider.init).not.toHaveBeenCalled();
   });
 
   it("refuses a foreign or missing Origin before calling Stripe", async () => {

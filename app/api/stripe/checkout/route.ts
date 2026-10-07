@@ -5,12 +5,40 @@ import { readCheckoutSettings, runtimeEnvironment } from "@/lib/env/env";
 
 export const runtime = "nodejs";
 
+function allowedOrigin(
+  request: Request,
+  configured: string,
+  livemode: boolean,
+) {
+  const actual = request.headers.get("origin");
+  if (actual === configured) return true;
+  if (!actual || livemode) return false;
+  try {
+    const expected = new URL(configured);
+    const received = new URL(actual);
+    const loopback = ["127.0.0.1", "localhost"];
+    // Browser form navigation can use either local hostname. This exception
+    // cannot apply to public origins or live billing, and never changes URLs.
+    return (
+      expected.protocol === "http:" &&
+      received.protocol === "http:" &&
+      loopback.includes(expected.hostname) &&
+      loopback.includes(received.hostname) &&
+      expected.port === received.port &&
+      received.origin === actual &&
+      received.host === request.headers.get("host")
+    );
+  } catch {
+    return false;
+  }
+}
+
 // A browser form posts here in every environment. GET cannot create billing
 // resources; neither the key nor the selected Price is sent to the client.
 export async function POST(request: Request) {
   try {
     const settings = readCheckoutSettings(runtimeEnvironment());
-    if (request.headers.get("origin") !== settings.origin)
+    if (!allowedOrigin(request, settings.origin, settings.livemode))
       return new Response("Forbidden", { status: 403 });
 
     const stripe = new Stripe(settings.key, {
