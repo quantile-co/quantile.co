@@ -56,7 +56,12 @@
 }
 
 .stepLink {
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: inherit;
+  cursor: pointer;
+  font: inherit;
   text-decoration: underline;
   text-decoration-color: var(--site-surface-outline);
   text-underline-offset: 0.15em;

@@ -20,7 +20,7 @@ type SiteHeaderProps = {
   homeHref: string;
   logo: ReactNode;
   sections: ReadonlyArray<{ href: string; label: string }>;
-  signUpHref: string;
+  signUpFormId: string;
 };
 
 export function SiteHeader({
@@ -28,7 +28,7 @@ export function SiteHeader({
   homeHref,
   logo,
   sections,
-  signUpHref,
+  signUpFormId,
 }: SiteHeaderProps) {
   const [opened, { toggle, close }] = useDisclosure(false);
 
@@ -67,9 +67,9 @@ export function SiteHeader({
             <Button
               autoContrast
               className={classes.navButton}
-              component="a"
-              href={signUpHref}
+              form={signUpFormId}
               size="xs"
+              type="submit"
               variant="filled"
             >
               Start building
@@ -132,11 +132,11 @@ export function SiteHeader({
               </Button>
               <Button
                 autoContrast
-                component="a"
                 data-site-cta="section"
-                href={signUpHref}
+                form={signUpFormId}
                 onClick={close}
                 size="md"
+                type="submit"
                 variant="filled"
               >
                 Start building

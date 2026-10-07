@@ -4,12 +4,12 @@ import classes from "./PricingSection.module.css";
 
 type PricingSectionProps = {
   mobileProof?: ReactNode;
-  signUpHref: string;
+  signUpFormId: string;
 };
 
 export function PricingSection({
   mobileProof,
-  signUpHref,
+  signUpFormId,
 }: PricingSectionProps) {
   return (
     <section className={classes.section}>
@@ -67,10 +67,10 @@ export function PricingSection({
             <Button
               autoContrast
               className={classes.action}
-              component="a"
               data-site-cta="hero"
-              href={signUpHref}
+              form={signUpFormId}
               size="xl"
+              type="submit"
               variant="filled"
             >
               Start building

@@ -9,10 +9,10 @@ import {
 import classes from "./FaqSection.module.css";
 
 type FaqSectionProps = {
-  signUpHref: string;
+  signUpFormId: string;
 };
 
-export function FaqSection({ signUpHref }: FaqSectionProps) {
+export function FaqSection({ signUpFormId }: FaqSectionProps) {
   const questions = [
     {
       value: "who-does-the-work",
@@ -274,9 +274,13 @@ export function FaqSection({ signUpHref }: FaqSectionProps) {
       answer: (
         <>
           <p>
-            <a className={classes.subscribeLink} href={signUpHref}>
+            <button
+              className={classes.subscribeLink}
+              form={signUpFormId}
+              type="submit"
+            >
               Subscribe
-            </a>{" "}
+            </button>{" "}
             whenever you're ready via Stripe. You will receive a welcome email
             with next steps for sharing access and assigning and prioritizing
             issues.

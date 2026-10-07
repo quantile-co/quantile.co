@@ -73,10 +73,10 @@ const categories = [
 ] as const;
 
 type BenefitsSectionProps = {
-  signUpHref: string;
+  signUpFormId: string;
 };
 
-export function BenefitsSection({ signUpHref }: BenefitsSectionProps) {
+export function BenefitsSection({ signUpFormId }: BenefitsSectionProps) {
   return (
     <div className={classes.group}>
       {categories.map((category) => (
@@ -103,9 +103,13 @@ export function BenefitsSection({ signUpHref }: BenefitsSectionProps) {
                 <p className={classes.description}>
                   {step.title === "Subscribe" ? (
                     <>
-                      <a className={classes.stepLink} href={signUpHref}>
+                      <button
+                        className={classes.stepLink}
+                        form={signUpFormId}
+                        type="submit"
+                      >
                         Subscribe
-                      </a>
+                      </button>
                       {step.description.slice(step.title.length)}
                     </>
                   ) : (

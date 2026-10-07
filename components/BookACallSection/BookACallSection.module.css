@@ -22,6 +22,28 @@
   text-wrap: balance;
 }
 
+.description {
+  max-width: 42rem;
+  margin: var(--mantine-spacing-md) auto 0;
+  color: var(--site-text-secondary);
+  font-size: clamp(1.125rem, 1.8vw, 1.375rem);
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* Calendly has its own top margin and inset; pull only the welcome variant
+   closer to its byline without changing the homepage's default spacing. */
+.calendarAfterDescription {
+  margin-top: -2.25rem;
+}
+
+@media (max-width: $mantine-breakpoint-xs) {
+  .calendarAfterDescription {
+    margin-top: 0;
+  }
+}
+
 .emailCard {
   position: relative;
   z-index: 3;

@@ -121,7 +121,12 @@
 }
 
 .subscribeLink {
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--site-text-primary);
+  cursor: pointer;
+  font: inherit;
   text-decoration: underline;
   text-underline-offset: 0.2em;
 
