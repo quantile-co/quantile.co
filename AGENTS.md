@@ -31,7 +31,6 @@ passing local tests or merging source does not authorize a deployment.
 | Public Check, Build, Plan and Apply workflows | `guides/workflows` | `"Quantile guide workflows"` |
 | Shared Firestore SDK, emulator and authentication boundaries | `guides/firestore` | `"Quantile guide firestore"` |
 | Welcome persistence, receipts, audit, races and recovery | `guides/welcome` | `"Quantile guide welcome"` |
-| Reusable Stripe catalog, modes, outputs and mocked validation | `guides/catalog` | `"Quantile guide catalog"` |
 
 ## Maintain the knowledge
 
