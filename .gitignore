@@ -1,7 +1,6 @@
 # OpenTofu
 .terraform/
 backend_override.tf
-/tf/quantile-co/.terraform.lock.hcl
 *.tfstate
 *.tfstate.*
 *.tfplan

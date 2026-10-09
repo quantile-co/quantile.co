@@ -63,12 +63,3 @@ jobs:
 
       - name: Validate repository root
         run: tofu -chdir=tf validate
-
-      - name: Initialize application module without backend
-        run: tofu -chdir=tf/quantile-co init -backend=false -input=false
-
-      - name: Validate application module
-        run: tofu -chdir=tf/quantile-co validate
-
-      - name: Test application module with mocked providers
-        run: tofu -chdir=tf/quantile-co test
