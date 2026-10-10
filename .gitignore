@@ -45,9 +45,16 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files (keep the secret-free direnv config versioned)
 .env*
+!.envrc
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Keep generated Pi session data local; review the dated historical import.
+/.pi/memory/SCRATCHPAD.md
+/.pi/memory/recovery/
+/.pi/memory/daily/*
+!/.pi/memory/daily/2026-10-07.md
