@@ -47,7 +47,7 @@ describe("provider-backed welcome completion", () => {
     const parsed = inputs.safeParse(process.env);
     if (!parsed.success)
       throw new Error(
-        `Invalid integration inputs: ${parsed.error.issues.map((issue) => issue.path.join(".")).join(", ")}. See AGENTS.md for the Engram development guide.`,
+        `Invalid integration inputs: ${parsed.error.issues.map((issue) => issue.path.join(".")).join(", ")}. See AGENTS.md and .pi/memory/MEMORY.md for current development guidance.`,
       );
     const env = parsed.data;
     const appInstance = env.QUANTILE_APP_INSTANCE;
@@ -200,7 +200,7 @@ describe("provider-backed welcome completion", () => {
       // never raw provider exceptions, request options or webhook secrets.
       failures.push(
         new Error(
-          `Integration failed during ${stage}, operation ${operation.id}. See AGENTS.md for the Engram development guide and safe investigation.`,
+          `Integration failed during ${stage}, operation ${operation.id}. See AGENTS.md and .pi/memory/MEMORY.md for current guidance and safe investigation.`,
         ),
       );
     } finally {
