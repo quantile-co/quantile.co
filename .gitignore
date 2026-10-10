@@ -53,6 +53,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Pi-managed local dependencies
+/.pi/npm/
+
 # Keep generated Pi session data local; review the dated historical import.
 /.pi/memory/SCRATCHPAD.md
 /.pi/memory/recovery/
