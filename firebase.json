@@ -34,7 +34,7 @@
         "headers": [
           {
             "key": "Content-Security-Policy",
-            "value": "default-src 'self'; base-uri 'self'; connect-src 'self' https://calendly.com https://*.calendly.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; frame-src https://calendly.com https://*.calendly.com; img-src 'self' data: blob:; object-src 'none'; script-src 'self' 'unsafe-inline' https://assets.calendly.com; style-src 'self' 'unsafe-inline' https://assets.calendly.com"
+            "value": "default-src 'self'; base-uri 'self'; connect-src 'self' https://calendly.com https://*.calendly.com; font-src 'self' data:; form-action 'self' https://checkout.stripe.com; frame-ancestors 'none'; frame-src https://calendly.com https://*.calendly.com; img-src 'self' data: blob:; object-src 'none'; script-src 'self' 'unsafe-inline' https://assets.calendly.com; style-src 'self' 'unsafe-inline' https://assets.calendly.com"
           },
           {
             "key": "Permissions-Policy",

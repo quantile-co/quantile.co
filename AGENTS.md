@@ -1,50 +1,34 @@
 # Project knowledge index
 
-Detailed project knowledge lives in **Engram**, under **`quantile-co:quantile.co`**
-(GitHub origin `quantile-co/quantile.co`). Main and linked worktrees share that
-project; the identity must not contain machine paths, usernames or branch names.
-Keep this file as the index. Do not recreate nested `AGENTS.md` files.
+This is **public** `quantile-co/quantile.co`. Verified checkout-specific
+knowledge lives in [MEMORY.md](.pi/memory/MEMORY.md), with the full former
+public guides preserved as explicitly historical entries in the plugin-native
+[daily log](.pi/memory/daily/2026-10-07.md). Never copy private Q1/DNS guidance
+here. Pi-memory injects only an excerpt; read the complete MEMORY.md and the
+affected source/tests before changes. Historical descriptions, especially of
+the old reusable Stripe catalog, are not current source or live-state proof.
 
-**README edits:** Ask for explicit approval before editing any README. Keep human
-docs succinct; put agent implementation knowledge in Engram, not READMEs.
-Preserve uncommitted work. Production/provider mutations require separate approval;
-passing local tests or merging source does not authorize a deployment.
+**README edits require explicit approval.** Preserve approved marketing copy.
+Keep this root index; do not recreate nested `AGENTS.md` files. Source and tests
+are authoritative, not historical guides or generated prompt excerpts.
 
-## Retrieve before changing code
+This checkout contains Next.js Checkout, signed Stripe/Resend webhook routes,
+Firestore-backed welcome logic and repo-owned Firebase configuration. Production
+provider credentials, test/live catalog identity and deployment topology have
+separate owners. No mocked or emulator Check proves real Checkout, webhook or
+email delivery. Do not put a Stripe test checkout or secrets on the live site.
 
-1. Start Pi from the checkout root. Confirm `.engram/config.json` and
-   `mem_current_project` select the project above; use it explicitly for memory
-   searches and saves. A renamed project may require a fresh Pi session.
-2. Read the repository guide plus the relevant topics below. Use `mem_search`
-   with the **quoted search phrase** and explicit `project`, select the matching
-   `topic_key`, then `mem_get_observation(id)` to read the full guide, not a preview.
-3. If Engram or a required guide is unavailable, surface the problem and restore
-   access before affected changes. Config files alone do not transfer the local
-   memory database to another machine. Do not guess the missing guidance.
+Public Check, manual immutable-source Build, protected-main Plan and exact Apply
+are distinct workflows. A source merge or passing Check does **not** authorize
+Build, Plan, Apply or provider-backed testing; require separate explicit review
+before each production phase. Keep WIF, state locks, provenance, and release
+immutability. Do not commit credentials, state, saved plans, customer payloads
+or live Checkout URLs.
 
-| Read for | Topic key | Search phrase |
-| --- | --- | --- |
-| Architecture, boundaries, layout and coding conventions | `guides/repository` | `"Quantile guide repository"` |
-| Provider routes, verification, eligibility and runtime wiring | `guides/webhooks` | `"Quantile guide webhooks"` |
-| Components, page/story composition, approved copy and visual checks | `guides/marketing` | `"Quantile guide marketing"` |
-| Local commands, configuration, integration ownership and cleanup | `guides/development` | `"Quantile guide development"` |
-| Public Check, Build, Plan and Apply workflows | `guides/workflows` | `"Quantile guide workflows"` |
-| Shared Firestore SDK, emulator and authentication boundaries | `guides/firestore` | `"Quantile guide firestore"` |
-| Welcome persistence, receipts, audit, races and recovery | `guides/welcome` | `"Quantile guide welcome"` |
-
-## Maintain the knowledge
-
-- Update the relevant stable topic, not a new duplicate or a nested guide file.
-  Keep this index synchronized with any added or renamed topics.
-- Imported guides preserve the full former file contents. Their old scoped-file
-  links/storage instructions are superseded by this index and Engram topic
-  `decisions/engram-knowledge-organization`; retain their technical constraints.
-- Source and tests are authoritative. The initial guide snapshot describes the
-  welcome feature at `26eab253` plus working-copy guide edits, not necessarily
-  `main`. Check the current checkout; distinguish decisions from history/proposals.
-- Record non-obvious invariants, failures and verification gaps; avoid transcripts
-  and duplicated code descriptions. Never store credentials, customer payloads or
-  raw provider errors in Git or memories. Keep knowledge owned by this repository.
+Update MEMORY.md only with branch-verified durable facts. The dated daily log
+contains full obsolete research and old nested-file instructions for history,
+not an active runbook. Review memory changes before Git publication; ignore
+unreviewed generated session logs, scratchpad and recovery data.
 
 Human setup: [README.md](README.md). Full local validation: `pnpm check`.
 
