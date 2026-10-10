@@ -113,16 +113,26 @@ describe("Checkout start", () => {
     );
   });
 
-  it("allows the hosted Checkout redirect under the production form policy", async () => {
-    const redirectOrigin = new URL(
-      (await submit()).headers.get("Location") ?? "",
-    ).origin;
+  it("allows both Stripe-hosted Checkout domains under the production form policy", async () => {
     const policy = firebaseConfig.hosting.headers
       .find((entry) => entry.source === "**")
       ?.headers.find(
         (header) => header.key === "Content-Security-Policy",
       )?.value;
-    expect(policy).toContain(`form-action 'self' ${redirectOrigin};`);
+    expect(policy).toContain(
+      "form-action 'self' https://checkout.stripe.com https://billing.quantile.co;",
+    );
+    for (const domain of ["checkout.stripe.com", "billing.quantile.co"]) {
+      provider.create.mockResolvedValueOnce({
+        livemode: false,
+        url: `https://${domain}/c/pay/cs_test_fixture`,
+      });
+      const response = await submit();
+      expect(response.status).toBe(303);
+      expect(new URL(response.headers.get("Location") ?? "").origin).toBe(
+        `https://${domain}`,
+      );
+    }
   });
 
   it("accepts only same-port localhost aliases in local test mode", async () => {
@@ -193,11 +203,15 @@ describe("Checkout start", () => {
     });
     expect((await submit()).status).toBe(503);
     expect(provider.create).not.toHaveBeenCalled();
-    provider.create.mockResolvedValueOnce({
-      livemode: false,
-      url: "https://checkout.example.com/other",
-    });
-    expect((await submit()).status).toBe(503);
+    for (const url of [
+      "https://checkout.example.com/other",
+      "https://billing.quantile.co.attacker.example/c/pay/cs_test_fixture",
+      "http://billing.quantile.co/c/pay/cs_test_fixture",
+      "https://billing.quantile.co:8443/c/pay/cs_test_fixture",
+    ]) {
+      provider.create.mockResolvedValueOnce({ livemode: false, url });
+      expect((await submit()).status).toBe(503);
+    }
   });
 
   it("in live mode uses a restricted live key and sends no test operation metadata", async () => {
