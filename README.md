@@ -23,6 +23,7 @@
 
 - [Node.js](https://nodejs.org) 22
 - [pnpm](https://pnpm.io)
+- [Java JDK](https://adoptium.net) 21 or later (for the Firestore emulator)
 
 ## Local Development
 
