@@ -108,7 +108,10 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
         const checkoutUrl = response.headers().location;
         if (
           !checkoutUrl ||
-          new URL(checkoutUrl).origin !== "https://checkout.stripe.com"
+          ![
+            "https://checkout.stripe.com",
+            "https://billing.quantile.co",
+          ].includes(new URL(checkoutUrl).origin)
         )
           throw new Error("Unexpected Checkout redirect.");
         const id = new URL(checkoutUrl).pathname.split("/").at(-1);
@@ -137,8 +140,11 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
         };
         assertTestOwnership(session, operation);
         stage = "hosted Checkout redirect";
-        await page.waitForURL(
-          (url) => url.origin === "https://checkout.stripe.com",
+        await page.waitForURL((url) =>
+          [
+            "https://checkout.stripe.com",
+            "https://billing.quantile.co",
+          ].includes(url.origin),
         );
         stage = "hosted email input";
         await page.locator("#email").fill(operation.recipient);

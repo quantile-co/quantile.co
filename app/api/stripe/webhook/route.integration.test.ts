@@ -93,7 +93,10 @@ describe("provider-backed welcome completion", () => {
       if (
         !session.url ||
         session.livemode ||
-        new URL(session.url).hostname !== "checkout.stripe.com"
+        ![
+          "https://checkout.stripe.com",
+          "https://billing.quantile.co",
+        ].includes(new URL(session.url).origin)
       )
         throw new Error("Expected a test Checkout URL.");
       stage = "test checkout payment";

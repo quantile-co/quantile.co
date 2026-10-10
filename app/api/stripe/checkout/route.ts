@@ -5,6 +5,13 @@ import { readCheckoutSettings, runtimeEnvironment } from "@/lib/env/env";
 
 export const runtime = "nodejs";
 
+// Stripe can switch to the custom hosted domain once DNS is verified. Keep
+// both hosts valid so Checkout works before and after activation.
+const hostedCheckoutOrigins = new Set([
+  "https://checkout.stripe.com",
+  "https://billing.quantile.co",
+]);
+
 function allowedOrigin(
   request: Request,
   configured: string,
@@ -87,7 +94,7 @@ export async function POST(request: Request) {
     if (
       !session.url ||
       session.livemode !== settings.livemode ||
-      new URL(session.url).origin !== "https://checkout.stripe.com"
+      !hostedCheckoutOrigins.has(new URL(session.url).origin)
     )
       throw new Error("Unexpected Checkout Session.");
     return new Response(null, {
