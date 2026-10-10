@@ -96,6 +96,7 @@ describe("Checkout start", () => {
       success_url: `${origin}/welcome`,
       cancel_url: `${origin}/#pricing`,
     });
+    expect(params).not.toHaveProperty("payment_method_types");
     const metadata = params.subscription_data.metadata;
     expect(metadata).toEqual(params.metadata);
     expect(metadata).toMatchObject({

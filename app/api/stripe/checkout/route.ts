@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     const session = await stripe.checkout.sessions.create(
       {
         mode: "subscription",
-        payment_method_types: ["card"],
+        // Stripe selects eligible methods enabled in the Dashboard.
         line_items: [
           {
             price: settings.priceId,
