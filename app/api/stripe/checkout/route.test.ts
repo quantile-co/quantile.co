@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import firebaseConfig from "../../../../firebase.json";
 
 const provider = vi.hoisted(() => ({
   init: vi.fn(),
@@ -109,6 +110,18 @@ describe("Checkout start", () => {
     expect(provider.create.mock.calls[1][0].metadata.quantile_test_id).not.toBe(
       metadata.quantile_test_id,
     );
+  });
+
+  it("allows the hosted Checkout redirect under the production form policy", async () => {
+    const redirectOrigin = new URL(
+      (await submit()).headers.get("Location") ?? "",
+    ).origin;
+    const policy = firebaseConfig.hosting.headers
+      .find((entry) => entry.source === "**")
+      ?.headers.find(
+        (header) => header.key === "Content-Security-Policy",
+      )?.value;
+    expect(policy).toContain(`form-action 'self' ${redirectOrigin};`);
   });
 
   it("accepts only same-port localhost aliases in local test mode", async () => {
