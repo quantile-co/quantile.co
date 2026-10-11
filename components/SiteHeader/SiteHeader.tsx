@@ -16,12 +16,13 @@ import type { ReactNode } from "react";
 import classes from "./SiteHeader.module.css";
 
 type SiteHeaderProps = {
-  bookCallHref: string;
   homeHref: string;
   logo: ReactNode;
   sections: ReadonlyArray<{ href: string; label: string }>;
-  signUpFormId: string;
-};
+} & (
+  | { bookCallHref: string; signUpFormId: string }
+  | { bookCallHref?: never; signUpFormId?: never }
+);
 
 export function SiteHeader({
   bookCallHref,
@@ -31,6 +32,7 @@ export function SiteHeader({
   signUpFormId,
 }: SiteHeaderProps) {
   const [opened, { toggle, close }] = useDisclosure(false);
+  const showActions = bookCallHref !== undefined && signUpFormId !== undefined;
 
   const items = sections.map((section) => (
     <a
@@ -54,27 +56,29 @@ export function SiteHeader({
           <nav aria-label="Primary">
             <Group gap={4}>{items}</Group>
           </nav>
-          <Group gap="xs">
-            <Button
-              className={classes.navButton}
-              component="a"
-              href={bookCallHref}
-              size="xs"
-              variant="outline"
-            >
-              Book a call
-            </Button>
-            <Button
-              autoContrast
-              className={classes.navButton}
-              form={signUpFormId}
-              size="xs"
-              type="submit"
-              variant="filled"
-            >
-              Start building
-            </Button>
-          </Group>
+          {showActions && (
+            <Group gap="xs">
+              <Button
+                className={classes.navButton}
+                component="a"
+                href={bookCallHref}
+                size="xs"
+                variant="outline"
+              >
+                Book a call
+              </Button>
+              <Button
+                autoContrast
+                className={classes.navButton}
+                form={signUpFormId}
+                size="xs"
+                type="submit"
+                variant="filled"
+              >
+                Start building
+              </Button>
+            </Group>
+          )}
         </Group>
 
         <Group gap="xs" hiddenFrom="lg">
@@ -119,29 +123,31 @@ export function SiteHeader({
             <nav aria-label="Primary" className={classes.mobileNav}>
               {items}
             </nav>
-            <Stack className={classes.mobileActions} gap="sm">
-              <Button
-                component="a"
-                data-site-cta="section"
-                href={bookCallHref}
-                onClick={close}
-                size="md"
-                variant="outline"
-              >
-                Book a call
-              </Button>
-              <Button
-                autoContrast
-                data-site-cta="section"
-                form={signUpFormId}
-                onClick={close}
-                size="md"
-                type="submit"
-                variant="filled"
-              >
-                Start building
-              </Button>
-            </Stack>
+            {showActions && (
+              <Stack className={classes.mobileActions} gap="sm">
+                <Button
+                  component="a"
+                  data-site-cta="section"
+                  href={bookCallHref}
+                  onClick={close}
+                  size="md"
+                  variant="outline"
+                >
+                  Book a call
+                </Button>
+                <Button
+                  autoContrast
+                  data-site-cta="section"
+                  form={signUpFormId}
+                  onClick={close}
+                  size="md"
+                  type="submit"
+                  variant="filled"
+                >
+                  Start building
+                </Button>
+              </Stack>
+            )}
           </div>
         </ScrollArea>
       </Drawer>

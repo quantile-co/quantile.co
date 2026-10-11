@@ -235,7 +235,9 @@ describe("Next.js Stripe route", () => {
     });
     const record = [...store.records.values()][0];
     expect(JSON.parse(record.request).to).toEqual([recipient]);
-    expect(JSON.parse(record.request).html).toContain("Welcome to Quantile");
+    expect(JSON.parse(record.request).html).toContain(
+      "Thank you for subscribing!",
+    );
     expect(record.state).toBe("accepted");
     expect(fetch).toHaveBeenCalledWith(
       "https://api.resend.com/emails",
@@ -342,9 +344,9 @@ describe("welcome email eligibility and completion", () => {
     const record = [...store.records.values()][0];
     const mail = JSON.parse(record.request);
     expect(mail.to).toEqual([recipient]);
-    expect(mail.subject).toBe("[Test] Welcome to Quantile");
+    expect(mail.subject).toBe("[Test] Thank you for subscribing!");
     expect(mail.text.replace(/\s+/g, " ")).toContain(
-      `${quantity} concurrent in-progress`,
+      `${quantity} ${quantity === 1 ? "issue is" : "issues are"} marked in progress at a time`,
     );
     expect(mail.reply_to).toBe(config.replyTo);
     expect(record).toMatchObject({
