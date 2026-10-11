@@ -314,15 +314,19 @@ export function FaqSection({
 
   return (
     <section
+      aria-label={variant === "welcome" ? "FAQ" : undefined}
       className={
         variant === "welcome"
           ? `${classes.section} ${classes.welcome}`
           : classes.section
       }
+      id={variant === "welcome" ? "faq" : undefined}
     >
-      <Title className={classes.label} data-section-anchor id="faq" order={2}>
-        FAQ
-      </Title>
+      {variant === "home" && (
+        <Title className={classes.label} data-section-anchor id="faq" order={2}>
+          FAQ
+        </Title>
+      )}
 
       <Container className={classes.wrapper} data-section-content size="xl">
         <div className={classes.accordionGrid}>

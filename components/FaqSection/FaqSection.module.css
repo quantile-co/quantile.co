@@ -5,7 +5,8 @@
 }
 
 .section.welcome {
-  padding-top: calc(var(--section-padding-block) * 0.5);
+  padding-top: 0;
+  margin-top: calc(-1 * var(--mantine-spacing-md));
 }
 
 .label {
@@ -24,10 +25,6 @@
   text-wrap: balance;
 }
 
-.welcome .label {
-  text-align: center;
-}
-
 .wrapper {
   position: relative;
   z-index: 2;
@@ -39,6 +36,11 @@
     (var(--section-padding-block) * 1.25) - var(--mantine-spacing-sm)
   );
   padding-left: var(--site-page-padding);
+}
+
+.welcome .wrapper {
+  max-width: calc(60rem + (2 * var(--site-page-padding)));
+  padding-top: 0;
 }
 
 .accordionGrid {

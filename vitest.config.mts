@@ -34,6 +34,7 @@ export default defineConfig({
       },
       {
         extends: true,
+        optimizeDeps: { include: ["react-dom/server", "react-email"] },
         plugins: [
           storybookTest({ configDir: path.join(dirname, ".storybook") }),
         ],

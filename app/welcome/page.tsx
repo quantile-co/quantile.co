@@ -9,10 +9,13 @@ import { SkipLink } from "@/components/SkipLink/SkipLink";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
 import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 
-const primarySections = [
-  { href: "/#benefits", label: "Benefits" },
-  { href: "/#pricing", label: "Pricing" },
+const footerSections = [
+  { href: "#book-a-call", label: "Book a call" },
   { href: "#faq", label: "FAQ" },
+] as const;
+const headerSections = [
+  ...footerSections,
+  { href: billingPortalLoginUrl, label: "Billing" },
 ] as const;
 
 export const metadata: Metadata = {
@@ -26,27 +29,22 @@ export default function WelcomePage() {
   return (
     <div>
       <SkipLink href="#main-content">Skip to content</SkipLink>
-      <SiteHeader
-        bookCallHref="#book-a-call"
-        homeHref="/"
-        logo={<BrandLogo />}
-        sections={primarySections}
-        signUpFormId="subscription-checkout"
-      />
+      <SiteHeader homeHref="/" logo={<BrandLogo />} sections={headerSections} />
       <main id="main-content" tabIndex={-1}>
         <BookACallSection
           calendar={<CalendlyEmbed />}
           description={
             <>
-              Keep an eye out for your welcome email with next steps. You can
-              also schedule an intro call below,{" "}
+              I&apos;m looking forward to working with you and your team. Keep
+              an eye out for your welcome email with next steps. You can also
+              schedule an intro call below,{" "}
               <a href="mailto:aj@quantile.co">get in touch by email</a>, read
               the <a href="#faq">FAQ</a>, or manage your subscription via the{" "}
               <a href={billingPortalLoginUrl}>billing portal</a>.
             </>
           }
           headingLevel={1}
-          title="Thanks for subscribing!"
+          title="Thank you for subscribing!"
         />
         <FaqSection
           billingPortalLoginUrl={billingPortalLoginUrl}
@@ -57,7 +55,7 @@ export default function WelcomePage() {
         billingPortalLoginUrl={billingPortalLoginUrl}
         homeHref="/"
         logo={<BrandLogo />}
-        sections={primarySections}
+        sections={footerSections}
         themeSwitcher={<ThemeSwitcher />}
       />
     </div>
