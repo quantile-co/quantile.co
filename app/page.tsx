@@ -11,6 +11,7 @@ import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
 import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
+import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 
 const checkoutFormId = "subscription-checkout";
 const primarySections = [
@@ -50,9 +51,13 @@ export default function Home() {
           signUpFormId={checkoutFormId}
         />
         <SocialProofSection hideOnMobile />
-        <FaqSection signUpFormId={checkoutFormId} />
+        <FaqSection
+          billingPortalLoginUrl={billingPortalLoginUrl}
+          signUpFormId={checkoutFormId}
+        />
       </main>
       <SiteFooter
+        billingPortalLoginUrl={billingPortalLoginUrl}
         callToAction={<BookACallSection calendar={<CalendlyEmbed />} />}
         homeHref="#top"
         logo={<BrandLogo />}

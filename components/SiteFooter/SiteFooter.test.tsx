@@ -12,6 +12,7 @@ describe("Site footer billing link", () => {
     const html = renderToStaticMarkup(
       <MantineProvider>
         <SiteFooter
+          billingPortalLoginUrl={liveLoginUrl}
           homeHref="/"
           logo="Quantile"
           sections={sections}

@@ -2,11 +2,8 @@ import { Container, Group, Text } from "@mantine/core";
 import type { ReactNode } from "react";
 import classes from "./SiteFooter.module.css";
 
-// Stripe's shareable LIVE email login, not a customer-specific Portal session.
-const billingPortalLoginUrl =
-  "https://billing.stripe.com/p/login/bJeeVe3TIaVO9ODfkn6AM00";
-
 type SiteFooterProps = {
+  billingPortalLoginUrl: string;
   callToAction?: ReactNode;
   homeHref: string;
   logo: ReactNode;
@@ -15,6 +12,7 @@ type SiteFooterProps = {
 };
 
 export function SiteFooter({
+  billingPortalLoginUrl,
   callToAction,
   homeHref,
   logo,
