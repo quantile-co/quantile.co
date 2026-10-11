@@ -4,6 +4,10 @@
   padding-top: calc(var(--section-padding-block) * 2);
 }
 
+.section.welcome {
+  padding-top: calc(var(--section-padding-block) * 0.5);
+}
+
 .label {
   position: relative;
   z-index: 2;
@@ -18,6 +22,10 @@
   line-height: 1;
   text-align: left;
   text-wrap: balance;
+}
+
+.welcome .label {
+  text-align: center;
 }
 
 .wrapper {

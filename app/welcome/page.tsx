@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
 import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
 import { CalendlyEmbed } from "@/components/CalendlyEmbed/CalendlyEmbed";
+import { FaqSection } from "@/components/FaqSection/FaqSection";
 import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
@@ -11,7 +12,7 @@ import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 const primarySections = [
   { href: "/#benefits", label: "Benefits" },
   { href: "/#pricing", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "#faq", label: "FAQ" },
 ] as const;
 
 export const metadata: Metadata = {
@@ -36,10 +37,20 @@ export default function WelcomePage() {
         <BookACallSection
           calendar={<CalendlyEmbed />}
           description={
-            "Keep an eye out for a welcome email with next steps, or feel free to book an intro call below."
+            <>
+              Keep an eye out for your welcome email with next steps. You can
+              also schedule an intro call below,{" "}
+              <a href="mailto:aj@quantile.co">get in touch by email</a>, read
+              the <a href="#faq">FAQ</a>, or manage your subscription via the{" "}
+              <a href={billingPortalLoginUrl}>billing portal</a>.
+            </>
           }
           headingLevel={1}
-          title="Thanks for subscribing."
+          title="Thanks for subscribing!"
+        />
+        <FaqSection
+          billingPortalLoginUrl={billingPortalLoginUrl}
+          variant="welcome"
         />
       </main>
       <SiteFooter

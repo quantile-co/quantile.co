@@ -8,14 +8,15 @@ import {
 } from "@mantine/core";
 import classes from "./FaqSection.module.css";
 
-type FaqSectionProps = {
-  billingPortalLoginUrl: string;
-  signUpFormId: string;
-};
+type FaqSectionProps = { billingPortalLoginUrl: string } & (
+  | { variant?: "home"; signUpFormId: string }
+  | { variant: "welcome"; signUpFormId?: never }
+);
 
 export function FaqSection({
   billingPortalLoginUrl,
   signUpFormId,
+  variant = "home",
 }: FaqSectionProps) {
   const questions = [
     {
@@ -282,28 +283,43 @@ export function FaqSection({
     {
       value: "getting-started",
       question: "How do I get started?",
-      answer: (
-        <>
-          <p>
-            <button
-              className={classes.subscribeLink}
-              form={signUpFormId}
-              type="submit"
-            >
-              Subscribe
-            </button>{" "}
-            whenever you're ready via Stripe. You will receive a welcome email
-            with next steps for sharing access and assigning and prioritizing
-            issues.
-          </p>
-          <p>If you'd prefer to talk first, book a free intro call below.</p>
-        </>
-      ),
+      answer:
+        variant === "home" ? (
+          <>
+            <p>
+              <button
+                className={classes.subscribeLink}
+                form={signUpFormId}
+                type="submit"
+              >
+                Subscribe
+              </button>{" "}
+              whenever you're ready via Stripe. You will receive a welcome email
+              with next steps for sharing access and assigning and prioritizing
+              issues.
+            </p>
+            <p>If you'd prefer to talk first, book a free intro call below.</p>
+          </>
+        ) : (
+          <>
+            <p>
+              Check your welcome email for next steps for sharing access and
+              assigning and prioritizing issues.
+            </p>
+            <p>If you'd like to talk, book a free intro call above.</p>
+          </>
+        ),
     },
   ];
 
   return (
-    <section className={classes.section}>
+    <section
+      className={
+        variant === "welcome"
+          ? `${classes.section} ${classes.welcome}`
+          : classes.section
+      }
+    >
       <Title className={classes.label} data-section-anchor id="faq" order={2}>
         FAQ
       </Title>
