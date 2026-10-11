@@ -32,6 +32,16 @@
   text-wrap: balance;
 }
 
+.description a {
+  color: var(--site-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+
+  @mixin hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
 /* Calendly has its own top margin and inset; pull only the welcome variant
    closer to its byline without changing the homepage's default spacing. */
 .calendarAfterDescription {

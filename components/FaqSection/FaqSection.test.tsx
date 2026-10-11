@@ -20,8 +20,12 @@ describe("FAQ billing portal links", () => {
     expect(html.match(new RegExp(`href="${liveLoginUrl}"`, "g"))).toHaveLength(
       2,
     );
+    expect(html).not.toMatch(/<section class="[^"]*welcome[^"]*"/);
     expect(html).toContain("How do I scale up or down?");
     expect(html).toContain("How do I pause or cancel?");
+    expect(html).toContain('form="subscribe"');
+    expect(html).toContain("book a free intro call below");
+    expect(html).not.toContain("Check your welcome email for next steps");
     expect(html).not.toContain("through Stripe");
     expect(html).not.toContain("/p/session/");
   });
