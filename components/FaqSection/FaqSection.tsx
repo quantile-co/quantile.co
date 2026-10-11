@@ -9,10 +9,14 @@ import {
 import classes from "./FaqSection.module.css";
 
 type FaqSectionProps = {
+  billingPortalLoginUrl: string;
   signUpFormId: string;
 };
 
-export function FaqSection({ signUpFormId }: FaqSectionProps) {
+export function FaqSection({
+  billingPortalLoginUrl,
+  signUpFormId,
+}: FaqSectionProps) {
   const questions = [
     {
       value: "who-does-the-work",
@@ -49,8 +53,11 @@ export function FaqSection({ signUpFormId }: FaqSectionProps) {
       answer: (
         <>
           <p>
-            Adjust the number of in-progress issues on your subscription through
-            Stripe.
+            Adjust the number of in-progress issues on your subscription in the{" "}
+            <a className={classes.portalLink} href={billingPortalLoginUrl}>
+              billing portal
+            </a>
+            .
           </p>
           <p>
             Upgrades take effect immediately, with a prorated charge for the
@@ -239,8 +246,12 @@ export function FaqSection({ signUpFormId }: FaqSectionProps) {
       answer: (
         <>
           <p>
-            Manage your subscription through Stripe. Pausing banks your
-            remaining subscription time for when you return.
+            Pause or cancel your subscription in the{" "}
+            <a className={classes.portalLink} href={billingPortalLoginUrl}>
+              billing portal
+            </a>
+            . Pausing banks your remaining subscription time for when you
+            return.
           </p>
           <p>
             Canceling stops renewal. Your subscription stays active until the
@@ -304,6 +315,7 @@ export function FaqSection({ signUpFormId }: FaqSectionProps) {
               <Accordion
                 className={classes.accordion}
                 key={columnIndex === 0 ? "first-column" : "second-column"}
+                keepMountedMode="display-none"
                 order={3}
                 variant="default"
               >

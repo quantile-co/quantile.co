@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
+import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 
 const primarySections = [
   { href: "/#benefits", label: "Benefits" },
@@ -42,6 +43,7 @@ export default function WelcomePage() {
         />
       </main>
       <SiteFooter
+        billingPortalLoginUrl={billingPortalLoginUrl}
         homeHref="/"
         logo={<BrandLogo />}
         sections={primarySections}

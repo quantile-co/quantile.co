@@ -120,6 +120,16 @@
   color: var(--site-text-primary);
 }
 
+.portalLink {
+  color: var(--site-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+
+  @mixin hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
 .subscribeLink {
   padding: 0;
   border: 0;

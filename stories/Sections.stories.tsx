@@ -8,6 +8,7 @@ import { HeroAnimation } from "@/components/HeroAnimation/HeroAnimation";
 import { HeroSection } from "@/components/HeroSection/HeroSection";
 import { PricingSection } from "@/components/PricingSection/PricingSection";
 import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
+import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 
 const checkoutFormId = "subscription-checkout";
 
@@ -54,7 +55,12 @@ export const SocialProof: Story = {
 };
 
 export const Faq: Story = {
-  render: () => <FaqSection signUpFormId={checkoutFormId} />,
+  render: () => (
+    <FaqSection
+      billingPortalLoginUrl={billingPortalLoginUrl}
+      signUpFormId={checkoutFormId}
+    />
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const questions = canvas.getAllByRole("button");
