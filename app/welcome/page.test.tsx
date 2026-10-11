@@ -53,7 +53,7 @@ describe("Welcome return page", () => {
     expect(html).not.toContain("book a free intro call below");
   });
 
-  it("shows only FAQ and Billing in the header and footer navigation", () => {
+  it("shows Book a call, FAQ, and Billing in the header and footer navigation", () => {
     const html = render();
     const header = html.slice(
       html.indexOf("<header"),
@@ -61,11 +61,16 @@ describe("Welcome return page", () => {
     );
     const footer = html.slice(html.indexOf("<footer"));
     for (const region of [header, footer]) {
-      expect(region).toContain('href="#faq">FAQ</a>');
-      expect(region).toContain(`href="${billingPortalLoginUrl}">Billing</a>`);
+      const bookCall = region.indexOf('href="#book-a-call">Book a call</a>');
+      const faq = region.indexOf('href="#faq">FAQ</a>');
+      const billing = region.indexOf(
+        `href="${billingPortalLoginUrl}">Billing</a>`,
+      );
+      expect(bookCall).toBeGreaterThan(-1);
+      expect(bookCall).toBeLessThan(faq);
+      expect(faq).toBeLessThan(billing);
       expect(region).not.toContain("Benefits");
       expect(region).not.toContain("Pricing");
-      expect(region).not.toContain("Book a call");
       expect(region).not.toContain("Start building");
     }
     expect(html).toContain("Quantile LLC");

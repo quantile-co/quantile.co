@@ -9,7 +9,10 @@ import { SkipLink } from "@/components/SkipLink/SkipLink";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
 import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 
-const footerSections = [{ href: "#faq", label: "FAQ" }] as const;
+const footerSections = [
+  { href: "#book-a-call", label: "Book a call" },
+  { href: "#faq", label: "FAQ" },
+] as const;
 const headerSections = [
   ...footerSections,
   { href: billingPortalLoginUrl, label: "Billing" },
