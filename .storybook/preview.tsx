@@ -3,7 +3,7 @@ import "../app/globals.css";
 import { MantineProvider } from "@mantine/core";
 import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import type { Preview } from "@storybook/nextjs-vite";
-import { theme } from "../theme";
+import { theme } from "../app/theme";
 
 const viewports = {
   mobile: {

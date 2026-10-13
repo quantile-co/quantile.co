@@ -301,12 +301,10 @@
 }
 
 .fileIcon {
-  width: 0.4375rem;
-  height: 0.5625rem;
+  width: 0.75rem;
+  height: 0.75rem;
   flex: 0 0 auto;
-  border: 1px solid var(--site-text-secondary);
-  border-radius: 1px;
-  opacity: 0.7;
+  color: var(--site-text-secondary);
 }
 
 .fileName {
@@ -467,9 +465,14 @@
   }
 }
 
-@container (max-width: 21rem) {
-  .fileIcon,
+@container (max-width: 30rem) {
   .changeCount {
+    display: none;
+  }
+}
+
+@container (max-width: 21rem) {
+  .fileIcon {
     display: none;
   }
 }

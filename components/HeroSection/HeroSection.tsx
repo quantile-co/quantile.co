@@ -1,5 +1,5 @@
 import { Button, Container, Text, Title } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import classes from "./HeroSection.module.css";
 
 type HeroSectionProps = {
@@ -7,9 +7,8 @@ type HeroSectionProps = {
   description?: string;
   eyebrow?: string;
   id?: string;
-  compactDescription?: string;
   order?: 1 | 2;
-  signUpFormId: string;
+  CheckoutForm: ComponentType<{ children: ReactNode }>;
   title: string;
   titleSize?: "hero" | "section";
   visual?: ReactNode;
@@ -17,12 +16,11 @@ type HeroSectionProps = {
 
 export function HeroSection({
   children,
-  compactDescription,
   description,
   eyebrow,
   id,
   order = 1,
-  signUpFormId,
+  CheckoutForm,
   title,
   titleSize = "hero",
   visual,
@@ -63,22 +61,12 @@ export function HeroSection({
             </Title>
 
             {description ? (
-              <>
-                <Text
-                  c="dimmed"
-                  className={`${classes.description} ${descriptionSizeClass} ${compactDescription ? classes.defaultDescription : ""}`}
-                >
-                  {description}
-                </Text>
-                {compactDescription ? (
-                  <Text
-                    c="dimmed"
-                    className={`${classes.description} ${classes.heroDescription} ${classes.compactDescription}`}
-                  >
-                    {compactDescription}
-                  </Text>
-                ) : null}
-              </>
+              <Text
+                c="dimmed"
+                className={`${classes.description} ${descriptionSizeClass}`}
+              >
+                {description}
+              </Text>
             ) : null}
 
             {children}
@@ -93,16 +81,17 @@ export function HeroSection({
               >
                 Book a call
               </Button>
-              <Button
-                autoContrast
-                data-site-cta={ctaScale}
-                form={signUpFormId}
-                size={ctaSize}
-                type="submit"
-                variant="filled"
-              >
-                Start building
-              </Button>
+              <CheckoutForm>
+                <Button
+                  autoContrast
+                  data-site-cta={ctaScale}
+                  size={ctaSize}
+                  type="submit"
+                  variant="filled"
+                >
+                  Start building
+                </Button>
+              </CheckoutForm>
             </div>
           </div>
           {visual ? <div className={classes.visual}>{visual}</div> : null}

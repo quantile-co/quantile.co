@@ -5,6 +5,7 @@ import {
   BrandAssetsSection,
 } from "@/components/BrandAssetsSection/BrandAssetsSection";
 import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
+import { CheckoutAction } from "@/components/CheckoutForm/CheckoutForm";
 import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
@@ -14,19 +15,23 @@ import classes from "./page.module.css";
 
 const brandDescription =
   "Download the Quantile logo, wordmark, and social banners.";
-const checkoutFormId = "subscription-checkout";
+const brandTitle = "Quantile brand assets";
 const primarySections = [
   { href: "/#benefits", label: "Benefits" },
   { href: "/#pricing", label: "Pricing" },
   { href: "/#faq", label: "FAQ" },
 ] as const;
+const headerCheckoutActions = {
+  desktop: <CheckoutAction size="xs" />,
+  mobile: <CheckoutAction size="md" siteCta="section" />,
+};
 
 export const metadata: Metadata = {
-  title: "Quantile brand assets",
+  title: brandTitle,
   description: brandDescription,
   alternates: { canonical: "/brand" },
   openGraph: {
-    title: "Quantile brand assets",
+    title: brandTitle,
     description: brandDescription,
     siteName: "Quantile",
     type: "website",
@@ -34,7 +39,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Quantile brand assets",
+    title: brandTitle,
     description: brandDescription,
   },
 };
@@ -191,7 +196,7 @@ export default function BrandPage() {
         homeHref="/"
         logo={<BrandLogo />}
         sections={primarySections}
-        signUpFormId={checkoutFormId}
+        checkoutActions={headerCheckoutActions}
       />
       <main className={classes.main} id="main-content" tabIndex={-1}>
         <Container className={classes.container} size="xl">

@@ -25,10 +25,14 @@ before each production phase. Keep WIF, state locks, provenance, and release
 immutability. Do not commit credentials, state, saved plans, customer payloads
 or live Checkout URLs.
 
-Update MEMORY.md only with branch-verified durable facts. The dated daily log
-contains full obsolete research and old nested-file instructions for history,
-not an active runbook. Review memory changes before Git publication; ignore
-unreviewed generated session logs, scratchpad and recovery data.
+Update MEMORY.md only with branch-verified durable public project facts. Never
+store personal preferences, local machine/network details, credentials, or raw
+session transcripts in this repository's memory. Use memory outside this public
+checkout for unrelated topics. The dated daily log contains full obsolete
+research and old nested-file instructions for history, not an active runbook.
+Auto handoffs can still append session context; daily logs are not Git-ignored.
+Review and sanitize each daily log and memory change before staging or sharing;
+keep scratchpad and recovery data local and ignored.
 
 Human setup: [README.md](README.md). Full local validation: `pnpm check`.
 

@@ -115,7 +115,9 @@ function startTests(
     [
       path.join(root, "node_modules/vitest/vitest.mjs"),
       `--project=${project}`,
-      ...(project === "unit" ? ["--project=storybook"] : []),
+      ...(project === "unit"
+        ? ["--project=storybook", "--project=browser"]
+        : []),
       "--run",
     ],
     {

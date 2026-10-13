@@ -1,5 +1,6 @@
 import { IconArrowRight } from "@tabler/icons-react";
 import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
+import { CheckoutAction } from "@/components/CheckoutForm/CheckoutForm";
 import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
@@ -12,6 +13,10 @@ const sections = [
   { href: "/#pricing", label: "Pricing" },
   { href: "/#faq", label: "FAQ" },
 ] as const;
+const headerCheckoutActions = {
+  desktop: <CheckoutAction size="xs" />,
+  mobile: <CheckoutAction size="md" siteCta="section" />,
+};
 
 export default function NotFound() {
   return (
@@ -22,7 +27,7 @@ export default function NotFound() {
         homeHref="/"
         logo={<BrandLogo />}
         sections={sections}
-        signUpFormId="subscription-checkout"
+        checkoutActions={headerCheckoutActions}
       />
       <main className={classes.main} id="main-content" tabIndex={-1}>
         <div className={classes.content}>

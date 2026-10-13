@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { ReactNode } from "react";
 import { expect, userEvent, within } from "storybook/test";
 import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
 import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
@@ -10,7 +11,15 @@ import { PricingSection } from "@/components/PricingSection/PricingSection";
 import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
 import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 
-const checkoutFormId = "subscription-checkout";
+const previewCheckoutAction = "/storybook-checkout-preview";
+
+function PreviewCheckoutForm({ children }: { children: ReactNode }) {
+  return (
+    <form action={previewCheckoutAction} method="post">
+      {children}
+    </form>
+  );
+}
 
 const meta = {
   title: "Sections",
@@ -22,28 +31,23 @@ type Story = StoryObj<typeof meta>;
 export const Hero: Story = {
   render: () => (
     <HeroSection
-      compactDescription={
-        "Fast, flexible, senior data engineering capacity without expensive hires or agency headaches."
-      }
-      description={
-        "Fast, flexible, senior data engineering capacity\nwithout expensive hires or agency headaches."
-      }
-      signUpFormId={checkoutFormId}
-      title={"Fractional\ndata engineering."}
+      description="Fast, flexible, senior data + AI engineering capacity without expensive hires or agency headaches."
+      CheckoutForm={PreviewCheckoutForm}
+      title={"Fractional data\nand AI engineering"}
       visual={<HeroAnimation />}
     />
   ),
 };
 
 export const Benefits: Story = {
-  render: () => <BenefitsSection signUpFormId={checkoutFormId} />,
+  render: () => <BenefitsSection CheckoutForm={PreviewCheckoutForm} />,
 };
 
 export const Pricing: Story = {
   render: () => (
     <PricingSection
       mobileProof={<SocialProofSection embedded />}
-      signUpFormId={checkoutFormId}
+      CheckoutForm={PreviewCheckoutForm}
     />
   ),
 };
@@ -58,7 +62,7 @@ export const Faq: Story = {
   render: () => (
     <FaqSection
       billingPortalLoginUrl={billingPortalLoginUrl}
-      signUpFormId={checkoutFormId}
+      CheckoutForm={PreviewCheckoutForm}
     />
   ),
   play: async ({ canvasElement }) => {
@@ -88,9 +92,11 @@ export const Faq: Story = {
       name: "How do I get started?",
     });
     await userEvent.click(gettingStarted);
-    await expect(
-      await canvas.findByRole("button", { name: "Subscribe" }),
-    ).toHaveAttribute("form", checkoutFormId);
+    const subscribe = await canvas.findByRole("button", { name: "Subscribe" });
+    await expect(subscribe.closest("form")).toHaveAttribute(
+      "action",
+      previewCheckoutAction,
+    );
 
     // Leave the story collapsed for normal browsing and screenshots.
     await userEvent.click(scope);

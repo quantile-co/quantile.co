@@ -56,8 +56,6 @@ next-env.d.ts
 # Pi-managed local dependencies
 /.pi/npm/
 
-# Keep generated Pi session data local; review the dated historical import.
+# Review daily memory logs before staging; keep scratchpad and recovery local.
 /.pi/memory/SCRATCHPAD.md
 /.pi/memory/recovery/
-/.pi/memory/daily/*
-!/.pi/memory/daily/2026-10-07.md

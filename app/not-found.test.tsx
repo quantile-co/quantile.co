@@ -30,7 +30,9 @@ describe("Not found page", () => {
     expect(html).toContain('href="#main-content"');
     expect(html).toContain('id="main-content"');
     expect(header).toContain('href="/#book-a-call"');
-    expect(header).toContain('form="subscription-checkout"');
+    expect(header).toContain(
+      '<form action="/api/stripe/checkout" method="post">',
+    );
     for (const region of [header, footer]) {
       for (const section of ["benefits", "pricing", "faq"]) {
         expect(region).toContain(`href="/#${section}"`);
