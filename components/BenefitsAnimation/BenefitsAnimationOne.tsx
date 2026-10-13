@@ -50,7 +50,7 @@ const issues = [
   { number: "#1941", title: "Handle late-arriving events" },
   { number: "#2176", title: "Pin deployment images to immutable digests" },
 ] as const;
-const duration = 12;
+const duration = 12.49;
 
 export function BenefitsAnimationOne() {
   const [scope, animate] = useAnimate<HTMLDivElement>();
@@ -98,7 +98,7 @@ export function BenefitsAnimationOne() {
       const show = (
         selector: string,
         at: number,
-        until = 11.1,
+        until = 11.64,
         enter = 0.14,
       ) => {
         track(selector, { opacity: [0, 0, 1, 1, 0, 0] }, [
@@ -115,42 +115,149 @@ export function BenefitsAnimationOne() {
           0,
           at,
           at + 0.14,
-          11.1,
-          11.3,
+          11.64,
+          11.84,
           duration,
         ]);
         show(after, at);
+      };
+      const highlight = (selector: string, from: number, until: number) => {
+        // A visual cue within the aria-hidden illustration, not DOM focus.
+        track(
+          selector,
+          {
+            outlineColor: [
+              "transparent",
+              "transparent",
+              "var(--onboarding-focus-outline)",
+              "var(--onboarding-focus-outline)",
+              "transparent",
+              "transparent",
+            ],
+          },
+          [0, from, from + 0.18, until, until + 0.18, duration],
+        );
+      };
+      const fill = (field: string, from: number, to: number) => {
+        track(
+          `[data-fill="${field}"]`,
+          {
+            clipPath: [
+              "inset(0 100% 0 0)",
+              "inset(0 100% 0 0)",
+              "inset(0 0% 0 0)",
+              "inset(0 0% 0 0)",
+              "inset(0 100% 0 0)",
+              "inset(0 100% 0 0)",
+            ],
+          },
+          [0, from, to, 11.64, 11.84, duration],
+          "linear",
+        );
       };
 
       // The surfaces never travel or stack. The story is told by payment,
       // permission connections, and a direct backlog reorder.
       track('[data-panel="checkout"]', { opacity: [1, 1, 0, 0, 1, 1] }, [
         0,
-        1.7,
-        1.94,
-        11.25,
-        11.77,
+        3.75,
+        3.99,
+        11.79,
+        12.29,
         duration,
       ]);
-      show('[data-panel="access"]', 1.85, 5.45, 0.52);
-      show('[data-panel="backlog"]', 5.6, 11.1, 0.52);
+      show('[data-panel="access"]', 3.9, 8.15, 0.52);
+      show('[data-panel="backlog"]', 8.25, 11.64, 0.45);
+
+      // The capacity choice gets its own beat before any payment details.
+      // These are illustrative values, never a real Checkout form.
+      highlight("[data-quantity-control]", 0.1, 1.1);
+      highlight("[data-payment-method]", 1.28, 2.55);
+      highlight("[data-subscribe]", 2.7, 3.53);
+      track(
+        "[data-quantity-control]",
+        {
+          transform: [
+            "translateY(0px) scale(1)",
+            "translateY(0px) scale(1)",
+            "translateY(0.5px) scale(0.97)",
+            "translateY(-0.5px) scale(1.01)",
+            "translateY(0px) scale(1)",
+            "translateY(0px) scale(1)",
+          ],
+          boxShadow: [
+            "0 0.375rem 1rem rgb(9 9 11 / 2%)",
+            "0 0.375rem 1rem rgb(9 9 11 / 2%)",
+            "0 0 0 rgb(9 9 11 / 0%)",
+            "0 0.5rem 1.25rem rgb(9 9 11 / 3%)",
+            "0 0.375rem 1rem rgb(9 9 11 / 2%)",
+            "0 0.375rem 1rem rgb(9 9 11 / 2%)",
+          ],
+        },
+        [0, 0.3, 0.55, 0.8, 1.1, duration],
+      );
+      track(
+        "[data-quantity-plus]",
+        {
+          transform: [
+            "scale(1)",
+            "scale(1)",
+            "translateY(1px) scale(0.78)",
+            "scale(1.3)",
+            "scale(1)",
+            "scale(1)",
+          ],
+        },
+        [0, 0.3, 0.55, 0.8, 1.1, duration],
+      );
+      swap("[data-quantity-zero]", "[data-quantity-one]", 0.8);
+      track(
+        "[data-quantity-one]",
+        {
+          transform: [
+            "translateY(4px)",
+            "translateY(4px)",
+            "translateY(0px)",
+            "translateY(0px)",
+            "translateY(4px)",
+            "translateY(4px)",
+          ],
+        },
+        [0, 0.8, 1.01, 11.64, 11.84, duration],
+      );
+      // Masked placeholders fill in sequence within fixed-width slots.
+      fill("holder", 1.47, 1.7);
+      fill("number", 1.74, 2.13);
+      fill("expiry", 2.17, 2.34);
+      fill("cvv", 2.38, 2.55);
 
       track(
         "[data-subscribe]",
         {
           transform: [
-            "scale(1)",
-            "scale(1)",
-            "scale(0.98)",
-            "scale(1)",
-            "scale(1)",
+            "translateY(0px) scale(1)",
+            "translateY(0px) scale(1)",
+            "translateY(0.75px) scale(0.965)",
+            "translateY(-0.4px) scale(1.015)",
+            "translateY(0px) scale(1)",
+            "translateY(0px) scale(1)",
+          ],
+          boxShadow: [
+            "0 0.375rem 1rem rgb(9 9 11 / 2%)",
+            "0 0.375rem 1rem rgb(9 9 11 / 2%)",
+            "0 0 0 rgb(9 9 11 / 0%)",
+            "0 0.75rem 1.5rem rgb(9 9 11 / 5%)",
+            "0 0.375rem 1rem rgb(9 9 11 / 2%)",
+            "0 0.375rem 1rem rgb(9 9 11 / 2%)",
           ],
         },
-        [0, 0.7, 0.84, 1.04, duration],
+        [0, 3, 3.14, 3.26, 3.42, duration],
       );
-      swap("[data-subscribe-label]", "[data-subscribed-label]", 1.1);
+      swap("[data-subscribe-label]", "[data-subscribed-label]", 3.4);
       tools.forEach((_, index) => {
-        const at = 2.3 + index * 0.45;
+        // Bounce, send the highlight, and finish the check before the next
+        // card starts. The 0.72s spacing leaves a gap after the 0.69s check.
+        const at = 4.35 + index * 0.72;
         const selector = `[data-connection="${index}"]`;
         const path = element.querySelector<SVGPathElement>(selector);
         if (!path) return;
@@ -166,26 +273,53 @@ export function BenefitsAnimationOne() {
             strokeDasharray: [dash, dash, dash, dash, dash, dash],
             strokeDashoffset: [-length, -length, beam, beam, -length, -length],
           },
-          [0, at, at + 0.65, 11.1, 11.3, duration],
+          [0, at + 0.25, at + 0.55, 11.64, 11.84, duration],
           "linear",
         );
-        show(`[data-access-check="${index}"]`, at + 0.65);
+        show(`[data-access-check="${index}"]`, at);
         track(
-          `[data-tool-icon="${index}"]`,
+          `[data-tool-card="${index}"]`,
+          {
+            borderColor: [
+              "var(--site-divider-color)",
+              "var(--site-divider-color)",
+              "var(--site-surface-outline)",
+              "var(--site-surface-outline)",
+              "var(--site-divider-color)",
+              "var(--site-divider-color)",
+            ],
+          },
+          [0, at, at + 0.14, 8.15, 8.35, duration],
+        );
+        track(
+          `[data-tool-card="${index}"]`,
           {
             transform: [
               "translateY(0px) scale(1)",
               "translateY(0px) scale(1)",
-              "translateY(-2px) scale(1.12)",
+              "translateY(-3px) scale(1.05)",
               "translateY(0px) scale(1)",
               "translateY(0px) scale(1)",
             ],
           },
-          [0, at + 0.65, at + 0.79, at + 0.99, duration],
+          [0, at, at + 0.1, at + 0.24, duration],
         );
       });
+      track(
+        "[data-aj-hub]",
+        {
+          transform: [
+            "scale(1)",
+            "scale(1)",
+            "scale(1.08)",
+            "scale(1)",
+            "scale(1)",
+          ],
+        },
+        [0, 7.25, 7.39, 7.62, duration],
+      );
 
-      swap("[data-priority-normal]", "[data-priority-high]", 6.45);
+      swap("[data-priority-normal]", "[data-priority-high]", 8.95);
       track(
         '[data-issue="0"]',
         {
@@ -196,7 +330,7 @@ export function BenefitsAnimationOne() {
             "translateY(100%)",
           ],
         },
-        [0, 6.7, 7.22, duration],
+        [0, 9.2, 9.65, duration],
       );
       track(
         '[data-issue="1"]',
@@ -208,25 +342,25 @@ export function BenefitsAnimationOne() {
             "translateY(-100%)",
           ],
         },
-        [0, 6.7, 7.22, duration],
+        [0, 9.2, 9.65, duration],
       );
-      show("[data-assignee]", 7.7);
+      show("[data-assignee]", 10);
       track(
         "[data-assignee]",
         { transform: ["scale(0.65)", "scale(0.65)", "scale(1)", "scale(1)"] },
-        [0, 7.7, 7.84, duration],
+        [0, 10, 10.14, duration],
       );
-      swap("[data-status-todo]", "[data-status-progress]", 8.1);
+      swap("[data-status-todo]", "[data-status-progress]", 10.35);
       track("[data-backlog-prioritize]", { opacity: [1, 1, 0, 0, 1, 1] }, [
         0,
-        7.3,
-        7.44,
-        11.1,
-        11.3,
+        9.8,
+        9.94,
+        11.64,
+        11.84,
         duration,
       ]);
-      show("[data-backlog-assign]", 7.3, 8.1);
-      show("[data-backlog-progress]", 8.1);
+      show("[data-backlog-assign]", 9.8, 10.35);
+      show("[data-backlog-progress]", 10.35);
       sync();
     };
 
@@ -274,29 +408,38 @@ export function BenefitsAnimationOne() {
               </div>
               <div className={classes.capacity}>
                 <span>Concurrent issues</span>
-                <span className={classes.quantity}>
+                <span className={classes.quantity} data-quantity-control>
                   <IconMinus />
-                  <strong>1</strong>
-                  <IconPlus />
+                  <span className={classes.quantityValue}>
+                    <strong data-quantity-zero data-before>
+                      0
+                    </strong>
+                    <strong data-quantity-one>1</strong>
+                  </span>
+                  <IconPlus data-quantity-plus />
                 </span>
               </div>
-              <div className={classes.paymentMethod}>
+              <div className={classes.paymentMethod} data-payment-method>
                 <IconCreditCard />
                 <div className={classes.cardHolder} data-card-field="holder">
                   <span className={classes.fieldLabel}>Cardholder</span>
-                  <span data-card-name>•••••• ••••••••</span>
+                  <span data-card-name data-fill="holder">
+                    •••••• ••••••••
+                  </span>
                 </div>
                 <div data-card-field="number">
                   <span className={classes.fieldLabel}>Card number</span>
-                  <span data-card-number>•••• •••• •••• ••••</span>
+                  <span data-card-number data-fill="number">
+                    •••• •••• •••• ••••
+                  </span>
                 </div>
                 <div data-card-field="expiry">
                   <span className={classes.fieldLabel}>Expiry</span>
-                  <span>•• / ••</span>
+                  <span data-fill="expiry">•• / ••</span>
                 </div>
                 <div data-card-field="cvv">
                   <span className={classes.fieldLabel}>CVV</span>
-                  <span>•••</span>
+                  <span data-fill="cvv">•••</span>
                 </div>
               </div>
             </div>
@@ -353,12 +496,12 @@ export function BenefitsAnimationOne() {
             ))}
           </svg>
           <div className={classes.accessHub}>
-            <span className={shared.avatar} data-aj />
+            <span className={shared.avatar} data-aj data-aj-hub />
           </div>
           <div className={classes.tools}>
             {tools.map(({ name, icon: Icon }, index) => (
               <div className={classes.accessRow} key={name}>
-                <div className={classes.tool}>
+                <div className={classes.tool} data-tool-card={index}>
                   <div className={classes.toolHeading}>
                     <Icon data-tool-icon={index} />
                     <strong>{name}</strong>

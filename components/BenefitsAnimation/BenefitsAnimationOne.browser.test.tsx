@@ -121,26 +121,30 @@ describe("BenefitsAnimationOne", () => {
     const illustratedSubscribe = getComputedStyle(
       getElement("[data-subscribe]", one),
     );
-    expect(illustratedSubscribe.backgroundImage).toBe(
-      getComputedStyle(
-        getElement('[class*="toolHeading"]', one).parentElement as HTMLElement,
-      ).backgroundImage,
-    );
     expect(illustratedSubscribe.color).toBe(getComputedStyle(one).color);
-    const paymentStyle = getComputedStyle(
+    const counterpartStyle = getComputedStyle(
+      getElement("[data-current]", two),
+    );
+    const stripeShadow = getComputedStyle(
+      getElement("[data-subscribe]", one),
+    ).boxShadow;
+    for (const surface of [
       getElement('[class*="paymentMethod"]', one),
-    );
-    const issueStyle = getComputedStyle(
+      getElement("[data-subscribe]", one),
       getElement('[class*="issueCard"]', one),
-    );
-    for (const property of [
-      "backgroundColor",
-      "backgroundImage",
-      "borderColor",
-      "borderRadius",
-    ] as const) {
-      expect(paymentStyle[property]).toBe(issueStyle[property]);
+      getElement("[data-quantity-control]", one),
+      ...one.querySelectorAll<HTMLElement>('[class*="accessRow"] > div'),
+    ]) {
+      const style = getComputedStyle(surface);
+      expect(style.backgroundColor).toBe(counterpartStyle.backgroundColor);
+      expect(style.backgroundImage).toBe(counterpartStyle.backgroundImage);
+      expect(style.boxShadow).toBe(
+        surface.closest('[class*="accessRow"]')
+          ? counterpartStyle.boxShadow
+          : stripeShadow,
+      );
     }
+    expect(stripeShadow).not.toBe(counterpartStyle.boxShadow);
     expect(
       container.querySelectorAll("[data-benefits-animation]"),
     ).toHaveLength(2);
@@ -277,9 +281,8 @@ describe("BenefitsAnimationOne", () => {
         number.scrollWidth,
         `card number at ${width}px`,
       ).toBeLessThanOrEqual(number.clientWidth);
-      expect(getElement('[class*="quantity"] strong', one).textContent).toBe(
-        "1",
-      );
+      expect(getElement("[data-quantity-one]", one).textContent).toBe("1");
+      expect(getElement("[data-quantity-zero]", one).textContent).toBe("0");
       expect(
         getElement('[class*="backlogAction"]', one).getBoundingClientRect()
           .right,
@@ -328,6 +331,106 @@ describe("BenefitsAnimationOne", () => {
 
   it.each([
     320, 768, 1440,
+  ])("fills the illustrated quantity and masked fields before subscribing at %ipx", async (width) => {
+    await page.viewport(width, 1000);
+    await mount();
+    reduceMotion(false);
+    const fields = ["holder", "number", "expiry", "cvv"];
+    const hidden = (field: string) =>
+      Number.parseFloat(
+        getComputedStyle(getElement(`[data-fill="${field}"]`)).clipPath.split(
+          " ",
+        )[1],
+      );
+    const payment = getElement('[class*="paymentMethod"]');
+    const bounds = payment.getBoundingClientRect();
+    const quantity = getElement("[data-quantity-control]");
+    const quantityBounds = quantity.getBoundingClientRect();
+    const quantityBorder = getComputedStyle(quantity).borderColor;
+    const outlined = (selector: string) => {
+      const color = getComputedStyle(getElement(selector)).outlineColor;
+      return !color.endsWith(", 0)") && !color.endsWith("/ 0)");
+    };
+    await seek(0.03);
+    for (const field of fields) expect(hidden(field)).toBe(100);
+    expect(opacity("[data-quantity-zero]")).toBe(1);
+    expect(opacity("[data-quantity-one]")).toBe(0);
+    await seek(0.28);
+    expect(outlined("[data-quantity-control]")).toBe(true);
+    expect(
+      new DOMMatrixReadOnly(getComputedStyle(quantity).transform).m11,
+    ).toBe(1);
+    expect(outlined("[data-payment-method]")).toBe(false);
+    await seek(0.55);
+    expect(
+      new DOMMatrixReadOnly(
+        getComputedStyle(getElement("[data-quantity-plus]")).transform,
+      ).m11,
+    ).toBeCloseTo(0.78, 2);
+    expect(
+      new DOMMatrixReadOnly(getComputedStyle(quantity).transform).m11,
+    ).toBeCloseTo(0.97, 2);
+    expect(getComputedStyle(quantity).borderColor).toBe(quantityBorder);
+    expect(quantity.getBoundingClientRect().width).toBeLessThan(
+      quantityBounds.width,
+    );
+    expect(opacity("[data-quantity-one]")).toBe(0);
+    await seek(0.8);
+    expect(
+      new DOMMatrixReadOnly(getComputedStyle(quantity).transform).m11,
+    ).toBeCloseTo(1.01, 2);
+    await seek(1);
+    expect(opacity("[data-quantity-zero]")).toBe(0);
+    expect(opacity("[data-quantity-one]")).toBe(1);
+    expect(hidden("holder")).toBe(100);
+    await seek(1.1);
+    expect(
+      new DOMMatrixReadOnly(getComputedStyle(quantity).transform).m11,
+    ).toBe(1);
+    expect(outlined("[data-quantity-control]")).toBe(true);
+    expect(outlined("[data-payment-method]")).toBe(false);
+    await seek(1.46);
+    expect(outlined("[data-quantity-control]")).toBe(false);
+    expect(outlined("[data-payment-method]")).toBe(true);
+    expect(hidden("holder")).toBe(100);
+    await seek(1.585);
+    expect(hidden("holder")).toBeCloseTo(50, 0);
+    expect(hidden("number")).toBe(100);
+    await seek(1.935);
+    expect(hidden("number")).toBeCloseTo(50, 0);
+    expect(hidden("expiry")).toBe(100);
+    await seek(2.255);
+    expect(hidden("expiry")).toBeCloseTo(50, 0);
+    expect(hidden("cvv")).toBe(100);
+    await seek(2.465);
+    expect(hidden("cvv")).toBeCloseTo(50, 0);
+    await seek(2.8);
+    for (const field of fields) expect(hidden(field)).toBe(0);
+    expect(opacity("[data-subscribe-label]")).toBe(1);
+    expect(opacity("[data-subscribed-label]")).toBe(0);
+    expect(payment.getBoundingClientRect()).toEqual(bounds);
+    expect(quantity.getBoundingClientRect()).toEqual(quantityBounds);
+    await seek(2.92);
+    expect(outlined("[data-subscribe]")).toBe(true);
+    expect(
+      new DOMMatrixReadOnly(
+        getComputedStyle(getElement("[data-subscribe]")).transform,
+      ).m11,
+    ).toBe(1);
+    await seek(3.73);
+    expect(opacity("[data-subscribed-label]")).toBe(1);
+    expect(outlined("[data-subscribe]")).toBe(false);
+    await seek(12.64);
+    for (const field of fields) expect(hidden(field)).toBe(100);
+    expect(opacity("[data-quantity-zero]")).toBe(1);
+    expect(opacity("[data-quantity-one]")).toBe(0);
+    expect(opacity("[data-subscribe-label]")).toBe(1);
+    expect(payment.getBoundingClientRect()).toEqual(bounds);
+    expect(quantity.getBoundingClientRect()).toEqual(quantityBounds);
+  });
+
+  it.each([
+    320, 768, 1440,
   ])("plays the same subscription, access, and assignment sequence at %ipx", async (width) => {
     await page.viewport(width, 1000);
     await mount();
@@ -336,29 +439,64 @@ describe("BenefitsAnimationOne", () => {
     await seek(0.5);
     expect(opacity('[data-panel="checkout"]')).toBe(1);
     expect(opacity("[data-subscribe-label]")).toBe(1);
-    await seek(0.84);
+    await seek(3.14);
     expect(
       new DOMMatrixReadOnly(
         getComputedStyle(getElement("[data-subscribe]")).transform,
       ).m11,
-    ).toBeCloseTo(0.98, 2);
-    await seek(1.4);
+    ).toBeCloseTo(0.965, 3);
+    const pressedShadow = getComputedStyle(
+      getElement("[data-subscribe]"),
+    ).boxShadow;
+    expect(pressedShadow).not.toBe(
+      getComputedStyle(getElement('[class*="issueCard"]')).boxShadow,
+    );
+    await seek(3.26);
+    expect(
+      new DOMMatrixReadOnly(
+        getComputedStyle(getElement("[data-subscribe]")).transform,
+      ).m11,
+    ).toBeCloseTo(1.015, 3);
+    for (const selector of [
+      scene(),
+      getElement('[data-panel="checkout"]'),
+      getElement('[class*="checkoutBody"]'),
+    ]) {
+      expect(getComputedStyle(selector).overflow).toBe("visible");
+    }
+    await seek(3.7);
     expect(opacity("[data-subscribed-label]")).toBe(1);
     expect(opacity("[data-subscribe-label]")).toBe(0);
-    await seek(2.4);
+    await seek(4.5);
     expect(opacity('[data-panel="access"]')).toBe(1);
     expect(scene().querySelector('[data-panel="email"]')).toBeNull();
-    await seek(3.11);
-    expect(opacity('[data-panel="access"]')).toBe(1);
+    await seek(4.45);
     expect(opacity('[data-panel="checkout"]')).toBe(0);
+    expect(opacity('[data-access-check="0"]')).toBeGreaterThan(0);
+    expect(opacity('[data-access-check="0"]')).toBeLessThan(1);
+    expect(
+      new DOMMatrixReadOnly(
+        getComputedStyle(getElement('[data-tool-card="0"]')).transform,
+      ).m11,
+    ).toBeGreaterThan(1.04);
+    await seek(5.17);
+    expect(opacity('[data-panel="access"]')).toBe(1);
     expect(opacity('[data-access-check="0"]')).toBe(1);
     expect(opacity('[data-access-check="3"]')).toBe(0);
     expect(
       new DOMMatrixReadOnly(
-        getComputedStyle(getElement('[data-tool-icon="0"]')).transform,
+        getComputedStyle(getElement('[data-tool-card="1"]')).transform,
       ).m11,
-    ).toBeGreaterThan(1.05);
-    await seek(4.9);
+    ).toBeGreaterThan(1.04);
+    expect(getComputedStyle(getElement('[data-tool-icon="1"]')).transform).toBe(
+      "none",
+    );
+    await seek(7.39);
+    expect(
+      new DOMMatrixReadOnly(
+        getComputedStyle(getElement("[data-aj-hub]")).transform,
+      ).m11,
+    ).toBeGreaterThan(1.07);
     for (let index = 0; index < 4; index++) {
       expect(opacity(`[data-access-check="${index}"]`)).toBe(1);
       expect(
@@ -375,25 +513,36 @@ describe("BenefitsAnimationOne", () => {
         2,
       );
     }
-    await seek(6.3);
+    await seek(8.1);
+    expect(opacity('[data-panel="access"]')).toBe(1);
+    expect(
+      new DOMMatrixReadOnly(
+        getComputedStyle(getElement("[data-aj-hub]")).transform,
+      ).m11,
+    ).toBe(1);
+    expect(opacity('[data-panel="backlog"]')).toBe(0);
+    await seek(8.8);
     expect(opacity('[data-panel="backlog"]')).toBe(1);
     const first = getElement('[data-issue="0"]');
     const promoted = getElement('[data-issue="1"]');
     expect(promoted.getBoundingClientRect().top).toBeGreaterThan(
       first.getBoundingClientRect().top,
     );
-    await seek(7.35);
+    await seek(9.75);
     expect(promoted.getBoundingClientRect().bottom).toBeCloseTo(
       first.getBoundingClientRect().top,
       0,
     );
     expect(opacity("[data-priority-high]")).toBe(1);
-    await seek(8.6);
+    await seek(10.75);
     expect(opacity("[data-assignee]")).toBe(1);
     expect(opacity("[data-status-progress]")).toBe(1);
     expect(opacity("[data-status-todo]")).toBe(0);
     expect(opacity("[data-backlog-progress]")).toBe(1);
-    await seek(12.5);
+    await seek(11.6);
+    expect(opacity('[data-panel="backlog"]')).toBe(1);
+    expect(opacity("[data-status-progress]")).toBe(1);
+    await seek(12.69);
     expect(opacity('[data-panel="checkout"]')).toBe(1);
     expect(opacity("[data-subscribe-label]")).toBe(1);
     expect(opacity('[data-panel="backlog"]')).toBe(0);
@@ -415,7 +564,7 @@ describe("BenefitsAnimationOne", () => {
     const width = getElement("[data-onboarding-area]").getBoundingClientRect()
       .width;
     const samples: number[] = [];
-    for (const time of [6.93, 6.96, 6.99]) {
+    for (const time of [9.39, 9.42, 9.45]) {
       await seek(time);
       const displacement = new DOMMatrixReadOnly(
         getComputedStyle(promoted).transform,
@@ -433,18 +582,41 @@ describe("BenefitsAnimationOne", () => {
   });
 
   it.each([
-    320, 768, 1440,
-  ])("sends one highlight from each system to AJ without screen-space dash repetition at %ipx", async (width) => {
+    [320, "light"],
+    [768, "light"],
+    [1440, "light"],
+    [320, "dark"],
+    [1440, "dark"],
+  ] as const)("sends one highlight from each system to AJ without screen-space dash repetition at %ipx in %s mode", async (width, colorScheme) => {
     await page.viewport(width, 1000);
-    await mount();
+    await mount(false, colorScheme);
     reduceMotion(false);
+    await seek(0.28);
+    const focusColor = getComputedStyle(
+      getElement("[data-quantity-control]"),
+    ).outlineColor;
+    // WAAPI serializes the animated outline in OKLab, while the SVG stroke
+    // serializes the same color-mix in sRGB. Compare rendered colors instead.
+    const pixels = (color: string) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 1;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Missing canvas context");
+      context.fillStyle = color;
+      context.fillRect(0, 0, 1, 1);
+      return Array.from(context.getImageData(0, 0, 1, 1).data);
+    };
+    const focusPixels = pixels(focusColor);
     for (let index = 0; index < 4; index++) {
-      const at = 2.3 + index * 0.45;
-      const arrival = at + 0.65;
+      const at = 4.35 + index * 0.72;
+      const arrival = at + 0.55;
       const maskPath = getElement(
         `[data-connection="${index}"]`,
       ) as unknown as SVGPathElement;
       const signal = getElement(`[data-connection-signal="${index}"]`);
+      const card = getElement(`[data-tool-card="${index}"]`);
+      const icon = getElement(`[data-tool-icon="${index}"]`);
+      const check = getElement(`[data-access-check="${index}"]`);
       const length = maskPath.getTotalLength();
       const beam = length * 0.28;
       const offset = () =>
@@ -454,11 +626,37 @@ describe("BenefitsAnimationOne", () => {
       expect(getComputedStyle(maskPath).vectorEffect).toBe("none");
       expect(getComputedStyle(signal).vectorEffect).toBe("non-scaling-stroke");
       expect(getComputedStyle(signal).strokeDasharray).toBe("none");
+      pixels(getComputedStyle(signal).stroke).forEach((channel, index) => {
+        expect(Math.abs(channel - focusPixels[index])).toBeLessThanOrEqual(1);
+      });
+      expect(
+        getComputedStyle(getElement(`[class*="connectionTrack"]`)).opacity,
+      ).toBe("0.18");
       expect(signal.getAttribute("mask")).toBe(
         `url(#${maskPath.parentElement?.id})`,
       );
-      expect(getComputedStyle(signal).opacity).toBe("0.65");
+      expect(getComputedStyle(signal).opacity).toBe("1");
+      if (index > 0) {
+        await seek(at - 0.62);
+        expect(opacity(`[data-access-check="${index - 1}"]`)).toBeGreaterThan(
+          0,
+        );
+        expect(opacity(`[data-access-check="${index - 1}"]`)).toBeLessThan(1);
+        expect(
+          new DOMMatrixReadOnly(getComputedStyle(card).transform).m11,
+        ).toBe(1);
+      }
       await seek(at);
+      if (index > 0) {
+        expect(opacity(`[data-access-check="${index - 1}"]`)).toBe(1);
+        const previousPath = getElement(
+          `[data-connection="${index - 1}"]`,
+        ) as unknown as SVGPathElement;
+        expect(
+          Number.parseFloat(getComputedStyle(previousPath).strokeDashoffset),
+        ).toBeCloseTo(previousPath.getTotalLength() * 0.28, 2);
+      }
+      const initialBorder = getComputedStyle(card).borderTopColor;
       expect(offset()).toBeCloseTo(-length, 3);
       const [dash, gap] = getComputedStyle(maskPath)
         .strokeDasharray.split(/[, ]+/)
@@ -466,18 +664,56 @@ describe("BenefitsAnimationOne", () => {
       expect(dash).toBeCloseTo(beam, 3);
       expect(gap).toBeCloseTo(length + beam, 3);
       expect(maskPath.getAttribute("d")).toMatch(/Q.*V.*Q/);
-      await seek(at + 0.325);
+      await seek(at + 0.1);
+      expect(offset()).toBeCloseTo(-length, 3);
+      expect(opacity(`[data-access-check="${index}"]`)).toBeGreaterThan(0);
+      expect(opacity(`[data-access-check="${index}"]`)).toBeLessThan(1);
+      expect(getComputedStyle(card).borderTopColor).not.toBe(initialBorder);
+      expect(
+        new DOMMatrixReadOnly(getComputedStyle(card).transform).m11,
+      ).toBeGreaterThan(1.04);
+      expect(getComputedStyle(icon).transform).toBe("none");
+      await seek(at + 0.24);
+      expect(opacity(`[data-access-check="${index}"]`)).toBe(1);
+      expect(offset()).toBeCloseTo(-length, 3);
+      await seek(at + 0.4);
       expect(offset()).toBeCloseTo((beam - length) / 2, 2);
-      expect(opacity(`[data-access-check="${index}"]`)).toBe(0);
+      expect(opacity(`[data-access-check="${index}"]`)).toBe(1);
       await seek(arrival + 0.15);
       expect(offset()).toBeCloseTo(beam, 2);
       expect(opacity(`[data-access-check="${index}"]`)).toBe(1);
-      expect(
-        new DOMMatrixReadOnly(
-          getComputedStyle(getElement(`[data-tool-icon="${index}"]`)).transform,
-        ).m11,
-      ).toBeGreaterThan(1.1);
+      expect(getComputedStyle(check).color).toBe(getComputedStyle(icon).color);
+      expect(getComputedStyle(card).borderTopColor).not.toBe(initialBorder);
+      expect(new DOMMatrixReadOnly(getComputedStyle(card).transform).m11).toBe(
+        1,
+      );
     }
+    const finishedBorder = getComputedStyle(
+      getElement('[data-tool-card="0"]'),
+    ).borderTopColor;
+    await seek(8.1);
+    for (let index = 0; index < 4; index++) {
+      expect(
+        getComputedStyle(getElement(`[data-tool-card="${index}"]`))
+          .borderTopColor,
+      ).toBe(finishedBorder);
+    }
+    await seek(8.5);
+    expect(
+      getComputedStyle(getElement('[data-tool-card="0"]')).borderTopColor,
+    ).not.toBe(finishedBorder);
+    await seek(7.39);
+    expect(
+      new DOMMatrixReadOnly(
+        getComputedStyle(getElement("[data-aj-hub]")).transform,
+      ).m11,
+    ).toBeGreaterThan(1.07);
+    await seek(7.65);
+    expect(
+      new DOMMatrixReadOnly(
+        getComputedStyle(getElement("[data-aj-hub]")).transform,
+      ).m11,
+    ).toBe(1);
   });
 
   it("pauses its timeline offscreen and in hidden tabs and cleans up on preference changes/unmount", async () => {
@@ -492,7 +728,7 @@ describe("BenefitsAnimationOne", () => {
           .every((animation) => animation.playState === "running"),
       ).toBe(true),
     );
-    await seek(6.2);
+    await seek(8.2);
     const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
     document.dispatchEvent(new Event("visibilitychange"));
     const animation = scene().getAnimations({ subtree: true })[0];
@@ -521,6 +757,22 @@ describe("BenefitsAnimationOne", () => {
     expect(scene().getAnimations({ subtree: true })).toHaveLength(0);
     expect(opacity('[data-panel="backlog"]')).toBe(1);
     expect(opacity('[data-panel="checkout"]')).toBe(0);
+    for (const field of ["holder", "number", "expiry", "cvv"]) {
+      expect(
+        getComputedStyle(getElement(`[data-fill="${field}"]`)).clipPath,
+      ).toBe("none");
+    }
+    expect(opacity("[data-quantity-one]")).toBe(1);
+    expect(opacity("[data-quantity-zero]")).toBe(0);
+    for (const selector of [
+      "[data-quantity-control]",
+      "[data-payment-method]",
+      "[data-subscribe]",
+    ]) {
+      expect(getComputedStyle(getElement(selector)).outlineColor).toBe(
+        "rgba(0, 0, 0, 0)",
+      );
+    }
     expect(opacity("[data-status-progress]")).toBe(1);
     reduceMotion(false);
     const animations = scene().getAnimations({ subtree: true });

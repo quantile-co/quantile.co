@@ -31,6 +31,11 @@ describe("BenefitsAnimationOne", () => {
     ]) {
       expect(html).toContain(text);
     }
+    expect([
+      ...html.matchAll(/data-fill="(?:holder|number|expiry|cvv)"/g),
+    ]).toHaveLength(4);
+    expect(html).toContain("data-quantity-zero");
+    expect(html).toContain("data-quantity-one");
     expect([...html.matchAll(/data-issue="\d"/g)]).toHaveLength(3);
     expect([...html.matchAll(/data-connection="\d"/g)]).toHaveLength(4);
     expect(html).not.toContain('data-panel="email"');
