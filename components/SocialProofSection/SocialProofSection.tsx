@@ -2,14 +2,10 @@
 
 import { Container, Text } from "@mantine/core";
 import { useMediaQuery, useReducedMotion } from "@mantine/hooks";
-import {
-  IconBrandGoogleFilled,
-  IconBrandLinkedin,
-  IconSquareLetterX,
-} from "@tabler/icons-react";
+import { IconBrandGoogleFilled } from "@tabler/icons-react";
 import { AnimatePresence, domAnimation, LazyMotion, m } from "motion/react";
-import Image from "next/image";
 import { type CSSProperties, useEffect, useState } from "react";
+import { ProfileCard } from "./ProfileCard";
 import classes from "./SocialProofSection.module.css";
 
 const experience = [
@@ -73,68 +69,6 @@ const proofCardCount = experience.length + 1;
 
 type ExperienceItem = (typeof experience)[number];
 
-function SocialLinks({ inactive }: { inactive: boolean }) {
-  return (
-    <span className={classes.socialLinks}>
-      <a
-        aria-label="AJ Welch on LinkedIn"
-        className={classes.socialLink}
-        href="https://www.linkedin.com/in/ajwelch4/"
-        rel="noopener noreferrer"
-        tabIndex={inactive ? -1 : undefined}
-        target="_blank"
-      >
-        <IconBrandLinkedin aria-hidden="true" size={16} stroke={1.7} />
-      </a>
-      <a
-        aria-label="AJ Welch on X"
-        className={classes.socialLink}
-        href="https://x.com/AJWelch"
-        rel="noopener noreferrer"
-        tabIndex={inactive ? -1 : undefined}
-        target="_blank"
-      >
-        <IconSquareLetterX aria-hidden="true" size={16} stroke={1.7} />
-      </a>
-    </span>
-  );
-}
-
-function ProfileCard({ inactive = false }: { inactive?: boolean }) {
-  return (
-    <article
-      aria-hidden={inactive || undefined}
-      className={`${classes.proofCard}${inactive ? ` ${classes.inactiveCard}` : ""}`}
-      data-profile
-    >
-      <div className={classes.mediaSquare} data-company="AJ Welch">
-        <Image
-          alt="Portrait of AJ Welch"
-          className={classes.profileImage}
-          fill
-          sizes="(max-width: 767px) 88px, (max-width: 1024px) 68px, 80px"
-          src="/images/aj-welch.webp"
-        />
-      </div>
-
-      <div className={`${classes.proofContent} ${classes.profileContent}`}>
-        <Text className={classes.proofTitle}>AJ Welch</Text>
-        <Text className={classes.profileRole}>Staff Data Engineer</Text>
-        <Text className={classes.profileDescription}>
-          15+ years experience at
-          <br />
-          Google, CompilerWorks,
-          <br />
-          <span className={classes.profileLastLine}>
-            <span>and Chartio.</span>
-            <SocialLinks inactive={inactive} />
-          </span>
-        </Text>
-      </div>
-    </article>
-  );
-}
-
 function CompanyMark({ company }: { company: ExperienceItem["company"] }) {
   if (company === "Google") {
     return (
@@ -161,48 +95,80 @@ function CompanyMark({ company }: { company: ExperienceItem["company"] }) {
 }
 
 function CompanyCard({
+  compact = false,
   inactive = false,
   item,
 }: {
+  compact?: boolean;
   inactive?: boolean;
   item: ExperienceItem;
 }) {
   return (
     <article
       aria-hidden={inactive || undefined}
+      aria-label={compact ? item.company : undefined}
       className={`${classes.proofCard}${inactive ? ` ${classes.inactiveCard}` : ""}`}
+      data-compact={compact || undefined}
       data-company={item.company}
     >
       <div className={classes.mediaSquare} data-company={item.company}>
         <CompanyMark company={item.company} />
+        {compact && (
+          <span className={classes.compactCompanyName}>{item.company}</span>
+        )}
       </div>
 
-      <div className={classes.proofContent}>
-        <Text className={classes.proofTitle}>{item.company}</Text>
-        <div className={classes.experienceContext}>
-          {[...item.context, "Clients:"].map((context) => (
-            <span key={context}>{context}</span>
-          ))}
+      {!compact && (
+        <div className={classes.proofContent}>
+          <Text className={classes.proofTitle}>{item.company}</Text>
+          <div className={classes.experienceContext}>
+            {[...item.context, "Clients:"].map((context) => (
+              <span key={context}>{context}</span>
+            ))}
+          </div>
+          <div className={classes.customerLogos}>
+            {item.customers.map((customer) => (
+              <div className={classes.customer} key={customer.name}>
+                <span
+                  aria-hidden="true"
+                  className={classes.customerLogo}
+                  style={
+                    {
+                      "--logo-image": `url("${customer.logo}")`,
+                    } as CSSProperties
+                  }
+                />
+                <span className={classes.customerName}>{customer.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
-
-        <div className={classes.customerLogos}>
-          {item.customers.map((customer) => (
-            <div className={classes.customer} key={customer.name}>
-              <span
-                aria-hidden="true"
-                className={classes.customerLogo}
-                style={
-                  {
-                    "--logo-image": `url("${customer.logo}")`,
-                  } as CSSProperties
-                }
-              />
-              <span className={classes.customerName}>{customer.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </article>
+  );
+}
+
+export function CompactSocialProof() {
+  return (
+    <section
+      aria-label="AJ Welch's experience and client work"
+      className={`${classes.section} ${classes.compactSection}`}
+    >
+      <div className={classes.compactGrid}>
+        <ProfileCard compact />
+        <div className={classes.compactTenure}>
+          <strong>15+</strong>
+          <span>
+            years of
+            <br />
+            experience
+          </span>
+        </div>
+        {experience.map((item) => (
+          <CompanyCard compact item={item} key={item.company} />
+        ))}
+      </div>
+    </section>
   );
 }
 

@@ -5,9 +5,13 @@ import type { ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { page } from "vitest/browser";
+import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
+import { FaqSection } from "@/components/FaqSection/FaqSection";
 import { HeroAnimation } from "@/components/HeroAnimation/HeroAnimation";
 import { HeroSection } from "@/components/HeroSection/HeroSection";
+import { PricingSection } from "@/components/PricingSection/PricingSection";
 import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
+import { CompactSocialProof } from "@/components/SocialProofSection/SocialProofSection";
 import { theme } from "./theme";
 
 function PreviewCheckoutForm({ children }: { children: ReactNode }) {
@@ -198,5 +202,52 @@ describe("homepage hero layout", () => {
     });
     form.querySelector<HTMLButtonElement>('button[type="submit"]')?.click();
     expect(submitted).toBe(true);
+  });
+});
+
+describe("homepage navigation anchors", () => {
+  it("places Benefits, Pricing, and FAQ at the same distance below the header", async () => {
+    await page.viewport(1200, 900);
+    const anchorContainer = document.createElement("div");
+    document.body.appendChild(anchorContainer);
+    const anchorRoot = createRoot(anchorContainer);
+
+    try {
+      anchorRoot.render(
+        <MantineProvider theme={theme}>
+          <div style={{ height: "100vh" }} />
+          <BenefitsSection CheckoutForm={PreviewCheckoutForm} />
+          <PricingSection CheckoutForm={PreviewCheckoutForm} />
+          <FaqSection
+            billingPortalLoginUrl="/portal-preview"
+            compactProof={<CompactSocialProof />}
+            CheckoutForm={PreviewCheckoutForm}
+          />
+          <div style={{ height: "100vh" }} />
+        </MantineProvider>,
+      );
+      await vi.waitFor(() =>
+        expect(anchorContainer.querySelector("#faq")).not.toBeNull(),
+      );
+      await document.fonts.ready;
+
+      const anchorTops = [];
+      for (const id of ["benefits", "pricing", "faq"]) {
+        const anchor = anchorContainer.querySelector<HTMLElement>(`#${id}`);
+        if (!anchor) throw new Error(`Missing ${id} anchor`);
+        anchor.scrollIntoView();
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => resolve()),
+        );
+        anchorTops.push(anchor.getBoundingClientRect().top);
+      }
+
+      expect(anchorTops[0]).toBeCloseTo(anchorTops[1], 0);
+      expect(anchorTops[1]).toBeCloseTo(anchorTops[2], 0);
+    } finally {
+      anchorRoot.unmount();
+      anchorContainer.remove();
+      window.scrollTo(0, 0);
+    }
   });
 });

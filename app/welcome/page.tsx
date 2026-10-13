@@ -6,6 +6,7 @@ import { FaqSection } from "@/components/FaqSection/FaqSection";
 import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
+import { CompactSocialProof } from "@/components/SocialProofSection/SocialProofSection";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
 import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 
@@ -48,6 +49,7 @@ export default function WelcomePage() {
         />
         <FaqSection
           billingPortalLoginUrl={billingPortalLoginUrl}
+          compactProof={<CompactSocialProof />}
           variant="welcome"
         />
       </main>

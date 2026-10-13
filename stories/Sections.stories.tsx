@@ -8,7 +8,10 @@ import { FaqSection } from "@/components/FaqSection/FaqSection";
 import { HeroAnimation } from "@/components/HeroAnimation/HeroAnimation";
 import { HeroSection } from "@/components/HeroSection/HeroSection";
 import { PricingSection } from "@/components/PricingSection/PricingSection";
-import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
+import {
+  CompactSocialProof,
+  SocialProofSection,
+} from "@/components/SocialProofSection/SocialProofSection";
 import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 
 const previewCheckoutAction = "/storybook-checkout-preview";
@@ -62,6 +65,7 @@ export const Faq: Story = {
   render: () => (
     <FaqSection
       billingPortalLoginUrl={billingPortalLoginUrl}
+      compactProof={<CompactSocialProof />}
       CheckoutForm={PreviewCheckoutForm}
     />
   ),
