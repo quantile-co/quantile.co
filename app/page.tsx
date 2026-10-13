@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BenefitsAnimationTwo } from "@/components/BenefitsAnimation/BenefitsAnimationTwo";
 import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
 import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
 import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
@@ -88,7 +89,10 @@ export default function Home() {
           visual={<HeroAnimation />}
         />
         <SocialProofSection ariaLabel="AJ Welch's experience and client work" />
-        <BenefitsSection CheckoutForm={CheckoutForm} />
+        <BenefitsSection
+          CheckoutForm={CheckoutForm}
+          expertiseVisual={<BenefitsAnimationTwo />}
+        />
         <PricingSection
           mobileProof={<SocialProofSection embedded />}
           CheckoutForm={CheckoutForm}

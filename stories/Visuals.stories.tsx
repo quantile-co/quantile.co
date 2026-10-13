@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { BenefitsAnimationTwo } from "@/components/BenefitsAnimation/BenefitsAnimationTwo";
 import { CalendlyEmbed } from "@/components/CalendlyEmbed/CalendlyEmbed";
 import { HeroAnimation } from "@/components/HeroAnimation/HeroAnimation";
 
@@ -13,6 +14,14 @@ export const Hero: Story = {
   render: () => (
     <div style={{ margin: "48px auto", maxWidth: 576 }}>
       <HeroAnimation />
+    </div>
+  ),
+};
+
+export const BenefitsTwo: Story = {
+  render: () => (
+    <div style={{ margin: "48px auto", maxWidth: 544, paddingInline: 20 }}>
+      <BenefitsAnimationTwo />
     </div>
   ),
 };
