@@ -56,12 +56,13 @@
 .columnLabel {
   position: absolute;
   z-index: 1;
-  top: 8%;
-  color: var(--site-text-secondary);
-  font-size: clamp(0.5625rem, 1.85cqw, 0.6875rem);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  line-height: 1;
+  /* Anchor the label's bottom to the cards, not a viewport percentage. */
+  top: calc(var(--todo-card-1-top) - var(--animation-title-size) * var(--animation-line-height) - var(--task-card-gap));
+  color: var(--site-text-primary);
+  font-size: var(--animation-title-size);
+  font-weight: var(--animation-weight-strong);
+  letter-spacing: var(--animation-title-tracking);
+  line-height: var(--animation-line-height);
   text-transform: uppercase;
 }
 
@@ -75,28 +76,6 @@
 
 .doneLabel {
   left: 69%;
-}
-
-.columnSurface {
-  position: absolute;
-  z-index: 0;
-  top: 14%;
-  bottom: 0;
-  width: 31%;
-  border-radius: clamp(0.5rem, 1.6cqw, 0.75rem);
-  background: var(--site-workstream-column-background);
-}
-
-.todoSurface {
-  left: 1%;
-}
-
-.activeSurface {
-  left: 34.5%;
-}
-
-.doneSurface {
-  left: 68%;
 }
 
 .taskCard {
@@ -176,9 +155,10 @@
   width: 100%;
   min-width: 0;
   color: var(--site-text-primary);
-  font-size: clamp(0.6875rem, 2cqw, 0.75rem);
-  font-weight: 600;
-  line-height: 1.1;
+  font-size: var(--animation-title-size);
+  font-weight: var(--animation-weight-strong);
+  letter-spacing: var(--animation-title-tracking);
+  line-height: 1.15;
 }
 
 .issueMeta {
@@ -200,8 +180,8 @@
   color: var(--site-text-secondary);
   background: var(--site-surface-raised-hover);
   font-family: var(--mantine-font-family-monospace);
-  font-size: clamp(0.4375rem, 1.35cqw, 0.5rem);
-  font-weight: 500;
+  font-size: var(--animation-micro-size);
+  font-weight: var(--animation-weight-regular);
   line-height: 1;
 }
 
@@ -223,8 +203,8 @@
   border-radius: 999px;
   color: var(--site-text-secondary);
   background: var(--site-surface-raised-hover);
-  font-size: clamp(0.375rem, 1.35cqw, 0.5rem);
-  font-weight: 500;
+  font-size: var(--animation-micro-size);
+  font-weight: var(--animation-weight-regular);
   line-height: 1;
   white-space: nowrap;
 }
@@ -311,13 +291,13 @@
   flex: 1;
   color: var(--site-text-primary);
   font-family: var(--mantine-font-family-monospace);
-  font-size: clamp(0.5rem, 1.65cqw, 0.625rem);
+  font-size: var(--animation-meta-size);
 }
 
 .changeCount {
   color: var(--site-text-primary);
   font-family: var(--mantine-font-family-monospace);
-  font-size: clamp(0.5rem, 1.55cqw, 0.5625rem);
+  font-size: var(--animation-micro-size);
 }
 
 .code {
@@ -340,7 +320,7 @@
 .plus {
   color: var(--site-text-secondary);
   font-family: var(--mantine-font-family-monospace);
-  font-size: clamp(0.5rem, 1.55cqw, 0.625rem);
+  font-size: var(--animation-meta-size);
   line-height: 1;
 }
 
@@ -384,7 +364,7 @@
   border: 1px solid var(--site-divider-color);
   border-radius: 999px;
   color: var(--site-text-secondary);
-  font-size: clamp(0.4375rem, 1.4cqw, 0.5rem);
+  font-size: var(--animation-micro-size);
   line-height: 1;
   gap: 0.125rem;
   text-transform: capitalize;
@@ -431,18 +411,19 @@
 .pullRequest {
   color: var(--site-text-secondary);
   font-family: var(--mantine-font-family-monospace);
-  font-size: clamp(0.4375rem, 1.45cqw, 0.5625rem);
+  font-size: var(--animation-micro-size);
 }
 
 .mergeTitle {
-  font-size: clamp(0.5625rem, 1.9cqw, 0.6875rem);
-  font-weight: 600;
+  font-size: var(--animation-title-size);
+  font-weight: var(--animation-weight-strong);
+  letter-spacing: var(--animation-title-tracking);
   line-height: 1.15;
 }
 
 .mergeMeta {
   color: var(--site-text-secondary);
-  font-size: clamp(0.5rem, 1.55cqw, 0.5625rem);
+  font-size: var(--animation-micro-size);
   line-height: 1.15;
 }
 
@@ -453,8 +434,8 @@
   border-radius: 999px;
   color: var(--site-text-primary);
   background: var(--site-surface-raised-hover);
-  font-size: clamp(0.4375rem, 1.4cqw, 0.5rem);
-  font-weight: 600;
+  font-size: var(--animation-micro-size);
+  font-weight: var(--animation-weight-strong);
   line-height: 1;
 }
 

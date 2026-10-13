@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { ReactNode } from "react";
 import { expect, userEvent, within } from "storybook/test";
 import { BenefitsAnimationOne } from "@/components/BenefitsAnimation/BenefitsAnimationOne";
+import { BenefitsAnimationThree } from "@/components/BenefitsAnimation/BenefitsAnimationThree";
 import { BenefitsAnimationTwo } from "@/components/BenefitsAnimation/BenefitsAnimationTwo";
 import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
 import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
@@ -50,6 +51,7 @@ export const Benefits: Story = {
       CheckoutForm={PreviewCheckoutForm}
       onboardingVisual={<BenefitsAnimationOne />}
       expertiseVisual={<BenefitsAnimationTwo />}
+      capacityVisual={<BenefitsAnimationThree />}
     />
   ),
 };

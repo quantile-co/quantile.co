@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BenefitsAnimationOne } from "@/components/BenefitsAnimation/BenefitsAnimationOne";
+import { BenefitsAnimationThree } from "@/components/BenefitsAnimation/BenefitsAnimationThree";
 import { BenefitsAnimationTwo } from "@/components/BenefitsAnimation/BenefitsAnimationTwo";
 import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
 import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
@@ -94,6 +95,7 @@ export default function Home() {
           CheckoutForm={CheckoutForm}
           onboardingVisual={<BenefitsAnimationOne />}
           expertiseVisual={<BenefitsAnimationTwo />}
+          capacityVisual={<BenefitsAnimationThree />}
         />
         <PricingSection
           mobileProof={<SocialProofSection embedded />}

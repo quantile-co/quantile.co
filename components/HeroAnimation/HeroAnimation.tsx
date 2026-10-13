@@ -309,13 +309,15 @@ export function HeroAnimation() {
       let completedCount = 0;
       let index = 0;
       while (!isCancelled()) {
-        setActiveTaskIndex(index);
-        await nextFrame();
-        if (isCancelled()) return;
+        if (completedCount > 0) {
+          setActiveTaskIndex(index);
+          await nextFrame();
+          if (isCancelled()) return;
 
-        await resetPanels();
-        await pause(completedCount === 0 ? 450 : 180);
-        if (isCancelled()) return;
+          await resetPanels();
+          await pause(180);
+          if (isCancelled()) return;
+        }
 
         const nextTodoIndex = wrapTaskIndex(index + queueDepth);
         const doneOldestIndex = wrapTaskIndex(index - queueDepth);
@@ -538,10 +540,6 @@ export function HeroAnimation() {
       <span className={`${classes.columnLabel} ${classes.doneLabel}`}>
         Done
       </span>
-
-      <span className={`${classes.columnSurface} ${classes.todoSurface}`} />
-      <span className={`${classes.columnSurface} ${classes.activeSurface}`} />
-      <span className={`${classes.columnSurface} ${classes.doneSurface}`} />
 
       {tasks.map((task, index) => (
         <div
