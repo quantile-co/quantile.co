@@ -186,6 +186,7 @@
 }
 
 .avatar[data-aj] {
+  border: 2px solid var(--site-text-secondary);
   background-image: url("/images/aj-welch.webp");
   background-position: center;
   background-size: cover;
@@ -335,6 +336,7 @@
   flex-shrink: 0;
   width: 2rem;
   height: 2rem;
+  border: 2px solid var(--site-text-secondary);
   border-radius: 50%;
   background-image: url("/images/aj-welch.webp");
   background-position: center;

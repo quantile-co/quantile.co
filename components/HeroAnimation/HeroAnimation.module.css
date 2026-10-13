@@ -260,14 +260,13 @@
   right: clamp(-0.75rem, -2cqw, -0.5rem);
   width: clamp(1.5rem, 5cqw, 1.875rem);
   height: clamp(1.5rem, 5cqw, 1.875rem);
-  border: 2px solid var(--site-surface-raised);
+  border: 2px solid var(--site-text-secondary);
   border-radius: 999px;
   opacity: 0;
   visibility: hidden;
   background-image: url("/images/aj-welch.webp");
   background-position: center;
   background-size: cover;
-  box-shadow: 0 0 0 1px var(--site-text-primary);
   filter: grayscale(1);
   transform: translateY(-50%) scale(0.6);
 }
