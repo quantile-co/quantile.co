@@ -1,15 +1,15 @@
 import { Button, Container, Text, Title } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import classes from "./PricingSection.module.css";
 
 type PricingSectionProps = {
   mobileProof?: ReactNode;
-  signUpFormId: string;
+  CheckoutForm: ComponentType<{ children: ReactNode }>;
 };
 
 export function PricingSection({
   mobileProof,
-  signUpFormId,
+  CheckoutForm,
 }: PricingSectionProps) {
   return (
     <section className={classes.section}>
@@ -64,17 +64,18 @@ export function PricingSection({
         </ul>
         <div className={classes.pricingGrid}>
           <div className={classes.actions}>
-            <Button
-              autoContrast
-              className={classes.action}
-              data-site-cta="hero"
-              form={signUpFormId}
-              size="xl"
-              type="submit"
-              variant="filled"
-            >
-              Start building
-            </Button>
+            <CheckoutForm>
+              <Button
+                autoContrast
+                className={classes.action}
+                data-site-cta="hero"
+                size="xl"
+                type="submit"
+                variant="filled"
+              >
+                Start building
+              </Button>
+            </CheckoutForm>
           </div>
 
           {mobileProof ? (

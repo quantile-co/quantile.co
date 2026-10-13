@@ -20,7 +20,10 @@ export default defineConfig({
             "components/**/*.test.{ts,tsx}",
             "lib/**/*.test.{ts,tsx}",
           ],
-          exclude: ["**/*.integration.test.{ts,tsx}"],
+          exclude: [
+            "**/*.integration.test.{ts,tsx}",
+            "**/*.browser.test.{ts,tsx}",
+          ],
         },
       },
       {
@@ -40,6 +43,26 @@ export default defineConfig({
         ],
         test: {
           name: "storybook",
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({}),
+            instances: [{ browser: "chromium" }],
+          },
+        },
+      },
+      {
+        extends: true,
+        optimizeDeps: {
+          include: [
+            "@mantine/hooks",
+            "@tabler/icons-react",
+            "react-dom/client",
+          ],
+        },
+        test: {
+          name: "browser",
+          include: ["app/**/*.browser.test.tsx"],
           browser: {
             enabled: true,
             headless: true,

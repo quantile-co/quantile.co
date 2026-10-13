@@ -40,7 +40,8 @@
   }
 }
 
-.navButton {
+.navButton,
+.desktopCheckoutAction button {
   height: 32px;
   padding-inline: 14px;
   border-radius: 999px;
@@ -70,6 +71,16 @@
 
 .mobileActions {
   width: min(100%, 128px);
+}
+
+.mobileCheckoutAction,
+.mobileCheckoutAction form {
+  display: flex;
+  width: 100%;
+}
+
+.mobileCheckoutAction button {
+  flex: 1;
 }
 
 .mobileNav {

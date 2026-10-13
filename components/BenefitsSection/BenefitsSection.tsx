@@ -1,3 +1,4 @@
+import type { ComponentType, ReactNode } from "react";
 import classes from "./BenefitsSection.module.css";
 
 const categories = [
@@ -73,10 +74,10 @@ const categories = [
 ] as const;
 
 type BenefitsSectionProps = {
-  signUpFormId: string;
+  CheckoutForm: ComponentType<{ children: ReactNode }>;
 };
 
-export function BenefitsSection({ signUpFormId }: BenefitsSectionProps) {
+export function BenefitsSection({ CheckoutForm }: BenefitsSectionProps) {
   return (
     <div className={classes.group}>
       {categories.map((category) => (
@@ -100,22 +101,18 @@ export function BenefitsSection({ signUpFormId }: BenefitsSectionProps) {
                 <h3 className={classes.title} data-section-heading>
                   {step.title}
                 </h3>
-                <p className={classes.description}>
-                  {step.title === "Subscribe" ? (
-                    <>
-                      <button
-                        className={classes.stepLink}
-                        form={signUpFormId}
-                        type="submit"
-                      >
+                {step.title === "Subscribe" ? (
+                  <CheckoutForm>
+                    <p className={classes.description}>
+                      <button className={classes.stepLink} type="submit">
                         Subscribe
                       </button>
                       {step.description.slice(step.title.length)}
-                    </>
-                  ) : (
-                    step.description
-                  )}
-                </p>
+                    </p>
+                  </CheckoutForm>
+                ) : (
+                  <p className={classes.description}>{step.description}</p>
+                )}
               </li>
             ))}
           </ol>

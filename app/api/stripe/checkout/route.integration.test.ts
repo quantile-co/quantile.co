@@ -90,7 +90,10 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
         const home = await page.goto(origin);
         expect(home?.ok()).toBe(true);
         stage = "rendered signup form";
-        const form = page.locator("form#subscription-checkout");
+        const button = page
+          .getByRole("button", { name: "Start building" })
+          .first();
+        const form = button.locator("xpath=ancestor::form");
         expect(await form.getAttribute("action")).toBe("/api/stripe/checkout");
         expect(await form.getAttribute("method")).toBe("post");
         stage = "same-origin Checkout POST";
@@ -99,10 +102,7 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
             response.url() === `${origin}/api/stripe/checkout` &&
             response.request().method() === "POST",
         );
-        await page
-          .getByRole("button", { name: "Start building" })
-          .first()
-          .click();
+        await button.click();
         const response = await started;
         expect(response.status()).toBe(303);
         const checkoutUrl = response.headers().location;

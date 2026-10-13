@@ -22,11 +22,6 @@
   white-space: pre-line;
 }
 
-/* Leave the category heading visible below the sticky header. */
-.categoryTitle[data-section-anchor] {
-  scroll-margin-top: var(--mantine-spacing-xl);
-}
-
 .categorySubtitle {
   max-width: 38ch;
   margin: var(--mantine-spacing-lg) 0 0;

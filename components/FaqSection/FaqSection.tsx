@@ -6,16 +6,17 @@ import {
   Container,
   Title,
 } from "@mantine/core";
+import type { ComponentType, ReactNode } from "react";
 import classes from "./FaqSection.module.css";
 
 type FaqSectionProps = { billingPortalLoginUrl: string } & (
-  | { variant?: "home"; signUpFormId: string }
-  | { variant: "welcome"; signUpFormId?: never }
+  | { variant?: "home"; CheckoutForm: ComponentType<{ children: ReactNode }> }
+  | { variant: "welcome"; CheckoutForm?: never }
 );
 
 export function FaqSection({
   billingPortalLoginUrl,
-  signUpFormId,
+  CheckoutForm,
   variant = "home",
 }: FaqSectionProps) {
   const questions = [
@@ -112,42 +113,56 @@ export function FaqSection({
       answer: (
         <>
           <p>
-            You can assign data engineering issues covering development,
-            maintenance, support, and operations. Examples include:
+            You can assign data and AI engineering issues covering development,
+            maintenance, support, and operations.
           </p>
+          <p>Primary languages: Python and Java.</p>
+          <p>Secondary languages are Go, TypeScript, and C.</p>
+          <p>Examples include:</p>
           <ul>
             <li>
-              <strong>Analytics and modeling:</strong> dbt, pandas, Jupyter,
+              <strong>AI agents and workflows:</strong> LangChain, LangGraph,
+              LlamaIndex, Haystack, LangChain4j, Pydantic AI, Spring AI,
+              Anthropic, OpenAI, Gemini, ADK, Cortex, Agent Bricks, Bedrock,
               etc.
             </li>
             <li>
-              <strong>AI agents and workflows:</strong> LangChain, Pydantic AI,
-              Anthropic SDKs, OpenAI SDKs, etc.
+              <strong>Analytics and modeling:</strong> SQL, dbt, pandas, Polars,
+              Jupyter, marimo, Ibis, SQLGlot, jOOQ, Tablesaw, Calcite, Spring
+              Data, Snowpark, BigQuery DataFrames, Spark DataFrames, etc.
             </li>
             <li>
               <strong>Orchestration and transformation:</strong> Airflow,
-              Prefect, Dagster, dbt, SQLMesh, etc.
+              Prefect, Dagster, Temporal, Conductor, DBOS, dbt, SQLMesh, Spring
+              Batch, AWS Glue, AWS Step Functions, GCP Composer, GCP Dataform,
+              Snowflake Tasks, Databricks Lakeflow Jobs, etc.
             </li>
             <li>
               <strong>Storage and query processing:</strong> BigQuery,
-              Snowflake, Databricks, ClickHouse, etc.
+              Snowflake, Databricks, Spark, ClickHouse, Redshift, Athena,
+              DuckDB, MotherDuck, Trino, Pinot, Parquet, Iceberg, Delta Lake,
+              etc.
             </li>
             <li>
               <strong>Integration and streaming:</strong> Fivetran, Airbyte,
-              dlt, Debezium, Kafka, Flink, etc.
+              dlt, Debezium, Flink, Beam, Kafka, Redpanda, Camel, Spring
+              Integration, AWS Kinesis, GCP Pub/Sub, GCP Dataflow, GCP
+              Datastream, Snowflake Snowpipe Streaming, Databricks Auto Loader,
+              etc.
             </li>
             <li>
               <strong>Performance optimization:</strong> Data platform, query,
-              and pipeline tuning, etc.
+              pipeline, agent, and application performance tuning.
             </li>
             <li>
               <strong>Observability and governance:</strong> Databricks Unity
-              Catalog, Snowflake Horizon Catalog, GCP Dataplex, DataHub, Great
-              Expectations, Langfuse, etc.
+              Catalog, Snowflake Horizon Catalog, GCP Dataplex, AWS Glue Data
+              Catalog, DataHub, Great Expectations, Langfuse, Grafana, etc.
             </li>
             <li>
               <strong>Infrastructure and automation:</strong> AWS, GCP,
-              Terraform, Pulumi, Docker, Kubernetes, etc.
+              Terraform, Pulumi, Docker, Kubernetes, Jenkins, Gradle, Dagger,
+              etc.
             </li>
           </ul>
         </>
@@ -172,7 +187,7 @@ export function FaqSection({
           solutions. He handles complex design decisions, weighs tradeoffs, and
           resolves blockers, while coding agents speed up the implementation and
           take on the rote, low-level grunt work. That means less time spent on
-          repetitive coding and more time spent on the efficiency, scalability,
+          mechanical coding and more time spent on the efficiency, scalability,
           and maintainability of the solution.
         </p>
       ),
@@ -286,18 +301,18 @@ export function FaqSection({
       answer:
         variant === "home" ? (
           <>
-            <p>
-              <button
-                className={classes.subscribeLink}
-                form={signUpFormId}
-                type="submit"
-              >
-                Subscribe
-              </button>{" "}
-              whenever you're ready via Stripe. You will receive a welcome email
-              with next steps for sharing access and assigning and prioritizing
-              issues.
-            </p>
+            {CheckoutForm ? (
+              <CheckoutForm>
+                <p>
+                  <button className={classes.subscribeLink} type="submit">
+                    Subscribe
+                  </button>{" "}
+                  whenever you're ready via Stripe. You will receive a welcome
+                  email with next steps for sharing access and assigning and
+                  prioritizing issues.
+                </p>
+              </CheckoutForm>
+            ) : null}
             <p>If you'd prefer to talk first, book a free intro call below.</p>
           </>
         ) : (

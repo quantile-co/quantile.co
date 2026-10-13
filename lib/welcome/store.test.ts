@@ -141,6 +141,8 @@ describe("official Firestore emulator: atomic persistence", () => {
     });
   });
 
+  // Contended creates can use the store's 3s per-operation deadline; the
+  // winner read and replay checks are separate operations, not one deadline.
   it("atomically chooses one immutable payload under concurrent creation", async () => {
     const { store, record } = setup();
     const second = {
@@ -171,7 +173,7 @@ describe("official Firestore emulator: atomic persistence", () => {
     expect(winners.every((winner) => winner.request === saved?.request)).toBe(
       true,
     );
-  });
+  }, 15_000);
   it("converges identical concurrent acceptance and preserves immutable fields", async () => {
     const { store, record } = setup();
     await store.prepare(record);

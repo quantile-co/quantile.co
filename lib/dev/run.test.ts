@@ -367,7 +367,12 @@ process.exit(fixture.exit ?? 0);
     });
     expect(await child.exit()).toBe(7);
     expect(await started("tests.started")).toMatchObject({
-      args: ["--project=unit", "--project=storybook", "--run"],
+      args: [
+        "--project=unit",
+        "--project=storybook",
+        "--project=browser",
+        "--run",
+      ],
       mode: "false",
       project: "demo-quantile",
       host: expect.stringMatching(/^127\.0\.0\.1:\d+$/),

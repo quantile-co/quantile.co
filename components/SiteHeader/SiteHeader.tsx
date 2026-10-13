@@ -20,8 +20,11 @@ type SiteHeaderProps = {
   logo: ReactNode;
   sections: ReadonlyArray<{ href: string; label: string }>;
 } & (
-  | { bookCallHref: string; signUpFormId: string }
-  | { bookCallHref?: never; signUpFormId?: never }
+  | {
+      bookCallHref: string;
+      checkoutActions: { desktop: ReactNode; mobile: ReactNode };
+    }
+  | { bookCallHref?: never; checkoutActions?: never }
 );
 
 export function SiteHeader({
@@ -29,10 +32,11 @@ export function SiteHeader({
   homeHref,
   logo,
   sections,
-  signUpFormId,
+  checkoutActions,
 }: SiteHeaderProps) {
   const [opened, { toggle, close }] = useDisclosure(false);
-  const showActions = bookCallHref !== undefined && signUpFormId !== undefined;
+  const showActions =
+    bookCallHref !== undefined && checkoutActions !== undefined;
 
   const items = sections.map((section) => (
     <a
@@ -67,16 +71,9 @@ export function SiteHeader({
               >
                 Book a call
               </Button>
-              <Button
-                autoContrast
-                className={classes.navButton}
-                form={signUpFormId}
-                size="xs"
-                type="submit"
-                variant="filled"
-              >
-                Start building
-              </Button>
+              <div className={classes.desktopCheckoutAction}>
+                {checkoutActions.desktop}
+              </div>
             </Group>
           )}
         </Group>
@@ -135,17 +132,9 @@ export function SiteHeader({
                 >
                   Book a call
                 </Button>
-                <Button
-                  autoContrast
-                  data-site-cta="section"
-                  form={signUpFormId}
-                  onClick={close}
-                  size="md"
-                  type="submit"
-                  variant="filled"
-                >
-                  Start building
-                </Button>
+                <div className={classes.mobileCheckoutAction}>
+                  {checkoutActions.mobile}
+                </div>
               </Stack>
             )}
           </div>

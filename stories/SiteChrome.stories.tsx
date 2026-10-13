@@ -1,3 +1,4 @@
+import { Button } from "@mantine/core";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
 import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
@@ -11,6 +12,29 @@ const sections = [
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
 ] as const;
+
+const previewCheckoutActions = {
+  desktop: (
+    <form action="/storybook-checkout-preview" method="post">
+      <Button autoContrast size="xs" type="submit" variant="filled">
+        Start building
+      </Button>
+    </form>
+  ),
+  mobile: (
+    <form action="/storybook-checkout-preview" method="post">
+      <Button
+        autoContrast
+        data-site-cta="section"
+        size="md"
+        type="submit"
+        variant="filled"
+      >
+        Start building
+      </Button>
+    </form>
+  ),
+};
 
 const meta = {
   title: "Site chrome",
@@ -27,7 +51,7 @@ export const Header: Story = {
         homeHref="#top"
         logo={<BrandLogo />}
         sections={sections}
-        signUpFormId="subscription-checkout"
+        checkoutActions={previewCheckoutActions}
       />
     </div>
   ),
