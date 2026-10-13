@@ -9,30 +9,42 @@ import {
 import type { ComponentType, ReactNode } from "react";
 import classes from "./FaqSection.module.css";
 
-type FaqSectionProps = { billingPortalLoginUrl: string } & (
+type FaqSectionProps = {
+  billingPortalLoginUrl: string;
+  compactProof: ReactNode;
+} & (
   | { variant?: "home"; CheckoutForm: ComponentType<{ children: ReactNode }> }
   | { variant: "welcome"; CheckoutForm?: never }
 );
 
+const questionValue = (question: string) =>
+  question
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
 export function FaqSection({
   billingPortalLoginUrl,
+  compactProof,
   CheckoutForm,
   variant = "home",
 }: FaqSectionProps) {
   const questions = [
     {
-      value: "who-does-the-work",
       question: "Who works on my issues?",
       answer: (
-        <p>
-          AJ Welch is a staff data engineer with 15+ years of experience across
-          Google, CompilerWorks, and Chartio. He works directly on your issues
-          and there are no agency PMs, junior handoffs, or offshore teams.
-        </p>
+        <>
+          <div className={classes.miniProof}>{compactProof}</div>
+          <p>
+            AJ Welch is a staff data engineer with 15+ years of experience
+            across Google, CompilerWorks, and Chartio. He works directly on your
+            issues and there are no agency PMs, junior handoffs, or offshore
+            teams.
+          </p>
+        </>
       ),
     },
     {
-      value: "pricing",
       question: "How does pricing work?",
       answer: (
         <>
@@ -50,7 +62,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "capacity",
       question: "How do I scale up or down?",
       answer: (
         <>
@@ -71,7 +82,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "issue-progress",
       question: "How do I manage in-progress issues?",
       answer: (
         <>
@@ -91,7 +101,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "larger-issues",
       question: "How big should an issue be?",
       answer: (
         <>
@@ -108,7 +117,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "good-fit",
       question: "What kinds of issues can I assign?",
       answer: (
         <>
@@ -169,7 +177,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "outside-scope",
       question: "What if an issue is out of scope?",
       answer: (
         <p>
@@ -179,7 +186,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "ai-use",
       question: "How is AI used?",
       answer: (
         <p>
@@ -193,7 +199,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "ai-workflows",
       question: "Can you use our existing AI tools and workflows?",
       answer: (
         <p>
@@ -203,7 +208,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "existing-stack",
       question: "Can you work in our existing systems?",
       answer: (
         <p>
@@ -213,7 +217,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "communication",
       question: "How does collaboration work?",
       answer: (
         <>
@@ -229,7 +232,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "revisions",
       question: "What if a PR needs changes?",
       answer: (
         <p>
@@ -240,14 +242,12 @@ export function FaqSection({
       ),
     },
     {
-      value: "code-ownership",
       question: "Who owns the code?",
       answer: (
         <p>You own all submitted code, even after you pause or cancel.</p>
       ),
     },
     {
-      value: "contracts",
       question: "Is there a minimum commitment?",
       answer: (
         <p>
@@ -257,7 +257,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "pause-or-cancel",
       question: "How do I pause or cancel?",
       answer: (
         <>
@@ -277,7 +276,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "first-week-guarantee",
       question: "How does the first-week guarantee work?",
       answer: (
         <p>
@@ -286,7 +284,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "refunds",
       question: "Can I get a refund after the first week?",
       answer: (
         <p>
@@ -296,7 +293,6 @@ export function FaqSection({
       ),
     },
     {
-      value: "getting-started",
       question: "How do I get started?",
       answer:
         variant === "home" ? (
@@ -354,18 +350,21 @@ export function FaqSection({
                 order={3}
                 variant="default"
               >
-                {columnQuestions.map((item) => (
-                  <AccordionItem
-                    className={classes.item}
-                    key={item.value}
-                    value={item.value}
-                  >
-                    <AccordionControl>{item.question}</AccordionControl>
-                    <AccordionPanel className={classes.panel}>
-                      {item.answer}
-                    </AccordionPanel>
-                  </AccordionItem>
-                ))}
+                {columnQuestions.map((item) => {
+                  const value = questionValue(item.question);
+                  return (
+                    <AccordionItem
+                      className={classes.item}
+                      key={value}
+                      value={value}
+                    >
+                      <AccordionControl>{item.question}</AccordionControl>
+                      <AccordionPanel className={classes.panel}>
+                        {item.answer}
+                      </AccordionPanel>
+                    </AccordionItem>
+                  );
+                })}
               </Accordion>
             ),
           )}

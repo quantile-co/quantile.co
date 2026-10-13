@@ -53,6 +53,11 @@ export default defineConfig({
       },
       {
         extends: true,
+        resolve: {
+          alias: {
+            "next/image": path.join(dirname, "tests/next-image.browser.tsx"),
+          },
+        },
         optimizeDeps: {
           include: [
             "@mantine/hooks",
@@ -62,7 +67,10 @@ export default defineConfig({
         },
         test: {
           name: "browser",
-          include: ["app/**/*.browser.test.tsx"],
+          include: [
+            "app/**/*.browser.test.tsx",
+            "components/**/*.browser.test.tsx",
+          ],
           browser: {
             enabled: true,
             headless: true,

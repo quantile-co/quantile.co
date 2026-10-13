@@ -15,12 +15,13 @@ function PreviewCheckoutForm({ children }: { children: ReactNode }) {
   );
 }
 
-describe("FAQ billing portal links", () => {
+describe("FAQ rendering", () => {
   it("links capacity and cancellation answers to the shareable live portal login", () => {
     const html = renderToStaticMarkup(
       <MantineProvider>
         <FaqSection
           billingPortalLoginUrl={liveLoginUrl}
+          compactProof={<div>Preview experience</div>}
           CheckoutForm={PreviewCheckoutForm}
         />
       </MantineProvider>,
@@ -71,5 +72,79 @@ describe("FAQ billing portal links", () => {
     expect(html).not.toContain("Check your welcome email for next steps");
     expect(html).not.toContain("through Stripe");
     expect(html).not.toContain("/p/session/");
+  });
+
+  it("keeps all 18 accordion values aligned with their question wording", () => {
+    const html = renderToStaticMarkup(
+      <MantineProvider>
+        <FaqSection
+          billingPortalLoginUrl={liveLoginUrl}
+          compactProof={<div>Preview experience</div>}
+          CheckoutForm={PreviewCheckoutForm}
+        />
+      </MantineProvider>,
+    );
+    const questions = [
+      "Who works on my issues?",
+      "How does pricing work?",
+      "How do I scale up or down?",
+      "How do I manage in-progress issues?",
+      "How big should an issue be?",
+      "What kinds of issues can I assign?",
+      "What if an issue is out of scope?",
+      "How is AI used?",
+      "Can you use our existing AI tools and workflows?",
+      "Can you work in our existing systems?",
+      "How does collaboration work?",
+      "What if a PR needs changes?",
+      "Who owns the code?",
+      "Is there a minimum commitment?",
+      "How do I pause or cancel?",
+      "How does the first-week guarantee work?",
+      "Can I get a refund after the first week?",
+      "How do I get started?",
+    ];
+    const values = Array.from(
+      html.matchAll(/id="[^"]*-control-([a-z0-9-]+)"/g),
+      (match) => match[1],
+    );
+    expect(values).toEqual(
+      questions.map((question) =>
+        question
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, ""),
+      ),
+    );
+    expect(new Set(values).size).toBe(18);
+    for (const question of questions) expect(html).toContain(question);
+  });
+
+  it("places injected experience proof before the unchanged answer on home and welcome", () => {
+    for (const variant of ["home", "welcome"] as const) {
+      const html = renderToStaticMarkup(
+        <MantineProvider>
+          {variant === "home" ? (
+            <FaqSection
+              billingPortalLoginUrl={liveLoginUrl}
+              compactProof={<div>Preview experience</div>}
+              CheckoutForm={PreviewCheckoutForm}
+            />
+          ) : (
+            <FaqSection
+              billingPortalLoginUrl={liveLoginUrl}
+              compactProof={<div>Preview experience</div>}
+              variant="welcome"
+            />
+          )}
+        </MantineProvider>,
+      );
+      expect(html.indexOf("Preview experience")).toBeLessThan(
+        html.indexOf("AJ Welch is a staff data engineer"),
+      );
+      expect(html).toContain(
+        "He works directly on your issues and there are no agency PMs, junior handoffs, or offshore teams.",
+      );
+    }
   });
 });

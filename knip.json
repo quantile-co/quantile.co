@@ -1,4 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreBinaries": ["jq", "sha256sum"]
+  "ignoreBinaries": ["jq", "sha256sum"],
+  "ignore": ["tests/next-image.browser.tsx"]
 }

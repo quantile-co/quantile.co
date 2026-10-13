@@ -14,7 +14,10 @@ import { PricingSection } from "@/components/PricingSection/PricingSection";
 import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
-import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
+import {
+  CompactSocialProof,
+  SocialProofSection,
+} from "@/components/SocialProofSection/SocialProofSection";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
 import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 
@@ -93,6 +96,7 @@ export default function Home() {
         <SocialProofSection hideOnMobile />
         <FaqSection
           billingPortalLoginUrl={billingPortalLoginUrl}
+          compactProof={<CompactSocialProof />}
           CheckoutForm={CheckoutForm}
         />
       </main>

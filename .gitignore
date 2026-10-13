@@ -26,6 +26,8 @@ crash.log
 
 # testing
 /coverage
+**/__screenshots__/
+/.vitest-attachments/
 
 # next.js
 /.next/

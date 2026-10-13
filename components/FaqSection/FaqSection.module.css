@@ -113,8 +113,12 @@
   margin: 0;
 }
 
-.panel p + p {
+.panel :global(.mantine-Accordion-content) > p + p {
   margin-top: var(--mantine-spacing-sm);
+}
+
+.miniProof {
+  margin-bottom: var(--mantine-spacing-md);
 }
 
 .panel ul {
