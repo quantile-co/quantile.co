@@ -1,3 +1,5 @@
+/* Shared visual system: animation two's approved card geometry, type, and
+   responsive spacing. Story-specific onboarding details live beside this. */
 .scene {
   --active-card-y: 8px;
 
@@ -93,7 +95,8 @@
   mask-image: linear-gradient(to bottom, transparent, black 0.25rem, black calc(100% - 1rem), transparent);
 }
 
-.entry {
+.entry,
+.surface {
   --avatar-size: 1.5rem;
 
   position: absolute;
@@ -108,10 +111,13 @@
   padding: 0.8125rem 1rem;
   border: 1px solid var(--site-surface-outline);
   border-radius: 0.75rem;
-  opacity: 0;
-  visibility: hidden;
   background: var(--site-surface-raised);
   box-shadow: 0 0.5rem 1.25rem rgb(9 9 11 / 4%);
+}
+
+.entry {
+  opacity: 0;
+  visibility: hidden;
   transform: translateY(240px);
 }
 
@@ -547,7 +553,8 @@
     width: 100%;
   }
 
-  .entry {
+  .entry,
+  .surface {
     min-height: 10rem;
     padding-block: 0.75rem;
     row-gap: 0.4375rem;
@@ -555,7 +562,8 @@
 }
 
 @media (min-width: 48em) and (max-width: 63.99em) {
-  .entry {
+  .entry,
+  .surface {
     --avatar-size: 1.375rem;
 
     min-height: 9.5rem;
@@ -602,7 +610,8 @@
     margin-inline: 0;
   }
 
-  .entry {
+  .entry,
+  .surface {
     left: 0;
     width: 100%;
   }
@@ -621,7 +630,8 @@
     font-size: 0.75rem;
   }
 
-  .entry {
+  .entry,
+  .surface {
     padding: 0.75rem;
   }
 

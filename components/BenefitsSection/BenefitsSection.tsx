@@ -75,11 +75,13 @@ const categories = [
 
 type BenefitsSectionProps = {
   CheckoutForm: ComponentType<{ children: ReactNode }>;
+  onboardingVisual?: ReactNode;
   expertiseVisual?: ReactNode;
 };
 
 export function BenefitsSection({
   CheckoutForm,
+  onboardingVisual,
   expertiseVisual,
 }: BenefitsSectionProps) {
   return (
@@ -93,9 +95,10 @@ export function BenefitsSection({
           <div
             className={classes.introduction}
             data-has-visual={
-              category.id === "benefits-expertise" && expertiseVisual
-                ? true
-                : undefined
+              (category.id === "benefits" && Boolean(onboardingVisual)) ||
+              (category.id === "benefits-expertise" &&
+                Boolean(expertiseVisual)) ||
+              undefined
             }
           >
             <div>
@@ -109,6 +112,9 @@ export function BenefitsSection({
               </h2>
               <p className={classes.categorySubtitle}>{category.subtitle}</p>
             </div>
+            {category.id === "benefits" && onboardingVisual ? (
+              <div className={classes.visual}>{onboardingVisual}</div>
+            ) : null}
             {category.id === "benefits-expertise" && expertiseVisual ? (
               <div className={classes.visual}>{expertiseVisual}</div>
             ) : null}
