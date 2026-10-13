@@ -75,9 +75,13 @@ const categories = [
 
 type BenefitsSectionProps = {
   CheckoutForm: ComponentType<{ children: ReactNode }>;
+  expertiseVisual?: ReactNode;
 };
 
-export function BenefitsSection({ CheckoutForm }: BenefitsSectionProps) {
+export function BenefitsSection({
+  CheckoutForm,
+  expertiseVisual,
+}: BenefitsSectionProps) {
   return (
     <div className={classes.group}>
       {categories.map((category) => (
@@ -86,15 +90,29 @@ export function BenefitsSection({ CheckoutForm }: BenefitsSectionProps) {
           className={classes.category}
           key={category.id}
         >
-          <h2
-            className={classes.categoryTitle}
-            data-section-anchor={category.id === "benefits" || undefined}
-            data-section-heading
-            id={category.id}
+          <div
+            className={classes.introduction}
+            data-has-visual={
+              category.id === "benefits-expertise" && expertiseVisual
+                ? true
+                : undefined
+            }
           >
-            {category.title}
-          </h2>
-          <p className={classes.categorySubtitle}>{category.subtitle}</p>
+            <div>
+              <h2
+                className={classes.categoryTitle}
+                data-section-anchor={category.id === "benefits" || undefined}
+                data-section-heading
+                id={category.id}
+              >
+                {category.title}
+              </h2>
+              <p className={classes.categorySubtitle}>{category.subtitle}</p>
+            </div>
+            {category.id === "benefits-expertise" && expertiseVisual ? (
+              <div className={classes.visual}>{expertiseVisual}</div>
+            ) : null}
+          </div>
           <ol className={classes.steps}>
             {category.steps.map((step) => (
               <li className={classes.step} key={step.title}>

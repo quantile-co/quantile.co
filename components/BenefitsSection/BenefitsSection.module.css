@@ -15,6 +15,49 @@
   padding-top: calc(var(--section-padding-block) * 2);
 }
 
+.introduction[data-has-visual] {
+  display: grid;
+  /* Fit the copy, then center the visual in the remaining content width. */
+  grid-template-columns: fit-content(32rem) minmax(0, 1fr);
+  align-items: center;
+}
+
+.visual {
+  min-width: 0;
+}
+
+@media (min-width: 48em) {
+  .visual {
+    /* Optical offsets: balanced copy has a trailing inset; the visible
+       header and top-weighted card content sit above the travel-area center. */
+    translate: -0.75rem 2rem;
+  }
+}
+
+@media (min-width: 48em) and (max-width: 63.99em) {
+  .visual {
+    translate: -0.75rem 2.5rem;
+  }
+}
+
+@media (min-width: 64em) and (max-width: 74.99em) {
+  .visual {
+    translate: -1.5rem 2.25rem;
+  }
+}
+
+@media (max-width: 47.99em) {
+  .introduction[data-has-visual] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  .visual {
+    width: 100%;
+    max-width: 34rem;
+  }
+}
+
 .categoryTitle {
   font-size: clamp(2.5rem, 4vw, 3rem);
   font-weight: 550;
@@ -96,20 +139,10 @@
   .categoryTitle {
     font-size: clamp(1.8125rem, 8.6vw, 2.25rem);
   }
-}
 
-@media (max-width: 26.5625em) {
-  .categorySubtitle {
-    max-width: 19.375rem;
-  }
-
+  .categorySubtitle,
   .description {
-    max-width: 15.625rem;
-  }
-}
-
-@media (max-width: 21.5em) {
-  .categorySubtitle {
-    max-width: 16.875rem;
+    max-width: none;
+    text-wrap: pretty;
   }
 }
