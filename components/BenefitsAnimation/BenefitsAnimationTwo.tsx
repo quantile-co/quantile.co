@@ -18,7 +18,7 @@ import {
 import { useAnimate } from "motion/react-mini";
 import type { ReactNode } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import classes from "./BenefitsAnimationTwo.module.css";
+import classes from "./BenefitsAnimation.module.css";
 
 // One illustrative issue, not live customer activity or a delivery-time promise.
 const activity = [
