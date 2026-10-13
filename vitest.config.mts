@@ -55,7 +55,7 @@ export default defineConfig({
         extends: true,
         resolve: {
           alias: {
-            "next/image": path.join(dirname, "tests/next-image.browser.tsx"),
+            "next/image": path.join(dirname, "lib/browser/test.tsx"),
           },
         },
         optimizeDeps: {
