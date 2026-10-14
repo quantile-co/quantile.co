@@ -185,6 +185,13 @@ describe("BenefitsAnimation3", () => {
   ] as const)("matches onboarding geometry and responsive layout in %s mode", async (scheme) => {
     await mount(true, scheme);
     const art = element("[data-capacity-art]");
+    const artStyle = getComputedStyle(art);
+    expect(artStyle.padding).toBe("0px");
+    expect(artStyle.borderTopWidth).toBe("0px");
+    expect(artStyle.boxShadow).toBe("none");
+    expect(
+      getComputedStyle(element('[data-callout="start"]')).boxShadow,
+    ).not.toBe("none");
     const other = element("[data-onboarding-area]");
     const intro = scene().closest<HTMLElement>("[data-has-visual]");
     if (!intro?.firstElementChild)
@@ -262,11 +269,14 @@ describe("BenefitsAnimation3", () => {
         const label = element(selector);
         expect(getComputedStyle(label).whiteSpace).toBe("nowrap");
         expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth + 1);
-        expect(label.getBoundingClientRect().right).toBeLessThanOrEqual(
-          bounds.right + 1,
-        );
+        const labelBounds = label.getBoundingClientRect();
+        expect(labelBounds.left).toBeGreaterThanOrEqual(bounds.left);
+        expect(labelBounds.right).toBeLessThanOrEqual(bounds.right + 1);
+        expect(labelBounds.top).toBeGreaterThanOrEqual(bounds.top);
+        expect(labelBounds.bottom).toBeLessThanOrEqual(bounds.bottom);
       }
       const plot = element("[data-rate-chart]").getBoundingClientRect();
+      expect(plot.right).toBeCloseTo(reference.right, 1);
       const month = element('[data-axis-month="3"]').getBoundingClientRect();
       expect((month.left + month.right) / 2).toBeCloseTo(
         plot.left + (plot.width * 320) / 480,
@@ -307,21 +317,26 @@ describe("BenefitsAnimation3", () => {
       for (const month of [1, 2, 3, 4]) {
         const tick = element(`[data-axis-month="${month}"]`);
         expect(tick.textContent).toBe(`Month ${month}`);
-        expect(getComputedStyle(tick).paddingInlineStart).toBe("8px");
-        expect(getComputedStyle(tick).paddingInlineEnd).toBe("8px");
+        const padding = month === 4 ? "0px" : "8px";
+        expect(getComputedStyle(tick).paddingInlineStart).toBe(padding);
+        expect(getComputedStyle(tick).paddingInlineEnd).toBe(padding);
         const rect = tick.getBoundingClientRect();
         expect(
           rect.left,
           `month ${month} left inset at ${width}px`,
-        ).toBeGreaterThanOrEqual(bounds.left + 8);
+        ).toBeGreaterThanOrEqual(bounds.left);
         expect(
           rect.right,
           `month ${month} right inset at ${width}px`,
-        ).toBeLessThanOrEqual(bounds.right - 8);
-        expect((rect.left + rect.right) / 2).toBeCloseTo(
-          plot.left + (plot.width * (month - 1)) / 3,
-          1,
-        );
+        ).toBeLessThanOrEqual(bounds.right);
+        if (month === 4) {
+          expect(rect.right).toBeCloseTo(plot.right, 1);
+        } else {
+          expect((rect.left + rect.right) / 2).toBeCloseTo(
+            plot.left + (plot.width * (month - 1)) / 3,
+            1,
+          );
+        }
         expect((rect.top + rect.bottom) / 2).toBeCloseTo(
           plot.top + (plot.height * 180) / 184,
           1,
@@ -343,7 +358,11 @@ describe("BenefitsAnimation3", () => {
       );
       expect(savedStyle.opacity).toBe(getComputedStyle(line).opacity);
       const segmentBounds = savedSegment.getBoundingClientRect();
-      expect(segmentBounds.right).toBeCloseTo(plot.right, 1);
+      const lastMonth = element(
+        '[data-axis-month="4"]',
+      ).getBoundingClientRect();
+      const periodEndX = (lastMonth.left + lastMonth.right) / 2;
+      expect(segmentBounds.right).toBeCloseTo(periodEndX, 1);
       expect((segmentBounds.top + segmentBounds.bottom) / 2).toBeCloseTo(
         plot.top + (58 / 184) * plot.height,
         1,
@@ -356,7 +375,7 @@ describe("BenefitsAnimation3", () => {
       expect(endpoint.parentElement).toBe(element("[data-banked]"));
       expect(endpointBounds.width).toBeCloseTo(pointSize, 1);
       expect((endpointBounds.left + endpointBounds.right) / 2).toBeCloseTo(
-        plot.right,
+        periodEndX,
         1,
       );
       expect((endpointBounds.top + endpointBounds.bottom) / 2).toBeCloseTo(
@@ -498,7 +517,10 @@ describe("BenefitsAnimation3", () => {
     expect(opacity("[data-decrease]")).toBe(1);
     expect(opacity("[data-pause-note]")).toBe(1);
     expect(scene().querySelectorAll("[style]")).toHaveLength(1);
-    expect(element("[data-rate-chart]").style.length).toBe(2);
+    expect(element("[data-rate-chart]").style.length).toBe(3);
+    expect(
+      element("[data-rate-chart]").style.getPropertyValue("--period-end-inset"),
+    ).toMatch(/px$/);
     expect(
       element("[data-rate-chart]").style.getPropertyValue(
         "--billing-callout-width",

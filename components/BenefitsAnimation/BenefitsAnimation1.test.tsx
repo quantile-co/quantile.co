@@ -20,10 +20,10 @@ describe("BenefitsAnimation1", () => {
       "Cardholder",
       "•••••• ••••••••",
       "•• / ••",
-      "GitHub",
-      "Linear",
-      "Slack",
-      "Cloud",
+      "Version control",
+      "Project management",
+      "Messaging",
+      "Cloud platform",
       "Handle late arriving events",
       "#1941",
       "1 in progress",
@@ -38,6 +38,22 @@ describe("BenefitsAnimation1", () => {
     expect(html).toContain("data-quantity-one");
     expect([...html.matchAll(/data-issue="\d"/g)]).toHaveLength(3);
     expect([...html.matchAll(/data-connection="\d"/g)]).toHaveLength(4);
+    expect([...html.matchAll(/data-tool-logos="\d"/g)]).toHaveLength(4);
+    for (const brand of [
+      "GitHub",
+      "GitLab",
+      "Bitbucket",
+      "Jira",
+      "Trello",
+      "Asana",
+      "Slack",
+      "Microsoft Teams",
+      "Discord",
+      "AWS",
+      "Azure",
+      "Cloudflare",
+    ])
+      expect(html).toContain(`data-system-logo="${brand}"`);
     expect(html).not.toContain('data-panel="email"');
     expect(html).not.toContain("data-animated");
   });

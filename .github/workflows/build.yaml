@@ -64,9 +64,14 @@ jobs:
           jq -e '.firestore | (type == "object" and .rules == "firestore.rules")' firebase.json > /dev/null
           test -s firestore.rules
           git archive --format=zip --output="$RUNNER_TEMP/source.zip" HEAD
-          printf '%s\n' "$APP_SHA" > "$RUNNER_TEMP/source.sha"
-          (cd "$RUNNER_TEMP" && sha256sum source.zip > source.zip.sha256)
           cp firestore.rules "$RUNNER_TEMP/firestore.rules"
+          jq -n --arg version "$RELEASE_VERSION" --arg sha "$APP_SHA" \
+            --arg check "$CHECK_RUN_ID" --arg build "$GITHUB_RUN_ID" \
+            --arg source "$(sha256sum "$RUNNER_TEMP/source.zip" | cut -d' ' -f1)" \
+            --arg rules "$(sha256sum "$RUNNER_TEMP/firestore.rules" | cut -d' ' -f1)" \
+            '{schema_version: 1, version: $version, app_sha: $sha,
+              check_run_id: $check, build_run_id: $build,
+              source_sha256: $source, rules_sha256: $rules}' > "$RUNNER_TEMP/release.json"
 
       - name: Publish reviewed source release
         env:
@@ -79,20 +84,22 @@ jobs:
             echo "Tag $tag already exists; inspect any partial release before retrying." >&2
             exit 1
           fi
-          notes=$(jq -nc --arg sha "$APP_SHA" --arg check "$CHECK_RUN_ID" \
-            --arg build "$GITHUB_RUN_ID" \
-            '{app_sha: $sha, check_run_id: $check, build_run_id: $build}')
+          gh api --method POST "repos/$GH_REPO/releases/generate-notes" \
+            -f "tag_name=$tag" -f "target_commitish=$APP_SHA" \
+            --jq .body > "$RUNNER_TEMP/notes.md"
+          printf '\n\n### Build provenance\n\n- [Source commit](https://github.com/%s/commit/%s)\n- [Check](https://github.com/%s/actions/runs/%s)\n- [Build](https://github.com/%s/actions/runs/%s)\n\nReviewed source and client Rules are attached. Machine-readable provenance and checksums are in `release.json`.\n' \
+            "$GH_REPO" "$APP_SHA" "$GH_REPO" "$CHECK_RUN_ID" "$GH_REPO" "$GITHUB_RUN_ID" \
+            >> "$RUNNER_TEMP/notes.md"
           existing=$(gh api "repos/$GH_REPO/releases?per_page=100" \
             | jq -c --arg tag "$tag" '[.[] | select(.tag_name == $tag)]')
           case "$(jq 'length' <<< "$existing")" in
             0)
               gh release create "$tag" \
                 "$RUNNER_TEMP/source.zip#source.zip" \
-                "$RUNNER_TEMP/source.sha#source.sha" \
-                "$RUNNER_TEMP/source.zip.sha256#source.zip.sha256" \
                 "$RUNNER_TEMP/firestore.rules#firestore.rules" \
-                --target "$APP_SHA" --title "Application source $tag" \
-                --notes "$notes" --latest=false --draft
+                "$RUNNER_TEMP/release.json#release.json" \
+                --target "$APP_SHA" --title "$tag" \
+                --notes-file "$RUNNER_TEMP/notes.md" --latest=false --draft
               ;;
             1)
               jq -e '.[0].draft == true' <<< "$existing" > /dev/null
@@ -101,22 +108,25 @@ jobs:
           esac
 
           # Draft releases are absent from REST /releases/tags until publication.
-          release=$(gh release view "$tag" --json tagName,isDraft,targetCommitish,body,assets)
-          jq -e --arg tag "$tag" --arg sha "$APP_SHA" --arg check "$CHECK_RUN_ID" '
+          release=$(gh release view "$tag" --json tagName,isDraft,targetCommitish,assets)
+          jq -e --arg tag "$tag" --arg sha "$APP_SHA" '
             .tagName == $tag and .isDraft == true and .targetCommitish == $sha and
-            (.body | fromjson | .app_sha == $sha and .check_run_id == $check and
-              (.build_run_id | test("^[1-9][0-9]*$"))) and
-            ([.assets[].name] | sort) ==
-              (["firestore.rules", "source.sha", "source.zip", "source.zip.sha256"] | sort)
+            ([.assets[].name] | sort) == (["firestore.rules", "release.json", "source.zip"] | sort)
           ' <<< "$release" > /dev/null
           mkdir -p "$RUNNER_TEMP/release"
           gh release download "$tag" --dir "$RUNNER_TEMP/release"
-          for name in source.zip source.sha source.zip.sha256 firestore.rules; do
+          for name in source.zip firestore.rules release.json; do
             digest=$(jq -er --arg name "$name" '.assets[] | select(.name == $name) | .digest' <<< "$release")
             test "$digest" = "sha256:$(sha256sum "$RUNNER_TEMP/release/$name" | cut -d' ' -f1)"
           done
-          test "$(< "$RUNNER_TEMP/release/source.sha")" = "$APP_SHA"
-          (cd "$RUNNER_TEMP/release" && sha256sum -c source.zip.sha256)
+          jq -e --arg tag "$tag" --arg sha "$APP_SHA" --arg check "$CHECK_RUN_ID" \
+            --arg source "$(sha256sum "$RUNNER_TEMP/release/source.zip" | cut -d' ' -f1)" \
+            --arg rules "$(sha256sum "$RUNNER_TEMP/firestore.rules" | cut -d' ' -f1)" '
+            keys == ["app_sha", "build_run_id", "check_run_id", "rules_sha256", "schema_version", "source_sha256", "version"] and
+            .schema_version == 1 and .version == $tag and .app_sha == $sha and .check_run_id == $check and
+            (.build_run_id | type == "string" and test("^[1-9][0-9]*$")) and
+            .source_sha256 == $source and .rules_sha256 == $rules
+          ' "$RUNNER_TEMP/release/release.json" > /dev/null
           cmp "$RUNNER_TEMP/release/firestore.rules" "$RUNNER_TEMP/firestore.rules"
           python3 - "$RUNNER_TEMP/source.zip" "$RUNNER_TEMP/release/source.zip" <<'PY'
           import sys
@@ -141,9 +151,25 @@ jobs:
               raise SystemExit("Draft source differs from reviewed tracked source")
           PY
 
-          # A previous failed Build may leave an intact draft. Point its notes
-          # at this run only after confirming that its assets match this commit.
-          gh release edit "$tag" --notes "$notes" --draft=false
+          # An approved retry may resume an intact draft. Refresh only its
+          # publishing run after verifying every asset and the tracked source.
+          # Preserve the verified archive digest, even if ZIP compression differs.
+          jq --arg build "$GITHUB_RUN_ID" '.build_run_id = $build' \
+            "$RUNNER_TEMP/release/release.json" > "$RUNNER_TEMP/release.json"
+          if ! cmp -s "$RUNNER_TEMP/release.json" "$RUNNER_TEMP/release/release.json"; then
+            gh release upload "$tag" "$RUNNER_TEMP/release.json#release.json" --clobber
+            cp "$RUNNER_TEMP/release.json" "$RUNNER_TEMP/release/release.json"
+          fi
+          release=$(gh release view "$tag" --json tagName,isDraft,targetCommitish,assets)
+          jq -e --arg tag "$tag" --arg sha "$APP_SHA" '
+            .tagName == $tag and .isDraft == true and .targetCommitish == $sha and
+            ([.assets[].name] | sort) == (["firestore.rules", "release.json", "source.zip"] | sort)
+          ' <<< "$release" > /dev/null
+          for name in source.zip firestore.rules release.json; do
+            digest=$(jq -er --arg name "$name" '.assets[] | select(.name == $name) | .digest' <<< "$release")
+            test "$digest" = "sha256:$(sha256sum "$RUNNER_TEMP/release/$name" | cut -d' ' -f1)"
+          done
+          gh release edit "$tag" --title "$tag" --notes-file "$RUNNER_TEMP/notes.md" --draft=false
           published=
           for attempt in $(seq 1 12); do
             candidate=$(gh api "repos/$GH_REPO/releases/tags/$tag" 2>/dev/null) || { sleep 5; continue; }
@@ -155,15 +181,24 @@ jobs:
             sleep 5
           done
           test -n "$published" || {
-            echo "Release $tag is not verifiably immutable; inspect before any private Build." >&2
+            echo "Release $tag failed immutability verification; inspect before using its assets." >&2
             exit 1
           }
           digest=$(sha256sum "$RUNNER_TEMP/release/source.zip" | cut -d' ' -f1)
           asset_id=$(jq -er --arg digest "sha256:$digest" '
             .assets[] | select(.name == "source.zip" and .digest == $digest) | .id
           ' <<< "$published")
-          jq -e --arg sha "$APP_SHA" --arg check "$CHECK_RUN_ID" --arg build "$GITHUB_RUN_ID" '
-            .body | fromjson | .app_sha == $sha and .check_run_id == $check and .build_run_id == $build
+          jq -e --arg tag "$tag" --arg sha "$APP_SHA" '
+            .name == $tag and .target_commitish == $sha and
+            ([.assets[].name] | sort) == (["firestore.rules", "release.json", "source.zip"] | sort)
           ' <<< "$published" > /dev/null
-          printf 'Published immutable source release `%s` from Check `%s` (SHA `%s`). Source asset ID `%s`, SHA256 `%s`. No deployment.\n' \
+          for name in source.zip firestore.rules release.json; do
+            digest=$(jq -er --arg name "$name" '.assets[] | select(.name == $name) | .digest' <<< "$published")
+            test "$digest" = "sha256:$(sha256sum "$RUNNER_TEMP/release/$name" | cut -d' ' -f1)"
+          done
+          gh api "repos/$GH_REPO/git/ref/tags/$tag" | jq -e --arg sha "$APP_SHA" '
+            .object.type == "commit" and .object.sha == $sha
+          ' > /dev/null
+          digest=$(sha256sum "$RUNNER_TEMP/release/source.zip" | cut -d' ' -f1)
+          printf 'Published immutable source release `%s` from Check `%s` (SHA `%s`). Source asset ID `%s`, SHA256 `%s`.\n' \
             "$tag" "$CHECK_RUN_ID" "$APP_SHA" "$asset_id" "$digest" >> "$GITHUB_STEP_SUMMARY"

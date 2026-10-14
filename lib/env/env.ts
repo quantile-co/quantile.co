@@ -118,6 +118,33 @@ export function runtimeEnvironment(): Environment {
 
 // Readers accept an explicit snapshot so both Next routes and the local launcher
 // use the same rules without a global config object or import-time validation.
+// The layout passes explicit NEXT_PUBLIC_ reads so Next freezes these optional
+// settings at build time. Never fall back to a production site ID or hostname.
+export function readFathomSettings(env: Environment) {
+  if (env.NODE_ENV !== "production" || !env.NEXT_PUBLIC_FATHOM_SITE_ID?.trim())
+    return null;
+  const parsed = z
+    .object({
+      siteId: z.string().regex(/^[A-Z0-9]{8}$/),
+      domains: z
+        .array(
+          z
+            .string()
+            .max(253)
+            .regex(/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/),
+        )
+        .min(1),
+    })
+    .safeParse({
+      siteId: env.NEXT_PUBLIC_FATHOM_SITE_ID.trim(),
+      domains: env.NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS?.split(",").map(
+        (domain) => domain.trim().toLowerCase(),
+      ),
+    });
+  if (!parsed.success) throw new Error("Invalid Fathom configuration.");
+  return { ...parsed.data, domains: [...new Set(parsed.data.domains)] };
+}
+
 export function readStripeEventMode(env: Environment) {
   const livemode =
     stripeEventLivemodeSchema.parse(env.STRIPE_EVENT_LIVEMODE) === "true";

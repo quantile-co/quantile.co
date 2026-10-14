@@ -2,15 +2,27 @@
 
 import {
   IconArrowRight,
+  IconBrandAsana,
+  IconBrandAws,
+  IconBrandAzure,
+  IconBrandBitbucket,
+  IconBrandCloudflare,
+  IconBrandDiscord,
   IconBrandGithub,
+  IconBrandGitlab,
+  IconBrandJira,
   IconBrandSlack,
   IconBrandStripe,
+  IconBrandTeams,
+  IconBrandTrello,
   IconCheck,
   IconCloud,
   IconCreditCard,
+  IconGitBranch,
   IconGripVertical,
   IconLayoutKanban,
   IconLock,
+  IconMessages,
   IconMinus,
   IconPlus,
 } from "@tabler/icons-react";
@@ -21,26 +33,46 @@ import classes from "./BenefitsAnimation1.module.css";
 
 const tools = [
   {
-    name: "GitHub",
-    icon: IconBrandGithub,
+    name: "Version control",
+    icon: IconGitBranch,
+    logos: [
+      { name: "GitHub", icon: IconBrandGithub },
+      { name: "GitLab", icon: IconBrandGitlab },
+      { name: "Bitbucket", icon: IconBrandBitbucket },
+    ],
     origin: "44 45",
     route: "M 0 0 H -2 Q -4 0 -4 -2 V -23 Q -4 -25 -6 -25 H -12",
   },
   {
-    name: "Linear",
+    name: "Project management",
     icon: IconLayoutKanban,
+    logos: [
+      { name: "Jira", icon: IconBrandJira },
+      { name: "Trello", icon: IconBrandTrello },
+      { name: "Asana", icon: IconBrandAsana },
+    ],
     origin: "56 45",
     route: "M 0 0 H 2 Q 4 0 4 -2 V -23 Q 4 -25 6 -25 H 12",
   },
   {
-    name: "Slack",
-    icon: IconBrandSlack,
+    name: "Messaging",
+    icon: IconMessages,
+    logos: [
+      { name: "Slack", icon: IconBrandSlack },
+      { name: "Microsoft Teams", icon: IconBrandTeams },
+      { name: "Discord", icon: IconBrandDiscord },
+    ],
     origin: "44 55",
     route: "M 0 0 H -2 Q -4 0 -4 2 V 23 Q -4 25 -6 25 H -12",
   },
   {
-    name: "Cloud",
+    name: "Cloud platform",
     icon: IconCloud,
+    logos: [
+      { name: "AWS", icon: IconBrandAws },
+      { name: "Azure", icon: IconBrandAzure },
+      { name: "Cloudflare", icon: IconBrandCloudflare },
+    ],
     origin: "56 55",
     route: "M 0 0 H 2 Q 4 0 4 2 V 23 Q 4 25 6 25 H 12",
   },
@@ -502,13 +534,26 @@ export function BenefitsAnimation1() {
             <span className={shared.avatar} data-aj data-aj-hub />
           </div>
           <div className={classes.tools}>
-            {tools.map(({ name, icon: Icon }, index) => (
+            {tools.map(({ name, logos, icon: Icon }, index) => (
               <div className={classes.accessRow} key={name}>
                 <div className={classes.tool} data-tool-card={index}>
                   <div className={classes.toolHeading}>
                     <Icon data-tool-icon={index} />
                     <strong>{name}</strong>
                   </div>
+                  <span
+                    className={classes.toolDivider}
+                    data-tool-divider={index}
+                  />
+                  <span className={classes.toolLogos} data-tool-logos={index}>
+                    {logos.map(({ name: brand, icon: Logo }) => (
+                      <Logo
+                        key={brand}
+                        data-system-logo={brand}
+                        aria-label={brand}
+                      />
+                    ))}
+                  </span>
                   <span
                     className={classes.accessCheck}
                     data-access-check={index}
