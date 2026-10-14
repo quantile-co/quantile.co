@@ -2,12 +2,33 @@ import "@fontsource-variable/outfit";
 // biome-ignore lint/style/noRestrictedImports: Browser tests need the site's typography and color tokens.
 import "@/app/globals.css";
 import { MantineProvider } from "@mantine/core";
+import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { page } from "vitest/browser";
+import { cdp, page } from "vitest/browser";
 // biome-ignore lint/style/noRestrictedImports: Match the site's actual typography in responsive browser checks.
 import { theme } from "@/app/theme";
 import { BenefitsAnimation2 } from "./BenefitsAnimation2";
+
+// Scope React's act environment to explicit updates. Browser-delivered
+// observer callbacks still run normally between those boundaries.
+const actEnvironment = globalThis as typeof globalThis & {
+  IS_REACT_ACT_ENVIRONMENT?: boolean;
+};
+async function update(action: () => void | Promise<void>) {
+  const previous = actEnvironment.IS_REACT_ACT_ENVIRONMENT;
+  actEnvironment.IS_REACT_ACT_ENVIRONMENT = true;
+  try {
+    await act(action);
+  } finally {
+    if (previous === undefined) delete actEnvironment.IS_REACT_ACT_ENVIRONMENT;
+    else actEnvironment.IS_REACT_ACT_ENVIRONMENT = previous;
+  }
+}
+const advance = (duration: number) =>
+  update(async () => {
+    await vi.advanceTimersByTimeAsync(duration);
+  });
 
 let container: HTMLDivElement;
 let root: Root | undefined;
@@ -29,10 +50,11 @@ function motionPreference(reduced: boolean) {
   vi.spyOn(window, "matchMedia").mockImplementation((media) =>
     media === query.media ? (query as MediaQueryList) : nativeMatchMedia(media),
   );
-  return (matches: boolean) => {
-    query.matches = matches;
-    query.dispatchEvent(new Event("change"));
-  };
+  return (matches: boolean) =>
+    update(() => {
+      query.matches = matches;
+      query.dispatchEvent(new Event("change"));
+    });
 }
 
 async function mount(colorScheme: "light" | "dark" = "light") {
@@ -40,16 +62,20 @@ async function mount(colorScheme: "light" | "dark" = "light") {
   container.style.padding = "20px";
   document.body.appendChild(container);
   root = createRoot(container);
-  root.render(
-    <MantineProvider theme={theme} forceColorScheme={colorScheme}>
-      <BenefitsAnimation2 />
-    </MantineProvider>,
-  );
-  await vi.waitFor(() =>
-    expect(container.querySelector("[data-current]")).not.toBeNull(),
+  await update(() =>
+    root?.render(
+      <MantineProvider theme={theme} forceColorScheme={colorScheme}>
+        <BenefitsAnimation2 />
+      </MantineProvider>,
+    ),
   );
   await document.fonts.ready;
-  await frame();
+  // Allow the real IntersectionObserver to deliver visibility, then flush
+  // React's resulting render/effects before installing the fake dwell clock.
+  await update(async () => {
+    await frame();
+    await frame();
+  });
 }
 
 function current() {
@@ -59,9 +85,10 @@ function current() {
 }
 
 afterEach(async () => {
+  await cdp().send("Emulation.setCPUThrottlingRate", { rate: 1 });
   if (samplingFrame !== undefined) cancelAnimationFrame(samplingFrame);
   samplingFrame = undefined;
-  root?.unmount();
+  await update(() => root?.unmount());
   root = undefined;
   container?.remove();
   vi.useRealTimers();
@@ -311,15 +338,16 @@ describe("BenefitsAnimation2", () => {
     }
   });
 
-  it("progresses through review, optional call, approval and merge, then loops", async () => {
+  it.each([
+    1, 6,
+  ])("progresses through review, optional call, approval and merge, then loops at %ix CPU slowdown", async (rate) => {
+    await cdp().send("Emulation.setCPUThrottlingRate", { rate });
     const setReducedMotion = motionPreference(true);
     await mount();
-    // Start playback only after installing fake dwell timers.
-    await frame();
+    // Own every dwell timer, including the first one. Keep WAAPI and RAF real.
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
-    setReducedMotion(false);
-    await frame();
-    await frame();
+    await setReducedMotion(false);
+    expect(vi.getTimerCount()).toBe(1);
 
     const cardWidth = current().getBoundingClientRect().width;
     const scene = container.querySelector<HTMLElement>(
@@ -344,13 +372,13 @@ describe("BenefitsAnimation2", () => {
     };
     sampleMovement();
     // Only the first viewing has a shorter hold; regular loops retain 3.6s.
-    await vi.advanceTimersByTimeAsync(1199);
+    await advance(1199);
     await frame();
     expect(current().dataset.activity).toBe("0");
     for (const [index, duration] of [
       1, 3000, 3600, 3200, 3200, 3600, 2600, 3200,
     ].entries()) {
-      await vi.advanceTimersByTimeAsync(duration);
+      await advance(duration);
       await frame();
       await frame();
       expect(current().dataset.activity).toBe(String((index + 1) % 8));
@@ -399,41 +427,52 @@ describe("BenefitsAnimation2", () => {
     if (samplingFrame !== undefined) cancelAnimationFrame(samplingFrame);
     samplingFrame = undefined;
     expect(backwardsJumps).toEqual([]);
-    await vi.advanceTimersByTimeAsync(3599);
+    await advance(3599);
     await frame();
     expect(current().dataset.activity).toBe("0");
-    await vi.advanceTimersByTimeAsync(1);
+    await advance(1);
     await frame();
     expect(current().dataset.activity).toBe("1");
+    expect(vi.getTimerCount()).toBe(1);
     const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
-    document.dispatchEvent(new Event("visibilitychange"));
-    await frame();
-    await vi.advanceTimersByTimeAsync(20000);
+    await update(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(vi.getTimerCount()).toBe(0);
+    await advance(20000);
     await frame();
     expect(current().dataset.activity).toBe("1");
     hidden.mockReturnValue(false);
-    document.dispatchEvent(new Event("visibilitychange"));
-    await frame();
+    await update(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(vi.getTimerCount()).toBe(1);
     await frame();
     expect(
       new DOMMatrixReadOnly(getComputedStyle(current()).transform).m42,
     ).toBe(8);
+    await advance(2999);
+    expect(current().dataset.activity).toBe("1");
+    await advance(1);
+    expect(current().dataset.activity).toBe("2");
   });
 
   it("responds to motion preference changes and stops timers on unmount", async () => {
-    const setReducedMotion = motionPreference(false);
+    const setReducedMotion = motionPreference(true);
     await mount();
-    await vi.waitFor(() => expect(current().dataset.activity).toBe("0"));
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
-    setReducedMotion(true);
-    await frame();
-    await vi.advanceTimersByTimeAsync(20000);
+    await setReducedMotion(false);
+    expect(current().dataset.activity).toBe("0");
+    expect(vi.getTimerCount()).toBe(1);
+    await setReducedMotion(true);
+    expect(vi.getTimerCount()).toBe(0);
+    await advance(20000);
     expect(current().dataset.activity).toBe("2");
     expect(container.querySelector("button")).toBeNull();
-    setReducedMotion(false);
-    await frame();
+    await setReducedMotion(false);
     expect(current().dataset.activity).toBe("0");
-    root?.unmount();
+    expect(vi.getTimerCount()).toBe(1);
+    await update(() => root?.unmount());
     root = undefined;
     expect(vi.getTimerCount()).toBe(0);
   });
