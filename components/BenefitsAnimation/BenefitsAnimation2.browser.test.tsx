@@ -407,7 +407,9 @@ describe("BenefitsAnimation2", () => {
     expect(current().dataset.activity).toBe("1");
     const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
     document.dispatchEvent(new Event("visibilitychange"));
-    await frame();
+    // Wait until React commits the hidden-tab effect and clears the current
+    // timeout before advancing fake time; a single frame can race in CI.
+    await vi.waitFor(() => expect(vi.getTimerCount()).toBe(0));
     await vi.advanceTimersByTimeAsync(20000);
     await frame();
     expect(current().dataset.activity).toBe("1");
