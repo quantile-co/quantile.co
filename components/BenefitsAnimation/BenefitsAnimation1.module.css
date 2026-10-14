@@ -264,6 +264,31 @@
   stroke-width: 1.5;
 }
 
+.subscribeCheck,
+.accessCheck {
+  display: grid;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  place-items: center;
+  color: var(--site-surface-raised);
+  background: var(--site-text-primary);
+}
+
+.subscribeCheck {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.subscribeCheck svg,
+.accessCheck svg {
+  stroke-width: 3;
+}
+
+.subscribeCheck svg {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
 .access {
   position: absolute;
   inset: 0;
@@ -369,12 +394,8 @@
   position: absolute;
   top: 0.25rem;
   right: 0.25rem;
-  display: grid;
   width: 1rem;
   height: 1rem;
-  border-radius: 50%;
-  place-items: center;
-  color: var(--site-text-primary);
 }
 
 .accessCheck svg {

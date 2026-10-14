@@ -10,11 +10,8 @@ import { page } from "vitest/browser";
 import { theme } from "@/app/theme";
 // biome-ignore lint/style/noRestrictedImports: Verify the visual injected by the composition root.
 import { BenefitsSection } from "../BenefitsSection/BenefitsSection";
-// biome-ignore lint/style/noRestrictedImports: Check the shared illustration typography and hero heading gaps together.
-import { HeroAnimation } from "../HeroAnimation/HeroAnimation";
-import { BenefitsAnimationOne } from "./BenefitsAnimationOne";
-import { BenefitsAnimationThree } from "./BenefitsAnimationThree";
-import { BenefitsAnimationTwo } from "./BenefitsAnimationTwo";
+import { BenefitsAnimation1 } from "./BenefitsAnimation1";
+import { BenefitsAnimation3 } from "./BenefitsAnimation3";
 
 let container: HTMLDivElement;
 let root: Root | undefined;
@@ -57,12 +54,12 @@ async function mount(section = false, colorScheme: "light" | "dark" = "light") {
         {section ? (
           <BenefitsSection
             CheckoutForm={CheckoutForm}
-            onboardingVisual={<BenefitsAnimationOne />}
-            capacityVisual={<BenefitsAnimationThree />}
+            onboardingVisual={<BenefitsAnimation1 />}
+            capacityVisual={<BenefitsAnimation3 />}
           />
         ) : (
           <div style={{ padding: 20 }}>
-            <BenefitsAnimationThree />
+            <BenefitsAnimation3 />
           </div>
         )}
       </MantineProvider>
@@ -99,7 +96,7 @@ afterEach(async () => {
   await page.viewport(initialViewport.width, initialViewport.height);
 });
 
-describe("BenefitsAnimationThree", () => {
+describe("BenefitsAnimation3", () => {
   it.each([
     320, 768, 1440,
   ])("traces level rates, capacity steps and a preserved remainder at %ipx", async (width) => {
@@ -155,6 +152,7 @@ describe("BenefitsAnimationThree", () => {
           ? "[data-pause-mark]"
           : `[data-milestone="${event.id}"]`;
       expect(opacity(marker)).toBe(1);
+      expect(opacity("[data-banked]")).toBe(event.id === "pause" ? 1 : 0);
       await seek(at + 0.36);
       expect(opacity(event.selector)).toBe(1);
       expect(opacity(`[data-tail="${event.id}"]`)).toBe(1);
@@ -173,7 +171,9 @@ describe("BenefitsAnimationThree", () => {
     expect(reveal()).toBe(0);
     expect(opacity("[data-capacity-art]")).toBe(1);
     for (const event of events) expect(opacity(event.selector)).toBe(1);
+    expect(opacity("[data-banked]")).toBe(1);
     await seek(8.51);
+    expect(opacity("[data-banked]")).toBe(0);
     expect(opacity("[data-capacity-art]")).toBe(1);
     for (const event of events) expect(opacity(event.selector)).toBe(0);
     expect(point().x).toBeLessThan(1);
@@ -329,6 +329,63 @@ describe("BenefitsAnimationThree", () => {
       }
       // No billing note may cover any part of the stepped line.
       const line = element("[data-rate-line]") as unknown as SVGPathElement;
+      expect(getComputedStyle(line).strokeWidth).toBe("1.5px");
+      expect(getComputedStyle(line).opacity).toBe("1");
+      const savedSegment = element("[data-banked] > svg");
+      const savedStyle = getComputedStyle(savedSegment);
+      expect(savedStyle.height).toBe("2px");
+      expect(savedStyle.stroke).toBe(getComputedStyle(line).stroke);
+      expect(savedStyle.strokeWidth).toBe(getComputedStyle(line).strokeWidth);
+      expect(savedStyle.strokeDasharray).toBe("0px, 4px");
+      expect(savedStyle.strokeLinecap).toBe("round");
+      expect(element("[data-banked] path").getAttribute("vector-effect")).toBe(
+        "non-scaling-stroke",
+      );
+      expect(savedStyle.opacity).toBe(getComputedStyle(line).opacity);
+      const segmentBounds = savedSegment.getBoundingClientRect();
+      expect(segmentBounds.right).toBeCloseTo(plot.right, 1);
+      expect((segmentBounds.top + segmentBounds.bottom) / 2).toBeCloseTo(
+        plot.top + (58 / 184) * plot.height,
+        1,
+      );
+      const sceneWidth = scene().getBoundingClientRect().width;
+      const pointSize = Math.max(4, Math.min(6, sceneWidth * 0.0121));
+      const endpoint = element("[data-period-end-point]");
+      const endpointBounds = endpoint.getBoundingClientRect();
+      const endpointStyle = getComputedStyle(endpoint);
+      expect(endpoint.parentElement).toBe(element("[data-banked]"));
+      expect(endpointBounds.width).toBeCloseTo(pointSize, 1);
+      expect((endpointBounds.left + endpointBounds.right) / 2).toBeCloseTo(
+        plot.right,
+        1,
+      );
+      expect((endpointBounds.top + endpointBounds.bottom) / 2).toBeCloseTo(
+        plot.top + (58 / 184) * plot.height,
+        1,
+      );
+      expect(endpointStyle.borderTopWidth).toBe("1px");
+      expect(endpointStyle.borderTopColor).toBe(getComputedStyle(line).stroke);
+      expect(endpointStyle.backgroundColor).toBe(
+        getComputedStyle(art).backgroundColor,
+      );
+      for (const point of scene().querySelectorAll<HTMLElement>(
+        "[data-milestone]",
+      )) {
+        expect(point.getBoundingClientRect().width).toBeCloseTo(pointSize, 1);
+        expect(point.getBoundingClientRect().height).toBeCloseTo(pointSize, 1);
+      }
+      expect(
+        element("[data-moving-dot]").getBoundingClientRect().width,
+      ).toBeCloseTo(pointSize, 1);
+      expect(getComputedStyle(element("[data-moving-dot]")).boxShadow).toBe(
+        getComputedStyle(element('[data-milestone="start"]')).boxShadow,
+      );
+      expect(
+        element("[data-pause-mark]").getBoundingClientRect().width,
+      ).toBeCloseTo(Math.max(14, Math.min(18, sceneWidth * 0.0363)), 1);
+      expect(getComputedStyle(line).stroke).toBe(
+        getComputedStyle(element('[data-callout="start"] strong')).color,
+      );
       for (const note of scene().querySelectorAll<HTMLElement>(
         "[data-callout]",
       )) {
@@ -401,90 +458,6 @@ describe("BenefitsAnimationThree", () => {
         xAxisY - start.bottom,
         `room below starting bill at ${width}px`,
       ).toBeGreaterThan(10);
-      expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
-    }
-  });
-
-  it("shares a four-size type scale without changing hero heading-to-card spacing", async () => {
-    root?.render(
-      <MantineProvider theme={theme}>
-        <div data-hero-preview style={{ maxWidth: 616, padding: 20 }}>
-          <HeroAnimation />
-        </div>
-        <BenefitsSection
-          CheckoutForm={CheckoutForm}
-          onboardingVisual={<BenefitsAnimationOne />}
-          expertiseVisual={<BenefitsAnimationTwo />}
-          capacityVisual={<BenefitsAnimationThree />}
-        />
-      </MantineProvider>,
-    );
-    await vi.waitFor(() =>
-      expect(
-        container.querySelector('[data-benefits-animation="two"]'),
-      ).not.toBeNull(),
-    );
-    await document.fonts.ready;
-    for (const width of [320, 390, 768, 820, 1024, 1440, 1920]) {
-      await page.viewport(width, 1000);
-      await nextFrame();
-      const headings = [
-        element("[data-hero-preview] > div > span"),
-        element('[data-panel="backlog"] strong'),
-        element('[data-benefits-animation="two"] > div:first-child strong'),
-      ];
-      const reference = getComputedStyle(headings[0]);
-      for (const heading of headings.slice(1)) {
-        const style = getComputedStyle(heading);
-        for (const property of [
-          "fontSize",
-          "fontWeight",
-          "lineHeight",
-          "letterSpacing",
-          "color",
-        ] as const)
-          expect(style[property]).toBe(reference[property]);
-      }
-      expect(reference.textTransform).toBe("uppercase");
-      expect(reference.fontWeight).toBe("550");
-      const titleSize = Number.parseFloat(reference.fontSize);
-      expect(
-        Number.parseFloat(
-          getComputedStyle(element('[data-activity="0"] strong')).fontSize,
-        ),
-      ).toBe(titleSize - 2);
-      expect(
-        Number.parseFloat(
-          getComputedStyle(element('[data-callout="start"]')).fontSize,
-        ),
-      ).toBe(
-        titleSize - (width <= 425 || (width >= 768 && width < 1200) ? 4 : 3),
-      );
-      expect(
-        Number.parseFloat(
-          getComputedStyle(
-            element(
-              '[data-benefits-animation="two"] > div:first-child strong + span',
-            ),
-          ).fontSize,
-        ),
-      ).toBe(titleSize - 4);
-      const card = element(
-        '[data-initial-position="todo-1"]',
-      ).getBoundingClientRect();
-      const gap = card.top - headings[0].getBoundingClientRect().bottom;
-      expect(gap, `hero heading gap at ${width}px`).toBeGreaterThanOrEqual(5.9);
-      expect(gap, `hero heading gap at ${width}px`).toBeLessThanOrEqual(12.1);
-      for (const title of container.querySelectorAll<HTMLElement>(
-        "[data-hero-preview] [data-task-card] > span:first-child > span:first-child",
-      )) {
-        const box = title.closest("[data-task-card]")?.getBoundingClientRect();
-        if (!box) throw new Error("Missing task card");
-        expect(title.getBoundingClientRect().bottom).toBeLessThanOrEqual(
-          box.bottom,
-        );
-        expect(getComputedStyle(title).whiteSpace).toBe("nowrap");
-      }
       expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
     }
   });

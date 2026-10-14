@@ -4,7 +4,7 @@ import { IconPlayerPause } from "@tabler/icons-react";
 import { useAnimate } from "motion/react-mini";
 import { useId, useLayoutEffect } from "react";
 import shared from "./BenefitsAnimation.module.css";
-import classes from "./BenefitsAnimationThree.module.css";
+import classes from "./BenefitsAnimation3.module.css";
 
 // Capacity over time, not completed work or usage. Billing annotations use
 // the approved monthly rate of $4,995 per concurrent issue.
@@ -37,7 +37,7 @@ const journey = [
   { at: duration, x: 388, y: 58, distance: 490 },
 ] as const;
 
-export function BenefitsAnimationThree() {
+export function BenefitsAnimation3() {
   const [scope, animate] = useAnimate<HTMLDivElement>();
   const maskId = useId();
 
@@ -356,7 +356,18 @@ export function BenefitsAnimationThree() {
             </span>
           </span>
           <span className={classes.banked} data-banked>
-            <span className={classes.savedSegment} />
+            <svg
+              className={classes.savedSegment}
+              viewBox="0 0 100 2"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M 0 1 H 100" vectorEffect="non-scaling-stroke" />
+            </svg>
+            <span
+              className={`${classes.milestonePoint} ${classes.periodEndPoint}`}
+              data-period-end-point
+            />
           </span>
           <span className={classes.point} data-rate-point>
             <span className={classes.dot} data-moving-dot />

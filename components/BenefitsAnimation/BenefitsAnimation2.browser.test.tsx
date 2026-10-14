@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { page } from "vitest/browser";
 // biome-ignore lint/style/noRestrictedImports: Match the site's actual typography in responsive browser checks.
 import { theme } from "@/app/theme";
-import { BenefitsAnimationTwo } from "./BenefitsAnimationTwo";
+import { BenefitsAnimation2 } from "./BenefitsAnimation2";
 
 let container: HTMLDivElement;
 let root: Root | undefined;
@@ -42,7 +42,7 @@ async function mount(colorScheme: "light" | "dark" = "light") {
   root = createRoot(container);
   root.render(
     <MantineProvider theme={theme} forceColorScheme={colorScheme}>
-      <BenefitsAnimationTwo />
+      <BenefitsAnimation2 />
     </MantineProvider>,
   );
   await vi.waitFor(() =>
@@ -69,7 +69,7 @@ afterEach(async () => {
   await page.viewport(initialViewport.width, initialViewport.height);
 });
 
-describe("BenefitsAnimationTwo", () => {
+describe("BenefitsAnimation2", () => {
   it("provides a static reduced-motion view that fits narrow and wide screens", async () => {
     motionPreference(true);
     await mount();
@@ -89,8 +89,8 @@ describe("BenefitsAnimationTwo", () => {
       );
       expect(
         scene?.getBoundingClientRect().height,
-        `compact height at ${width}px`,
-      ).toBeLessThanOrEqual(290);
+        `bounded conversation height at ${width}px`,
+      ).toBeLessThanOrEqual(352);
       const bounds = viewport.getBoundingClientRect();
       const entry = current().getBoundingClientRect();
       expect(
@@ -111,7 +111,7 @@ describe("BenefitsAnimationTwo", () => {
   it.each([
     "light",
     "dark",
-  ] as const)("keeps all eight cards single-line and contained across responsive widths in %s mode", async (colorScheme) => {
+  ] as const)("keeps messages readable and the video-call card unchanged across widths in %s mode", async (colorScheme) => {
     motionPreference(true);
     await mount(colorScheme);
     for (const width of [
@@ -128,46 +128,69 @@ describe("BenefitsAnimationTwo", () => {
         scene.querySelectorAll<HTMLElement>("[data-activity]"),
       );
       expect(cards).toHaveLength(8);
-      const artifacts = Array.from(
-        scene.querySelectorAll<HTMLElement>("[data-artifact-kind]"),
-      );
-      expect(artifacts).toHaveLength(7);
-      for (const artifact of artifacts) {
-        expect(
-          getComputedStyle(artifact).display,
-          `desktop-only detail at ${width}px`,
-        ).toBe(width >= 1024 ? "grid" : "none");
-      }
-      if (width >= 1024) {
-        for (const card of cards) {
-          const artifact = card.querySelector<HTMLElement>(
-            "[data-artifact-kind]",
-          );
-          if (!artifact) continue;
-          const lastText = Math.max(
-            ...Array.from(card.querySelectorAll("dd"), (text) => {
-              const box = text.getBoundingClientRect();
-              const range = document.createRange();
-              range.selectNodeContents(text);
-              return Math.min(box.right, range.getBoundingClientRect().right);
-            }),
-          );
-          const cardRight = card.getBoundingClientRect().right;
-          const detailBounds = artifact.getBoundingClientRect();
-          expect(
-            detailBounds.left - lastText,
-            `clear of copy at ${width}px (${artifact.dataset.artifactKind})`,
-          ).toBeGreaterThanOrEqual(7);
-          expect(
-            detailBounds.right,
-            `right-aligned detail at ${width}px`,
-          ).toBeCloseTo(
-            cardRight -
-              Number.parseFloat(getComputedStyle(card).paddingRight) -
-              1,
-            0,
-          );
-          expect(getComputedStyle(artifact).textAlign).toBe("center");
+      expect(
+        scene.querySelector("[data-artifact-kind], dl, dt, dd"),
+      ).toBeNull();
+      expect(scene.textContent).not.toMatch(/\bAI\b/);
+      expect(scene.querySelectorAll("[data-message]")).toHaveLength(7);
+      const callRoom = cards[4].querySelector("[data-call-room]");
+      expect(callRoom?.children).toHaveLength(2);
+      expect(cards[4].querySelector("[data-message]")).toBeNull();
+      for (const message of scene.querySelectorAll<HTMLElement>(
+        "[data-message]",
+      )) {
+        const card = message.closest<HTMLElement>("[data-activity]");
+        if (!card) throw new Error("Missing message card");
+        const box = message.getBoundingClientRect();
+        const cardBox = card.getBoundingClientRect();
+        const style = getComputedStyle(message);
+        const cardStyle = getComputedStyle(card);
+        expect(box.left).toBeCloseTo(
+          cardBox.left + Number.parseFloat(cardStyle.paddingLeft) + 1,
+          1,
+        );
+        expect(box.right).toBeCloseTo(
+          cardBox.right - Number.parseFloat(cardStyle.paddingRight) - 1,
+          1,
+        );
+        expect(style.whiteSpace).toBe("normal");
+        expect(style.textOverflow).not.toBe("ellipsis");
+        expect(message.scrollWidth).toBeLessThanOrEqual(message.clientWidth);
+        const lines = box.height / Number.parseFloat(style.lineHeight);
+        expect(lines, `paragraph lines at ${width}px`).toBeGreaterThanOrEqual(
+          0.9,
+        );
+        expect(lines, `paragraph lines at ${width}px`).toBeLessThanOrEqual(4.1);
+        const body = card.querySelector<HTMLElement>("[data-message-body]");
+        const bullets = card.querySelectorAll<HTMLElement>(
+          "[data-message-body] li",
+        );
+        if (!body) throw new Error("Missing message body");
+        expect(body.firstElementChild).toBe(message);
+        const hasBullets = [0, 2, 3, 5].includes(Number(card.dataset.activity));
+        expect(bullets).toHaveLength(hasBullets ? 2 : 0);
+        expect(body.children).toHaveLength(hasBullets ? 2 : 1);
+        for (const bullet of bullets) {
+          const bulletStyle = getComputedStyle(bullet);
+          expect(bulletStyle.fontSize).toBe(style.fontSize);
+          expect(bulletStyle.lineHeight).toBe(style.lineHeight);
+          expect(bulletStyle.fontWeight).toBe(style.fontWeight);
+          expect(bullet.scrollWidth).toBeLessThanOrEqual(bullet.clientWidth);
+        }
+        const header = card.firstElementChild?.getBoundingClientRect();
+        const footer = card.lastElementChild?.getBoundingClientRect();
+        if (!header || !footer) throw new Error("Missing message chrome");
+        expect(body.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+          header.bottom + 5,
+        );
+        expect(body.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+          footer.top - 5,
+        );
+        const range = document.createRange();
+        range.selectNodeContents(message);
+        for (const line of range.getClientRects()) {
+          expect(line.left).toBeGreaterThanOrEqual(box.left - 1);
+          expect(line.right).toBeLessThanOrEqual(box.right + 1);
         }
       }
       const avatarSize = cards[0]
@@ -219,13 +242,25 @@ describe("BenefitsAnimationTwo", () => {
           bounds.width,
           `card ${card.dataset.activity} at ${width}px`,
         ).toBeCloseTo(cards[0].getBoundingClientRect().width, 1);
-        expect(bounds.height, `card height at ${width}px`).toBe(
-          width >= 768 && width < 1024
-            ? 152
-            : width >= 1024 && width < 1200
-              ? 160
-              : 168,
-        );
+        if (card.querySelector("[data-call-room]")) {
+          expect(bounds.height, `unchanged call height at ${width}px`).toBe(
+            width >= 768 && width < 1024
+              ? 152
+              : width >= 1024 && width < 1200
+                ? 160
+                : 168,
+          );
+        } else {
+          expect(
+            bounds.height,
+            `modest message height at ${width}px`,
+          ).toBeLessThanOrEqual(216);
+          if (!card.querySelector("ul"))
+            expect(bounds.height).toBeLessThan(
+              cards[0].getBoundingClientRect().height,
+            );
+        }
+        expect(card.scrollHeight).toBeLessThanOrEqual(card.clientHeight);
         expect(
           card.scrollWidth,
           `card overflow at ${width}px`,
@@ -237,7 +272,7 @@ describe("BenefitsAnimationTwo", () => {
             `metadata at ${width}px`,
           ).toBe(width >= 768 && width < 1024 ? 22 : 24);
           const author = meta.querySelector("strong");
-          const mainRow = card.querySelector<HTMLElement>("dd");
+          const mainRow = card.querySelector<HTMLElement>("[data-message]");
           if (author && mainRow) {
             expect(
               getComputedStyle(mainRow).fontSize,
@@ -246,8 +281,17 @@ describe("BenefitsAnimationTwo", () => {
           }
         }
       }
+      const tallestCard = Math.max(
+        ...cards.map((card) => card.getBoundingClientRect().height),
+      );
+      const travelSpace =
+        width < 768 ? 72 : width < 1024 ? 136 : width < 1200 ? 128 : 120;
+      expect(scene.getBoundingClientRect().height).toBeCloseTo(
+        tallestCard + travelSpace,
+        1,
+      );
       for (const text of scene.querySelectorAll<HTMLElement>(
-        '[class*="issueCopy"] > *, [class*="messageMeta"] strong, [class*="label"], [class*="day"], dt, dd, [class*="detailText"], [class*="participantName"], [class*="mergeOutcome"], [class*="mergeHeading"] strong',
+        '[class*="issueCopy"] > *, [class*="messageMeta"] strong, [class*="label"], [class*="day"], [class*="detailText"], [class*="participantName"], [class*="mergeOutcome"], [class*="mergeHeading"] strong',
       )) {
         const style = getComputedStyle(text);
         expect(style.whiteSpace, `${text.textContent} at ${width}px`).toBe(
@@ -278,6 +322,11 @@ describe("BenefitsAnimationTwo", () => {
     await frame();
 
     const cardWidth = current().getBoundingClientRect().width;
+    const scene = container.querySelector<HTMLElement>(
+      '[data-benefits-animation="two"]',
+    );
+    if (!scene) throw new Error("Missing conversation");
+    const sceneHeight = scene.getBoundingClientRect().height;
     const statusWidth = container
       .querySelector('[class*="prStatus"]')
       ?.getBoundingClientRect().width;
@@ -294,14 +343,19 @@ describe("BenefitsAnimationTwo", () => {
       samplingFrame = requestAnimationFrame(sampleMovement);
     };
     sampleMovement();
+    // Only the first viewing has a shorter hold; regular loops retain 3.6s.
+    await vi.advanceTimersByTimeAsync(1199);
+    await frame();
+    expect(current().dataset.activity).toBe("0");
     for (const [index, duration] of [
-      3600, 3000, 3600, 3200, 3200, 3600, 2600, 3200,
+      1, 3000, 3600, 3200, 3200, 3600, 2600, 3200,
     ].entries()) {
       await vi.advanceTimersByTimeAsync(duration);
       await frame();
       await frame();
       expect(current().dataset.activity).toBe(String((index + 1) % 8));
       expect(current().getBoundingClientRect().width).toBeCloseTo(cardWidth, 1);
+      expect(scene.getBoundingClientRect().height).toBeCloseTo(sceneHeight, 1);
       expect(
         container.querySelector('[class*="prStatus"]')?.getBoundingClientRect()
           .width,
@@ -345,12 +399,18 @@ describe("BenefitsAnimationTwo", () => {
     if (samplingFrame !== undefined) cancelAnimationFrame(samplingFrame);
     samplingFrame = undefined;
     expect(backwardsJumps).toEqual([]);
+    await vi.advanceTimersByTimeAsync(3599);
+    await frame();
+    expect(current().dataset.activity).toBe("0");
+    await vi.advanceTimersByTimeAsync(1);
+    await frame();
+    expect(current().dataset.activity).toBe("1");
     const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
     document.dispatchEvent(new Event("visibilitychange"));
     await frame();
     await vi.advanceTimersByTimeAsync(20000);
     await frame();
-    expect(current().dataset.activity).toBe("0");
+    expect(current().dataset.activity).toBe("1");
     hidden.mockReturnValue(false);
     document.dispatchEvent(new Event("visibilitychange"));
     await frame();

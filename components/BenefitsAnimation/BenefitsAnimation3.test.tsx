@@ -1,10 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { BenefitsAnimationThree } from "./BenefitsAnimationThree";
+import { BenefitsAnimation3 } from "./BenefitsAnimation3";
 
-describe("BenefitsAnimationThree", () => {
+describe("BenefitsAnimation3", () => {
   it("renders a decorative step chart, not a billing dashboard", () => {
-    const html = renderToStaticMarkup(<BenefitsAnimationThree />);
+    const html = renderToStaticMarkup(<BenefitsAnimation3 />);
     expect(html).toContain('aria-hidden="true"');
     expect(html).toContain('data-benefits-animation="three"');
     for (const text of [
@@ -43,8 +43,8 @@ describe("BenefitsAnimationThree", () => {
   it("gives each instance a unique reveal mask", () => {
     const html = renderToStaticMarkup(
       <>
-        <BenefitsAnimationThree />
-        <BenefitsAnimationThree />
+        <BenefitsAnimation3 />
+        <BenefitsAnimation3 />
       </>,
     );
     const ids = [...html.matchAll(/<mask id="([^"]+)"/g)].map(

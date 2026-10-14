@@ -17,7 +17,7 @@ import {
 import { useAnimate } from "motion/react-mini";
 import { useId, useLayoutEffect } from "react";
 import shared from "./BenefitsAnimation.module.css";
-import classes from "./BenefitsAnimationOne.module.css";
+import classes from "./BenefitsAnimation1.module.css";
 
 const tools = [
   {
@@ -47,12 +47,12 @@ const tools = [
 ] as const;
 const issues = [
   { number: "#1642", title: "Add regression evals for tool selection" },
-  { number: "#1941", title: "Handle late-arriving events" },
+  { number: "#1941", title: "Handle late arriving events" },
   { number: "#2176", title: "Pin deployment images to immutable digests" },
 ] as const;
 const duration = 12.49;
 
-export function BenefitsAnimationOne() {
+export function BenefitsAnimation1() {
   const [scope, animate] = useAnimate<HTMLDivElement>();
   const connectionId = useId();
 
@@ -450,7 +450,10 @@ export function BenefitsAnimationOne() {
               Subscribe <IconArrowRight />
             </span>
             <span data-subscribed-label>
-              <IconCheck /> Subscribed
+              <span className={classes.subscribeCheck}>
+                <IconCheck />
+              </span>
+              Subscribed
             </span>
           </span>
         </div>

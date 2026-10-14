@@ -58,7 +58,7 @@
   z-index: 1;
   /* Anchor the label's bottom to the cards, not a viewport percentage. */
   top: calc(var(--todo-card-1-top) - var(--animation-title-size) * var(--animation-line-height) - var(--task-card-gap));
-  color: var(--site-text-primary);
+  color: var(--site-text-secondary);
   font-size: var(--animation-title-size);
   font-weight: var(--animation-weight-strong);
   letter-spacing: var(--animation-title-tracking);
@@ -84,10 +84,10 @@
   height: var(--task-card-height);
   align-items: center;
   padding-inline: clamp(0.375rem, 1.6cqw, 0.625rem);
-  border: 1px solid var(--site-surface-outline);
+  border: 1px solid var(--site-divider-color);
   border-radius: clamp(0.375rem, 1.4cqw, 0.5rem);
   background: var(--site-surface-raised);
-  box-shadow: 0 0.25rem 1rem rgb(9 9 11 / 3%);
+  box-shadow: 0 0.25rem 1rem rgb(9 9 11 / 2%);
   gap: clamp(0.3125rem, 1.4cqw, 0.5rem);
   transform-origin: center;
 }
@@ -155,10 +155,11 @@
   width: 100%;
   min-width: 0;
   color: var(--site-text-primary);
-  font-size: var(--animation-title-size);
+  /* Task text is not a scene heading: retain the original container-responsive
+     11–12px scale and tight leading inside these small Kanban cards. */
+  font-size: clamp(0.6875rem, 2cqw, 0.75rem);
   font-weight: var(--animation-weight-strong);
-  letter-spacing: var(--animation-title-tracking);
-  line-height: 1.15;
+  line-height: 1.1;
 }
 
 .issueMeta {
@@ -178,7 +179,7 @@
   padding-inline: 0.25rem;
   border-radius: 999px;
   color: var(--site-text-secondary);
-  background: var(--site-surface-raised-hover);
+  background: color-mix(in srgb, var(--site-surface-raised-hover) 60%, var(--site-surface-raised));
   font-family: var(--mantine-font-family-monospace);
   font-size: var(--animation-micro-size);
   font-weight: var(--animation-weight-regular);
@@ -202,7 +203,7 @@
   padding-inline: 0.1875rem;
   border-radius: 999px;
   color: var(--site-text-secondary);
-  background: var(--site-surface-raised-hover);
+  background: color-mix(in srgb, var(--site-surface-raised-hover) 60%, var(--site-surface-raised));
   font-size: var(--animation-micro-size);
   font-weight: var(--animation-weight-regular);
   line-height: 1;
@@ -261,7 +262,7 @@
   width: 29%;
   height: 52%;
   overflow: hidden;
-  border: 1px solid var(--site-surface-outline);
+  border: 1px solid var(--site-divider-color);
   border-radius: clamp(0.5rem, 1.6cqw, 0.625rem);
   visibility: hidden;
   grid-template-rows: auto 1fr auto;
@@ -289,13 +290,13 @@
 .fileName {
   min-width: 0;
   flex: 1;
-  color: var(--site-text-primary);
+  color: var(--site-text-secondary);
   font-family: var(--mantine-font-family-monospace);
   font-size: var(--animation-meta-size);
 }
 
 .changeCount {
-  color: var(--site-text-primary);
+  color: var(--site-text-secondary);
   font-family: var(--mantine-font-family-monospace);
   font-size: var(--animation-micro-size);
 }
@@ -318,6 +319,7 @@
 }
 
 .plus {
+  opacity: 0.65;
   color: var(--site-text-secondary);
   font-family: var(--mantine-font-family-monospace);
   font-size: var(--animation-meta-size);
@@ -329,7 +331,7 @@
   height: clamp(0.1875rem, 0.8cqw, 0.3125rem);
   border-radius: 999px;
   background: var(--site-text-secondary);
-  opacity: 0.5;
+  opacity: 0.25;
 }
 
 .codeRow:nth-child(2) .codeLine {
@@ -372,7 +374,7 @@
 }
 
 .smallCheck {
-  color: var(--site-text-primary);
+  color: inherit;
   font-size: 0.5rem;
 }
 
@@ -387,7 +389,7 @@
   width: 29%;
   min-width: 0;
   padding: clamp(0.5rem, 2cqw, 0.75rem);
-  border: 1px solid var(--site-surface-outline);
+  border: 1px solid var(--site-divider-color);
   border-radius: clamp(0.5rem, 1.6cqw, 0.625rem);
   visibility: hidden;
   background: var(--site-surface-raised);
@@ -405,6 +407,7 @@
   color: var(--site-surface-raised);
   background: var(--site-text-primary);
   font-size: clamp(0.625rem, 2cqw, 0.75rem);
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -415,9 +418,8 @@
 }
 
 .mergeTitle {
-  font-size: var(--animation-title-size);
+  font-size: clamp(0.5625rem, 1.9cqw, 0.6875rem);
   font-weight: var(--animation-weight-strong);
-  letter-spacing: var(--animation-title-tracking);
   line-height: 1.15;
 }
 
@@ -457,16 +459,25 @@
   }
 }
 
-@media (min-width: 48em) and (max-width: 50em) {
+@media (min-width: 48em) and (max-width: 63.99em) {
   .scene {
-    height: 11.5rem;
-    aspect-ratio: auto;
+    min-height: 17.5rem;
   }
+}
 
+@media (min-width: 48em) and (max-width: 50em) {
   .check {
     padding-inline: 0;
     border: 0;
     border-radius: 0;
+  }
+}
+
+@media (min-width: 48em) and (max-width: 52em) {
+  @container (max-width: 26rem) {
+    .issueTitle {
+      font-size: clamp(0.625rem, 2.8cqw, 0.6875rem);
+    }
   }
 }
 

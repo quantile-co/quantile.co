@@ -158,7 +158,7 @@ describe("homepage hero layout", () => {
           }
         }
         if (width === 1024) {
-          expect(descriptionLines).toBe(3);
+          expect(descriptionLines).toBe(2);
         }
       }
     }

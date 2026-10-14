@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { BenefitsAnimationOne } from "@/components/BenefitsAnimation/BenefitsAnimationOne";
-import { BenefitsAnimationThree } from "@/components/BenefitsAnimation/BenefitsAnimationThree";
-import { BenefitsAnimationTwo } from "@/components/BenefitsAnimation/BenefitsAnimationTwo";
+import { BenefitsAnimation1 } from "@/components/BenefitsAnimation/BenefitsAnimation1";
+import { BenefitsAnimation2 } from "@/components/BenefitsAnimation/BenefitsAnimation2";
+import { BenefitsAnimation3 } from "@/components/BenefitsAnimation/BenefitsAnimation3";
 import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
 import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
 import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
@@ -93,9 +93,9 @@ export default function Home() {
         <SocialProofSection ariaLabel="AJ Welch's experience and client work" />
         <BenefitsSection
           CheckoutForm={CheckoutForm}
-          onboardingVisual={<BenefitsAnimationOne />}
-          expertiseVisual={<BenefitsAnimationTwo />}
-          capacityVisual={<BenefitsAnimationThree />}
+          onboardingVisual={<BenefitsAnimation1 />}
+          expertiseVisual={<BenefitsAnimation2 />}
+          capacityVisual={<BenefitsAnimation3 />}
         />
         <PricingSection
           mobileProof={<SocialProofSection embedded />}
