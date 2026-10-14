@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { ReactNode } from "react";
 import { expect, userEvent, within } from "storybook/test";
-import { BenefitsAnimationOne } from "@/components/BenefitsAnimation/BenefitsAnimationOne";
-import { BenefitsAnimationTwo } from "@/components/BenefitsAnimation/BenefitsAnimationTwo";
+import { BenefitsAnimation1 } from "@/components/BenefitsAnimation/BenefitsAnimation1";
+import { BenefitsAnimation2 } from "@/components/BenefitsAnimation/BenefitsAnimation2";
+import { BenefitsAnimation3 } from "@/components/BenefitsAnimation/BenefitsAnimation3";
 import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
 import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
 import { CalendlyEmbed } from "@/components/CalendlyEmbed/CalendlyEmbed";
@@ -48,8 +49,9 @@ export const Benefits: Story = {
   render: () => (
     <BenefitsSection
       CheckoutForm={PreviewCheckoutForm}
-      onboardingVisual={<BenefitsAnimationOne />}
-      expertiseVisual={<BenefitsAnimationTwo />}
+      onboardingVisual={<BenefitsAnimation1 />}
+      expertiseVisual={<BenefitsAnimation2 />}
+      capacityVisual={<BenefitsAnimation3 />}
     />
   ),
 };

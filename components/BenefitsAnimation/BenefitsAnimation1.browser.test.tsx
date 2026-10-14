@@ -10,8 +10,8 @@ import { page } from "vitest/browser";
 import { theme } from "@/app/theme";
 // biome-ignore lint/style/noRestrictedImports: Verify both visuals as injected by the page composition root.
 import { BenefitsSection } from "../BenefitsSection/BenefitsSection";
-import { BenefitsAnimationOne } from "./BenefitsAnimationOne";
-import { BenefitsAnimationTwo } from "./BenefitsAnimationTwo";
+import { BenefitsAnimation1 } from "./BenefitsAnimation1";
+import { BenefitsAnimation2 } from "./BenefitsAnimation2";
 
 const initialViewport = {
   width: window.innerWidth,
@@ -57,12 +57,12 @@ async function mount(section = false, colorScheme: "light" | "dark" = "light") {
         {section ? (
           <BenefitsSection
             CheckoutForm={CheckoutForm}
-            onboardingVisual={<BenefitsAnimationOne />}
-            expertiseVisual={<BenefitsAnimationTwo />}
+            onboardingVisual={<BenefitsAnimation1 />}
+            expertiseVisual={<BenefitsAnimation2 />}
           />
         ) : (
           <div style={{ padding: 20 }}>
-            <BenefitsAnimationOne />
+            <BenefitsAnimation1 />
           </div>
         )}
       </MantineProvider>
@@ -99,7 +99,7 @@ afterEach(async () => {
   await page.viewport(initialViewport.width, initialViewport.height);
 });
 
-describe("BenefitsAnimationOne", () => {
+describe("BenefitsAnimation1", () => {
   it.each([
     "light",
     "dark",
@@ -155,6 +155,23 @@ describe("BenefitsAnimationOne", () => {
       "/storybook-checkout-preview",
     );
     expect(getElement('button[type="submit"]').textContent).toBe("Subscribe");
+    const mergeStyle = getComputedStyle(getElement("[data-merge-stamp]", two));
+    for (const check of [
+      getElement("[data-subscribed-label] > span", one),
+      ...one.querySelectorAll<HTMLElement>("[data-access-check]"),
+    ]) {
+      const checkStyle = getComputedStyle(check);
+      expect(checkStyle.backgroundColor).toBe(mergeStyle.backgroundColor);
+      expect(checkStyle.color).toBe(mergeStyle.color);
+      expect(checkStyle.borderRadius).toBe("50%");
+      const size = check.hasAttribute("data-access-check") ? 16 : 12;
+      expect(check.getBoundingClientRect().width).toBe(size);
+      expect(check.getBoundingClientRect().height).toBe(size);
+      const glyph = check.querySelector("svg");
+      if (!glyph) throw new Error("Missing completion glyph");
+      expect(glyph.getBoundingClientRect().width).toBeLessThan(size);
+      expect(getComputedStyle(glyph).strokeWidth).toBe("3px");
+    }
     for (const width of [
       320, 360, 375, 390, 425, 426, 480, 600, 767, 768, 820, 960, 1023, 1024,
       1200, 1440, 1920, 2560,
@@ -169,7 +186,8 @@ describe("BenefitsAnimationOne", () => {
         throw new Error("Missing section introduction");
       const bounds = area.getBoundingClientRect();
       const sceneBounds = one.getBoundingClientRect();
-      expect(sceneBounds.height).toBe(two.getBoundingClientRect().height);
+      // Conversation cards now fit their content; onboarding keeps its stage.
+      expect(sceneBounds.height).toBe(width < 768 ? 240 : 288);
       expect(sceneBounds.width).toBe(two.getBoundingClientRect().width);
       const counterpartBounds = counterpart.getBoundingClientRect();
       expect(bounds.width).toBeCloseTo(counterpartBounds.width, 1);
@@ -682,7 +700,12 @@ describe("BenefitsAnimationOne", () => {
       await seek(arrival + 0.15);
       expect(offset()).toBeCloseTo(beam, 2);
       expect(opacity(`[data-access-check="${index}"]`)).toBe(1);
-      expect(getComputedStyle(check).color).toBe(getComputedStyle(icon).color);
+      expect(getComputedStyle(check).backgroundColor).toBe(
+        getComputedStyle(icon).color,
+      );
+      expect(getComputedStyle(check).color).toBe(
+        getComputedStyle(card).backgroundColor,
+      );
       expect(getComputedStyle(card).borderTopColor).not.toBe(initialBorder);
       expect(new DOMMatrixReadOnly(getComputedStyle(card).transform).m11).toBe(
         1,

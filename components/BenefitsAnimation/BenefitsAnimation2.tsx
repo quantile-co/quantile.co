@@ -1,54 +1,48 @@
 "use client";
 
 import {
-  IconActivity,
-  IconBox,
   IconCheck,
-  IconClock,
   IconCode,
   IconFileText,
   IconGitCommit,
   IconGitMerge,
   IconGitPullRequest,
-  IconHistory,
   IconMessageCircle,
   IconUsers,
   IconVideo,
 } from "@tabler/icons-react";
 import { useAnimate } from "motion/react-mini";
-import type { ReactNode } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import classes from "./BenefitsAnimation.module.css";
 
-// One illustrative issue, not live customer activity or a delivery-time promise.
+// Illustrative client dialogue, not live activity, quoted comments, or a delivery-time promise.
+// Technical inspiration: https://github.com/apache/beam/issues/18677
+// https://github.com/apache/flink/pull/2093 and https://github.com/apache/flink/pull/18118
 const activity = [
   {
     author: "AJ Welch",
     day: "Day 1",
     label: "Investigation",
-    updates: [
-      ["Found", "Late-event gap reproduced."],
-      ["Next", "Bounded replay + AI tests."],
-      ["Need", "Your retention policy."],
+    message:
+      "I’ve reproduced the overlapping sessions. A late event creates a new session after the earlier window state has been cleared.",
+    points: [
+      "The regression test advances the watermark past window expiry.",
+      "I’m checking events just before, at, and after the cutoff.",
     ],
-    detail: "AI-assisted regression tests",
+    detail: "Regression tests added",
     icon: IconCode,
-    artifact: "tests",
-    signals: ["cutoff", "replay", "duplicates"],
+    signals: [],
     duration: 3600,
   },
   {
     author: "Your team",
     day: "Day 1",
     label: "Code review",
-    updates: [
-      ["Change", "Configurable lateness threshold."],
-      ["Pattern", "Use existing pipeline settings."],
-      ["Verify", "Cover events at the cutoff."],
-    ],
+    message:
+      "Thanks for tracking this down. Could we use our existing allowed lateness setting and cover an event exactly at the expiry boundary? I’d also like to keep the results unchanged for events arriving on time.",
+    points: [],
     detail: "Changes requested",
     icon: IconMessageCircle,
-    artifact: "review",
     signals: [],
     duration: 3000,
   },
@@ -56,29 +50,29 @@ const activity = [
     author: "AJ Welch",
     day: "Day 2",
     label: "Revision pushed",
-    updates: [
-      ["Updated", "Your config pattern, reused."],
-      ["Tested", "Events exactly at the cutoff."],
-      ["Next", "Agree on recovery policy."],
+    message:
+      "I’ve updated the PR to use your existing setting. The regression test now fails without the fix and passes with it.",
+    points: [
+      "Events within allowed lateness still merge into the session.",
+      "Events past the limit go to a side output so we can recover them.",
     ],
     detail: "Review comment resolved",
     icon: IconGitCommit,
-    artifact: "config",
-    signals: ["config", "tests"],
+    signals: ["tests"],
     duration: 3600,
   },
   {
     author: "Your team",
     day: "Day 2",
     label: "Technical discussion",
-    updates: [
-      ["Discuss", "Retention and replay trade-offs."],
-      ["Goal", "Keep live state bounded."],
-      ["Format", "Optional 30-minute call."],
+    message:
+      "How much more state would we keep if we increased allowed lateness? Could we compare that with replaying older events?",
+    points: [
+      "Roughly how many events would we need to replay?",
+      "Do we retain the source data long enough to recover them?",
     ],
     detail: "Weekly sync · 30 min · Optional",
     icon: IconVideo,
-    artifact: "sync",
     signals: [],
     duration: 3200,
   },
@@ -86,10 +80,10 @@ const activity = [
     author: "AJ Welch",
     day: "Day 2",
     label: "Technical sync",
-    updates: [],
+    message: "",
+    points: [],
     detail: "30 min · Optional",
     icon: IconVideo,
-    artifact: null,
     signals: [],
     duration: 3200,
   },
@@ -97,14 +91,14 @@ const activity = [
     author: "AJ Welch",
     day: "Day 3",
     label: "Decision documented",
-    updates: [
-      ["Decided", "Bound live state; replay older events."],
-      ["Added", "Recovery runbook in the PR."],
-      ["Blockers", "None — ready for review."],
+    message:
+      "We’ll keep the current allowed lateness setting and recover older events separately. That lets us keep the existing window state cleanup behavior.",
+    points: [
+      "We’ll save the side output so those events are available for replay.",
+      "I’ve documented the replay limits and checks for duplicate writes in the PR.",
     ],
     detail: "PR #1979 updated",
     icon: IconFileText,
-    artifact: "replay",
     signals: [],
     duration: 3600,
   },
@@ -112,14 +106,11 @@ const activity = [
     author: "Your team",
     day: "Day 3",
     label: "Approved",
-    updates: [
-      ["Reviewed", "Config, cutoff tests, recovery."],
-      ["Standards", "Matches our pipeline patterns."],
-      ["Decision", "Approved — ready to merge."],
-    ],
+    message:
+      "Thanks, the regression test and recovery steps look good to me. This is approved from our side once the required checks pass.",
+    points: [],
     detail: "Approved by your team",
     icon: IconCheck,
-    artifact: "checks",
     signals: [],
     duration: 2600,
   },
@@ -127,118 +118,17 @@ const activity = [
     author: "AJ Welch",
     day: "Day 3",
     label: "Merged",
-    updates: [
-      ["Shipped", "Late-event handling + replay."],
-      ["Handoff", "Recovery runbook included."],
-      ["Closed", "Issue #1941."],
-    ],
+    message:
+      "All checks passed, so I’ve merged this. The recovery steps are in the PR for your team. Replay tests also cover duplicate writes.",
+    points: [],
     detail: "PR #1979 merged · Issue #1941 closed",
     icon: IconGitMerge,
-    artifact: "merged",
     signals: ["lint", "tests", "build"],
     duration: 3200,
   },
 ] as const;
 
-type ArtifactKind = Exclude<(typeof activity)[number]["artifact"], null>;
-
-function Artifact({ kind }: { kind: ArtifactKind }) {
-  let visual: ReactNode;
-  switch (kind) {
-    case "tests":
-      visual = (
-        <>
-          <span className={classes.artifactLabel}>edge cases</span>
-          <div className={classes.testDots}>
-            <span>late</span>
-            <span>cutoff</span>
-            <span>replay</span>
-          </div>
-        </>
-      );
-      break;
-    case "review":
-      visual = (
-        <>
-          <div className={classes.reviewNote}>
-            <IconMessageCircle />
-            <span>threshold?</span>
-          </div>
-          <span className={classes.reviewLine} />
-          <span className={classes.reviewLine} />
-        </>
-      );
-      break;
-    case "config":
-      visual = (
-        <>
-          <span className={classes.artifactLabel}>config</span>
-          <div className={classes.diffLine}>
-            <span>−</span>
-            <i />
-          </div>
-          <div className={classes.diffLine}>
-            <span>+</span>
-            <i />
-          </div>
-        </>
-      );
-      break;
-    case "sync":
-      visual = (
-        <>
-          <div className={classes.syncIcon}>
-            <IconVideo />
-          </div>
-          <span className={classes.artifactLabel}>optional sync</span>
-        </>
-      );
-      break;
-    case "replay":
-      visual = (
-        <div className={classes.replayPaths}>
-          <span>
-            <IconActivity /> live <b>→</b> <IconBox /> bounded
-          </span>
-          <span>
-            <IconClock /> late <b>→</b> <IconHistory /> replay
-          </span>
-        </div>
-      );
-      break;
-    case "checks":
-      visual = (
-        <>
-          <div className={classes.checkMarks}>
-            <IconCheck />
-            <IconCheck />
-            <IconCheck />
-          </div>
-          <span className={classes.artifactLabel}>review passed</span>
-        </>
-      );
-      break;
-    case "merged":
-      visual = (
-        <>
-          <div className={classes.mergePaths}>
-            <span />
-            <span />
-            <IconGitMerge />
-          </div>
-          <span className={classes.artifactLabel}>landed</span>
-        </>
-      );
-      break;
-  }
-  return (
-    <div className={classes.artifact} data-artifact-kind={kind}>
-      {visual}
-    </div>
-  );
-}
-
-export function BenefitsAnimationTwo() {
+export function BenefitsAnimation2() {
   const [scope, animate] = useAnimate<HTMLDivElement>();
   const [sequence, setSequence] = useState(0);
   const [inView, setInView] = useState(false);
@@ -281,10 +171,12 @@ export function BenefitsAnimationTwo() {
     if (!running) return;
     const timer = window.setTimeout(
       () => setSequence((value) => value + 1),
-      activity[displayedIndex].duration,
+      // Establish motion promptly on first viewing; subsequent loops use the
+      // normal cadence. Offscreen and reduced-motion views still stay still.
+      sequence === 0 ? 1200 : activity[displayedIndex].duration,
     );
     return () => window.clearTimeout(timer);
-  }, [displayedIndex, running]);
+  }, [displayedIndex, running, sequence]);
 
   // Install the entry keyframes in the same commit as the slot change. A
   // passive effect can paint the settled CSS position for one frame first.
@@ -419,7 +311,7 @@ export function BenefitsAnimationTwo() {
   return (
     <div
       aria-hidden="true"
-      className={classes.scene}
+      className={`${classes.scene} ${classes.conversation}`}
       ref={scope}
       data-benefits-animation="two"
     >
@@ -428,7 +320,7 @@ export function BenefitsAnimationTwo() {
           <IconGitPullRequest />
         </span>
         <div className={classes.issueCopy}>
-          <strong>Handle late-arriving events</strong>
+          <strong>Handle late arriving events</strong>
           <span>
             #1941 <span className={classes.separator}>·</span> streaming
           </span>
@@ -503,20 +395,19 @@ export function BenefitsAnimationTwo() {
                   </div>
                 </div>
               ) : (
-                <div className={classes.body}>
-                  <dl className={classes.updates}>
-                    {entry.updates.map(([label, text]) => (
-                      <div
-                        className={classes.updateRow}
-                        data-reveal
-                        key={label}
-                      >
-                        <dt>{label}</dt>
-                        <dd>{text}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                  {entry.artifact && <Artifact kind={entry.artifact} />}
+                <div className={classes.messageContent} data-message-body>
+                  <p className={classes.message} data-message data-reveal>
+                    {entry.message}
+                  </p>
+                  {entry.points.length > 0 && (
+                    <ul className={classes.messageList}>
+                      {entry.points.map((point) => (
+                        <li key={point} data-reveal>
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
               <div className={classes.result}>

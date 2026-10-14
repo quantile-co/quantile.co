@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { BenefitsAnimationOne } from "@/components/BenefitsAnimation/BenefitsAnimationOne";
-import { BenefitsAnimationTwo } from "@/components/BenefitsAnimation/BenefitsAnimationTwo";
+import { BenefitsAnimation1 } from "@/components/BenefitsAnimation/BenefitsAnimation1";
+import { BenefitsAnimation2 } from "@/components/BenefitsAnimation/BenefitsAnimation2";
+import { BenefitsAnimation3 } from "@/components/BenefitsAnimation/BenefitsAnimation3";
 import { CalendlyEmbed } from "@/components/CalendlyEmbed/CalendlyEmbed";
 import { HeroAnimation } from "@/components/HeroAnimation/HeroAnimation";
 
@@ -19,18 +20,26 @@ export const Hero: Story = {
   ),
 };
 
-export const BenefitsOne: Story = {
+export const Benefits1: Story = {
   render: () => (
     <div style={{ margin: "48px auto", maxWidth: 544, paddingInline: 20 }}>
-      <BenefitsAnimationOne />
+      <BenefitsAnimation1 />
     </div>
   ),
 };
 
-export const BenefitsTwo: Story = {
+export const Benefits2: Story = {
   render: () => (
     <div style={{ margin: "48px auto", maxWidth: 544, paddingInline: 20 }}>
-      <BenefitsAnimationTwo />
+      <BenefitsAnimation2 />
+    </div>
+  ),
+};
+
+export const Benefits3: Story = {
+  render: () => (
+    <div style={{ margin: "48px auto", maxWidth: 544, paddingInline: 20 }}>
+      <BenefitsAnimation3 />
     </div>
   ),
 };

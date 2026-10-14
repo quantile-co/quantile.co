@@ -53,6 +53,26 @@
   --site-text-secondary: var(--site-zinc-800);
   --site-workstream-column-background: rgb(9 9 11 / 2.5%);
   --section-padding-block: 112px;
+
+  /* Shared illustration typography: titles, body, metadata, tiny UI labels.
+     Keep the hero and benefit animations on the same scale and weights. */
+  --animation-title-size: 0.8125rem;
+  --animation-body-size: 0.6875rem;
+  --animation-meta-size: 0.625rem;
+  --animation-micro-size: 0.5625rem;
+  --animation-weight-strong: 550;
+  --animation-weight-regular: 400;
+  --animation-line-height: 1.35;
+  --animation-title-tracking: -0.02em;
+}
+
+@media (max-width: 26.5625em), (min-width: 48em) and (max-width: 63.99em) {
+  :root {
+    --animation-title-size: 0.75rem;
+    --animation-body-size: 0.625rem;
+    --animation-meta-size: 0.5625rem;
+    --animation-micro-size: 0.5rem;
+  }
 }
 
 html {

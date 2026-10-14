@@ -1,7 +1,7 @@
 .scene {
   --avatar-size: 2rem;
-  --action-text-size: 0.8125rem;
-  --action-meta-size: 0.625rem;
+  --action-text-size: var(--animation-title-size);
+  --action-meta-size: var(--animation-meta-size);
   --onboarding-focus-outline: color-mix(in srgb, var(--site-text-secondary) 15%, transparent);
 
   /* This story never slides whole panels offscreen; don't crop card shadows. */
@@ -101,8 +101,9 @@
   min-width: 0;
   overflow: hidden;
   font-size: var(--action-text-size);
-  font-weight: 550;
-  line-height: 1.35;
+  font-weight: var(--animation-weight-strong);
+  letter-spacing: var(--animation-title-tracking);
+  line-height: var(--animation-line-height);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -242,7 +243,7 @@
   background: var(--site-surface-raised);
   box-shadow: 0 0.375rem 1rem rgb(9 9 11 / 2%);
   font-size: var(--action-text-size);
-  font-weight: 550;
+  font-weight: var(--animation-weight-strong);
 }
 
 .quantity,
@@ -261,6 +262,31 @@
   height: 0.75rem;
   flex: 0 0 auto;
   stroke-width: 1.5;
+}
+
+.subscribeCheck,
+.accessCheck {
+  display: grid;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  place-items: center;
+  color: var(--site-surface-raised);
+  background: var(--site-text-primary);
+}
+
+.subscribeCheck {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.subscribeCheck svg,
+.accessCheck svg {
+  stroke-width: 3;
+}
+
+.subscribeCheck svg {
+  width: 0.5rem;
+  height: 0.5rem;
 }
 
 .access {
@@ -368,12 +394,8 @@
   position: absolute;
   top: 0.25rem;
   right: 0.25rem;
-  display: grid;
   width: 1rem;
   height: 1rem;
-  border-radius: 50%;
-  place-items: center;
-  color: var(--site-text-primary);
 }
 
 .accessCheck svg {
@@ -447,11 +469,6 @@
 }
 
 @media (min-width: 48em) and (max-width: 63.99em) {
-  .scene {
-    --action-text-size: 0.75rem;
-    --action-meta-size: 0.5625rem;
-  }
-
   .stageArea {
     height: 12.5rem;
   }

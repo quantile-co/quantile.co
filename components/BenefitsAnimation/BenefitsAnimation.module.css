@@ -15,6 +15,25 @@
   user-select: none;
 }
 
+/* Reserve room for the longest message without stretching the shorter cards
+   or changing the section height as the conversation advances. */
+.scene.conversation {
+  height: auto;
+}
+
+.conversation .flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  height: auto;
+  padding-bottom: 4.25rem;
+}
+
+.conversation .entry {
+  position: relative;
+  grid-area: 1 / 1;
+  align-self: start;
+}
+
 .issueHeader {
   display: flex;
   height: 3.25rem;
@@ -46,8 +65,6 @@
 .issueCopy > span,
 .messageMeta strong,
 .label,
-.updateRow dt,
-.updateRow dd,
 .detailText,
 .participantName,
 .mergeOutcome,
@@ -59,16 +76,16 @@
 }
 
 .issueCopy strong {
-  font-size: 0.8125rem;
-  font-weight: 550;
-  letter-spacing: -0.02em;
-  line-height: 1.3;
+  font-size: var(--animation-title-size);
+  font-weight: var(--animation-weight-strong);
+  letter-spacing: var(--animation-title-tracking);
+  line-height: var(--animation-line-height);
 }
 
 .issueCopy > span {
   color: var(--site-text-secondary);
   font-family: var(--mantine-font-family-monospace);
-  font-size: 0.5625rem;
+  font-size: var(--animation-micro-size);
 }
 
 .separator {
@@ -84,7 +101,7 @@
   border-radius: 999px;
   color: var(--site-text-secondary);
   background: var(--site-surface-raised-hover);
-  font-size: 0.5625rem;
+  font-size: var(--animation-micro-size);
   white-space: nowrap;
 }
 
@@ -154,18 +171,18 @@
   align-items: center;
   grid-template-columns: 1.5rem max-content minmax(0, 1fr) max-content;
   column-gap: 0.4375rem;
-  font-size: 0.6875rem;
-  line-height: 1.4;
+  font-size: var(--animation-body-size);
+  line-height: var(--animation-line-height);
 }
 
 .messageMeta strong {
-  font-weight: 550;
+  font-weight: var(--animation-weight-strong);
 }
 
 .label,
 .day {
   color: var(--site-text-secondary);
-  font-size: 0.5625rem;
+  font-size: var(--animation-micro-size);
 }
 
 .day {
@@ -193,39 +210,36 @@
   filter: grayscale(1);
 }
 
-.body {
-  display: grid;
-  min-width: 0;
+/* Conversation length determines message height; the call keeps its geometry. */
+.entry:has(.messageContent) {
+  min-height: 0;
 }
 
-.updates {
+.messageContent {
   display: grid;
   min-width: 0;
-  align-content: space-evenly;
+  align-self: center;
+  gap: 0.375rem;
+  font-size: var(--animation-body-size);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.message {
   margin: 0;
+  font: inherit;
+}
+
+.messageList {
+  display: grid;
+  margin: 0;
+  padding-left: 1.125rem;
   gap: 0.1875rem;
+  font: inherit;
 }
 
-.updateRow {
-  display: grid;
-  align-items: baseline;
-  grid-template-columns: 3.25rem minmax(0, 1fr);
-  column-gap: 0.5rem;
-  font-size: 0.6875rem;
-  line-height: 1.35;
-}
-
-.updateRow dt {
+.messageList li::marker {
   color: var(--site-text-secondary);
-  font-size: 0.625rem;
-}
-
-.updateRow dd {
-  margin: 0;
-}
-
-.artifact {
-  display: none;
 }
 
 .result {
@@ -243,8 +257,8 @@
   flex: 1;
   gap: 0.3125rem;
   color: var(--site-text-secondary);
-  font-size: 0.625rem;
-  line-height: 1.4;
+  font-size: var(--animation-meta-size);
+  line-height: var(--animation-line-height);
 }
 
 .signals {
@@ -258,7 +272,7 @@
   border: 1px solid var(--site-divider-color);
   border-radius: 999px;
   gap: 0.1875rem;
-  font-size: 0.5625rem;
+  font-size: var(--animation-micro-size);
 }
 
 .issueIcon svg,
@@ -297,17 +311,18 @@
 .mergeStamp svg {
   width: 0.875rem;
   height: 0.875rem;
+  stroke-width: 2.5;
 }
 
 .mergeHeading strong {
-  font-size: 0.6875rem;
-  font-weight: 550;
-  line-height: 1.4;
+  font-size: var(--animation-body-size);
+  font-weight: var(--animation-weight-strong);
+  line-height: var(--animation-line-height);
 }
 
 .mergeOutcome {
   color: var(--site-text-secondary);
-  font-size: 0.5625rem;
+  font-size: var(--animation-micro-size);
 }
 
 .callRoom {
@@ -329,7 +344,7 @@
   border-radius: 0.5rem;
   gap: 0.5rem;
   background: var(--site-workstream-column-background);
-  font-size: 0.625rem;
+  font-size: var(--animation-meta-size);
 }
 
 .callPortrait {
@@ -375,184 +390,13 @@
   }
 }
 
-@media (min-width: 64em) {
-  .body:has(.artifact) {
-    grid-template-columns: minmax(0, 1fr) 8rem;
-    gap: 0.5rem;
-  }
-
-  /* Right-align the subtle framed accent while centering its contents. */
-  .artifact {
-    display: grid;
-    width: calc(100% + 3rem);
-    min-width: 0;
-    min-height: 4rem;
-    box-sizing: border-box;
-    align-content: center;
-    justify-self: end;
-    justify-items: center;
-    padding: 0.4375rem 0.375rem;
-    border: 1px solid color-mix(in srgb, var(--site-divider-color) 55%, transparent);
-    border-radius: 0.4375rem;
-    gap: 0.375rem;
-    background: var(--site-workstream-column-background);
-    color: var(--site-text-secondary);
-    opacity: 0.8;
-    text-align: center;
-  }
-
-  .artifactLabel {
-    overflow: hidden;
-    max-width: 100%;
-    font-family: var(--mantine-font-family-monospace);
-    font-size: 0.5625rem;
-    line-height: 1;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .testDots,
-  .reviewNote,
-  .diffLine,
-  .checkMarks,
-  .mergePaths {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .testDots {
-    gap: 0.375rem;
-    font-size: 0.5rem;
-  }
-
-  .testDots span {
-    display: grid;
-    gap: 0.25rem;
-    justify-items: center;
-  }
-
-  .testDots span::before {
-    width: 0.5rem;
-    height: 0.5rem;
-    border: 1px solid currentColor;
-    border-radius: 50%;
-    content: "";
-  }
-
-  .reviewNote {
-    gap: 0.3125rem;
-    font-size: 0.5625rem;
-  }
-
-  .reviewNote svg,
-  .syncIcon svg {
-    width: 1.125rem;
-    height: 1.125rem;
-    stroke-width: 1.5;
-  }
-
-  .reviewLine {
-    width: 65%;
-    height: 0.1875rem;
-    border-radius: 999px;
-    background: currentColor;
-    opacity: 0.5;
-  }
-
-  .reviewLine:last-child {
-    width: 43%;
-  }
-
-  .diffLine {
-    width: 70%;
-    gap: 0.3125rem;
-    font-family: var(--mantine-font-family-monospace);
-    font-size: 0.625rem;
-    line-height: 1;
-  }
-
-  .diffLine i {
-    height: 0.1875rem;
-    flex: 1;
-    border-radius: 999px;
-    background: currentColor;
-    opacity: 0.55;
-  }
-
-  .diffLine:last-child i {
-    flex: 0 0 65%;
-  }
-
-  .replayPaths {
-    display: grid;
-    gap: 0.4375rem;
-    font-family: var(--mantine-font-family-monospace);
-    font-size: 0.5625rem;
-    white-space: nowrap;
-  }
-
-  .replayPaths span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.125rem;
-  }
-
-  .replayPaths svg {
-    width: 0.875rem;
-    height: 0.875rem;
-    flex-shrink: 0;
-    stroke-width: 1.5;
-  }
-
-  .replayPaths b {
-    padding-inline: 0.0625rem;
-    font-weight: 400;
-  }
-
-  .checkMarks {
-    gap: 0.3125rem;
-  }
-
-  .checkMarks svg {
-    width: 1rem;
-    height: 1rem;
-    border: 1px solid currentColor;
-    border-radius: 50%;
-    padding: 0.125rem;
-    stroke-width: 1.5;
-  }
-
-  .mergePaths {
-    gap: 0.25rem;
-  }
-
-  .mergePaths span {
-    width: 1rem;
-    height: 1px;
-    background: currentColor;
-  }
-
-  .mergePaths svg {
-    width: 1.25rem;
-    height: 1.25rem;
-    stroke-width: 1.5;
-  }
-}
-
-
 @media (min-width: 64em) and (max-width: 74.99em) {
-  .body:has(.artifact) {
-    grid-template-columns: minmax(0, 1fr) 7rem;
+  .conversation .flow {
+    padding-bottom: 4.75rem;
   }
 
   .scene {
     max-width: 26rem;
-  }
-
-  .artifact {
-    width: 100%;
   }
 
   .entry,
@@ -564,6 +408,10 @@
 }
 
 @media (min-width: 48em) and (max-width: 63.99em) {
+  .conversation .flow {
+    padding-bottom: 5.25rem;
+  }
+
   .entry,
   .surface {
     --avatar-size: 1.375rem;
@@ -576,28 +424,14 @@
   .messageMeta {
     min-height: 1.375rem;
     grid-template-columns: 1.375rem max-content minmax(0, 1fr) max-content;
-    font-size: 0.625rem;
-  }
-
-  .mergeHeading strong {
-    font-size: 0.625rem;
-  }
-
-  .updateRow {
-    font-size: 0.625rem;
-  }
-
-  .updateRow dt,
-  .detail {
-    font-size: 0.5625rem;
-  }
-
-  .signals > span {
-    font-size: 0.5rem;
   }
 }
 
 @media (max-width: 47.99em) {
+  .conversation .flow {
+    padding-bottom: 1.25rem;
+  }
+
   .scene {
     max-width: 32rem;
     margin-inline: 0;
@@ -628,20 +462,11 @@
     gap: 0.375rem;
   }
 
-  .issueCopy strong {
-    font-size: 0.75rem;
-  }
-
   .entry,
   .surface {
     padding: 0.75rem;
   }
 
-  .updateRow {
-    grid-template-columns: 2.875rem minmax(0, 1fr);
-    column-gap: 0.375rem;
-    font-size: 0.6875rem;
-  }
 }
 
 /* Like the hero's optional tags, secondary checks yield to the main copy. */

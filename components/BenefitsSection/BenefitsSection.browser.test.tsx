@@ -9,7 +9,7 @@ import { page } from "vitest/browser";
 // biome-ignore lint/style/noRestrictedImports: Exercise the site's actual fonts and heading metrics.
 import { theme } from "@/app/theme";
 // biome-ignore lint/style/noRestrictedImports: Test the visual injected by the page's composition root.
-import { BenefitsAnimationTwo } from "../BenefitsAnimation/BenefitsAnimationTwo";
+import { BenefitsAnimation2 } from "../BenefitsAnimation/BenefitsAnimation2";
 import { BenefitsSection } from "./BenefitsSection";
 
 function PreviewCheckoutForm({ children }: { children: ReactNode }) {
@@ -35,7 +35,7 @@ it("optically centers the expertise visual in the space after the rendered copy"
       <MantineProvider theme={theme}>
         <BenefitsSection
           CheckoutForm={PreviewCheckoutForm}
-          expertiseVisual={<BenefitsAnimationTwo />}
+          expertiseVisual={<BenefitsAnimation2 />}
         />
       </MantineProvider>,
     );
@@ -73,7 +73,7 @@ it("optically centers the expertise visual in the space after the rendered copy"
         textRight,
       );
       expect(visual.right).toBeLessThanOrEqual(right);
-      expect(visual.height).toBeLessThanOrEqual(290);
+      expect(visual.height).toBeLessThanOrEqual(352);
       if (width === 1024) expect(visual.width).toBeLessThanOrEqual(416);
       const header = scene
         .querySelector<HTMLElement>('[class*="issueIcon"]')
@@ -119,7 +119,15 @@ it("optically centers the expertise visual in the space after the rendered copy"
       const steps = introduction?.parentElement
         ?.querySelector("ol")
         ?.getBoundingClientRect();
-      if (!subtitle || !header || !card || !steps || !scene || !heading)
+      if (
+        !introduction ||
+        !subtitle ||
+        !header ||
+        !card ||
+        !steps ||
+        !scene ||
+        !heading
+      )
         throw new Error("Missing mobile layout");
       expect(scene.left, `visual aligned with copy at ${width}px`).toBeCloseTo(
         heading.left,
@@ -138,7 +146,15 @@ it("optically centers the expertise visual in the space after the rendered copy"
         0,
       );
       const above = header.top - subtitle.bottom;
-      const below = steps.top - card.bottom;
+      // The tallest card reserves a stable stage; shorter replies do not stretch
+      // or move the benefits below as the conversation advances.
+      const tallestCard = Math.max(
+        ...Array.from(
+          introduction.querySelectorAll("[data-activity]"),
+          (entry) => entry.getBoundingClientRect().height,
+        ),
+      );
+      const below = steps.top - (card.top + tallestCard);
       expect(above).toBeGreaterThan(0);
       expect(below).toBeGreaterThan(0);
       expect(
@@ -153,7 +169,10 @@ it("optically centers the expertise visual in the space after the rendered copy"
           category.clientWidth -
           Number.parseFloat(style.paddingLeft) -
           Number.parseFloat(style.paddingRight);
-        for (const paragraph of category.querySelectorAll<HTMLElement>("p")) {
+        // Illustration paragraphs sit inside padded cards, not the section copy column.
+        for (const paragraph of category.querySelectorAll<HTMLElement>(
+          "p:not([data-benefits-animation] p)",
+        )) {
           expect(
             paragraph.getBoundingClientRect().width,
             `full-width copy at ${width}px`,

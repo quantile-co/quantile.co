@@ -15,7 +15,8 @@
 
 .section[data-has-visual] .wrapper {
   display: grid;
-  min-height: 48rem;
+  /* Preserve the 48rem desktop stage, scaled to the narrower content width. */
+  min-height: min(48rem, calc((100vw - 2 * var(--site-page-padding)) * 0.64));
   align-items: center;
 }
 
@@ -106,10 +107,6 @@
 }
 
 @media (max-width: $mantine-breakpoint-lg) {
-  .section[data-has-visual] .wrapper {
-    min-height: 48rem;
-  }
-
   .section[data-has-visual] .layout {
     grid-template-columns: minmax(0, 1.1fr) minmax(15rem, 0.9fr);
     gap: var(--mantine-spacing-xl);
@@ -120,25 +117,44 @@
   }
 }
 
+@media (min-width: 48em) {
+  .section[data-has-visual] .content:not([data-section-scale]) .controls {
+    margin-top: clamp(1.5rem, calc(100vw / 45), 2rem);
+  }
+
+  .section[data-has-visual] .controls [data-site-cta="hero"] {
+    min-height: 2.25rem;
+    font-size: clamp(0.8125rem, 1.111vw, 1rem);
+  }
+}
+
 @media (min-width: 48em) and (max-width: 68em) {
+  .section[data-has-visual] .heroTitle {
+    font-size: 3rem;
+  }
+
   .section[data-has-visual] .heroDescription {
     max-width: 24rem;
+    font-size: 1rem;
   }
 }
 
 @media (min-width: 48em) and (max-width: 63.99em) {
   .visual {
-    width: min(32rem, calc(100% + 4rem));
+    /* Keep clearance for the full-size headline, easing into the wider board. */
+    width: min(32rem, calc(100% + clamp(2.5rem, calc(37.5vw - 15.5rem), 4rem)));
   }
 }
 
-@media (min-width: 48em) and (max-width: 50em) {
+@media (min-width: 75em) {
   .visual {
-    width: min(32rem, calc(100% + 1rem));
+    /* Grow smoothly from 576px at 1200px to 672px at 1440px, then cap. */
+    width: min(42rem, calc(40vw + 6rem), calc(100% + 13rem));
+    max-height: 21.5rem;
   }
 }
 
-@media (max-width: 27.875em), (min-width: 48em) and (max-width: 68em) {
+@media (max-width: 27.875em) {
   .section[data-has-visual] .heroDescription {
     text-wrap: pretty;
   }
