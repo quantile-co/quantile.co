@@ -8,8 +8,8 @@
   overflow: visible;
 }
 
-/* Match the shared card surfaces and content edges; the chart has extra
-   vertical room for persistent billing annotations and axis labels. */
+/* Preserve the illustration footprint while using the former card padding
+   for the chart, billing annotations and axis labels. */
 .art {
   position: relative;
   top: 0.75rem;
@@ -18,11 +18,8 @@
   height: 15.5rem;
   display: flow-root;
   box-sizing: border-box;
-  padding: 0.75rem;
-  border: 1px solid var(--site-surface-outline);
   border-radius: 0.75rem;
   background: var(--site-surface-raised);
-  box-shadow: 0 0.5rem 1.25rem rgb(9 9 11 / 4%);
 }
 
 .xTick,
@@ -33,10 +30,9 @@
 .chart {
   position: relative;
   min-width: 0;
-  height: calc(100% - 3rem);
-  /* Centered endpoint labels extend beyond the line; reserve room for their
-     text and background so neither touches the card's rounded border. */
-  margin: 3rem 1.5rem 0;
+  height: calc(100% - 3.375rem);
+  /* Keep room for the starting callout; the plot reaches the right edge. */
+  margin: 3rem 0 0.375rem 1.75rem;
 }
 
 .chart > svg {
@@ -194,7 +190,7 @@
   line-height: var(--animation-line-height);
   text-align: center;
   background: var(--site-surface-raised);
-  box-shadow: 0 0.375rem 1rem rgb(9 9 11 / 2%);
+  box-shadow: 0 0.125rem 0.375rem rgb(9 9 11 / 6%);
 }
 
 .note {
@@ -245,14 +241,15 @@
 
 .lastMonth {
   right: 0;
-  transform: translate(50%, -50%);
+  padding-inline: 0;
+  transform: translateY(-50%);
 }
 
 .startNote {
   position: absolute;
   z-index: 1;
   top: calc(50% + 0.75rem);
-  left: -1.8125rem;
+  left: -1.75rem;
 }
 
 .renewalNote {
@@ -267,7 +264,7 @@
 .banked {
   position: absolute;
   top: 31.521739%;
-  right: 0;
+  right: var(--period-end-inset, 1rem);
   left: calc(80.833333% + var(--capacity-pause-size) / 2 + var(--capacity-point-size) / 2 + 0.125rem);
   display: grid;
   transform: translateY(-50%);
@@ -315,8 +312,8 @@
   }
 
   .chart {
-    height: calc(100% - 2.5rem);
-    margin-block: 2.5rem 0;
+    height: calc(100% - 2.875rem);
+    margin-block: 2.5rem 0.375rem;
   }
 
   .note {

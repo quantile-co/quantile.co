@@ -20,10 +20,10 @@ describe("BenefitsAnimation1", () => {
       "Cardholder",
       "•••••• ••••••••",
       "•• / ••",
-      "GitHub",
-      "Linear",
-      "Slack",
-      "Cloud",
+      "Version control",
+      "Project management",
+      "Messaging",
+      "Cloud platform",
       "Handle late arriving events",
       "#1941",
       "1 in progress",
@@ -38,6 +38,34 @@ describe("BenefitsAnimation1", () => {
     expect(html).toContain("data-quantity-one");
     expect([...html.matchAll(/data-issue="\d"/g)]).toHaveLength(3);
     expect([...html.matchAll(/data-connection="\d"/g)]).toHaveLength(4);
+    expect([...html.matchAll(/data-tool-logos="\d"/g)]).toHaveLength(4);
+    for (const brand of [
+      "GitHub",
+      "GitLab",
+      "Bitbucket",
+      "Linear",
+      "Jira",
+      "Asana",
+      "Slack",
+      "Microsoft Teams",
+      "Google Chat",
+      "GCP",
+      "Databricks",
+      "Snowflake",
+    ])
+      expect(html).toContain(`data-system-logo="${brand}"`);
+    // The filled Linear mark is padded; Chat and GCP use outline strokes
+    // to match the visual weight of the Tabler logos in the same 17px slots.
+    expect(html).toContain(
+      'viewBox="-3 -3 30 30" fill="currentColor" role="img" aria-label="Linear"',
+    );
+    for (const brand of ["Google Chat", "GCP"]) {
+      expect(html).toMatch(
+        new RegExp(
+          `viewBox="0 0 24 24" fill="none" stroke="currentColor"[^>]*aria-label="${brand}"`,
+        ),
+      );
+    }
     expect(html).not.toContain('data-panel="email"');
     expect(html).not.toContain("data-animated");
   });

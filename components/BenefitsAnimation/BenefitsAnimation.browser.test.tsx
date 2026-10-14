@@ -259,6 +259,75 @@ describe("Shared illustration styling", () => {
     }
   });
 
+  it.each([
+    "light",
+    "dark",
+  ] as const)("balances the hero merge card without overflow in %s mode", async (colorScheme) => {
+    root?.render(
+      <MantineProvider theme={theme} forceColorScheme={colorScheme}>
+        <HeroSection
+          CheckoutForm={CheckoutForm}
+          title="Preview"
+          description="Preview"
+          visual={<HeroAnimation />}
+        />
+      </MantineProvider>,
+    );
+    await vi.waitFor(() => expect(element("[data-merged-panel]")).toBeTruthy());
+    await document.fonts.ready;
+    for (const width of [320, 390, 600, 767, 768, 769, 820, 1024, 1440, 1920]) {
+      await page.viewport(width, 1000);
+      await nextFrame();
+      const panel = element("[data-merged-panel]").getBoundingClientRect();
+      const scene = element("[data-hero-animation]").getBoundingClientRect();
+      const status = element("[data-merge-status]").getBoundingClientRect();
+      const mark = element("[data-merge-mark]").getBoundingClientRect();
+      const label = element(
+        "[data-merge-status] > span:last-child",
+      ).getBoundingClientRect();
+      const number = element("[data-merge-reference]").getBoundingClientRect();
+      const title = element("[data-merged-panel] strong");
+      const titleBounds = title.getBoundingClientRect();
+      expect(mark.left).toBeCloseTo(titleBounds.left, 1);
+      expect(label.left - mark.right).toBeCloseTo(4, 1);
+      if (width <= 768) {
+        expect(number.left).toBeCloseTo(titleBounds.left, 1);
+      } else {
+        expect(number.right).toBeCloseTo(titleBounds.right, 1);
+      }
+      expect(titleBounds.top).toBeGreaterThan(status.bottom);
+      if (scene.width <= 432 || width <= 768) {
+        expect(number.top).toBeGreaterThan(titleBounds.bottom);
+      } else {
+        expect(label.right + 4).toBeLessThanOrEqual(number.left);
+        expect((number.top + number.bottom) / 2).toBeCloseTo(
+          (status.top + status.bottom) / 2,
+          1,
+        );
+      }
+      for (const selector of [
+        "[data-merge-status] > span:last-child",
+        "[data-merge-reference]",
+      ])
+        expect(getComputedStyle(element(selector)).fontSize).toBe(
+          getComputedStyle(title).fontSize,
+        );
+      expect(getComputedStyle(title).webkitLineClamp).toBe("2");
+      expect(getComputedStyle(title).whiteSpace).toBe("normal");
+      expect(panel.bottom, `merge card fits at ${width}px`).toBeLessThanOrEqual(
+        scene.bottom,
+      );
+      for (const selector of [
+        "[data-merge-status]",
+        "[data-merged-panel] strong",
+        "[data-merge-reference]",
+      ]) {
+        const node = element(selector);
+        expect(node.scrollWidth).toBeLessThanOrEqual(node.clientWidth + 1);
+      }
+    }
+  });
+
   it("shares a four-size type scale without changing hero heading-to-card spacing", async () => {
     root?.render(
       <MantineProvider theme={theme}>
@@ -345,10 +414,10 @@ describe("Shared illustration styling", () => {
         element("[data-merged-panel] strong"),
       );
       expect(Number.parseFloat(mergeTitleStyle.fontSize)).toBeCloseTo(
-        Math.max(9, Math.min(11, heroWidth * 0.019)),
+        titleSize - 2,
         2,
       );
-      expect(mergeTitleStyle.fontWeight).toBe("550");
+      expect(mergeTitleStyle.fontWeight).toBe("400");
       for (const title of container.querySelectorAll<HTMLElement>(
         "[data-hero-preview] [data-task-card] > span:first-child > span:first-child",
       )) {

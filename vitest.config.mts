@@ -62,6 +62,8 @@ export default defineConfig({
           include: [
             "@mantine/hooks",
             "@tabler/icons-react",
+            "fathom-client",
+            "next/navigation",
             "react-dom/client",
           ],
         },

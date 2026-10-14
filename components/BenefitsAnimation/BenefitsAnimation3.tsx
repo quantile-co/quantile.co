@@ -45,11 +45,18 @@ export function BenefitsAnimation3() {
     const element = scope.current;
     const plot = element?.querySelector<HTMLElement>("[data-rate-chart]");
     if (!element || !plot) return;
+    const lastMonth = element.querySelector('[data-axis-month="4"]');
     // Measure real text boxes so pointers remain attached as fonts, viewport,
     // and card dimensions change. No per-frame JS or React state updates.
     const updatePointers = () => {
       const bounds = plot.getBoundingClientRect();
       if (!bounds.width || !bounds.height) return;
+      if (lastMonth) {
+        plot.style.setProperty(
+          "--period-end-inset",
+          `${lastMonth.getBoundingClientRect().width / 2}px`,
+        );
+      }
       // Offline collision searches reduce to one responsive constraint: keep
       // pause centered unless the preceding billing box needs that space.
       const billing = element.querySelector('[data-callout="downgrade"]');
@@ -90,6 +97,7 @@ export function BenefitsAnimation3() {
       resizeFrame = requestAnimationFrame(updatePointers);
     });
     observer.observe(plot);
+    if (lastMonth) observer.observe(lastMonth);
     for (const box of element.querySelectorAll("[data-callout]"))
       observer.observe(box);
     updatePointers();

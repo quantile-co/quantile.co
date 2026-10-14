@@ -164,7 +164,7 @@ describe("BenefitsAnimation1", () => {
       expect(checkStyle.backgroundColor).toBe(mergeStyle.backgroundColor);
       expect(checkStyle.color).toBe(mergeStyle.color);
       expect(checkStyle.borderRadius).toBe("50%");
-      const size = check.hasAttribute("data-access-check") ? 16 : 12;
+      const size = check.hasAttribute("data-access-check") ? 14 : 12;
       expect(check.getBoundingClientRect().width).toBe(size);
       expect(check.getBoundingClientRect().height).toBe(size);
       const glyph = check.querySelector("svg");
@@ -173,8 +173,8 @@ describe("BenefitsAnimation1", () => {
       expect(getComputedStyle(glyph).strokeWidth).toBe("3px");
     }
     for (const width of [
-      320, 360, 375, 390, 425, 426, 480, 600, 767, 768, 820, 960, 1023, 1024,
-      1200, 1440, 1920, 2560,
+      320, 360, 375, 390, 425, 426, 472, 473, 480, 600, 767, 768, 820, 960,
+      1023, 1024, 1200, 1440, 1920, 2560,
     ]) {
       await page.viewport(width, 1000);
       await frame();
@@ -238,8 +238,29 @@ describe("BenefitsAnimation1", () => {
         expect(getComputedStyle(text).fontWeight).toBe(
           getComputedStyle(author).fontWeight,
         );
-        expect(getComputedStyle(text).whiteSpace).toBe("nowrap");
-        expect(getComputedStyle(text).textOverflow).toBe("ellipsis");
+        const category = text.closest("[data-tool-card]");
+        expect(getComputedStyle(text).whiteSpace).toBe(
+          category && bounds.width <= 432 ? "normal" : "nowrap",
+        );
+        expect(getComputedStyle(text).textOverflow).toBe(
+          category ? "clip" : "ellipsis",
+        );
+      }
+      const categories = [0, 1, 3].map((index) =>
+        getElement(`[data-tool-card="${index}"] strong`, one),
+      );
+      for (const category of categories) {
+        const lineHeight = Number.parseFloat(
+          getComputedStyle(category).lineHeight,
+        );
+        expect(
+          Math.round(category.getBoundingClientRect().height / lineHeight),
+          `${category.textContent} line count at ${width}px`,
+        ).toBe(bounds.width <= 432 ? 2 : 1);
+        expect(category.getBoundingClientRect().height).toBeCloseTo(
+          categories[0].getBoundingClientRect().height,
+          1,
+        );
       }
       const avatar = getElement('[class*="accessHub"] [data-aj]', one);
       expect(avatar.getBoundingClientRect().width).toBe(64);
@@ -248,6 +269,67 @@ describe("BenefitsAnimation1", () => {
         (bounds.left + bounds.right) / 2,
         1,
       );
+      for (const card of one.querySelectorAll<HTMLElement>(
+        "[data-tool-card]",
+      )) {
+        const detail = getElement("[data-tool-logos]", card);
+        const name = getElement("strong", card);
+        const detailStyle = getComputedStyle(detail);
+        expect(detailStyle.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        const divider = getElement(
+          "[data-tool-divider]",
+          card,
+        ).getBoundingClientRect();
+        const logos = detail.getBoundingClientRect();
+        expect(divider.height).toBe(1);
+        expect(divider.left).toBeCloseTo(logos.left, 1);
+        expect(divider.right).toBeCloseTo(logos.right, 1);
+        expect(divider.top - name.getBoundingClientRect().bottom).toBeCloseTo(
+          4,
+          1,
+        );
+        expect(logos.top - divider.bottom).toBeCloseTo(4, 1);
+        expect(detail.querySelectorAll("[data-system-logo]")).toHaveLength(3);
+        expect(name.scrollWidth).toBeLessThanOrEqual(name.clientWidth);
+        const icon = getElement(
+          "[data-tool-icon]",
+          card,
+        ).getBoundingClientRect();
+        expect(icon.width).toBe(18);
+        expect(icon.height).toBe(18);
+        const cardBounds = card.getBoundingClientRect();
+        expect(cardBounds.height).toBe((bounds.height - 32) / 2);
+        expect(icon.top - cardBounds.top).toBeGreaterThanOrEqual(5);
+        expect(cardBounds.bottom - logos.bottom).toBeGreaterThanOrEqual(5);
+        expect(icon.top - cardBounds.top).toBeCloseTo(
+          cardBounds.bottom - logos.bottom,
+          1,
+        );
+        expect(name.getBoundingClientRect().top - icon.bottom).toBeCloseTo(
+          1,
+          1,
+        );
+        for (const logo of detail.querySelectorAll<SVGElement>(
+          "[data-system-logo]",
+        )) {
+          expect(logo.getBoundingClientRect().width).toBe(17);
+          expect(logo.getBoundingClientRect().height).toBe(17);
+        }
+        expect(
+          detail.scrollWidth,
+          `tool logos at ${width}px`,
+        ).toBeLessThanOrEqual(detail.clientWidth);
+        expect(
+          card.scrollHeight,
+          `tool height at ${width}px`,
+        ).toBeLessThanOrEqual(card.clientHeight);
+        expect(detail.getBoundingClientRect().top).toBeGreaterThan(
+          name.getBoundingClientRect().bottom,
+        );
+        expect(detail.getBoundingClientRect().bottom).toBeLessThan(
+          card.getBoundingClientRect().bottom,
+        );
+      }
       for (const selector of [
         "[data-subscribe]",
         '[class*="paymentMethod"]',

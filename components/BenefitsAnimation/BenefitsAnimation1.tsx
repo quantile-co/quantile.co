@@ -2,45 +2,131 @@
 
 import {
   IconArrowRight,
+  IconBrandAsana,
+  IconBrandBitbucket,
+  IconBrandDatabricks,
   IconBrandGithub,
+  IconBrandGitlab,
+  IconBrandJira,
   IconBrandSlack,
+  IconBrandSnowflake,
   IconBrandStripe,
+  IconBrandTeams,
   IconCheck,
   IconCloud,
   IconCreditCard,
+  IconGitBranch,
   IconGripVertical,
   IconLayoutKanban,
   IconLock,
+  IconMessages,
   IconMinus,
   IconPlus,
 } from "@tabler/icons-react";
 import { useAnimate } from "motion/react-mini";
+import type { ComponentProps } from "react";
 import { useId, useLayoutEffect } from "react";
 import shared from "./BenefitsAnimation.module.css";
 import classes from "./BenefitsAnimation1.module.css";
 
+// Linear's filled mark is from Simple Icons (https://simpleicons.org/).
+// The Google Chat and Google Cloud outlines keep the brand silhouettes at
+// Tabler's lighter stroke weight. These marks are only used in this animation.
+// The filled Linear path needs a padded viewBox to match Tabler's internal margin.
+type LogoProps = ComponentProps<"svg">;
+
+function LinearLogo(props: LogoProps) {
+  return (
+    <svg
+      viewBox="-3 -3 30 30"
+      fill="currentColor"
+      role="img"
+      aria-label="Linear"
+      {...props}
+    >
+      <path d="M2.886 4.18A11.982 11.982 0 0 1 11.99 0C18.624 0 24 5.376 24 12.009c0 3.64-1.62 6.903-4.18 9.105L2.887 4.18ZM1.817 5.626l16.556 16.556c-.524.33-1.075.62-1.65.866L.951 7.277c.247-.575.537-1.126.866-1.65ZM.322 9.163l14.515 14.515c-.71.172-1.443.282-2.195.322L0 11.358a12 12 0 0 1 .322-2.195Zm-.17 4.862 9.823 9.824a12.02 12.02 0 0 1-9.824-9.824Z" />
+    </svg>
+  );
+}
+
+function GoogleChatLogo(props: LogoProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role="img"
+      aria-label="Google Chat"
+      {...props}
+    >
+      <path d="M4 3.5h12l4 4v11H10l-4 3v-3H4a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1Z" />
+      <path d="M7 8h9v6H9l-2 2V8Z" />
+    </svg>
+  );
+}
+
+function GoogleCloudLogo(props: LogoProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role="img"
+      aria-label="GCP"
+      {...props}
+    >
+      <path d="M7 19.5h10a4.5 4.5 0 0 0 1.6-8.7 6.8 6.8 0 0 0-12.8 1.3A3.8 3.8 0 0 0 7 19.5Z" />
+      <path d="M7 16.5a1.6 1.6 0 0 1 0-3.2c.5 0 1 .2 1.3.5a4 4 0 0 1 7.2-2.4" />
+    </svg>
+  );
+}
+
 const tools = [
   {
-    name: "GitHub",
-    icon: IconBrandGithub,
+    name: "Version control",
+    icon: IconGitBranch,
+    logos: [
+      { name: "GitHub", icon: IconBrandGithub },
+      { name: "GitLab", icon: IconBrandGitlab },
+      { name: "Bitbucket", icon: IconBrandBitbucket },
+    ],
     origin: "44 45",
     route: "M 0 0 H -2 Q -4 0 -4 -2 V -23 Q -4 -25 -6 -25 H -12",
   },
   {
-    name: "Linear",
+    name: "Project management",
     icon: IconLayoutKanban,
+    logos: [
+      { name: "Linear", icon: LinearLogo },
+      { name: "Jira", icon: IconBrandJira },
+      { name: "Asana", icon: IconBrandAsana },
+    ],
     origin: "56 45",
     route: "M 0 0 H 2 Q 4 0 4 -2 V -23 Q 4 -25 6 -25 H 12",
   },
   {
-    name: "Slack",
-    icon: IconBrandSlack,
+    name: "Messaging",
+    icon: IconMessages,
+    logos: [
+      { name: "Slack", icon: IconBrandSlack },
+      { name: "Microsoft Teams", icon: IconBrandTeams },
+      { name: "Google Chat", icon: GoogleChatLogo },
+    ],
     origin: "44 55",
     route: "M 0 0 H -2 Q -4 0 -4 2 V 23 Q -4 25 -6 25 H -12",
   },
   {
-    name: "Cloud",
+    name: "Cloud platform",
     icon: IconCloud,
+    logos: [
+      { name: "GCP", icon: GoogleCloudLogo },
+      { name: "Databricks", icon: IconBrandDatabricks },
+      { name: "Snowflake", icon: IconBrandSnowflake },
+    ],
     origin: "56 55",
     route: "M 0 0 H 2 Q 4 0 4 2 V 23 Q 4 25 6 25 H 12",
   },
@@ -502,13 +588,26 @@ export function BenefitsAnimation1() {
             <span className={shared.avatar} data-aj data-aj-hub />
           </div>
           <div className={classes.tools}>
-            {tools.map(({ name, icon: Icon }, index) => (
+            {tools.map(({ name, logos, icon: Icon }, index) => (
               <div className={classes.accessRow} key={name}>
                 <div className={classes.tool} data-tool-card={index}>
                   <div className={classes.toolHeading}>
                     <Icon data-tool-icon={index} />
                     <strong>{name}</strong>
                   </div>
+                  <span
+                    className={classes.toolDivider}
+                    data-tool-divider={index}
+                  />
+                  <span className={classes.toolLogos} data-tool-logos={index}>
+                    {logos.map(({ name: brand, icon: Logo }) => (
+                      <Logo
+                        key={brand}
+                        data-system-logo={brand}
+                        aria-label={brand}
+                      />
+                    ))}
+                  </span>
                   <span
                     className={classes.accessCheck}
                     data-access-check={index}

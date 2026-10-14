@@ -661,15 +661,17 @@ function HeroScene({ reducedMotion }: { reducedMotion: boolean }) {
       </div>
 
       <div className={classes.mergedPanel} data-merged-panel>
-        <span className={classes.mergeMark} data-merge-mark>
-          ✓
-        </span>
-        <span className={classes.pullRequest}>
+        <div className={classes.mergeStatus} data-merge-status>
+          <span className={classes.mergeMark} data-merge-mark>
+            ✓
+          </span>
+          <span className={classes.mergeLabel}>Merged</span>
+        </div>
+        <span className={classes.pullRequest} data-merge-reference>
           PR {activeTask.pullRequestNumber}
         </span>
         <strong className={classes.mergeTitle}>{activeTask.pullRequest}</strong>
         <span className={classes.mergeMeta}>All checks passed</span>
-        <span className={classes.mergedBadge}>Merged</span>
       </div>
     </div>
   );
