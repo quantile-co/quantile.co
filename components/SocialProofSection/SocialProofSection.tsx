@@ -267,8 +267,8 @@ export function SocialProofSection({
   const carouselInstruction = reducedMotion
     ? "Automatic card changes are disabled by your motion preference."
     : userPaused
-      ? "Automatic card changes are paused. Tap or press Enter to resume."
-      : "Automatic card changes are playing. Tap or press Enter to pause.";
+      ? "Automatic card changes are paused. Click, tap, or press Enter or Space to resume."
+      : "Automatic card changes are playing. Click, tap, or press Enter or Space to pause.";
 
   return (
     <Root

@@ -28,6 +28,14 @@ const nextFrame = () =>
   new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 let container: HTMLDivElement;
 let root: Root | undefined;
+let preference: MediaQueryList;
+function reduceMotion(matches: boolean) {
+  Object.defineProperty(preference, "matches", {
+    value: matches,
+    configurable: true,
+  });
+  preference.dispatchEvent(new Event("change"));
+}
 function element(selector: string) {
   const element = container.querySelector<HTMLElement>(selector);
   if (!element) throw new Error(`Missing ${selector}`);
@@ -39,7 +47,7 @@ function CheckoutForm({ children }: { children: ReactNode }) {
 }
 
 beforeEach(() => {
-  const preference = Object.assign(new EventTarget(), {
+  preference = Object.assign(new EventTarget(), {
     matches: true,
     media: "(prefers-reduced-motion: reduce)",
   }) as MediaQueryList;
@@ -61,6 +69,150 @@ afterEach(async () => {
 });
 
 describe("Shared illustration styling", () => {
+  it.each([
+    "light",
+    "dark",
+  ] as const)("shows a populated static hero with one active issue and editor in %s mode", async (colorScheme) => {
+    root?.render(
+      <MantineProvider theme={theme} forceColorScheme={colorScheme}>
+        <div style={{ maxWidth: 672, padding: 20 }}>
+          <HeroAnimation />
+        </div>
+      </MantineProvider>,
+    );
+    await vi.waitFor(() =>
+      expect(element("[data-hero-animation]").hasAttribute("data-static")).toBe(
+        true,
+      ),
+    );
+    await document.fonts.ready;
+    for (const width of [320, 768, 1440]) {
+      await page.viewport(width, 1000);
+      await nextFrame();
+      const scene = element("[data-hero-animation]");
+      const todo = Array.from(
+        scene.querySelectorAll<HTMLElement>('[data-static-position^="todo-"]'),
+      );
+      const done = Array.from(
+        scene.querySelectorAll<HTMLElement>('[data-static-position^="done-"]'),
+      );
+      const active = element('[data-static-position="in-progress"]');
+      expect(todo).toHaveLength(5);
+      expect(done).toHaveLength(5);
+      expect(
+        scene.querySelectorAll('[data-static-position="in-progress"]'),
+      ).toHaveLength(1);
+      for (const card of [...todo, active, ...done]) {
+        expect(getComputedStyle(card).visibility).toBe("visible");
+        expect(card.getBoundingClientRect().right).toBeLessThanOrEqual(
+          scene.getBoundingClientRect().right,
+        );
+      }
+      expect(todo[0].getBoundingClientRect().right).toBeLessThan(
+        active.getBoundingClientRect().left,
+      );
+      expect(active.getBoundingClientRect().right).toBeLessThan(
+        done[0].getBoundingClientRect().left,
+      );
+      expect(
+        element('[data-static-position="done-1"]').getBoundingClientRect().top,
+      ).toBeCloseTo(active.getBoundingClientRect().top, 1);
+      const editor = element("[data-active-panel]");
+      expect(getComputedStyle(editor).visibility).toBe("visible");
+      expect(editor.getBoundingClientRect().top).toBeGreaterThan(
+        active.getBoundingClientRect().bottom,
+      );
+      expect(editor.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+        scene.getBoundingClientRect().bottom,
+      );
+      expect(editor.textContent).toContain("evals.py");
+      for (const line of scene.querySelectorAll<HTMLElement>(
+        "[data-code-line]",
+      )) {
+        expect(getComputedStyle(line).visibility).toBe("visible");
+        expect(line.getBoundingClientRect().width).toBeGreaterThan(10);
+      }
+      expect(getComputedStyle(element("[data-merged-panel]")).visibility).toBe(
+        "hidden",
+      );
+      expect(scene.getAnimations({ subtree: true })).toHaveLength(0);
+      expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
+    }
+  });
+
+  it("switches every illustration to reduced motion after load and safely restarts the hero", async () => {
+    reduceMotion(false);
+    root?.render(
+      <MantineProvider theme={theme}>
+        <HeroAnimation />
+        <BenefitsAnimation1 />
+        <BenefitsAnimation2 />
+        <BenefitsAnimation3 />
+      </MantineProvider>,
+    );
+    for (let cycle = 0; cycle < 3; cycle += 1) {
+      await vi.waitFor(() =>
+        expect(
+          element("[data-hero-animation]")
+            .getAnimations({ subtree: true })
+            .some((animation) => animation.playState === "running"),
+        ).toBe(true),
+      );
+      const oldScene = element("[data-hero-animation]");
+      const oldAnimations = oldScene.getAnimations({ subtree: true });
+      reduceMotion(true);
+      await vi.waitFor(() =>
+        expect(
+          element("[data-hero-animation]").hasAttribute("data-static"),
+        ).toBe(true),
+      );
+      expect(oldScene.isConnected).toBe(false);
+      expect(
+        oldAnimations.every((animation) => animation.playState === "idle"),
+      ).toBe(true);
+      expect(
+        element("[data-hero-animation]").getAnimations({ subtree: true }),
+      ).toHaveLength(0);
+      expect(getComputedStyle(element("[data-active-panel]")).visibility).toBe(
+        "visible",
+      );
+      expect(
+        element('[data-benefits-animation="one"]').hasAttribute(
+          "data-animated",
+        ),
+      ).toBe(false);
+      expect(
+        element(
+          '[data-benefits-animation="two"] [data-activity="2"]',
+        ).getAttribute("data-position"),
+      ).toBe("0");
+      expect(
+        getComputedStyle(
+          element('[data-benefits-animation="three"] [data-banked]'),
+        ).opacity,
+      ).toBe("1");
+      reduceMotion(false);
+    }
+    await vi.waitFor(() =>
+      expect(
+        element("[data-hero-animation]")
+          .getAnimations({ subtree: true })
+          .some((animation) => animation.playState === "running"),
+      ).toBe(true),
+    );
+    const animations = element("[data-hero-animation]").getAnimations({
+      subtree: true,
+    });
+    root?.unmount();
+    root = undefined;
+    expect(
+      animations.every((animation) => animation.playState === "idle"),
+    ).toBe(true);
+    reduceMotion(true);
+    await nextFrame();
+    expect(container.childElementCount).toBe(0);
+  });
+
   it.each([
     "light",
     "dark",

@@ -91,6 +91,7 @@ export function SiteHeader({
       </Container>
 
       <Drawer
+        attributes={{ header: { role: "presentation" } }}
         closeButtonProps={{ "aria-label": "Close navigation" }}
         classNames={{
           close: classes.drawerClose,
