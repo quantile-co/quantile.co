@@ -2,7 +2,12 @@
 
 import { IconFileText } from "@tabler/icons-react";
 import { useAnimate } from "motion/react-mini";
-import { useEffect, useState } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import classes from "./HeroAnimation.module.css";
 
 const tasks = [
@@ -211,11 +216,31 @@ const queueCardFilter = (slot: number) => {
   return "opacity(0.02)";
 };
 
-const pause = (duration: number) =>
-  new Promise<void>((resolve) => window.setTimeout(resolve, duration));
+const motionQuery = "(prefers-reduced-motion: reduce)";
+const subscribeToMotion = (notify: () => void) => {
+  const preference = window.matchMedia(motionQuery);
+  preference.addEventListener("change", notify);
+  return () => preference.removeEventListener("change", notify);
+};
+const prefersReducedMotion = () => window.matchMedia(motionQuery).matches;
+const serverReducedMotion = () => true;
 
-const nextFrame = () =>
-  new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+function staticCard(index: number) {
+  const column =
+    index === 0 ? "in-progress" : index <= queueDepth ? "todo" : "done";
+  const slot = column === "done" ? tasks.length - index : index;
+  if (column === "done" && slot > queueDepth) return {};
+  return {
+    "data-static-position":
+      column === "in-progress" ? column : `${column}-${slot}`,
+    style: {
+      "--static-card-top": `var(--${column}-card${slot ? `-${slot}` : ""}-top)`,
+      "--static-card-offset":
+        column === "todo" ? "0px" : `var(--${column}-card-offset)`,
+      "--static-card-filter": queueCardFilter(slot),
+    } as CSSProperties,
+  };
+}
 
 const wrapTaskIndex = (index: number) => (index + tasks.length) % tasks.length;
 
@@ -223,16 +248,45 @@ const initialPosition = (index: number) =>
   index < queueDepth ? `todo-${index + 1}` : undefined;
 
 export function HeroAnimation() {
-  const [scope, animate] = useAnimate<HTMLDivElement>();
+  const reducedMotion = useSyncExternalStore(
+    subscribeToMotion,
+    prefersReducedMotion,
+    serverReducedMotion,
+  );
+  // A fresh scene discards all committed WAAPI styles when the preference
+  // changes, so the static view is intentional rather than a frozen mid-frame.
+  return (
+    <HeroScene key={String(reducedMotion)} reducedMotion={reducedMotion} />
+  );
+}
+
+function HeroScene({ reducedMotion }: { reducedMotion: boolean }) {
+  const [scope, startAnimation] = useAnimate<HTMLDivElement>();
   const [activeTaskIndex, setActiveTaskIndex] = useState(0);
   const activeTask = tasks[activeTaskIndex];
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return;
-    }
+    const element = scope.current;
+    if (reducedMotion || !element) return;
 
     let cancelled = false;
+    const pending = new Set<ReturnType<typeof startAnimation>>();
+    const animate: typeof startAnimation = (...args) => {
+      const control = startAnimation(...args);
+      pending.add(control);
+      void control.then(() => pending.delete(control));
+      return control;
+    };
+    let timer: number | undefined;
+    let frame: number | undefined;
+    const pause = (duration: number) =>
+      new Promise<void>((resolve) => {
+        timer = window.setTimeout(resolve, duration);
+      });
+    const nextFrame = () =>
+      new Promise<void>((resolve) => {
+        frame = window.requestAnimationFrame(() => resolve());
+      });
     const isCancelled = () => cancelled;
     const cssValue = (property: string) => {
       if (!scope.current) return "0";
@@ -440,6 +494,7 @@ export function HeroAnimation() {
           ),
         ]);
 
+        if (isCancelled()) return;
         await pause(600);
         if (isCancelled()) return;
 
@@ -526,11 +581,23 @@ export function HeroAnimation() {
 
     return () => {
       cancelled = true;
+      window.clearTimeout(timer);
+      if (frame !== undefined) window.cancelAnimationFrame(frame);
+      // Retain controls explicitly: passive cleanup can run after React has
+      // detached the old scene, when element.getAnimations() returns nothing.
+      for (const control of pending) control.cancel();
+      pending.clear();
     };
-  }, [animate, scope]);
+  }, [startAnimation, reducedMotion, scope]);
 
   return (
-    <div aria-hidden="true" className={classes.scene} ref={scope}>
+    <div
+      aria-hidden="true"
+      className={classes.scene}
+      data-hero-animation
+      data-static={reducedMotion || undefined}
+      ref={scope}
+    >
       <span className={`${classes.columnLabel} ${classes.todoLabel}`}>
         Todo
       </span>
@@ -543,10 +610,11 @@ export function HeroAnimation() {
 
       {tasks.map((task, index) => (
         <div
+          key={task.issue}
           className={`${classes.taskCard} ${classes.movingCard}`}
+          {...staticCard(index)}
           data-initial-position={initialPosition(index)}
           data-task-card={String(index)}
-          key={task.issue}
         >
           <span className={classes.issueCopy}>
             <span className={classes.issueTitle}>{task.title}</span>

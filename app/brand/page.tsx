@@ -51,7 +51,7 @@ const groups = [
     assets: [
       {
         name: "Dark",
-        alt: "Light Quantile logo on a dark background",
+        alt: "Quantile logo, dark-background version: light mark on a dark background",
         preview: {
           src: "/images/brand/logo-dark-1024.png",
           width: 1024,
@@ -73,7 +73,7 @@ const groups = [
       },
       {
         name: "Light",
-        alt: "Dark Quantile logo on a light background",
+        alt: "Quantile logo, light-background version: dark mark on a light background",
         preview: {
           src: "/images/brand/logo-light-1024.png",
           width: 1024,
@@ -101,7 +101,7 @@ const groups = [
     assets: [
       {
         name: "Dark",
-        alt: "Light Quantile wordmark on a dark background",
+        alt: "Quantile wordmark, dark-background version: light text on a dark background",
         preview: {
           src: "/images/brand/wordmark-dark-1600.png",
           width: 1600,
@@ -123,7 +123,7 @@ const groups = [
       },
       {
         name: "Light",
-        alt: "Dark Quantile wordmark on a light background",
+        alt: "Quantile wordmark, light-background version: dark text on a light background",
         preview: {
           src: "/images/brand/wordmark-light-1600.png",
           width: 1600,
@@ -151,7 +151,7 @@ const groups = [
     assets: [
       {
         name: "X",
-        alt: "Quantile wordmark on a dark X header",
+        alt: "X header: light Quantile wordmark on a dark background",
         preview: {
           src: "/images/brand/x-header-1500x500.png",
           width: 1500,
@@ -168,7 +168,7 @@ const groups = [
       },
       {
         name: "General",
-        alt: "Quantile wordmark on a dark social preview",
+        alt: "Social preview: light Quantile wordmark on a dark background",
         preview: {
           src: "/images/brand/social-preview-1200x630.png",
           width: 1200,

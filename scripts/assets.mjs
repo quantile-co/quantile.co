@@ -118,6 +118,24 @@ function socialSvg() {
   });
 }
 
+function brandSocialSvg() {
+  const mark = positionedText(
+    ":quantile",
+    { pointSize: 120, centerX: 598.5, centerY: 247 },
+    "wordmark",
+  );
+  const label = positionedText(
+    "Brand assets",
+    { pointSize: 55, centerX: 600, centerY: 422 },
+    "label",
+  );
+  return documentSvg({
+    width: 1200,
+    height: 630,
+    body: `  <rect width="1200" height="630" fill="${zinc950}"/>\n  <g fill="${zinc50}">${mark}${label}</g>`,
+  });
+}
+
 async function png(svg, width, height) {
   return sharp(Buffer.from(svg)).resize(width, height).png().toBuffer();
 }
@@ -187,6 +205,7 @@ async function buildAssets() {
     faviconSpecs.map((spec) => png(iconSvg(spec), spec.size, spec.size)),
   );
   const openGraph = await png(social, 1200, 630);
+  const brandOpenGraph = await png(brandSocialSvg(), 1200, 630);
 
   return new Map([
     ["app/favicon.ico", await pngToIco(faviconPngs)],
@@ -196,6 +215,16 @@ async function buildAssets() {
     ["app/opengraph-image.alt.txt", Buffer.from("Quantile wordmark")],
     ["app/twitter-image.png", openGraph],
     ["app/twitter-image.alt.txt", Buffer.from("Quantile wordmark")],
+    ["app/brand/opengraph-image.png", brandOpenGraph],
+    [
+      "app/brand/opengraph-image.alt.txt",
+      Buffer.from("Quantile wordmark above Brand assets"),
+    ],
+    ["app/brand/twitter-image.png", brandOpenGraph],
+    [
+      "app/brand/twitter-image.alt.txt",
+      Buffer.from("Quantile wordmark above Brand assets"),
+    ],
     ["public/images/brand/wordmark-dark.svg", Buffer.from(darkWordmark)],
     ["public/images/brand/wordmark-light.svg", Buffer.from(lightWordmark)],
     [

@@ -30,6 +30,19 @@ const approvedTitles = [
 ];
 
 describe("HeroAnimation", () => {
+  it("server-renders the intentional static board before reading motion preferences", () => {
+    const html = renderToStaticMarkup(<HeroAnimation />);
+    expect(html).toContain('data-static="true"');
+    expect([...html.matchAll(/data-static-position="todo-\d"/g)]).toHaveLength(
+      5,
+    );
+    expect([...html.matchAll(/data-static-position="done-\d"/g)]).toHaveLength(
+      5,
+    );
+    expect([
+      ...html.matchAll(/data-static-position="in-progress"/g),
+    ]).toHaveLength(1);
+  });
   it("shows each of the 24 approved tasks once", () => {
     const html = renderToStaticMarkup(<HeroAnimation />);
     const cardCount = [...html.matchAll(/data-task-card="\d+"/g)].length;

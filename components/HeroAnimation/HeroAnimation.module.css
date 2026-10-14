@@ -500,9 +500,25 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .activePanel,
-  .mergedPanel {
-    visibility: hidden !important;
-  }
+/* A representative populated board, also used for server rendering. Keep
+   positioning in CSS so this snapshot stays responsive without JS layout. */
+.scene[data-static] .movingCard {
+  visibility: hidden;
+}
+
+.scene[data-static] .movingCard[data-static-position] {
+  top: var(--static-card-top);
+  translate: var(--static-card-offset);
+  filter: var(--static-card-filter);
+  visibility: visible;
+}
+
+.scene[data-static] .activePanel {
+  visibility: visible;
+}
+
+.scene[data-static] [data-static-position="in-progress"] .assignee {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) scale(1);
 }

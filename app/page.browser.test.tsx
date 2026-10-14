@@ -4,7 +4,7 @@ import { MantineProvider } from "@mantine/core";
 import type { ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { page } from "vitest/browser";
+import { page, userEvent } from "vitest/browser";
 import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
 import { FaqSection } from "@/components/FaqSection/FaqSection";
 import { HeroAnimation } from "@/components/HeroAnimation/HeroAnimation";
@@ -164,7 +164,7 @@ describe("homepage hero layout", () => {
     }
   });
 
-  it("submits a local form from the mobile navigation drawer", async () => {
+  it("keeps mobile drawer semantics and keyboard handling while submitting a local form", async () => {
     await page.viewport(390, 844);
     root.render(
       <MantineProvider theme={theme}>
@@ -184,6 +184,7 @@ describe("homepage hero layout", () => {
       expect(button).not.toBeNull();
       return button as HTMLButtonElement;
     });
+    toggle.focus();
     toggle.click();
     const form = await vi.waitFor(() => {
       const element = document.querySelector<HTMLFormElement>(
@@ -195,6 +196,32 @@ describe("homepage hero layout", () => {
     expect(form.getAttribute("action")).toBe("/storybook-checkout-preview");
     expect(form.getAttribute("method")).toBe("post");
 
+    const dialog = form.closest('[role="dialog"]');
+    expect(dialog?.getAttribute("aria-modal")).toBe("true");
+    expect(dialog?.querySelector("header")?.getAttribute("role")).toBe(
+      "presentation",
+    );
+    const titleId = dialog?.getAttribute("aria-labelledby");
+    expect(titleId && document.getElementById(titleId)?.textContent).toBe(
+      "Quantile",
+    );
+    expect(
+      document.querySelectorAll('header:not([role="presentation"])'),
+    ).toHaveLength(1);
+    await vi.waitFor(() =>
+      expect(dialog?.contains(document.activeElement)).toBe(true),
+    );
+    // Traverse past both ends, including the logo and close button. Removing
+    // the header landmark must not remove its descendants from keyboard use.
+    for (let index = 0; index < 8; index += 1) {
+      await userEvent.keyboard("{Tab}");
+      expect(dialog?.contains(document.activeElement)).toBe(true);
+    }
+    for (let index = 0; index < 8; index += 1) {
+      await userEvent.keyboard("{Shift>}{Tab}{/Shift}");
+      expect(dialog?.contains(document.activeElement)).toBe(true);
+    }
+
     let submitted = false;
     form.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -202,6 +229,12 @@ describe("homepage hero layout", () => {
     });
     form.querySelector<HTMLButtonElement>('button[type="submit"]')?.click();
     expect(submitted).toBe(true);
+    await userEvent.keyboard("{Escape}");
+    await vi.waitFor(() =>
+      expect(document.querySelector('[role="dialog"]')).toBeNull(),
+    );
+    await vi.waitFor(() => expect(document.activeElement).toBe(toggle));
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
   });
 });
 
