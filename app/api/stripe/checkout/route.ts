@@ -5,8 +5,8 @@ import { readCheckoutSettings, runtimeEnvironment } from "@/lib/env/env";
 
 export const runtime = "nodejs";
 
-// Stripe can switch to the custom hosted domain once DNS is verified. Keep
-// both hosts valid so Checkout works before and after activation.
+// Stripe returns its own hosted domain in some modes; accept both its
+// Checkout origin and our active custom domain for provider-issued URLs.
 const hostedCheckoutOrigins = new Set([
   "https://checkout.stripe.com",
   "https://billing.quantile.co",

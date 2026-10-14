@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { SiteFooter } from "./SiteFooter";
 
 const liveLoginUrl =
-  "https://billing.stripe.com/p/login/bJeeVe3TIaVO9ODfkn6AM00";
+  "https://billing.quantile.co/p/login/bJeeVe3TIaVO9ODfkn6AM00";
 const sections = [{ href: "/#faq", label: "FAQ" }] as const;
 
 describe("Site footer billing link", () => {

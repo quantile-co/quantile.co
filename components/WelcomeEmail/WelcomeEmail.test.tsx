@@ -4,7 +4,7 @@ import { welcomeEmailPlainText } from "./plain-text";
 import { WelcomeEmail } from "./WelcomeEmail";
 
 const billingPortalLoginUrl =
-  "https://billing.stripe.com/p/login/bJeeVe3TIaVO9ODfkn6AM00";
+  "https://billing.quantile.co/p/login/bJeeVe3TIaVO9ODfkn6AM00";
 
 describe("WelcomeEmail", () => {
   it.each([

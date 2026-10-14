@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { FaqSection } from "./FaqSection";
 
 const liveLoginUrl =
-  "https://billing.stripe.com/p/login/bJeeVe3TIaVO9ODfkn6AM00";
+  "https://billing.quantile.co/p/login/bJeeVe3TIaVO9ODfkn6AM00";
 
 function PreviewCheckoutForm({ children }: { children: ReactNode }) {
   return (
