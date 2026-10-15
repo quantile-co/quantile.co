@@ -4,17 +4,20 @@ import { createWelcomeReceiptHandler } from "./receipt";
 import { memoryStore, pending, receipt } from "./test";
 
 beforeEach(() => vi.spyOn(console, "info").mockImplementation(() => {}));
-describe("immutable request and completion contract", () => {
+describe.each([
+  "development",
+  "production",
+] as const)("immutable request and completion contract (%s)", (mode) => {
   function setup() {
     const store = memoryStore();
-    const record = pending();
+    const record = pending({ mode });
     const render = vi.fn(async () => JSON.parse(record.request) as Mail);
     const send = vi.fn<(request: string, key: string) => Promise<string>>(
       async () => "mail_accepted",
     );
     const deliver = createWelcomeDelivery({ store, send });
     const callback = createWelcomeReceiptHandler({
-      config: { mode: "test", appInstance: record.appInstance },
+      config: { mode, appInstance: record.appInstance },
       getStore: () => store,
     });
     return { store, record, render, send, deliver, callback };
@@ -107,24 +110,50 @@ describe("immutable request and completion contract", () => {
     expect(send).not.toHaveBeenCalled();
     expect(render).not.toHaveBeenCalled();
   });
-  it("rejects another instance's record", async () => {
+  it("rejects another billing environment's record and ignores its callback", async () => {
+    const { deliver, record, render, send, store, callback } = setup();
+    const other = pending({
+      mode: mode === "development" ? "production" : "development",
+    });
+    store.get.mockResolvedValueOnce(other);
+    await expect(deliver(record, render)).rejects.toThrow();
+    expect(send).not.toHaveBeenCalled();
+    store.get.mockClear();
+    expect(await callback(receipt(other))).toEqual({ result: "ignored" });
+    expect(store.get).not.toHaveBeenCalled();
+  });
+  it("rejects another operation in the same instance", async () => {
     const { deliver, record, render, send, store } = setup();
     store.get.mockResolvedValueOnce(
-      pending({ appInstance: "other", testId: `other-${"a".repeat(32)}` }),
+      pending({ mode, operationId: `sample-${"a".repeat(32)}` }),
     );
     await expect(deliver(record, render)).rejects.toThrow();
     expect(send).not.toHaveBeenCalled();
   });
-  it("rejects schema changes and real recipients in test records", () => {
-    expect(() => assertRecord({ ...pending(), schema: "2" as "1" })).toThrow();
-    expect(() =>
-      assertRecord(pending({}, { to: ["customer@example.com"] })),
-    ).toThrow();
+  it("rejects a callback for another operation", async () => {
+    const { record, store, callback } = setup();
+    await store.prepare(record);
+    const event = receipt(record);
+    event.data.tags.quantile_operation_id = `sample-${"a".repeat(32)}`;
+    await expect(callback(event)).rejects.toThrow();
+    expect(store.accept).not.toHaveBeenCalled();
+  });
+  it("rejects another instance's record", async () => {
+    const { deliver, record, render, send, store } = setup();
+    store.get.mockResolvedValueOnce(
+      pending({ appInstance: "other", operationId: `other-${"a".repeat(32)}` }),
+    );
+    await expect(deliver(record, render)).rejects.toThrow();
+    expect(send).not.toHaveBeenCalled();
+  });
+  it("rejects unsupported schemas and unowned operations", () => {
+    expect(() => assertRecord({ ...pending(), schema: "1" as "2" })).toThrow();
+    expect(() => assertRecord(pending({ operationId: "unowned" }))).toThrow();
   });
   it("ignores unrelated callbacks without opening the store", async () => {
     const getStore = vi.fn();
     const callback = createWelcomeReceiptHandler({
-      config: { mode: "test", appInstance: "sample" },
+      config: { mode, appInstance: "sample" },
       getStore,
     });
     const event = receipt();
@@ -137,7 +166,9 @@ describe("immutable request and completion contract", () => {
   });
   it("never creates a missing request from a callback", async () => {
     const { callback, store } = setup();
-    await expect(callback(receipt())).rejects.toThrow("not found");
+    await expect(callback(receipt(pending({ mode })))).rejects.toThrow(
+      "not found",
+    );
     expect(store.prepare).not.toHaveBeenCalled();
   });
   it("rejects mismatched recipients and conflicting receipt IDs", async () => {

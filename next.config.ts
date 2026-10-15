@@ -1,25 +1,18 @@
 import type { NextConfig } from "next";
-import firebaseConfig from "./firebase.json";
+import {
+  readDevelopmentPortalUrl,
+  readHeaderSettings,
+  runtimeEnvironment,
+} from "./lib/env/env";
+import { siteHeaders } from "./lib/http/headers";
 
-function hostingHeaders(source: string) {
-  const rule = firebaseConfig.hosting.headers.find(
-    (entry) => entry.source === source,
-  );
-  if (!rule) {
-    throw new Error(`Missing Firebase Hosting headers for ${source}`);
-  }
-  return rule.headers;
-}
-
+const portalUrl = readDevelopmentPortalUrl(runtimeEnvironment());
 const nextConfig: NextConfig = {
+  compiler: {
+    define: portalUrl ? { QUANTILE_DEVELOPMENT_PORTAL_URL: portalUrl } : {},
+  },
   async headers() {
-    // Leave development caching/HMR intact; App Hosting builds run in production.
-    // Next itself sets immutable caching on its hashed /_next/static assets.
-    if (process.env.NODE_ENV !== "production") return [];
-    return [
-      { source: "/:path*", headers: hostingHeaders("**") },
-      { source: "/images/:path*", headers: hostingHeaders("/images/**") },
-    ];
+    return siteHeaders(readHeaderSettings(runtimeEnvironment()));
   },
   images: {
     unoptimized: true,

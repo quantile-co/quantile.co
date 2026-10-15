@@ -1,18 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import firebaseConfig from "../../../../firebase.json";
 
-const provider = vi.hoisted(() => ({
-  init: vi.fn(),
-  retrieve: vi.fn(),
-  create: vi.fn(),
-}));
+const provider = vi.hoisted(() => ({ init: vi.fn(), create: vi.fn() }));
 vi.mock("server-only", () => ({}));
 vi.mock("stripe", () => ({
   default: class {
     constructor(key: string) {
       provider.init(key);
     }
-    prices = { retrieve: provider.retrieve };
     checkout = { sessions: { create: provider.create } };
   },
 }));
@@ -20,16 +15,6 @@ vi.mock("stripe", () => ({
 import { POST } from "./route";
 
 const origin = "http://127.0.0.1:3000";
-const keys = [
-  "STRIPE_EVENT_LIVEMODE",
-  "STRIPE_API_KEY",
-  "STRIPE_PRICE_ID",
-  "QUANTILE_APP_INSTANCE",
-  "QUANTILE_SITE_ORIGIN",
-  "FIRESTORE_EMULATOR_HOST",
-] as const;
-const original = new Map<string, string | undefined>();
-
 function submit(from = origin, target = origin) {
   return POST(
     new Request(`${target}/api/stripe/checkout`, {
@@ -38,51 +23,47 @@ function submit(from = origin, target = origin) {
     }),
   );
 }
-
 beforeEach(() => {
   vi.resetAllMocks();
   vi.spyOn(console, "error").mockImplementation(() => {});
-  for (const key of keys) original.set(key, process.env[key]);
-  delete process.env.FIRESTORE_EMULATOR_HOST;
-  Object.assign(process.env, {
+  for (const [key, value] of Object.entries({
     STRIPE_EVENT_LIVEMODE: "false",
     STRIPE_API_KEY: "rk_test_fixture",
     STRIPE_PRICE_ID: "price_fixture",
     QUANTILE_APP_INSTANCE: "sample",
     QUANTILE_SITE_ORIGIN: origin,
-  });
-  provider.retrieve.mockResolvedValue({
-    active: true,
-    livemode: false,
-    currency: "usd",
-    unit_amount: 499_500,
-    recurring: { interval: "month", usage_type: "licensed" },
-  });
+    FIRESTORE_EMULATOR_HOST: "",
+  }))
+    vi.stubEnv(key, value);
   provider.create.mockResolvedValue({
     livemode: false,
     url: "https://checkout.stripe.com/c/pay/cs_test_fixture",
   });
 });
 afterEach(() => {
-  for (const key of keys) {
-    const prior = original.get(key);
-    if (prior === undefined) delete process.env[key];
-    else process.env[key] = prior;
-  }
-  original.clear();
+  vi.unstubAllEnvs();
   vi.restoreAllMocks();
 });
 
 describe("Checkout start", () => {
-  it("creates an owned subscription Checkout from a same-origin POST", async () => {
-    const response = await submit();
+  it.each([
+    false,
+    true,
+  ])("uses the configured Price and shared operation metadata (livemode=%s)", async (livemode) => {
+    const site = livemode ? "https://example.com" : origin;
+    const key = livemode ? "rk_live_fixture" : "rk_test_fixture";
+    vi.stubEnv("STRIPE_EVENT_LIVEMODE", String(livemode));
+    vi.stubEnv("STRIPE_API_KEY", key);
+    vi.stubEnv("QUANTILE_SITE_ORIGIN", site);
+    provider.create.mockResolvedValue({
+      livemode,
+      url: "https://billing.quantile.co/c/pay/session",
+    });
+    const response = await submit(site);
     expect(response.status).toBe(303);
-    expect(response.headers.get("Location")).toBe(
-      "https://checkout.stripe.com/c/pay/cs_test_fixture",
-    );
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(provider.init).toHaveBeenCalledWith("rk_test_fixture");
-    expect(provider.retrieve).toHaveBeenCalledWith("price_fixture");
+    expect(response.headers.get("Referrer-Policy")).toBe("no-referrer");
+    expect(provider.init).toHaveBeenCalledWith(key);
     const [params, options] = provider.create.mock.calls[0];
     expect(params).toMatchObject({
       mode: "subscription",
@@ -93,27 +74,25 @@ describe("Checkout start", () => {
           adjustable_quantity: { enabled: true, minimum: 1, maximum: 5 },
         },
       ],
-      success_url: `${origin}/welcome`,
-      cancel_url: `${origin}/#pricing`,
+      success_url: `${site}/welcome`,
+      cancel_url: `${site}/#pricing`,
     });
     expect(params).not.toHaveProperty("payment_method_types");
-    const metadata = params.subscription_data.metadata;
-    expect(metadata).toEqual(params.metadata);
-    expect(metadata).toMatchObject({
+    expect(params.metadata).toEqual(params.subscription_data.metadata);
+    expect(params.metadata).toEqual({
       quantile_app_instance: "sample",
-      quantile_test_delivery: "delivered",
+      quantile_operation_id: expect.stringMatching(/^sample-[a-f0-9]{32}$/),
     });
-    expect(metadata.quantile_test_id).toMatch(/^sample-[a-f0-9]{32}$/);
     expect(options.idempotencyKey).toBe(
-      `checkout/${metadata.quantile_test_id}`,
+      `checkout/${params.metadata.quantile_operation_id}`,
     );
-    await submit();
-    expect(provider.create.mock.calls[1][0].metadata.quantile_test_id).not.toBe(
-      metadata.quantile_test_id,
-    );
+    await submit(site);
+    expect(
+      provider.create.mock.calls[1][0].metadata.quantile_operation_id,
+    ).not.toBe(params.metadata.quantile_operation_id);
   });
 
-  it("allows both Stripe-hosted Checkout domains under the production form policy", async () => {
+  it("allows both hosted Checkout domains under the production form policy", async () => {
     const policy = firebaseConfig.hosting.headers
       .find((entry) => entry.source === "**")
       ?.headers.find(
@@ -129,129 +108,61 @@ describe("Checkout start", () => {
       });
       const response = await submit();
       expect(response.status).toBe(303);
-      expect(new URL(response.headers.get("Location") ?? "").origin).toBe(
-        `https://${domain}`,
+      expect(new URL(response.headers.get("Location") ?? "").hostname).toBe(
+        domain,
       );
     }
   });
 
-  it("accepts only same-port localhost aliases in local test mode", async () => {
-    const local = "http://localhost:3000";
-    expect((await submit(local, local)).status).toBe(303);
+  it.each([
+    "",
+    "https://another.example",
+    "http://localhost:3000",
+    "http://127.0.0.1:3001",
+    `${origin}/`,
+  ])("rejects noncanonical Origin %s before calling Stripe", async (from) => {
+    expect((await submit(from, from || origin)).status).toBe(403);
+    expect(provider.init).not.toHaveBeenCalled();
+  });
+  it("allows localhost when it is the configured canonical origin", async () => {
+    vi.stubEnv("QUANTILE_SITE_ORIGIN", "http://localhost:3000");
+    expect((await submit("http://localhost:3000")).status).toBe(303);
     expect(provider.create.mock.calls[0][0].success_url).toBe(
-      `${origin}/welcome`,
+      "http://localhost:3000/welcome",
     );
-    for (const [from, target] of [
-      ["http://localhost:3001", "http://localhost:3001"],
-      [local, origin],
-      ["http://attacker.example:3000", "http://attacker.example:3000"],
-      ["http://localhost:3000/", local],
-    ])
-      expect((await submit(from, target)).status).toBe(403);
-    expect(provider.create).toHaveBeenCalledTimes(1);
   });
-
-  it("does not allow local aliases in live mode or for a public test origin", async () => {
-    const local = "http://localhost:3000";
-    process.env.QUANTILE_SITE_ORIGIN = "https://example.com";
-    expect((await submit(local, local)).status).toBe(403);
-    Object.assign(process.env, {
-      QUANTILE_SITE_ORIGIN: "https://127.0.0.1:3000",
-      STRIPE_EVENT_LIVEMODE: "true",
-      STRIPE_API_KEY: "rk_live_fixture",
-    });
-    expect(
-      (await submit("https://localhost:3000", "https://localhost:3000")).status,
-    ).toBe(403);
+  it.each([
+    { STRIPE_API_KEY: "" },
+    { STRIPE_API_KEY: "rk_live_fixture" },
+    { STRIPE_EVENT_LIVEMODE: "invalid" },
+  ])("fails closed on invalid configuration", async (changes) => {
+    for (const [key, value] of Object.entries(changes)) vi.stubEnv(key, value);
+    const response = await submit();
+    expect(response.status).toBe(503);
+    expect(await response.text()).toBe("Checkout unavailable");
     expect(provider.init).not.toHaveBeenCalled();
   });
-
-  it("refuses a foreign or missing Origin before calling Stripe", async () => {
-    for (const from of ["https://another.example", ""]) {
-      const response = await submit(from);
-      expect(response.status).toBe(403);
-    }
-    expect(provider.init).not.toHaveBeenCalled();
-  });
-
-  it("refuses missing credentials or mode/key mismatch without leaking values", async () => {
-    for (const changes of [
-      { STRIPE_API_KEY: "" },
-      { STRIPE_API_KEY: "rk_live_fixture" },
-      { STRIPE_EVENT_LIVEMODE: "invalid" },
-    ]) {
-      Object.assign(process.env, changes);
-      const response = await submit();
-      expect(response.status).toBe(503);
-      expect(await response.text()).toBe("Checkout unavailable");
-      Object.assign(process.env, {
-        STRIPE_EVENT_LIVEMODE: "false",
-        STRIPE_API_KEY: "rk_test_fixture",
-      });
-    }
-    expect(provider.init).not.toHaveBeenCalled();
+  it("does not expose provider failures", async () => {
+    provider.create.mockRejectedValueOnce(
+      new Error("private provider details"),
+    );
+    const response = await submit();
+    expect(response.status).toBe(503);
+    expect(await response.text()).toBe("Checkout unavailable");
     expect(console.error).toHaveBeenCalledWith("checkout_unavailable");
   });
-
-  it("refuses an ineligible Price and a non-Stripe redirect", async () => {
-    provider.retrieve.mockResolvedValueOnce({
-      active: true,
-      livemode: true,
-      currency: "usd",
-      unit_amount: 499_500,
-      recurring: { interval: "month", usage_type: "licensed" },
-    });
+  it.each([
+    { livemode: true, url: "https://checkout.stripe.com/c/pay/session" },
+    { livemode: false, url: null },
+    { livemode: false, url: "https://checkout.example.com/other" },
+    {
+      livemode: false,
+      url: "https://billing.quantile.co.attacker.example/session",
+    },
+    { livemode: false, url: "http://billing.quantile.co/session" },
+    { livemode: false, url: "https://billing.quantile.co:8443/session" },
+  ])("rejects an unexpected Checkout response", async (session) => {
+    provider.create.mockResolvedValueOnce(session);
     expect((await submit()).status).toBe(503);
-    expect(provider.create).not.toHaveBeenCalled();
-    for (const url of [
-      "https://checkout.example.com/other",
-      "https://billing.quantile.co.attacker.example/c/pay/cs_test_fixture",
-      "http://billing.quantile.co/c/pay/cs_test_fixture",
-      "https://billing.quantile.co:8443/c/pay/cs_test_fixture",
-    ]) {
-      provider.create.mockResolvedValueOnce({ livemode: false, url });
-      expect((await submit()).status).toBe(503);
-    }
-  });
-
-  it("in live mode uses a restricted live key and sends no test operation metadata", async () => {
-    Object.assign(process.env, {
-      STRIPE_EVENT_LIVEMODE: "true",
-      STRIPE_API_KEY: "rk_live_fixture",
-      QUANTILE_SITE_ORIGIN: "https://example.com",
-    });
-    provider.retrieve.mockResolvedValue({
-      active: true,
-      livemode: true,
-      currency: "usd",
-      unit_amount: 499_500,
-      recurring: { interval: "month", usage_type: "licensed" },
-    });
-    provider.create.mockResolvedValue({
-      livemode: true,
-      url: "https://checkout.stripe.com/c/pay/cs_live_fixture",
-    });
-    expect((await submit("https://example.com")).status).toBe(303);
-    expect(provider.create.mock.calls[0][0].subscription_data.metadata).toEqual(
-      {
-        quantile_app_instance: "sample",
-      },
-    );
-    expect(provider.create.mock.calls[0][0].success_url).toBe(
-      "https://example.com/welcome",
-    );
-    expect(provider.create.mock.calls[0][1].idempotencyKey).toMatch(
-      /^checkout\/sample-[a-f0-9]{32}$/,
-    );
-    provider.retrieve.mockResolvedValueOnce({
-      active: true,
-      livemode: true,
-      currency: "usd",
-      unit_amount: 100,
-      recurring: { interval: "month", usage_type: "licensed" },
-    });
-    expect((await submit("https://example.com")).status).toBe(503);
-    process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
-    expect((await submit("https://example.com")).status).toBe(503);
   });
 });

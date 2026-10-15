@@ -176,7 +176,7 @@ describe("provider lifecycle coordination", () => {
           },
         })),
       ),
-    ).rejects.toThrow("Could not stop all local child processes.");
+    ).rejects.toThrow("Could not stop all development child processes.");
     expect(order).toEqual([2, 1, 0]);
   });
   it("paginates and filters registry lookups by exact URL", async () => {

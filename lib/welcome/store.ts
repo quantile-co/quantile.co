@@ -35,7 +35,7 @@ export function createWelcomeStore(
     identity: Pick<WelcomeIdentity, "mode" | "subscriptionId">,
   ) => {
     if (
-      !["test", "live"].includes(identity.mode) ||
+      !["development", "production"].includes(identity.mode) ||
       !/^sub_[A-Za-z0-9_]+$/.test(identity.subscriptionId)
     )
       throw new Error("Invalid welcome identity.");

@@ -148,7 +148,8 @@ export async function stopChildren(children: Child[]) {
       failed = true;
     }
   }
-  if (failed) throw new Error("Could not stop all local child processes.");
+  if (failed)
+    throw new Error("Could not stop all development child processes.");
 }
 
 export async function freePort(): Promise<number> {
@@ -159,7 +160,7 @@ export async function freePort(): Promise<number> {
   });
   const address = server.address();
   if (!address || typeof address === "string")
-    throw new Error("Could not allocate a local port.");
+    throw new Error("Could not allocate a loopback port.");
   await new Promise<void>((resolve, reject) =>
     server.close((error) => (error ? reject(error) : resolve())),
   );

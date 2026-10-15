@@ -10,11 +10,70 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readIntegrationTarget } from "../stripe/test.ts";
 import { childEnvironment } from "./process.ts";
-import { parseCommand, readIntegrationConfig } from "./run.ts";
+import {
+  discoverDevelopmentPortal,
+  parseCommand,
+  readIntegrationConfig,
+} from "./run.ts";
+
+const portalList = vi.hoisted(() => vi.fn());
+vi.mock("stripe", () => ({
+  default: class {
+    billingPortal = { configurations: { list: portalList } };
+  },
+}));
+const portalUrl = "https://billing.quantile.co/p/login/test_fixture";
+
+describe("development portal discovery", () => {
+  const valid = {
+    active: true,
+    is_default: true,
+    livemode: false,
+    login_page: { enabled: true, url: portalUrl },
+  };
+  function configurations(values: unknown[]) {
+    portalList.mockImplementation(() => ({
+      async *[Symbol.asyncIterator]() {
+        yield* values;
+      },
+    }));
+  }
+  it("uses the enabled default, not the first configuration", async () => {
+    configurations([{ ...valid, is_default: false }, valid]);
+    expect(await discoverDevelopmentPortal("rk_test_fixture")).toBe(portalUrl);
+    expect(portalList).toHaveBeenCalledWith({ active: true, limit: 100 });
+  });
+  it.each([
+    [],
+    [valid, valid],
+    [{ ...valid, active: false }],
+    [{ ...valid, livemode: true }],
+    [{ ...valid, login_page: { enabled: false, url: portalUrl } }],
+    [{ ...valid, login_page: { enabled: true, url: null } }],
+    [{ ...valid, login_page: { enabled: true, url: "https://evil.example" } }],
+  ])("rejects unavailable or unsafe defaults without a production fallback: %j", async (...values) => {
+    configurations(values);
+    await expect(discoverDevelopmentPortal("rk_test_fixture")).rejects.toThrow(
+      "Could not discover",
+    );
+  });
+  it("does not use production keys or expose provider errors", async () => {
+    portalList.mockClear();
+    await expect(discoverDevelopmentPortal("rk_live_private")).rejects.toThrow(
+      "requires a development billing key",
+    );
+    expect(portalList).not.toHaveBeenCalled();
+    portalList.mockImplementation(() => {
+      throw new Error("sensitive-provider-output");
+    });
+    await expect(discoverDevelopmentPortal("rk_test_fixture")).rejects.toThrow(
+      /^Could not discover the default development billing portal\./,
+    );
+  });
+});
 
 let root: string;
 beforeEach(async () => {
@@ -176,9 +235,6 @@ describe("integration configuration and process boundaries", () => {
 });
 
 describe("development command processes", () => {
-  const entrypoint = fileURLToPath(
-    new URL("../../scripts/dev.ts", import.meta.url),
-  );
   const running: {
     process: ChildProcess;
     exit: () => Promise<number | null>;
@@ -186,6 +242,16 @@ describe("development command processes", () => {
   // Inert subprocess fixtures exercise actual signals/process groups; no provider calls.
   beforeEach(async () => {
     const files = {
+      "dev.mjs": `
+import { runDevelopment } from ${JSON.stringify(new URL("./run.ts", import.meta.url).href)};
+import { readFileSync, writeFileSync } from 'node:fs';
+process.exitCode = await runDevelopment(process.argv.slice(2), async () => {
+  const fixture = JSON.parse(readFileSync('fixture.json', 'utf8'));
+  writeFileSync('portal.discovered', 'yes');
+  if (fixture.portalFailure) throw new Error('Development portal unavailable');
+  return ${JSON.stringify(portalUrl)};
+});
+`,
       "node_modules/firebase-tools/lib/bin/firebase.js": `
 const fs = require('node:fs');
 const fixture = JSON.parse(fs.readFileSync('fixture.json', 'utf8'));
@@ -199,7 +265,12 @@ if (fixture.emulator !== 'wait') console.log('All emulators ready');
       "node_modules/next/dist/bin/next": `
 const fs = require('node:fs');
 try { process.loadEnvFile('.env.local'); } catch {}
-fs.writeFileSync('next.started', JSON.stringify({ instance: process.env.QUANTILE_APP_INSTANCE, port: process.env.PORT, management: process.env.RESEND_MANAGEMENT_API_KEY, stripe: process.env.STRIPE_TEST_API_KEY }));
+const fixture = JSON.parse(fs.readFileSync('fixture.json', 'utf8'));
+if (process.argv[2] === 'build') {
+  fs.writeFileSync('build.started', JSON.stringify({ nodeEnv: process.env.NODE_ENV, mode: process.env.STRIPE_EVENT_LIVEMODE, project: process.env.GCP_PROJECT_ID, host: process.env.FIRESTORE_EMULATOR_HOST, sendingKey: process.env.RESEND_API_KEY, stripe: process.env.STRIPE_API_KEY, analytics: process.env.NEXT_PUBLIC_FATHOM_SITE_ID, portal: process.env.QUANTILE_DEVELOPMENT_PORTAL_URL }));
+  process.exit(fixture.buildExit ?? 0);
+}
+fs.writeFileSync('next.started', JSON.stringify({ command: process.argv[2], nodeEnv: process.env.NODE_ENV, instance: process.env.QUANTILE_APP_INSTANCE, port: process.env.PORT, management: process.env.RESEND_MANAGEMENT_API_KEY, stripe: process.env.STRIPE_TEST_API_KEY }));
 process.on('SIGTERM', () => { fs.writeFileSync('next.stopped', 'yes'); process.exit(0); });
 setTimeout(() => process.exit(98), 12000);
 `,
@@ -229,7 +300,7 @@ process.exit(fixture.exit ?? 0);
   ) {
     const child = spawn(
       process.execPath,
-      ["--experimental-strip-types", entrypoint, ...args],
+      ["--experimental-strip-types", path.join(root, "dev.mjs"), ...args],
       {
         cwd: root,
         env: {
@@ -302,6 +373,8 @@ process.exit(fixture.exit ?? 0);
     const child = startDevelopment(["--port", "3101"], { PORT: "3102" });
     expect(await started("next.started")).toMatchObject({
       port: "3101",
+      command: "dev",
+      nodeEnv: "development",
       instance: expect.stringMatching(/^app-[a-f0-9]{16}$/),
       management: "",
       stripe: "",
@@ -388,6 +461,62 @@ process.exit(fixture.exit ?? 0);
     expect(await readdir(path.join(root, ".quantile"))).toEqual([]);
     await absent("next.started");
   });
+  it("builds integration in production mode with development billing and stops before webhook startup if compilation fails", async () => {
+    await writeFile(
+      path.join(root, "fixture.json"),
+      JSON.stringify({ buildExit: 7 }),
+    );
+    const child = startDevelopment(["--test", "--integration"], {
+      ...env,
+      NEXT_PUBLIC_FATHOM_SITE_ID: "TESTSITE",
+    });
+    expect(await child.exit()).toBe(1);
+    expect(await started("build.started")).toMatchObject({
+      nodeEnv: "production",
+      mode: "false",
+      project: "demo-quantile",
+      host: expect.stringMatching(/^127\.0\.0\.1:\d+$/),
+      sendingKey: "",
+      stripe: "",
+      analytics: "",
+      portal: portalUrl,
+    });
+    expect(child.output()).toContain(
+      "Production build for development billing failed",
+    );
+    expect(await readFile(path.join(root, "emulator.stopped"), "utf8")).toBe(
+      "yes",
+    );
+    await absent("next.started");
+    await absent("tests.started");
+    await absent(".quantile/webhooks.json");
+  });
+  it("stops before build and webhook startup if portal discovery fails", async () => {
+    await writeFile(
+      path.join(root, "fixture.json"),
+      JSON.stringify({ portalFailure: true }),
+    );
+    const child = startDevelopment(["--test", "--integration"], env);
+    expect(await child.exit()).toBe(1);
+    expect(child.output()).toContain("Development portal unavailable");
+    await absent("build.started");
+    await absent("next.started");
+    await absent(".quantile/webhooks.json");
+    expect(await readFile(path.join(root, "emulator.stopped"), "utf8")).toBe(
+      "yes",
+    );
+  });
+  it("rejects a supplied portal override before starting resources", async () => {
+    const child = startDevelopment([], {
+      QUANTILE_DEVELOPMENT_PORTAL_URL: portalUrl,
+    });
+    expect(await child.exit()).toBe(1);
+    expect(child.output()).toContain(
+      "QUANTILE_DEVELOPMENT_PORTAL_URL is internal",
+    );
+    await absent("emulator.started");
+    await absent("portal.discovered");
+  });
   it("cleans failed emulator startup without quoting provider output", async () => {
     await writeFile(
       path.join(root, "fixture.json"),
@@ -441,13 +570,13 @@ process.exit(fixture.exit ?? 0);
   it.each([
     ["--integration"],
     ["--test", "--integration"],
-  ])("rejects live integration for manual or automated use: %o", async (...args) => {
+  ])("rejects production billing for manual or automated integration: %o", async (...args) => {
     const child = startDevelopment(args, {
       STRIPE_EVENT_LIVEMODE: "true",
       STRIPE_TEST_API_KEY: "sk_live_fixture",
     });
     expect(await child.exit()).toBe(1);
-    expect(child.output()).toContain("live mode is forbidden");
+    expect(child.output()).toContain("production billing is forbidden");
     await absent("emulator.started");
     await absent("next.started");
     await absent(".quantile/webhooks.json");

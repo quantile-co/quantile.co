@@ -3,16 +3,16 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { SiteFooter } from "./SiteFooter";
 
-const liveLoginUrl =
+const productionLoginUrl =
   "https://billing.quantile.co/p/login/bJeeVe3TIaVO9ODfkn6AM00";
 const sections = [{ href: "/#faq", label: "FAQ" }] as const;
 
 describe("Site footer billing link", () => {
-  it("links only from the footer to the shareable live login, not a session or test Portal", () => {
+  it("links only from the footer to the shareable production login, not a session or development portal", () => {
     const html = renderToStaticMarkup(
       <MantineProvider>
         <SiteFooter
-          billingPortalLoginUrl={liveLoginUrl}
+          billingPortalLoginUrl={productionLoginUrl}
           homeHref="/"
           logo="Quantile"
           sections={sections}
@@ -22,10 +22,10 @@ describe("Site footer billing link", () => {
     );
 
     expect(html.match(/>Billing<\/a>/g)).toHaveLength(1);
-    expect(html).toContain(`href="${liveLoginUrl}"`);
+    expect(html).toContain(`href="${productionLoginUrl}"`);
     const footer = html.slice(html.indexOf("<footer"));
     expect(footer).toContain('aria-label="Footer"');
-    expect(footer).toContain(`href="${liveLoginUrl}">Billing</a>`);
+    expect(footer).toContain(`href="${productionLoginUrl}">Billing</a>`);
     expect(html).not.toContain("<header");
     expect(html).not.toContain("/p/session/");
   });
