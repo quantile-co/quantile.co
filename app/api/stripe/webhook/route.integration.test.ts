@@ -3,8 +3,8 @@ import { chromium } from "playwright";
 import Stripe from "stripe";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { appInstanceSchema } from "@/lib/env/env";
-import { type FirestoreConfig, getFirestore } from "@/lib/gcp/firestore";
+import { appInstanceSchema, readFirestoreTarget } from "@/lib/env/env";
+import { getFirestore } from "@/lib/gcp/firestore";
 import {
   assertEligibleTestPrice,
   assertTestOwnership,
@@ -38,7 +38,7 @@ async function until<T>(
 }
 
 // Same real-provider suite for launcher-owned localhost or a caller-owned test
-// target. Never register dashboard Stripe endpoints: the local launcher uses CLI.
+// target. Never register dashboard Stripe endpoints: the development launcher uses CLI.
 describe("provider-backed welcome completion", () => {
   it.each([
     "delivered",
@@ -56,10 +56,7 @@ describe("provider-backed welcome completion", () => {
       maxNetworkRetries: 2,
       timeout: 20_000,
     });
-    const database: FirestoreConfig = {
-      projectId: env.GCP_PROJECT_ID,
-      emulatorHost: process.env.FIRESTORE_EMULATOR_HOST || undefined,
-    };
+    const database = readFirestoreTarget(process.env, "development");
     const store = createWelcomeStore(getFirestore(database));
     const endpoint = readIntegrationTarget(env.QUANTILE_STRIPE_WEBHOOK_URL);
     const resendKey = env.RESEND_MANAGEMENT_API_KEY;
@@ -139,12 +136,12 @@ describe("provider-backed welcome completion", () => {
       );
       stage = "Stripe delivery, Resend acceptance and verified Resend callback";
       const completed = await until(async () => {
-        const record = await store.get({ mode: "test", subscriptionId });
+        const record = await store.get({ mode: "development", subscriptionId });
         if (!record) return undefined;
         expect(record).toMatchObject({
-          mode: "test",
+          mode: "development",
           appInstance,
-          testId: operation.id,
+          operationId: operation.id,
           subscriptionId,
         });
         return record.state === "accepted" && record.callbackReceivedAt
@@ -152,7 +149,9 @@ describe("provider-backed welcome completion", () => {
           : undefined;
       }, stage);
       expect(JSON.parse(completed.request).to).toEqual([operation.recipient]);
-      expect(completed.idempotencyKey).toBe(`welcome/test/${subscriptionId}`);
+      expect(completed.idempotencyKey).toBe(
+        `welcome/development/${subscriptionId}`,
+      );
       stage = "Resend inspection";
       const resendId = completed.resendId;
       if (!resendId) throw new Error("Missing durable acceptance receipt.");
@@ -176,7 +175,7 @@ describe("provider-backed welcome completion", () => {
       expect(event.data.object.id).toBe(completed.invoiceId);
       expect(
         event.data.object.parent?.subscription_details?.metadata
-          ?.quantile_test_id,
+          ?.quantile_operation_id,
       ).toBe(operation.id);
       const body = JSON.stringify(event);
       const replay = await fetch(endpoint, {
@@ -196,7 +195,7 @@ describe("provider-backed welcome completion", () => {
         resendId: completed.resendId,
       });
       expect(
-        (await store.get({ mode: "test", subscriptionId }))?.resendId,
+        (await store.get({ mode: "development", subscriptionId }))?.resendId,
       ).toBe(completed.resendId);
     } catch {
       // SDK errors can include request credentials. Report safe correlation,

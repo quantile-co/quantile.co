@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { FaqSection } from "./FaqSection";
 
-const liveLoginUrl =
+const productionLoginUrl =
   "https://billing.quantile.co/p/login/bJeeVe3TIaVO9ODfkn6AM00";
 
 function PreviewCheckoutForm({ children }: { children: ReactNode }) {
@@ -16,20 +16,20 @@ function PreviewCheckoutForm({ children }: { children: ReactNode }) {
 }
 
 describe("FAQ rendering", () => {
-  it("links capacity and cancellation answers to the shareable live portal login", () => {
+  it("links capacity and cancellation answers to the shareable production portal login", () => {
     const html = renderToStaticMarkup(
       <MantineProvider>
         <FaqSection
-          billingPortalLoginUrl={liveLoginUrl}
+          billingPortalLoginUrl={productionLoginUrl}
           compactProof={<div>Preview experience</div>}
           CheckoutForm={PreviewCheckoutForm}
         />
       </MantineProvider>,
     );
 
-    expect(html.match(new RegExp(`href="${liveLoginUrl}"`, "g"))).toHaveLength(
-      2,
-    );
+    expect(
+      html.match(new RegExp(`href="${productionLoginUrl}"`, "g")),
+    ).toHaveLength(2);
     expect(html).not.toMatch(/<section class="[^"]*welcome[^"]*"/);
     expect(html).toContain("How do I scale up or down?");
     expect(html).toContain("How do I pause or cancel?");
@@ -78,7 +78,7 @@ describe("FAQ rendering", () => {
     const html = renderToStaticMarkup(
       <MantineProvider>
         <FaqSection
-          billingPortalLoginUrl={liveLoginUrl}
+          billingPortalLoginUrl={productionLoginUrl}
           compactProof={<div>Preview experience</div>}
           CheckoutForm={PreviewCheckoutForm}
         />
@@ -126,13 +126,13 @@ describe("FAQ rendering", () => {
         <MantineProvider>
           {variant === "home" ? (
             <FaqSection
-              billingPortalLoginUrl={liveLoginUrl}
+              billingPortalLoginUrl={productionLoginUrl}
               compactProof={<div>Preview experience</div>}
               CheckoutForm={PreviewCheckoutForm}
             />
           ) : (
             <FaqSection
-              billingPortalLoginUrl={liveLoginUrl}
+              billingPortalLoginUrl={productionLoginUrl}
               compactProof={<div>Preview experience</div>}
               variant="welcome"
             />

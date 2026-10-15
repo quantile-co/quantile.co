@@ -13,7 +13,7 @@ import {
   acquireOwner,
   assertOwner,
   cleanupOwner,
-  localAppInstance,
+  developmentAppInstance,
   type ResendRegistry,
   readOwner,
   saveOwner,
@@ -40,17 +40,17 @@ async function ownedEndpoint() {
 
 describe("app identity and internal integration ownership", () => {
   it("persists one instance per checkout without credentials", async () => {
-    const instance = await localAppInstance(root);
+    const instance = await developmentAppInstance(root);
     expect(instance).toMatch(/^app-[a-f0-9]{16}$/);
-    expect(await localAppInstance(root)).toBe(instance);
-    expect(await localAppInstance(path.join(root, "worktree"))).not.toBe(
+    expect(await developmentAppInstance(root)).toBe(instance);
+    expect(await developmentAppInstance(path.join(root, "worktree"))).not.toBe(
       instance,
     );
-    expect(await localAppInstance(root, "explicit")).toBe("explicit");
+    expect(await developmentAppInstance(root, "explicit")).toBe("explicit");
   });
   it("publishes one complete identity under concurrent startup", async () => {
     const values = await Promise.all(
-      Array.from({ length: 32 }, () => localAppInstance(root)),
+      Array.from({ length: 32 }, () => developmentAppInstance(root)),
     );
     expect(new Set(values).size).toBe(1);
     expect(await readdir(path.join(root, ".quantile"))).toEqual([
@@ -133,7 +133,7 @@ describe("app identity and internal integration ownership", () => {
     expect(await readOwner(root)).toEqual(owner);
     expect(api.find).not.toHaveBeenCalled();
   });
-  it("refuses cleanup of another live process or host", async () => {
+  it("refuses cleanup of another running process or host", async () => {
     const owner = await acquireOwner(root, "sample");
     owner.pid = process.ppid;
     await saveOwner(root, owner);
@@ -186,7 +186,9 @@ describe("app identity and internal integration ownership", () => {
   });
   it("refuses changed endpoints, mode, ownership and subscriptions", async () => {
     const owner = await ownedEndpoint();
-    expect(() => assertOwner({ ...owner, mode: "live" as "test" })).toThrow();
+    expect(() =>
+      assertOwner({ ...owner, mode: "production" as "development" }),
+    ).toThrow();
     expect(() =>
       assertOwner({
         ...owner,

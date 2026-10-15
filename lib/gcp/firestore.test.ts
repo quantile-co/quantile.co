@@ -1,40 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { getFirestore, validateFirestoreConfig } from "./firestore";
+import { readFirestoreTarget } from "../env/env";
+import { getFirestore } from "./firestore";
 
-describe("Firestore target configuration", () => {
-  it.each([
-    "",
-    "https://evil.example",
-    "../project",
-  ])("rejects invalid project %s", (projectId) => {
-    expect(() => validateFirestoreConfig({ projectId })).toThrow();
-  });
-  it.each([
-    "evil.example:8080",
-    "127.0.0.1:0",
-    "localhost:65536",
-    "https://localhost:8080",
-  ])("rejects unsafe emulator %s", (emulatorHost) => {
-    expect(() =>
-      validateFirestoreConfig({ projectId: "demo-quantile", emulatorHost }),
-    ).toThrow();
-  });
-  it("accepts loopback IPv6 without depending on billing configuration", () => {
-    expect(
-      validateFirestoreConfig({
-        projectId: "demo-quantile",
-        emulatorHost: "[::1]:8080",
-      }),
-    ).toEqual({ projectId: "demo-quantile", emulatorHost: "[::1]:8080" });
-  });
-  it("reuses a lazy client for the same database without creating resources", () => {
-    const config = {
-      projectId: "demo-quantile",
-      emulatorHost: process.env.FIRESTORE_EMULATOR_HOST,
-    };
-    const first = getFirestore(config);
-    expect(getFirestore({ ...config })).toBe(first);
+describe("Firestore client factory", () => {
+  it("reuses a client for equivalent resolved settings", () => {
+    const settings = readFirestoreTarget(
+      {
+        GCP_PROJECT_ID: "demo-quantile",
+        FIRESTORE_EMULATOR_HOST: process.env.FIRESTORE_EMULATOR_HOST,
+      },
+      "development",
+    );
+    const first = getFirestore(settings);
+    expect(getFirestore({ ...settings })).toBe(first);
     expect(first.doc("probe/identity").path).toBe("probe/identity");
     expect(first.databaseId).toBe("(default)");
+  });
+  it("separates clients with different resolved connection settings", () => {
+    const settings = readFirestoreTarget(
+      {
+        GCP_PROJECT_ID: "demo-quantile",
+        FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080",
+      },
+      "development",
+    );
+    expect(getFirestore(settings)).not.toBe(
+      getFirestore({ ...settings, host: "127.0.0.1:8081" }),
+    );
   });
 });

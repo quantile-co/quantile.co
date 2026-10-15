@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { DocumentReference } from "@google-cloud/firestore";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { readFirestoreTarget } from "@/lib/env/env";
 import { getFirestore } from "@/lib/gcp/firestore";
 import { createWelcomeStore } from "./store";
 import { memoryStore, pending } from "./test";
@@ -64,10 +65,9 @@ describe("official Firestore emulator: atomic persistence", () => {
       throw new Error(
         "Run pnpm test; these tests require its demo Firestore emulator.",
       );
-    const client = getFirestore({
-      projectId: "demo-quantile",
-      emulatorHost: process.env.FIRESTORE_EMULATOR_HOST,
-    });
+    const client = getFirestore(
+      readFirestoreTarget(process.env, "development"),
+    );
     return {
       client,
       store: createWelcomeStore(client),
@@ -225,7 +225,7 @@ describe("official Firestore emulator: atomic persistence", () => {
         pending({
           subscriptionId: record.subscriptionId,
           appInstance: "other",
-          testId: `other-${"a".repeat(32)}`,
+          operationId: `other-${"a".repeat(32)}`,
         }),
       ),
     ).rejects.toThrow("different operation");
@@ -236,7 +236,7 @@ describe("official Firestore emulator: atomic persistence", () => {
   it("rejects corrupt stored data rather than trusting SDK types", async () => {
     const { client, store, record } = setup();
     await client
-      .doc(`welcome-emails/test-${record.subscriptionId}`)
+      .doc(`welcome-emails/${record.mode}-${record.subscriptionId}`)
       .create({ schema: "invalid" });
     await expect(store.get(record)).rejects.toThrow("Invalid welcome record");
   });

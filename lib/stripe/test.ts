@@ -61,8 +61,7 @@ export function createTestOperation(
     recipient: `${delivery}+${id}@resend.dev`,
     metadata: {
       quantile_app_instance: instance,
-      quantile_test_id: id,
-      quantile_test_delivery: delivery,
+      quantile_operation_id: id,
     },
   };
 }
@@ -75,10 +74,10 @@ export function assertTestOwnership(
     object.livemode ||
     object.metadata?.quantile_app_instance !==
       operation.metadata.quantile_app_instance ||
-    object.metadata?.quantile_test_id !== operation.id
+    object.metadata?.quantile_operation_id !== operation.id
   ) {
     throw new Error(
-      "Refusing to modify a live object or another test operation's resources.",
+      "Refusing to modify a production object or another test operation's resources.",
     );
   }
 }

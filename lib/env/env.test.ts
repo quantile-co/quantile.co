@@ -3,13 +3,15 @@ import {
   belongsToAppInstance,
   parseAppInstance,
   readAppInstance,
+  readBillingMode,
   readCheckoutSettings,
+  readDevelopmentPortalUrl,
   readEmailAddresses,
   readFathomSettings,
   readFirestoreTarget,
   readResendSendingKey,
-  readStripeEventMode,
   readStripeVerification,
+  resolveFirestoreSettings,
 } from "./env";
 
 describe("app instance", () => {
@@ -56,31 +58,33 @@ describe("Checkout settings", () => {
     QUANTILE_APP_INSTANCE: "sample",
     QUANTILE_SITE_ORIGIN: "http://127.0.0.1:3000",
   };
-  it("uses only the selected Sandbox key and origin", () => {
+  it("uses only the selected development key and origin", () => {
     expect(readCheckoutSettings(test)).toEqual({
       key: "rk_test_fixture",
       livemode: false,
-      mode: "test",
+      mode: "development",
       priceId: "price_fixture",
       appInstance: "sample",
       origin: "http://127.0.0.1:3000",
     });
   });
-  it("requires an explicitly enabled, restricted live key and HTTPS origin", () => {
-    const live = {
+  it("requires an explicitly enabled, restricted production key and HTTPS origin", () => {
+    const production = {
       ...test,
       STRIPE_EVENT_LIVEMODE: "true",
       STRIPE_API_KEY: "rk_live_fixture",
       QUANTILE_SITE_ORIGIN: "https://example.com",
     };
-    expect(readCheckoutSettings(live).livemode).toBe(true);
+    expect(readCheckoutSettings(production).livemode).toBe(true);
     for (const invalid of [
       { STRIPE_API_KEY: "rk_test_fixture" },
       { STRIPE_API_KEY: "sk_live_fixture" },
       { QUANTILE_SITE_ORIGIN: "http://example.com" },
       { FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080" },
     ])
-      expect(() => readCheckoutSettings({ ...live, ...invalid })).toThrow();
+      expect(() =>
+        readCheckoutSettings({ ...production, ...invalid }),
+      ).toThrow();
   });
   it.each([
     { STRIPE_EVENT_LIVEMODE: undefined },
@@ -156,7 +160,98 @@ describe("Fathom build settings", () => {
   });
 });
 
+describe("Firestore connection settings", () => {
+  it.each([
+    "",
+    "https://evil.example",
+    "../project",
+  ])("rejects invalid project %s", (projectId) => {
+    expect(() => resolveFirestoreSettings({ projectId })).toThrow();
+  });
+  it.each([
+    "evil.example:8080",
+    "127.0.0.1:0",
+    "localhost:65536",
+    "https://localhost:8080",
+  ])("rejects unsafe emulator %s", (emulatorHost) => {
+    expect(() =>
+      resolveFirestoreSettings({ projectId: "demo-quantile", emulatorHost }),
+    ).toThrow();
+  });
+  it("resolves emulator SDK settings including IPv6", () => {
+    expect(
+      resolveFirestoreSettings({
+        projectId: "demo-quantile",
+        emulatorHost: "[::1]:8080",
+      }),
+    ).toEqual({
+      projectId: "demo-quantile",
+      databaseId: "(default)",
+      host: "[::1]:8080",
+      ssl: false,
+      clientOptions: { universeDomain: "googleapis.com" },
+    });
+  });
+});
+
+describe("development portal configuration", () => {
+  const url = "https://billing.quantile.co/p/login/test_fixture";
+  it("leaves ordinary builds unchanged without requiring credentials", () => {
+    expect(readDevelopmentPortalUrl({})).toBeUndefined();
+  });
+  it.each([
+    "production",
+    "development",
+  ])("accepts a discovered development URL in %s", (NODE_ENV) => {
+    expect(
+      readDevelopmentPortalUrl({
+        NODE_ENV,
+        STRIPE_EVENT_LIVEMODE: "false",
+        QUANTILE_DEVELOPMENT_PORTAL_URL: url,
+      }),
+    ).toBe(url);
+  });
+  it.each([
+    "",
+    "not-a-url",
+    "https://billing.quantile.co/p/login/live",
+    "https://evil.example/p/login/test_fixture",
+    "http://billing.stripe.com/p/login/test_fixture",
+    "https://user:password@billing.stripe.com/p/login/test_fixture",
+    `${url}?prefilled_email=private`,
+    `${url}#fragment`,
+  ])("rejects unsafe portal URL %s", (value) => {
+    expect(() =>
+      readDevelopmentPortalUrl({
+        STRIPE_EVENT_LIVEMODE: "false",
+        QUANTILE_DEVELOPMENT_PORTAL_URL: value,
+      }),
+    ).toThrow("Invalid development billing portal URL.");
+  });
+  it.each([
+    undefined,
+    "true",
+  ])("rejects overrides without explicit development billing: %s", (mode) => {
+    expect(() =>
+      readDevelopmentPortalUrl({
+        STRIPE_EVENT_LIVEMODE: mode,
+        QUANTILE_DEVELOPMENT_PORTAL_URL: url,
+      }),
+    ).toThrow();
+  });
+});
+
 describe("staged environment readers", () => {
+  it.each([
+    ["false", "development"],
+    ["true", "production"],
+  ])("maps Stripe livemode=%s independently of build mode", (STRIPE_EVENT_LIVEMODE, mode) => {
+    for (const NODE_ENV of ["development", "production", "test"])
+      expect(readBillingMode({ STRIPE_EVENT_LIVEMODE, NODE_ENV })).toEqual({
+        livemode: STRIPE_EVENT_LIVEMODE === "true",
+        mode,
+      });
+  });
   it("normalizes app settings without requiring unrelated secrets", () => {
     const env = {
       STRIPE_EVENT_LIVEMODE: "false",
@@ -165,13 +260,13 @@ describe("staged environment readers", () => {
     };
     expect(readStripeVerification(env)).toEqual({
       livemode: false,
-      mode: "test",
+      mode: "development",
       signingSecret: "whsec_fixture",
     });
     expect(readAppInstance(env)).toBe("sample");
     expect(
-      readFirestoreTarget({ GCP_PROJECT_ID: "demo-quantile" }, "test"),
-    ).toEqual({ projectId: "demo-quantile", emulatorHost: undefined });
+      readFirestoreTarget({ GCP_PROJECT_ID: "demo-quantile" }, "development"),
+    ).toEqual({ projectId: "demo-quantile", databaseId: "(default)" });
     expect(
       readEmailAddresses({
         QUANTILE_EMAIL_FROM: "sender@example.com",
@@ -188,27 +283,25 @@ describe("staged environment readers", () => {
     "1",
     "0",
   ])("fails closed for invalid STRIPE_EVENT_LIVEMODE=%s", (value) => {
-    expect(() =>
-      readStripeEventMode({ STRIPE_EVENT_LIVEMODE: value }),
-    ).toThrow();
+    expect(() => readBillingMode({ STRIPE_EVENT_LIVEMODE: value })).toThrow();
   });
-  it("refuses live billing against an emulator", () => {
+  it("refuses production billing against an emulator", () => {
     expect(() =>
       readFirestoreTarget(
         {
           GCP_PROJECT_ID: "demo-quantile",
           FIRESTORE_EMULATOR_HOST: "localhost:8080",
         },
-        "live",
+        "production",
       ),
-    ).toThrow("Live billing cannot use an emulator.");
+    ).toThrow("Production billing cannot use an emulator.");
   });
   it("does not require today's sending key when reading verification config", () => {
     const env = {
       STRIPE_EVENT_LIVEMODE: "true",
       STRIPE_WEBHOOK_SECRET: "whsec_fixture",
     };
-    expect(readStripeVerification(env).mode).toBe("live");
+    expect(readStripeVerification(env).mode).toBe("production");
     expect(() => readResendSendingKey(env)).toThrow();
   });
 });

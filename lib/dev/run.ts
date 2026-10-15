@@ -2,12 +2,14 @@ import { execFile } from "node:child_process";
 import path from "node:path";
 import { promisify } from "node:util";
 import { Command, CommanderError, Option } from "commander";
+import Stripe from "stripe";
 import {
   loadDevelopmentEnvironment,
+  readDevelopmentPortalUrl,
   readIntegrationSettings,
   readTargetSettings,
+  resolveFirestoreSettings,
 } from "../env/env.ts";
-import { validateFirestoreConfig } from "../gcp/firestore.ts";
 import { readIntegrationTarget } from "../stripe/test.ts";
 import { startEmulator } from "./emulator.ts";
 import {
@@ -18,7 +20,7 @@ import {
 import {
   acquireOwner,
   cleanupOwner,
-  localAppInstance,
+  developmentAppInstance,
   ownerIsRunning,
   readOwner,
 } from "./ownership.ts";
@@ -40,7 +42,7 @@ export function readIntegrationConfig(
   return readIntegrationSettings(env, appInstance);
 }
 function validateTargetInputs(env: Environment) {
-  validateFirestoreConfig(readTargetSettings(env));
+  readTargetSettings(env);
 }
 
 type DevelopmentCommand =
@@ -51,7 +53,7 @@ export function parseCommand(args: string[]): DevelopmentCommand | undefined {
   const cli = new Command()
     .name("pnpm dev")
     .description(
-      "Local application and Firestore emulator; --integration adds remote providers.",
+      "Development application and Firestore emulator; --integration adds remote providers.",
     )
     .option("--integration", "Connect Stripe and Resend")
     .option(
@@ -131,8 +133,43 @@ function startTests(
   );
 }
 
-// Composition root. Normal development is local; providers are opt-in.
-export async function runDevelopment(args = process.argv.slice(2)) {
+export async function discoverDevelopmentPortal(key: string) {
+  if (!/^(rk|sk)_test_/.test(key))
+    throw new Error("Portal discovery requires a development billing key.");
+  try {
+    const stripe = new Stripe(key, { timeout: 20_000, maxNetworkRetries: 0 });
+    const defaults: Stripe.BillingPortal.Configuration[] = [];
+    for await (const config of stripe.billingPortal.configurations.list({
+      active: true,
+      limit: 100,
+    })) {
+      if (config.is_default) defaults.push(config);
+    }
+    const config = defaults[0];
+    if (
+      defaults.length !== 1 ||
+      !config?.active ||
+      config.livemode ||
+      !config.login_page?.enabled ||
+      !config.login_page.url
+    )
+      throw new Error();
+    return readDevelopmentPortalUrl({
+      STRIPE_EVENT_LIVEMODE: "false",
+      QUANTILE_DEVELOPMENT_PORTAL_URL: config.login_page.url,
+    }) as string;
+  } catch {
+    throw new Error(
+      "Could not discover the default development billing portal. Check its login link and the development key's portal read permission.",
+    );
+  }
+}
+
+// Composition root. Development provider connections are opt-in.
+export async function runDevelopment(
+  args = process.argv.slice(2),
+  discoverPortal = discoverDevelopmentPortal,
+) {
   let command: DevelopmentCommand | undefined;
   try {
     command = parseCommand(args);
@@ -143,7 +180,7 @@ export async function runDevelopment(args = process.argv.slice(2)) {
   if (!command) return 0;
   const root = process.cwd();
   // Parse first: --help/invalid arguments must not load files or acquire resources.
-  // Provider tests use local development config; ordinary unit tests use test files.
+  // Provider tests use development config; ordinary unit tests use test files.
   let env: Environment;
   try {
     env = await loadDevelopmentEnvironment(
@@ -182,13 +219,13 @@ export async function runDevelopment(args = process.argv.slice(2)) {
   let emulator: Awaited<ReturnType<typeof startEmulator>> | undefined;
   let exitCode = 0;
 
-  async function runLocal(command: DevelopmentCommand) {
+  async function runDevelopmentCommand(command: DevelopmentCommand) {
     const remote =
       command.kind === "integrated-dev" || command.kind === "integrated-test";
     const appInstance =
       command.kind === "unit-test"
         ? undefined
-        : await localAppInstance(root, env.QUANTILE_APP_INSTANCE);
+        : await developmentAppInstance(root, env.QUANTILE_APP_INSTANCE);
     const config = remote
       ? readIntegrationConfig(env, appInstance as string)
       : undefined;
@@ -198,16 +235,16 @@ export async function runDevelopment(args = process.argv.slice(2)) {
       command.kind === "integrated-test" ? await freePort() : Number(portInput);
     if (!Number.isInteger(port) || port < 1 || port > 65535)
       throw new Error("Invalid port.");
-    // Always own an isolated unit-test emulator. Explicit local dev emulators
+    // Always own an isolated unit-test emulator. Explicit development emulators
     // are permitted only for the demo project, never an inherited cloud target.
     if (command.kind !== "unit-test" && env.FIRESTORE_EMULATOR_HOST) {
-      validateFirestoreConfig({
+      resolveFirestoreSettings({
         projectId: env.GCP_PROJECT_ID ?? "",
         emulatorHost: env.FIRESTORE_EMULATOR_HOST,
       });
       if (env.GCP_PROJECT_ID !== "demo-quantile")
         throw new Error(
-          "Local development requires the demo-quantile Firestore emulator, never a cloud database.",
+          "Development requires the demo-quantile Firestore emulator, never a cloud database.",
         );
     } else {
       emulator = await startEmulator({
@@ -247,8 +284,32 @@ export async function runDevelopment(args = process.argv.slice(2)) {
       if (command.kind === "integrated-test")
         env.QUANTILE_CHECKOUT_TEST_ORIGIN = env.QUANTILE_SITE_ORIGIN;
       // The ordinary dev server has no provider access. Integrated dev uses
-      // exactly the validated Sandbox key, never an ambient live key.
+      // exactly the validated development key, never an ambient production key.
       env.STRIPE_API_KEY = config?.stripeKey ?? "";
+      if (config) {
+        // Discover once, before compilation. No page request needs provider access.
+        env.QUANTILE_DEVELOPMENT_PORTAL_URL = await Promise.race([
+          discoverPortal(config.stripeKey),
+          ...unavailable,
+        ]);
+      }
+      if (command.kind === "integrated-test") {
+        // Exercise the production build and browser policy with development
+        // billing and the isolated emulator. Never publish analytics.
+        env.NODE_ENV = "production";
+        env.NEXT_PUBLIC_FATHOM_SITE_ID = "";
+        env.NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS = "";
+        const build = runner.start(
+          "Next.js build",
+          process.execPath,
+          [path.join(root, "node_modules/next/dist/bin/next"), "build"],
+          childEnvironment(env, "unit-test"),
+          output,
+        );
+        const result = await Promise.race([build.done, ...unavailable]);
+        if (result !== 0)
+          throw new Error("Production build for development billing failed.");
+      }
       if (config) {
         let ngrokConfig: string;
         try {
@@ -304,7 +365,7 @@ export async function runDevelopment(args = process.argv.slice(2)) {
         process.execPath,
         [
           path.join(root, "node_modules/next/dist/bin/next"),
-          "dev",
+          command.kind === "integrated-test" ? "start" : "dev",
           "--hostname",
           "127.0.0.1",
           "--port",
@@ -363,6 +424,10 @@ export async function runDevelopment(args = process.argv.slice(2)) {
       );
     if (env.QUANTILE_CHECKOUT_TEST_ORIGIN)
       throw new Error("QUANTILE_CHECKOUT_TEST_ORIGIN is internal.");
+    if (env.QUANTILE_DEVELOPMENT_PORTAL_URL !== undefined)
+      throw new Error(
+        "QUANTILE_DEVELOPMENT_PORTAL_URL is internal; the launcher discovers it.",
+      );
     if (command.kind === "cleanup") {
       const owner = await readOwner(root);
       if (ownerIsRunning(owner))
@@ -385,12 +450,14 @@ export async function runDevelopment(args = process.argv.slice(2)) {
         interrupted,
       ]);
     } else {
-      await runLocal(command);
+      await runDevelopmentCommand(command);
     }
   } catch (error) {
     if (!signalExit)
       console.error(
-        error instanceof Error ? error.message : "Local lifecycle failed.",
+        error instanceof Error
+          ? error.message
+          : "Development lifecycle failed.",
       );
     exitCode = signalExit || 1;
   } finally {

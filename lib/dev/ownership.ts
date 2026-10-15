@@ -32,7 +32,7 @@ export type IntegrationOwner = {
   pid: number;
   host: string;
   startedAt: string;
-  mode: "test";
+  mode: "development";
   endpoint?: string;
   resendId?: string;
 };
@@ -48,7 +48,10 @@ async function publish(file: string, value: string) {
   }
 }
 
-export async function localAppInstance(root: string, configured?: string) {
+export async function developmentAppInstance(
+  root: string,
+  configured?: string,
+) {
   if (configured) return parseAppInstance(configured);
   const directory = path.join(root, ".quantile");
   await mkdir(directory, { recursive: true, mode: 0o700 });
@@ -63,7 +66,7 @@ export async function localAppInstance(root: string, configured?: string) {
 
 const ownerSchema = z.object({
   version: z.literal(2),
-  mode: z.literal("test"),
+  mode: z.literal("development"),
   appInstance: z.string(),
   token: z.string(),
   pid: z.number().int().positive(),
@@ -121,7 +124,7 @@ export async function acquireOwner(root: string, appInstance: string) {
 async function createOwner(file: string, appInstance: string) {
   const owner: IntegrationOwner = {
     version: 2,
-    mode: "test",
+    mode: "development",
     appInstance,
     token: `${appInstance}-${randomUUID().replaceAll("-", "")}`,
     pid: process.pid,

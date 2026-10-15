@@ -14,7 +14,7 @@ export function createWelcomeReceiptHandler({
   getStore,
   report = () => {},
 }: {
-  config: { mode: "test" | "live"; appInstance: string };
+  config: { mode: "development" | "production"; appInstance: string };
   getStore: () => WelcomeStore;
   report?: (reason: string, context: Record<string, string>) => void;
 }) {
@@ -35,7 +35,7 @@ export function createWelcomeReceiptHandler({
     if (
       payload?.type !== "email.sent" ||
       tags?.quantile_operation !== "welcome" ||
-      tags.stripe_mode !== mode ||
+      tags.quantile_environment !== mode ||
       tags.quantile_app_instance !== appInstance
     )
       return { result: "ignored" };
@@ -44,8 +44,7 @@ export function createWelcomeReceiptHandler({
       !isEmailId(data.email_id) ||
       !/^sub_[A-Za-z0-9_]+$/.test(tags.stripe_subscription_id ?? "") ||
       !/^in_[A-Za-z0-9_]+$/.test(tags.stripe_invoice_id ?? "") ||
-      (mode === "test" &&
-        !belongsToAppInstance(appInstance, tags.quantile_test_id))
+      !belongsToAppInstance(appInstance, tags.quantile_operation_id)
     )
       throw new Error("Invalid welcome receipt.");
     const store = getStore();
@@ -63,7 +62,7 @@ export function createWelcomeReceiptHandler({
       invoiceId: tags.stripe_invoice_id,
       eventId: record.eventId,
       appInstance,
-      ...(mode === "test" ? { testId: tags.quantile_test_id } : {}),
+      operationId: tags.quantile_operation_id,
     });
     const mail = JSON.parse(record.request) as Mail;
     if (

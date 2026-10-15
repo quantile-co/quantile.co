@@ -2,12 +2,12 @@ import { z } from "zod";
 import { appInstanceSchema, belongsToAppInstance } from "../env/env";
 
 const identitySchema = z.object({
-  mode: z.enum(["test", "live"]),
+  mode: z.enum(["development", "production"]),
   subscriptionId: z.string().regex(/^sub_[A-Za-z0-9_]+$/),
   invoiceId: z.string().regex(/^in_[A-Za-z0-9_]+$/),
   eventId: z.string().regex(/^evt_[A-Za-z0-9_]+$/),
   appInstance: appInstanceSchema,
-  testId: z.string().optional(),
+  operationId: z.string(),
 });
 export type WelcomeIdentity = z.infer<typeof identitySchema>;
 const emailIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,128}$/);
@@ -24,7 +24,7 @@ const mailSchema = z.object({
 });
 export type Mail = z.infer<typeof mailSchema>;
 const preparedSchema = identitySchema.extend({
-  schema: z.literal("1"),
+  schema: z.literal("2"),
   request: z.string(),
   idempotencyKey: z.string(),
   createdAt: z.string().datetime(),
@@ -65,9 +65,8 @@ export function assertOwnership(
     record.subscriptionId !== expected.subscriptionId ||
     record.invoiceId !== expected.invoiceId ||
     record.appInstance !== expected.appInstance ||
-    (record.mode === "test" &&
-      (!belongsToAppInstance(expected.appInstance, expected.testId) ||
-        record.testId !== expected.testId))
+    !belongsToAppInstance(expected.appInstance, expected.operationId) ||
+    record.operationId !== expected.operationId
   )
     throw new Error("Welcome record belongs to a different operation.");
 }
@@ -96,25 +95,15 @@ export function assertRecord(value: WelcomeRecord): void {
     )
   )
     throw new Error("Invalid stored email correlation.");
-  if (
-    value.mode === "test" &&
-    mail.to[0] !== "suppressed@resend.dev" &&
-    !["delivered", "bounced", "complained"].some(
-      (kind) => mail.to[0] === `${kind}+${value.testId}@resend.dev`,
-    )
-  )
-    throw new Error("Test email must use its operation's simulator address.");
 }
 export function welcomeTags(identity: WelcomeIdentity): Mail["tags"] {
   return [
     { name: "quantile_operation", value: "welcome" },
-    { name: "stripe_mode", value: identity.mode },
+    { name: "quantile_environment", value: identity.mode },
     { name: "stripe_subscription_id", value: identity.subscriptionId },
     { name: "stripe_invoice_id", value: identity.invoiceId },
     { name: "quantile_app_instance", value: identity.appInstance },
-    ...(identity.testId
-      ? [{ name: "quantile_test_id", value: identity.testId }]
-      : []),
+    { name: "quantile_operation_id", value: identity.operationId },
   ];
 }
 export function createWelcomeDelivery({
@@ -133,7 +122,7 @@ export function createWelcomeDelivery({
       const mail = { ...(await render()), tags: welcomeTags(identity) };
       record = await store.prepare({
         ...identity,
-        schema: "1",
+        schema: "2",
         request: JSON.stringify(mail),
         idempotencyKey: `welcome/${identity.mode}/${identity.subscriptionId}`,
         createdAt: new Date().toISOString(),

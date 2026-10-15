@@ -16,14 +16,14 @@ This checkout contains Next.js Checkout, signed Stripe/Resend webhook routes,
 Firestore-backed welcome logic and repo-owned Firebase configuration. Production
 provider credentials, test/live catalog identity and deployment topology have
 separate owners. No mocked or emulator Check proves real Checkout, webhook or
-email delivery. Do not put a Stripe test checkout or secrets on the live site.
+email delivery. Do not put a development Checkout or secrets on the production site.
 
 Public Check, manual immutable-source Build, protected-main Plan and exact Apply
 are distinct workflows. A source merge or passing Check does **not** authorize
 Build, Plan, Apply or provider-backed testing; require separate explicit review
 before each production phase. Keep WIF, state locks, provenance, and release
 immutability. Do not commit credentials, state, saved plans, customer payloads
-or live Checkout URLs.
+or production Checkout URLs.
 
 Update MEMORY.md only with branch-verified durable public project facts. Never
 store personal preferences, local machine/network details, credentials, or raw
@@ -34,7 +34,12 @@ Auto handoffs can still append session context; daily logs are not Git-ignored.
 Review and sanitize each daily log and memory change before staging or sharing;
 keep scratchpad and recovery data local and ignored.
 
-Human setup: [README.md](README.md). Full local validation: `pnpm check`.
+Use **development** and **production** for application billing environments,
+independently of Next.js build mode. Keep provider terms (`livemode`, `test`/`live`
+key prefixes) at API boundaries, and keep automated tests and `NODE_ENV=test`
+named as tests. A production build can use development billing.
+
+Human setup: [README.md](README.md). Full validation: `pnpm check`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

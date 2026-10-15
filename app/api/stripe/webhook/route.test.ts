@@ -3,9 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { memoryStore } from "@/lib/welcome/test";
 
 const config = {
-  signingSecret: "whsec_local_unit_test_only",
-  mode: "test" as const,
-  priceId: "price_local_capacity",
+  signingSecret: "whsec_fixture_unit_test_only",
+  mode: "development" as const,
+  priceId: "price_fixture_capacity",
   from: "Quantile <welcome@example.com>",
   replyTo: "help@example.com",
   appInstance: "sample",
@@ -18,27 +18,27 @@ function paymentEvent(
   eventOverrides: Record<string, unknown> = {},
 ) {
   return {
-    id: "evt_local_payment",
+    id: "evt_fixture_payment",
     object: "event",
     api_version: "2026-08-26.dahlia",
     type: "invoice.payment_succeeded",
     livemode: false,
     data: {
       object: {
-        id: "in_local_first_payment",
+        id: "in_fixture_first_payment",
         object: "invoice",
         billing_reason: "subscription_create",
         status: "paid",
         amount_paid: 499500,
         currency: "usd",
-        customer_email: "customer@example.com",
+        customer_email: recipient,
         parent: {
           type: "subscription_details",
           subscription_details: {
-            subscription: "sub_local_customer",
+            subscription: "sub_fixture_customer",
             metadata: {
               quantile_app_instance: config.appInstance,
-              quantile_test_id: testId,
+              quantile_operation_id: testId,
             },
           },
         },
@@ -184,7 +184,7 @@ describe("Next.js Stripe route", () => {
     expect(response.status).toBe(413);
     expect(cloud.store).not.toHaveBeenCalled();
   });
-  it("rejects live billing with a local emulator at composition", async () => {
+  it("rejects production billing with an emulator at composition", async () => {
     vi.stubEnv("STRIPE_EVENT_LIVEMODE", "true");
     vi.stubEnv("FIRESTORE_EMULATOR_HOST", "localhost:8080");
     const { POST } = await import("./route");
@@ -230,7 +230,7 @@ describe("Next.js Stripe route", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       result: "completed",
-      subscriptionId: "sub_local_customer",
+      subscriptionId: "sub_fixture_customer",
       resendId: "mail_accepted",
     });
     const record = [...store.records.values()][0];
@@ -264,7 +264,7 @@ describe("Next.js Stripe route", () => {
       ).status,
     ).toBe(400);
     const event = paymentEvent();
-    event.data.object.parent.subscription_details.metadata.quantile_test_id =
+    event.data.object.parent.subscription_details.metadata.quantile_operation_id =
       "another-developer";
     expect(await (await POST(signedRequest(event))).json()).toEqual({
       result: "Ignored",
@@ -302,13 +302,14 @@ describe("Next.js Stripe route", () => {
   });
 });
 
-function setup(overrides: { mode?: "test" | "live" } = {}) {
+function setup(overrides: { mode?: "development" | "production" } = {}) {
   if (overrides.mode)
     vi.stubEnv(
       "STRIPE_EVENT_LIVEMODE",
-      overrides.mode === "live" ? "true" : "false",
+      overrides.mode === "production" ? "true" : "false",
     );
-  if (overrides.mode === "live") vi.stubEnv("FIRESTORE_EMULATOR_HOST", "");
+  if (overrides.mode === "production")
+    vi.stubEnv("FIRESTORE_EMULATOR_HOST", "");
   const send = vi.fn(async (_body: string, _key: string) => "mail_accepted");
   vi.mocked(fetch).mockImplementation(async (_url, options) => {
     const headers = new Headers(options?.headers);
@@ -344,7 +345,7 @@ describe("welcome email eligibility and completion", () => {
     const record = [...store.records.values()][0];
     const mail = JSON.parse(record.request);
     expect(mail.to).toEqual([recipient]);
-    expect(mail.subject).toBe("[Test] Thank you for subscribing!");
+    expect(mail.subject).toBe("Thank you for subscribing!");
     expect(mail.text.replace(/\s+/g, " ")).toContain(
       `${quantity} ${quantity === 1 ? "issue is" : "issues are"} marked in progress at a time`,
     );
@@ -353,22 +354,32 @@ describe("welcome email eligibility and completion", () => {
       state: "accepted",
       eventId: event.id,
       invoiceId: event.data.object.id,
-      testId,
+      operationId: testId,
     });
     expect(send).toHaveBeenCalledWith(
       record.request,
-      "welcome/test/sub_local_customer",
+      "welcome/development/sub_fixture_customer",
     );
   });
-  it("only uses the customer address in explicit live mode", async () => {
-    const { handler, store } = setup({ mode: "live" });
+  it("allows a customer inbox in explicit production billing", async () => {
+    const { handler, store } = setup({ mode: "production" });
     expect(
-      (await handler(signedRequest(paymentEvent({}, { livemode: true }))))
-        .status,
+      (
+        await handler(
+          signedRequest(
+            paymentEvent(
+              { customer_email: "customer@example.com" },
+              { livemode: true },
+            ),
+          ),
+        )
+      ).status,
     ).toBe(200);
     const record = [...store.records.values()][0];
     expect(JSON.parse(record.request).to).toEqual(["customer@example.com"]);
-    expect(record.idempotencyKey).toBe("welcome/live/sub_local_customer");
+    expect(record.idempotencyKey).toBe(
+      "welcome/production/sub_fixture_customer",
+    );
   });
   it.each([
     { billing_reason: "subscription_cycle" },
@@ -388,13 +399,16 @@ describe("welcome email eligibility and completion", () => {
     undefined,
     "",
     "not-an-operation",
-  ])("ignores unowned or malformed test operations %s", async (id) => {
+  ])("ignores unowned or malformed operations %s", async (id) => {
     const { handler, store, send } = setup();
     const event = paymentEvent({
       parent: {
         subscription_details: {
           subscription: "sub_other",
-          metadata: { quantile_test_id: id },
+          metadata: {
+            quantile_app_instance: config.appInstance,
+            quantile_operation_id: id,
+          },
         },
       },
     });
@@ -467,8 +481,8 @@ describe("welcome email eligibility and completion", () => {
     expect(report).toHaveBeenCalledWith(
       "welcome_incomplete",
       expect.objectContaining({
-        eventId: "evt_local_payment",
-        subscriptionId: "sub_local_customer",
+        eventId: "evt_fixture_payment",
+        subscriptionId: "sub_fixture_customer",
       }),
     );
   });
@@ -480,28 +494,21 @@ describe("welcome email eligibility and completion", () => {
   ])("uses only the %s simulator", async (delivery) => {
     const { handler, store } = setup();
     const event = paymentEvent();
-    Object.assign(event.data.object.parent.subscription_details.metadata, {
-      quantile_test_delivery: delivery,
-    });
+    event.data.object.customer_email = `${delivery}+${testId}@resend.dev`;
     expect((await handler(signedRequest(event))).status).toBe(200);
     expect(JSON.parse([...store.records.values()][0].request).to).toEqual([
-      delivery === "suppressed"
-        ? "suppressed@resend.dev"
-        : `${delivery}+${testId}@resend.dev`,
+      event.data.object.customer_email,
     ]);
   });
   it.each([
     "customer@example.com",
     "delivered@resend.dev.evil.test",
-    "",
-    "unknown",
-  ])("rejects simulation %s", async (delivery) => {
+    `delivered+other-${"a".repeat(32)}@resend.dev`,
+    "delivered@resend.dev",
+  ])("blocks unsafe development recipient %s at the sending boundary", async (email) => {
     const { handler, send } = setup();
-    const event = paymentEvent();
-    Object.assign(event.data.object.parent.subscription_details.metadata, {
-      quantile_test_delivery: delivery,
-    });
-    expect((await handler(signedRequest(event))).status).toBe(400);
+    const event = paymentEvent({ customer_email: email });
+    expect((await handler(signedRequest(event))).status).toBe(503);
     expect(send).not.toHaveBeenCalled();
   });
 });

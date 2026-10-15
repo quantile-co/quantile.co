@@ -164,7 +164,7 @@ describe("homepage hero layout", () => {
     }
   });
 
-  it("keeps mobile drawer semantics and keyboard handling while submitting a local form", async () => {
+  it("keeps mobile drawer semantics and keyboard handling while submitting a same-origin form", async () => {
     await page.viewport(390, 844);
     root.render(
       <MantineProvider theme={theme}>

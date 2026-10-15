@@ -22,25 +22,25 @@ export function pending(
   mailOverrides: Partial<Mail> = {},
 ): WelcomeRecord {
   const identity: WelcomeIdentity = {
-    mode: "test",
+    mode: "development",
     appInstance: config.appInstance,
-    testId,
-    eventId: "evt_local_payment",
-    invoiceId: "in_local_first_payment",
-    subscriptionId: "sub_local_customer",
+    operationId: testId,
+    eventId: "evt_fixture_payment",
+    invoiceId: "in_fixture_first_payment",
+    subscriptionId: "sub_fixture_customer",
     ...overrides,
   };
   return {
     ...identity,
-    schema: "1",
+    schema: "2",
     state: "pending",
     createdAt: new Date().toISOString(),
     idempotencyKey: `welcome/${identity.mode}/${identity.subscriptionId}`,
     request: JSON.stringify({
       from: config.from,
       reply_to: config.replyTo,
-      to: [`delivered+${identity.testId}@resend.dev`],
-      subject: "[Test] Welcome to Quantile",
+      to: [`delivered+${identity.operationId}@resend.dev`],
+      subject: "Welcome to Quantile",
       html: "<p>Welcome</p>",
       text: "Welcome",
       tags: welcomeTags(identity),

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export type Environment = Record<string, string | undefined>;
 
-// Value and ownership checks accept an explicit identity: old receipts and local
+// Value and ownership checks accept an explicit identity: old receipts and development
 // cleanup must not be reinterpreted using the current process environment.
 export const appInstanceSchema = z
   .string()
@@ -34,18 +34,18 @@ const stripeWebhookSecretSchema = z.string().startsWith("whsec_");
 const resendKeySchema = z.string().startsWith("re_").min(4);
 const emailAddressSchema = z.string().min(1);
 
-const testAccessSchema = z.object({
+const developmentAccessSchema = z.object({
   STRIPE_EVENT_LIVEMODE: z.literal("false"),
   STRIPE_TEST_API_KEY: z.string().regex(/^(rk|sk)_test_/),
 });
-const integrationInputsSchema = testAccessSchema.extend({
+const integrationInputsSchema = developmentAccessSchema.extend({
   STRIPE_PRICE_ID: stripePriceIdSchema,
   RESEND_MANAGEMENT_API_KEY: resendKeySchema,
   RESEND_API_KEY: resendKeySchema,
   QUANTILE_EMAIL_FROM: emailAddressSchema,
   QUANTILE_EMAIL_REPLY_TO: emailAddressSchema,
 });
-const targetInputsSchema = testAccessSchema.extend({
+const targetInputsSchema = developmentAccessSchema.extend({
   STRIPE_PRICE_ID: stripePriceIdSchema,
   RESEND_MANAGEMENT_API_KEY: resendKeySchema,
   STRIPE_WEBHOOK_SECRET: stripeWebhookSecretSchema,
@@ -53,16 +53,16 @@ const targetInputsSchema = testAccessSchema.extend({
   GCP_PROJECT_ID: z.string().min(1),
 });
 
-function requireTestAccess(env: Environment) {
-  if (!testAccessSchema.safeParse(env).success)
+function requireDevelopmentAccess(env: Environment) {
+  if (!developmentAccessSchema.safeParse(env).success)
     throw new Error(
-      "Integration requires STRIPE_EVENT_LIVEMODE=false and STRIPE_TEST_API_KEY; live mode is forbidden.",
+      "Integration requires STRIPE_EVENT_LIVEMODE=false and STRIPE_TEST_API_KEY; production billing is forbidden.",
     );
 }
 
 export function readIntegrationSettings(env: Environment, appInstance: string) {
   parseAppInstance(appInstance);
-  requireTestAccess(env);
+  requireDevelopmentAccess(env);
   const parsed = integrationInputsSchema.safeParse(env);
   if (!parsed.success)
     throw new Error(
@@ -98,25 +98,25 @@ export function readIntegrationSettings(env: Environment, appInstance: string) {
 }
 
 export function readTargetSettings(env: Environment) {
-  requireTestAccess(env);
+  requireDevelopmentAccess(env);
   const parsed = targetInputsSchema.safeParse(env);
   if (!parsed.success)
     throw new Error(
       `Invalid target configuration: ${parsed.error.issues.map((issue) => issue.path.join(".")).join(", ")}.`,
     );
-  return {
+  return resolveFirestoreSettings({
     projectId: parsed.data.GCP_PROJECT_ID,
     emulatorHost: env.FIRESTORE_EMULATOR_HOST || undefined,
-  };
+  });
 }
 
 // Next loads its own env files; capture request settings when the route runs,
-// not at module import. Local dev passes its separately loaded snapshot below.
+// not at module import. The development launcher passes its snapshot below.
 export function runtimeEnvironment(): Environment {
   return { ...process.env };
 }
 
-// Readers accept an explicit snapshot so both Next routes and the local launcher
+// Readers accept an explicit snapshot so both Next routes and the development launcher
 // use the same rules without a global config object or import-time validation.
 // The layout passes explicit NEXT_PUBLIC_ reads so Next freezes these optional
 // settings at build time. Never fall back to a production site ID or hostname.
@@ -145,15 +145,20 @@ export function readFathomSettings(env: Environment) {
   return { ...parsed.data, domains: [...new Set(parsed.data.domains)] };
 }
 
-export function readStripeEventMode(env: Environment) {
+// Application billing environments are independent of Next's build mode.
+// Translate Stripe's livemode flag here, at the configuration boundary.
+export function readBillingMode(env: Environment) {
   const livemode =
     stripeEventLivemodeSchema.parse(env.STRIPE_EVENT_LIVEMODE) === "true";
-  return { livemode, mode: livemode ? ("live" as const) : ("test" as const) };
+  return {
+    livemode,
+    mode: livemode ? ("production" as const) : ("development" as const),
+  };
 }
 
 export function readStripeVerification(env: Environment) {
   return {
-    ...readStripeEventMode(env),
+    ...readBillingMode(env),
     signingSecret: stripeWebhookSecretSchema.parse(env.STRIPE_WEBHOOK_SECRET),
   };
 }
@@ -173,15 +178,16 @@ export function readStripePriceId(env: Environment) {
 // Only a visitor starting Checkout needs the API key. A build, homepage view or
 // incoming webhook never does. The key and selected Price must target one account.
 export function readCheckoutSettings(env: Environment) {
-  const { livemode, mode } = readStripeEventMode(env);
+  const { livemode, mode } = readBillingMode(env);
   const key = z.string().min(1).parse(env.STRIPE_API_KEY);
+  const stripeMode = livemode ? "live" : "test";
   if (
-    !key.startsWith(`rk_${mode}_`) &&
-    !(mode === "test" && key.startsWith("sk_test_"))
+    !key.startsWith(`rk_${stripeMode}_`) &&
+    !(!livemode && key.startsWith("sk_test_"))
   )
-    throw new Error("Checkout API key does not match Stripe mode.");
+    throw new Error("Checkout API key does not match the billing environment.");
   if (livemode && env.FIRESTORE_EMULATOR_HOST)
-    throw new Error("Live billing cannot use an emulator.");
+    throw new Error("Production billing cannot use an emulator.");
   const origin = z.string().url().parse(env.QUANTILE_SITE_ORIGIN);
   const url = new URL(origin);
   if (
@@ -209,13 +215,51 @@ export function readCheckoutSettings(env: Environment) {
   };
 }
 
-export function readFirestoreTarget(env: Environment, mode: "test" | "live") {
+export function readFirestoreTarget(
+  env: Environment,
+  mode: "development" | "production",
+) {
   const emulatorHost = env.FIRESTORE_EMULATOR_HOST || undefined;
-  if (mode === "live" && emulatorHost)
-    throw new Error("Live billing cannot use an emulator.");
-  return {
-    projectId: z.string().min(1).parse(env.GCP_PROJECT_ID),
+  if (mode === "production" && emulatorHost)
+    throw new Error("Production billing cannot use an emulator.");
+  return resolveFirestoreSettings({
+    projectId: env.GCP_PROJECT_ID ?? "",
     emulatorHost,
+  });
+}
+
+// Resolve SDK connection settings here, not inside the client factory.
+const firestoreTargetSchema = z.object({
+  projectId: z.string().regex(/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/),
+  emulatorHost: z
+    .string()
+    .regex(/^(localhost|127\.0\.0\.1|\[::1\]):([0-9]{1,5})$/)
+    .refine((value) => {
+      const port = Number(value.slice(value.lastIndexOf(":") + 1));
+      return port > 0 && port <= 65535;
+    })
+    .optional(),
+});
+export function resolveFirestoreSettings(target: {
+  projectId: string;
+  emulatorHost?: string;
+}) {
+  const result = firestoreTargetSchema.safeParse(target);
+  if (!result.success)
+    throw new Error(
+      "Invalid Firestore target; emulators must use a loopback host and valid port.",
+    );
+  const { projectId, emulatorHost } = result.data;
+  return {
+    projectId,
+    databaseId: "(default)",
+    ...(emulatorHost
+      ? {
+          host: emulatorHost,
+          ssl: false,
+          clientOptions: { universeDomain: "googleapis.com" },
+        }
+      : {}),
   };
 }
 
@@ -228,6 +272,42 @@ export function readEmailAddresses(env: Environment) {
 
 export function readResendSendingKey(env: Environment) {
   return z.string().min(1).parse(env.RESEND_API_KEY);
+}
+
+export function readEmailSendingSettings(env: Environment) {
+  return {
+    key: readResendSendingKey(env),
+    development: readBillingMode(env).mode === "development",
+  };
+}
+
+// Launcher-discovered public URL, not user configuration or a provider secret.
+export function readDevelopmentPortalUrl(env: Environment) {
+  const value = env.QUANTILE_DEVELOPMENT_PORTAL_URL;
+  if (value === undefined) return undefined;
+  const parsed = z.string().url().safeParse(value);
+  if (parsed.success && env.STRIPE_EVENT_LIVEMODE === "false") {
+    const url = new URL(parsed.data);
+    if (
+      ["https://billing.stripe.com", "https://billing.quantile.co"].includes(
+        url.origin,
+      ) &&
+      !url.username &&
+      !url.password &&
+      !url.search &&
+      !url.hash &&
+      /^\/p\/login\/test_[A-Za-z0-9]+$/.test(url.pathname)
+    )
+      return parsed.data;
+  }
+  throw new Error("Invalid development billing portal URL.");
+}
+
+export function readHeaderSettings(env: Environment) {
+  return {
+    development: env.NODE_ENV === "development",
+    cacheAssets: env.NODE_ENV === "production",
+  };
 }
 
 // Only the non-Next CLI calls this after parsing its command. Next itself loads

@@ -49,12 +49,12 @@ describe("signed Resend receipt route", () => {
     const { POST } = await import("./route");
     expect((await POST(request())).status).toBe(200);
   });
-  it("rejects live billing with an emulator before opening persistence", async () => {
+  it("rejects production billing with an emulator before opening persistence", async () => {
     vi.stubEnv("STRIPE_EVENT_LIVEMODE", "true");
     vi.stubEnv("FIRESTORE_EMULATOR_HOST", "localhost:8080");
     const { POST } = await import("./route");
     expect(
-      (await POST(request(receipt(pending({ mode: "live" }))))).status,
+      (await POST(request(receipt(pending({ mode: "production" }))))).status,
     ).toBe(503);
     expect(cloud.store).not.toHaveBeenCalled();
   });

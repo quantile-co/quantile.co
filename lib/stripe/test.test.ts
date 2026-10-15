@@ -59,7 +59,7 @@ describe("integration test isolation", () => {
   ])("rejects invalid app instance %s", (appInstance) => {
     expect(() => createTestOperation(appInstance, "delivered")).toThrow();
   });
-  it("refuses live objects and other operations even within the same app instance", () => {
+  it("refuses production objects and other operations even within the same app instance", () => {
     const operation = createTestOperation("sample", "delivered");
     const other = createTestOperation("sample", "delivered");
     const otherApp = createTestOperation("other", "delivered");
@@ -67,7 +67,7 @@ describe("integration test isolation", () => {
       { livemode: true, metadata: operation.metadata },
       { livemode: false, metadata: other.metadata },
       { livemode: false, metadata: otherApp.metadata },
-      { livemode: false, metadata: { quantile_test_id: operation.id } },
+      { livemode: false, metadata: { quantile_operation_id: operation.id } },
       { livemode: false, metadata: null },
     ])
       expect(() => assertTestOwnership(object, operation)).toThrow();

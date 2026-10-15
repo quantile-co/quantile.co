@@ -6,8 +6,8 @@ import {
   type Environment,
   readAppInstance,
   readEmailAddresses,
+  readEmailSendingSettings,
   readFirestoreTarget,
-  readResendSendingKey,
   readStripePriceId,
   readStripeVerification,
   runtimeEnvironment,
@@ -55,7 +55,7 @@ async function body(request: Request): Promise<Buffer | Response> {
 // One supported event/use case: keep HTTP and Stripe-specific decisions here.
 async function welcome(
   event: Stripe.InvoicePaymentSucceededEvent,
-  mode: "test" | "live",
+  mode: "development" | "production",
   env: Environment,
 ) {
   const invoice = event.data.object;
@@ -67,8 +67,11 @@ async function welcome(
     return reply(200, "Ignored");
   const appInstance = readAppInstance(env);
   const metadata = invoice.parent?.subscription_details?.metadata;
-  const testId = metadata?.quantile_test_id;
-  if (mode === "test" && !belongsToAppInstance(appInstance, testId))
+  const operationId = metadata?.quantile_operation_id;
+  if (
+    metadata?.quantile_app_instance !== appInstance ||
+    !belongsToAppInstance(appInstance, operationId)
+  )
     return reply(200, "Ignored");
   const priceId = readStripePriceId(env);
   const lines = invoice.lines?.data;
@@ -99,24 +102,13 @@ async function welcome(
     });
   if (matching.length !== 1 || !candidate.success)
     return reply(400, "Invalid subscription invoice");
-  let recipient = candidate.data.email;
-  if (mode === "test") {
-    const simulation = z
-      .enum(["delivered", "bounced", "complained", "suppressed"])
-      .safeParse(metadata?.quantile_test_delivery ?? "delivered");
-    if (!simulation.success) return reply(400, "Invalid test operation");
-    recipient =
-      simulation.data === "suppressed"
-        ? "suppressed@resend.dev"
-        : `${simulation.data}+${testId}@resend.dev`;
-  }
   const identity: WelcomeIdentity = {
     eventId: event.id,
     invoiceId: invoice.id,
     subscriptionId: candidate.data.subscriptionId,
     mode,
     appInstance,
-    ...(mode === "test" ? { testId } : {}),
+    operationId,
   };
   try {
     const store = createWelcomeStore(
@@ -125,7 +117,7 @@ async function welcome(
     const deliver = createWelcomeDelivery({
       store,
       send: (request, key) =>
-        createEmailSender(readResendSendingKey(env))(request, key),
+        createEmailSender(readEmailSendingSettings(env))(request, key),
     });
     const completed = await deliver(identity, async () => {
       // Existing immutable requests need neither today's sender config nor renderer.
@@ -135,8 +127,7 @@ async function welcome(
         ...email,
         from,
         reply_to: replyTo,
-        to: [recipient],
-        subject: mode === "test" ? `[Test] ${email.subject}` : email.subject,
+        to: [candidate.data.email],
       };
     });
     console.info("welcome_completed", {

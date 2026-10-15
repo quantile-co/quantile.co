@@ -3,7 +3,12 @@ import { chromium } from "playwright";
 import Stripe from "stripe";
 import { expect, it } from "vitest";
 import { z } from "zod";
-import { appInstanceSchema, belongsToAppInstance } from "@/lib/env/env";
+import {
+  appInstanceSchema,
+  belongsToAppInstance,
+  readDevelopmentPortalUrl,
+  readFirestoreTarget,
+} from "@/lib/env/env";
 import { getFirestore } from "@/lib/gcp/firestore";
 import {
   assertTestOwnership,
@@ -41,7 +46,7 @@ async function cleanOwnedCheckout(
     if (subscriberId !== customerId)
       throw new Error("Checkout customer does not match subscription.");
     // Deleting this proven, test-owned customer cancels its subscription;
-    // the Sandbox key need not have subscription mutation permissions.
+    // the development key need not have subscription mutation permissions.
     await stripe.customers.del(customerId);
     const canceled = await stripe.subscriptions.retrieve(subscriptionId);
     if (canceled.status !== "canceled")
@@ -50,7 +55,7 @@ async function cleanOwnedCheckout(
 }
 
 // This exercises the actual landing-page button only when the launcher owns the
-// local app. --target tests exercise their caller-owned webhook, not Checkout.
+// development app. --target tests exercise their caller-owned webhook, not Checkout.
 it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
   "completes landing-page Checkout, signed invoice and welcome callback",
   async () => {
@@ -69,15 +74,15 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
       );
     const env = parsed.data;
     const origin = env.QUANTILE_CHECKOUT_TEST_ORIGIN;
+    const portalUrl = readDevelopmentPortalUrl(process.env);
+    if (!portalUrl)
+      throw new Error("Missing launcher-discovered development portal.");
     const stripe = new Stripe(env.STRIPE_TEST_API_KEY, {
       maxNetworkRetries: 2,
       timeout: 20_000,
     });
     const store = createWelcomeStore(
-      getFirestore({
-        projectId: env.GCP_PROJECT_ID,
-        emulatorHost: process.env.FIRESTORE_EMULATOR_HOST || undefined,
-      }),
+      getFirestore(readFirestoreTarget(process.env, "development")),
     );
     let sessionId: string | undefined;
     let operation: ReturnType<typeof createTestOperation> | undefined;
@@ -89,6 +94,17 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
         const page = await browser.newPage();
         const home = await page.goto(origin);
         expect(home?.ok()).toBe(true);
+        const csp = home?.headers()["content-security-policy"];
+        expect(csp).toContain(
+          "form-action 'self' https://checkout.stripe.com https://billing.quantile.co;",
+        );
+        expect(csp).not.toContain("'unsafe-eval'");
+        expect(home?.headers()["x-content-type-options"]).toBe("nosniff");
+        stage = "homepage development billing links";
+        const billingLinks = page.locator('a[href*="/p/login/"]');
+        expect(await billingLinks.count()).toBeGreaterThan(0);
+        for (const link of await billingLinks.all())
+          expect(await link.getAttribute("href")).toBe(portalUrl);
         stage = "rendered signup form";
         const button = page
           .getByRole("button", { name: "Start building" })
@@ -120,13 +136,11 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
         sessionId = id;
         stage = "Checkout Session ownership";
         const session = await stripe.checkout.sessions.retrieve(id);
-        const testId = session.metadata?.quantile_test_id;
+        const testId = session.metadata?.quantile_operation_id;
         if (
           session.livemode ||
           !belongsToAppInstance(env.QUANTILE_APP_INSTANCE, testId) ||
-          session.metadata?.quantile_app_instance !==
-            env.QUANTILE_APP_INSTANCE ||
-          session.metadata?.quantile_test_delivery !== "delivered"
+          session.metadata?.quantile_app_instance !== env.QUANTILE_APP_INSTANCE
         )
           throw new Error("Checkout operation is not owned by this app.");
         operation = {
@@ -134,8 +148,7 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
           recipient: `delivered+${testId}@resend.dev`,
           metadata: {
             quantile_app_instance: env.QUANTILE_APP_INSTANCE,
-            quantile_test_id: testId,
-            quantile_test_delivery: "delivered",
+            quantile_operation_id: testId,
           },
         };
         assertTestOwnership(session, operation);
@@ -148,6 +161,17 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
         );
         stage = "hosted email input";
         await page.locator("#email").fill(operation.recipient);
+        stage = "hosted card payment method";
+        const cardLabel = page.getByText("Card", { exact: true });
+        await cardLabel.waitFor({ state: "visible" });
+        const card = await cardLabel.boundingBox();
+        if (!card) throw new Error("Card payment method not visible.");
+        // Stripe's overlay button intercepts label clicks but reports no visible
+        // box to Playwright. A pointer click on the visible label selects Card.
+        await page.mouse.click(
+          card.x + card.width / 2,
+          card.y + card.height / 2,
+        );
         stage = "hosted card input";
         await page.locator("#cardNumber").fill("4242424242424242");
         await page
@@ -162,7 +186,7 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
         const saveForLater = page.locator("#enableStripePass");
         if (await saveForLater.isVisible()) await saveForLater.uncheck();
         stage = "hosted payment action";
-        await page.getByRole("button", { name: /Subscribe|Pay/i }).click();
+        await page.getByTestId("hosted-payment-submit-button").click();
         const deadline = Date.now() + 120_000;
         let subscriptionId: string | undefined;
         while (Date.now() < deadline) {
@@ -185,23 +209,33 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
         const completionDeadline = Date.now() + 120_000;
         let completed = false;
         while (Date.now() < completionDeadline) {
-          const record = await store.get({ mode: "test", subscriptionId });
+          const record = await store.get({
+            mode: "development",
+            subscriptionId,
+          });
           if (record?.state === "accepted" && record.callbackReceivedAt) {
             expect(record).toMatchObject({
-              mode: "test",
+              mode: "development",
               appInstance: env.QUANTILE_APP_INSTANCE,
-              testId,
+              operationId: testId,
               subscriptionId,
             });
-            expect(JSON.parse(record.request).to).toEqual([
-              operation.recipient,
-            ]);
+            const email = JSON.parse(record.request);
+            expect(email.to).toEqual([operation.recipient]);
+            expect(email.html).toContain(portalUrl);
+            expect(email.text).toContain(portalUrl);
             completed = true;
             break;
           }
           await delay(1500);
         }
         if (!completed) throw new Error("Welcome callback did not complete.");
+        stage = "return to welcome page";
+        await page.waitForURL(`${origin}/welcome`);
+        stage = "welcome page development billing links";
+        expect(await billingLinks.count()).toBeGreaterThan(0);
+        for (const link of await billingLinks.all())
+          expect(await link.getAttribute("href")).toBe(portalUrl);
       } finally {
         await browser.close();
       }

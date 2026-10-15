@@ -2,9 +2,9 @@ import "server-only";
 import { Webhook } from "svix";
 import {
   readAppInstance,
+  readBillingMode,
   readFirestoreTarget,
   readResendSigningSecret,
-  readStripeEventMode,
   runtimeEnvironment,
 } from "@/lib/env/env";
 import { getFirestore } from "@/lib/gcp/firestore";
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     const payload = await verifiedBody(request, new Webhook(secret));
     if (payload instanceof Response) return payload;
     const config = {
-      mode: readStripeEventMode(env).mode,
+      mode: readBillingMode(env).mode,
       appInstance: readAppInstance(env),
     };
     const handle = createWelcomeReceiptHandler({
