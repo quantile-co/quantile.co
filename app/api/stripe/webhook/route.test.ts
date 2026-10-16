@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { memoryStore } from "@/lib/welcome/test";
+import { POST } from "./route";
 
 const config = {
   signingSecret: "whsec_fixture_unit_test_only",
@@ -87,7 +88,8 @@ vi.mock("@/lib/welcome/store", () => ({
 }));
 let store: ReturnType<typeof memoryStore>;
 beforeEach(() => {
-  vi.resetModules();
+  // POST reads the environment per request; reloading its import graph adds
+  // cold Vite transforms to the first test's five-second timeout.
   store = memoryStore();
   cloud.store.mockReset().mockReturnValue(store);
   for (const [key, value] of Object.entries({
@@ -324,8 +326,7 @@ function setup(overrides: { mode?: "development" | "production" } = {}) {
     store,
     send,
     report: vi.mocked(console.error),
-    handler: async (request: Request) =>
-      (await import("./route")).POST(request),
+    handler: POST,
   };
 }
 
