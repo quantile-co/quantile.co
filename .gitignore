@@ -61,3 +61,7 @@ next-env.d.ts
 # Review daily memory logs before staging; keep scratchpad and recovery local.
 /.pi/memory/SCRATCHPAD.md
 /.pi/memory/recovery/
+
+# Keep QMD's native config; exclude its worktree-local index and locks.
+/.qmd/*
+!/.qmd/index.yml
