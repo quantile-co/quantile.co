@@ -17,7 +17,7 @@ jobs:
     if: >-
       github.ref == 'refs/heads/main' &&
       contains(fromJSON(vars.GH_MAINTAINERS), github.actor)
-    runs-on: namespace-profile-quantile
+    runs-on: namespace-profile-quantile-4x8
     environment: prod
     timeout-minutes: 15
     env:
