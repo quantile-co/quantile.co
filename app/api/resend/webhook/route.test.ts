@@ -1,6 +1,7 @@
 import { Webhook } from "svix";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { memoryStore, pending, receipt } from "@/lib/welcome/test";
+import { POST } from "./route";
 
 vi.mock("server-only", () => ({}));
 const cloud = vi.hoisted(() => ({ store: vi.fn() }));
@@ -22,7 +23,7 @@ function request(event: unknown = receipt(), age = 0, key = secret) {
 }
 let store: ReturnType<typeof memoryStore>;
 beforeEach(async () => {
-  vi.resetModules();
+  // POST reads the environment per request; keep the route import graph cached.
   store = memoryStore();
   await store.prepare(pending());
   cloud.store.mockReset().mockReturnValue(store);
@@ -46,7 +47,6 @@ describe("signed Resend receipt route", () => {
       "QUANTILE_EMAIL_REPLY_TO",
     ])
       vi.stubEnv(key, "");
-    const { POST } = await import("./route");
     expect((await POST(request())).status).toBe(200);
   });
   it("rejects production billing with an emulator before opening persistence", async () => {
