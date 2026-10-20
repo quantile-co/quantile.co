@@ -31,16 +31,16 @@ describe("root analytics composition", () => {
     expect(html).toContain("Content");
   });
 
-  it.each([
-    "production",
-    "development",
-  ])("omits analytics when unconfigured in %s", (mode) => {
-    vi.stubEnv("NODE_ENV", mode);
-    vi.stubEnv("NEXT_PUBLIC_FATHOM_SITE_ID", undefined);
-    vi.stubEnv("NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS", undefined);
-    const html = renderToStaticMarkup(<RootLayout>Content</RootLayout>);
-    expect(html).not.toContain("data-analytics-site");
-  });
+  it.each(["production", "development"])(
+    "omits analytics when unconfigured in %s",
+    (mode) => {
+      vi.stubEnv("NODE_ENV", mode);
+      vi.stubEnv("NEXT_PUBLIC_FATHOM_SITE_ID", undefined);
+      vi.stubEnv("NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS", undefined);
+      const html = renderToStaticMarkup(<RootLayout>Content</RootLayout>);
+      expect(html).not.toContain("data-analytics-site");
+    },
+  );
 
   it("allows only the Fathom CDN for script, image collection and departure beacons", () => {
     const policy = firebaseConfig.hosting.headers

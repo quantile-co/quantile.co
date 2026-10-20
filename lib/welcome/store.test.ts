@@ -89,57 +89,60 @@ describe("official Firestore emulator: atomic persistence", () => {
     }
   }, 15_000);
 
-  describe.each([
-    "memory",
-    "Firestore SDK",
-  ])("shared persistence contract: %s", (implementation) => {
-    function contract() {
-      return {
-        store: implementation === "memory" ? memoryStore() : setup().store,
-        record: pending({
-          subscriptionId: `sub_${randomUUID().replaceAll("-", "")}`,
-        }),
-      };
-    }
-    it("keeps the first request and rejects another operation", async () => {
-      const { store, record } = contract();
-      await store.prepare(record);
-      expect(
-        (
-          await store.prepare({
-            ...record,
-            request: record.request.replace("Welcome to Quantile", "New copy"),
-          })
-        ).request,
-      ).toBe(record.request);
-      await expect(
-        store.prepare({ ...record, invoiceId: "in_another" }),
-      ).rejects.toThrow();
-      expect((await store.get(record))?.request).toBe(record.request);
-    });
-    it("requires preparation and preserves the first accepted ID", async () => {
-      const { store, record } = contract();
-      await expect(store.accept(record, "mail_first")).rejects.toThrow();
-      await store.prepare(record);
-      const accepted = await store.accept(record, "mail_first");
-      expect(accepted.state).toBe("accepted");
-      await expect(store.accept(record, "mail_other")).rejects.toThrow();
-      await expect(store.prepare(accepted)).rejects.toThrow("pending");
-      expect((await store.get(record))?.resendId).toBe("mail_first");
-    });
-    it("adds callback evidence without replacing either timestamp on replay", async () => {
-      const { store, record } = contract();
-      await store.prepare(record);
-      const accepted = await store.accept(record, "mail_first");
-      const callback = await store.accept(record, "mail_first", "webhook");
-      expect(callback.acceptedAt).toBe(accepted.acceptedAt);
-      expect(callback.callbackReceivedAt).toBeTruthy();
-      expect(await store.accept(record, "mail_first", "webhook")).toEqual(
-        callback,
-      );
-      expect(callback.request).toBe(record.request);
-    });
-  });
+  describe.each(["memory", "Firestore SDK"])(
+    "shared persistence contract: %s",
+    (implementation) => {
+      function contract() {
+        return {
+          store: implementation === "memory" ? memoryStore() : setup().store,
+          record: pending({
+            subscriptionId: `sub_${randomUUID().replaceAll("-", "")}`,
+          }),
+        };
+      }
+      it("keeps the first request and rejects another operation", async () => {
+        const { store, record } = contract();
+        await store.prepare(record);
+        expect(
+          (
+            await store.prepare({
+              ...record,
+              request: record.request.replace(
+                "Welcome to Quantile",
+                "New copy",
+              ),
+            })
+          ).request,
+        ).toBe(record.request);
+        await expect(
+          store.prepare({ ...record, invoiceId: "in_another" }),
+        ).rejects.toThrow();
+        expect((await store.get(record))?.request).toBe(record.request);
+      });
+      it("requires preparation and preserves the first accepted ID", async () => {
+        const { store, record } = contract();
+        await expect(store.accept(record, "mail_first")).rejects.toThrow();
+        await store.prepare(record);
+        const accepted = await store.accept(record, "mail_first");
+        expect(accepted.state).toBe("accepted");
+        await expect(store.accept(record, "mail_other")).rejects.toThrow();
+        await expect(store.prepare(accepted)).rejects.toThrow("pending");
+        expect((await store.get(record))?.resendId).toBe("mail_first");
+      });
+      it("adds callback evidence without replacing either timestamp on replay", async () => {
+        const { store, record } = contract();
+        await store.prepare(record);
+        const accepted = await store.accept(record, "mail_first");
+        const callback = await store.accept(record, "mail_first", "webhook");
+        expect(callback.acceptedAt).toBe(accepted.acceptedAt);
+        expect(callback.callbackReceivedAt).toBeTruthy();
+        expect(await store.accept(record, "mail_first", "webhook")).toEqual(
+          callback,
+        );
+        expect(callback.request).toBe(record.request);
+      });
+    },
+  );
 
   // Contended creates can use the store's 3s per-operation deadline; the
   // winner read and replay checks are separate operations, not one deadline.

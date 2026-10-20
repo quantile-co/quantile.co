@@ -54,12 +54,15 @@ describe("development portal discovery", () => {
     [{ ...valid, login_page: { enabled: false, url: portalUrl } }],
     [{ ...valid, login_page: { enabled: true, url: null } }],
     [{ ...valid, login_page: { enabled: true, url: "https://evil.example" } }],
-  ])("rejects unavailable or unsafe defaults without a production fallback: %j", async (...values) => {
-    configurations(values);
-    await expect(discoverDevelopmentPortal("rk_test_fixture")).rejects.toThrow(
-      "Could not discover",
-    );
-  });
+  ])(
+    "rejects unavailable or unsafe defaults without a production fallback: %j",
+    async (...values) => {
+      configurations(values);
+      await expect(
+        discoverDevelopmentPortal("rk_test_fixture"),
+      ).rejects.toThrow("Could not discover");
+    },
+  );
   it("does not use production keys or expose provider errors", async () => {
     portalList.mockClear();
     await expect(discoverDevelopmentPortal("rk_live_private")).rejects.toThrow(
@@ -145,18 +148,17 @@ describe("integration configuration and process boundaries", () => {
       ),
     ).toMatchObject({ origin: "https://sample.example.com" });
   });
-  it.each([
-    "true",
-    "test",
-    "live",
-    "TRUE",
-    "1",
-    "0",
-  ])("rejects invalid STRIPE_EVENT_LIVEMODE=%s", (value) => {
-    expect(() =>
-      readIntegrationConfig({ ...env, STRIPE_EVENT_LIVEMODE: value }, "sample"),
-    ).toThrow();
-  });
+  it.each(["true", "test", "live", "TRUE", "1", "0"])(
+    "rejects invalid STRIPE_EVENT_LIVEMODE=%s",
+    (value) => {
+      expect(() =>
+        readIntegrationConfig(
+          { ...env, STRIPE_EVENT_LIVEMODE: value },
+          "sample",
+        ),
+      ).toThrow();
+    },
+  );
   it.each(Object.keys(env))("requires %s before startup", (key) => {
     expect(() =>
       readIntegrationConfig({ ...env, [key]: undefined }, "sample"),
@@ -567,20 +569,20 @@ process.exit(fixture.exit ?? 0);
     await absent("next.started");
     await absent(".quantile");
   });
-  it.each([
-    ["--integration"],
-    ["--test", "--integration"],
-  ])("rejects production billing for manual or automated integration: %o", async (...args) => {
-    const child = startDevelopment(args, {
-      STRIPE_EVENT_LIVEMODE: "true",
-      STRIPE_TEST_API_KEY: "sk_live_fixture",
-    });
-    expect(await child.exit()).toBe(1);
-    expect(child.output()).toContain("production billing is forbidden");
-    await absent("emulator.started");
-    await absent("next.started");
-    await absent(".quantile/webhooks.json");
-  });
+  it.each([["--integration"], ["--test", "--integration"]])(
+    "rejects production billing for manual or automated integration: %o",
+    async (...args) => {
+      const child = startDevelopment(args, {
+        STRIPE_EVENT_LIVEMODE: "true",
+        STRIPE_TEST_API_KEY: "sk_live_fixture",
+      });
+      expect(await child.exit()).toBe(1);
+      expect(child.output()).toContain("production billing is forbidden");
+      await absent("emulator.started");
+      await absent("next.started");
+      await absent(".quantile/webhooks.json");
+    },
+  );
   it("does not use an ambient URL to change integration ownership", async () => {
     const child = startDevelopment(["--test", "--integration"], {
       QUANTILE_STRIPE_WEBHOOK_URL:
@@ -595,12 +597,15 @@ process.exit(fixture.exit ?? 0);
     ["--test", "--port", "3100"],
     ["--integration", "--target", "https://example.com/api/stripe/webhook"],
     ["--cleanup-integration", "--integration"],
-  ])("rejects incompatible arguments %o before starting children", async (...args) => {
-    const child = startDevelopment(args);
-    expect(await child.exit()).toBe(1);
-    expect(child.output()).toContain("Incompatible arguments");
-    await absent("emulator.started");
-    await absent("next.started");
-    await absent("tests.started");
-  });
+  ])(
+    "rejects incompatible arguments %o before starting children",
+    async (...args) => {
+      const child = startDevelopment(args);
+      expect(await child.exit()).toBe(1);
+      expect(child.output()).toContain("Incompatible arguments");
+      await absent("emulator.started");
+      await absent("next.started");
+      await absent("tests.started");
+    },
+  );
 });

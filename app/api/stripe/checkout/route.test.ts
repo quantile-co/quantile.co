@@ -46,51 +46,51 @@ afterEach(() => {
 });
 
 describe("Checkout start", () => {
-  it.each([
-    false,
-    true,
-  ])("uses the configured Price and shared operation metadata (livemode=%s)", async (livemode) => {
-    const site = livemode ? "https://example.com" : origin;
-    const key = livemode ? "rk_live_fixture" : "rk_test_fixture";
-    vi.stubEnv("STRIPE_EVENT_LIVEMODE", String(livemode));
-    vi.stubEnv("STRIPE_API_KEY", key);
-    vi.stubEnv("QUANTILE_SITE_ORIGIN", site);
-    provider.create.mockResolvedValue({
-      livemode,
-      url: "https://billing.quantile.co/c/pay/session",
-    });
-    const response = await submit(site);
-    expect(response.status).toBe(303);
-    expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(response.headers.get("Referrer-Policy")).toBe("no-referrer");
-    expect(provider.init).toHaveBeenCalledWith(key);
-    const [params, options] = provider.create.mock.calls[0];
-    expect(params).toMatchObject({
-      mode: "subscription",
-      line_items: [
-        {
-          price: "price_fixture",
-          quantity: 1,
-          adjustable_quantity: { enabled: true, minimum: 1, maximum: 5 },
-        },
-      ],
-      success_url: `${site}/welcome`,
-      cancel_url: `${site}/#pricing`,
-    });
-    expect(params).not.toHaveProperty("payment_method_types");
-    expect(params.metadata).toEqual(params.subscription_data.metadata);
-    expect(params.metadata).toEqual({
-      quantile_app_instance: "sample",
-      quantile_operation_id: expect.stringMatching(/^sample-[a-f0-9]{32}$/),
-    });
-    expect(options.idempotencyKey).toBe(
-      `checkout/${params.metadata.quantile_operation_id}`,
-    );
-    await submit(site);
-    expect(
-      provider.create.mock.calls[1][0].metadata.quantile_operation_id,
-    ).not.toBe(params.metadata.quantile_operation_id);
-  });
+  it.each([false, true])(
+    "uses the configured Price and shared operation metadata (livemode=%s)",
+    async (livemode) => {
+      const site = livemode ? "https://example.com" : origin;
+      const key = livemode ? "rk_live_fixture" : "rk_test_fixture";
+      vi.stubEnv("STRIPE_EVENT_LIVEMODE", String(livemode));
+      vi.stubEnv("STRIPE_API_KEY", key);
+      vi.stubEnv("QUANTILE_SITE_ORIGIN", site);
+      provider.create.mockResolvedValue({
+        livemode,
+        url: "https://billing.quantile.co/c/pay/session",
+      });
+      const response = await submit(site);
+      expect(response.status).toBe(303);
+      expect(response.headers.get("Cache-Control")).toBe("no-store");
+      expect(response.headers.get("Referrer-Policy")).toBe("no-referrer");
+      expect(provider.init).toHaveBeenCalledWith(key);
+      const [params, options] = provider.create.mock.calls[0];
+      expect(params).toMatchObject({
+        mode: "subscription",
+        line_items: [
+          {
+            price: "price_fixture",
+            quantity: 1,
+            adjustable_quantity: { enabled: true, minimum: 1, maximum: 5 },
+          },
+        ],
+        success_url: `${site}/welcome`,
+        cancel_url: `${site}/#pricing`,
+      });
+      expect(params).not.toHaveProperty("payment_method_types");
+      expect(params.metadata).toEqual(params.subscription_data.metadata);
+      expect(params.metadata).toEqual({
+        quantile_app_instance: "sample",
+        quantile_operation_id: expect.stringMatching(/^sample-[a-f0-9]{32}$/),
+      });
+      expect(options.idempotencyKey).toBe(
+        `checkout/${params.metadata.quantile_operation_id}`,
+      );
+      await submit(site);
+      expect(
+        provider.create.mock.calls[1][0].metadata.quantile_operation_id,
+      ).not.toBe(params.metadata.quantile_operation_id);
+    },
+  );
 
   it("allows both hosted Checkout domains under the production form policy", async () => {
     const policy = firebaseConfig.hosting.headers

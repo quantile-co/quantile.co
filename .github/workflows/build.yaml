@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       check_run_id:
-        description: Successful protected-main public Check run for this commit
+        description: Successful exact-source public Check run; source must be on main
         required: true
         type: string
       version:
@@ -24,7 +24,8 @@ jobs:
     name: Build
     if: >-
       github.ref == 'refs/heads/main' &&
-      contains(fromJSON(vars.GH_MAINTAINERS), github.actor)
+      contains(fromJSON(vars.GH_MAINTAINERS), github.actor) &&
+      contains(fromJSON(vars.GH_MAINTAINERS), github.triggering_actor)
     runs-on: namespace-profile-quantile-4x8
     permissions:
       actions: read
@@ -34,30 +35,89 @@ jobs:
       CHECK_RUN_ID: ${{ inputs.check_run_id }}
       RELEASE_VERSION: ${{ inputs.version }}
     steps:
+      - name: Check out trusted release tooling
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          path: tooling
+          persist-credentials: false
+
+      - name: Mount the Nix store and database
+        uses: namespacelabs/nscloud-cache-action@1124a6f3ce44e5cf84cc22111530961f4d2a15f9 # v1
+        with:
+          path: /nix
+          spacectl-version: 0.12.3
+          spacectl-system-binary: ignore
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          install_options: --no-daemon
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            require-sigs = true
+
+      - name: Load pinned development tools
+        working-directory: tooling
+        env:
+          SECRETSPEC_PROFILE: default
+        run: |
+          # Expand PATH inside the pinned shell, not the bootstrap runner shell.
+          # shellcheck disable=SC2016
+          nix run '.#devenv-cli' -- shell bash --noprofile --norc -euo pipefail -c '
+            IFS=: read -r -a paths <<< "$PATH"
+            pinned_path=
+            for path in "${paths[@]}"; do
+              case "$path" in
+                /nix/store/*)
+                  printf "%s\n" "$path" >> "$GITHUB_PATH"
+                  pinned_path="${pinned_path:+$pinned_path:}$path"
+                  ;;
+              esac
+            done
+            printf "PINNED_PATH=%s\n" "$pinned_path" >> "$GITHUB_ENV"
+          '
+
       - name: Verify quantile-co/quantile.co Check
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          export PATH="$PINNED_PATH"
           [[ "$APP_SHA" =~ ^[0-9a-f]{40}$ && "$CHECK_RUN_ID" =~ ^[1-9][0-9]*$ ]]
           test "$GITHUB_REPOSITORY" = quantile-co/quantile.co
           checked=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CHECK_RUN_ID")
           jq -e --arg repo "$GITHUB_REPOSITORY" --arg sha "$APP_SHA" '
             .repository.full_name == $repo and
             .path == ".github/workflows/check.yaml" and
-            .event == "push" and .head_branch == "main" and
-            .head_sha == $sha and .conclusion == "success"
+            .event == "push" and .head_repository.full_name == $repo and
+            .head_sha == $sha and .status == "completed" and .conclusion == "success"
           ' <<< "$checked" > /dev/null
+          # A successful workflow with skipped jobs is not a successful Check.
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CHECK_RUN_ID/jobs?filter=latest" |
+            jq -e --arg sha "$APP_SHA" '
+              any(.jobs[]; .name == "All / All" and .head_sha == $sha and
+                .status == "completed" and .conclusion == "success")
+            ' > /dev/null
+          # Check runs before landing. Only publish a checked commit now on main.
+          gh api "repos/$GITHUB_REPOSITORY/compare/$APP_SHA...main" |
+            jq -e --arg sha "$APP_SHA" '
+              (.status == "ahead" or .status == "identical") and
+              .merge_base_commit.sha == $sha
+            ' > /dev/null
 
       - name: Check out quantile-co/quantile.co
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.app_sha }}
+          path: source
           persist-credentials: false
 
       - name: Package reviewed source and client rules
+        working-directory: source
         run: |
           set -euo pipefail
+          export PATH="$PINNED_PATH"
           test "$(git rev-parse HEAD)" = "$APP_SHA"
           [[ "$RELEASE_VERSION" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
           test "$RELEASE_VERSION" = "v$(jq -er '.version' package.json)"
@@ -74,11 +134,13 @@ jobs:
               source_sha256: $source, rules_sha256: $rules}' > "$RUNNER_TEMP/release.json"
 
       - name: Publish reviewed source release
+        working-directory: source
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+          export PATH="$PINNED_PATH"
           tag="$RELEASE_VERSION"
           if gh api "repos/$GH_REPO/git/ref/tags/$tag" > /dev/null 2>&1; then
             echo "Tag $tag already exists; inspect any partial release before retrying." >&2
@@ -87,6 +149,8 @@ jobs:
           gh api --method POST "repos/$GH_REPO/releases/generate-notes" \
             -f "tag_name=$tag" -f "target_commitish=$APP_SHA" \
             --jq .body > "$RUNNER_TEMP/notes.md"
+          # Markdown code spans are literal, not shell substitutions.
+          # shellcheck disable=SC2016
           printf '\n\n### Build provenance\n\n- [Source commit](https://github.com/%s/commit/%s)\n- [Check](https://github.com/%s/actions/runs/%s)\n- [Build](https://github.com/%s/actions/runs/%s)\n\nReviewed source and client Rules are attached. Machine-readable provenance and checksums are in `release.json`.\n' \
             "$GH_REPO" "$APP_SHA" "$GH_REPO" "$CHECK_RUN_ID" "$GH_REPO" "$GITHUB_RUN_ID" \
             >> "$RUNNER_TEMP/notes.md"
@@ -171,7 +235,7 @@ jobs:
           done
           gh release edit "$tag" --title "$tag" --notes-file "$RUNNER_TEMP/notes.md" --draft=false
           published=
-          for attempt in $(seq 1 12); do
+          for _ in $(seq 1 12); do
             candidate=$(gh api "repos/$GH_REPO/releases/tags/$tag" 2>/dev/null) || { sleep 5; continue; }
             if jq -e --arg tag "$tag" '.tag_name == $tag and .draft == false and .immutable == true' \
               <<< "$candidate" > /dev/null; then
@@ -200,5 +264,6 @@ jobs:
             .object.type == "commit" and .object.sha == $sha
           ' > /dev/null
           digest=$(sha256sum "$RUNNER_TEMP/release/source.zip" | cut -d' ' -f1)
+          # shellcheck disable=SC2016
           printf 'Published immutable source release `%s` from Check `%s` (SHA `%s`). Source asset ID `%s`, SHA256 `%s`.\n' \
             "$tag" "$CHECK_RUN_ID" "$APP_SHA" "$asset_id" "$digest" >> "$GITHUB_STEP_SUMMARY"

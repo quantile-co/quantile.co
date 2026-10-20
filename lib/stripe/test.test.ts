@@ -51,14 +51,12 @@ describe("integration test isolation", () => {
       ).not.toThrow();
     }
   });
-  it.each([
-    "",
-    "../other",
-    "UPPERCASE",
-    "a".repeat(21),
-  ])("rejects invalid app instance %s", (appInstance) => {
-    expect(() => createTestOperation(appInstance, "delivered")).toThrow();
-  });
+  it.each(["", "../other", "UPPERCASE", "a".repeat(21)])(
+    "rejects invalid app instance %s",
+    (appInstance) => {
+      expect(() => createTestOperation(appInstance, "delivered")).toThrow();
+    },
+  );
   it("refuses production objects and other operations even within the same app instance", () => {
     const operation = createTestOperation("sample", "delivered");
     const other = createTestOperation("sample", "delivered");
