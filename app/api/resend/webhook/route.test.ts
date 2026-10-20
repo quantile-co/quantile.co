@@ -58,18 +58,15 @@ describe("signed Resend receipt route", () => {
     ).toBe(503);
     expect(cloud.store).not.toHaveBeenCalled();
   });
-  it.each([
-    "",
-    "test",
-    "live",
-    "TRUE",
-    "1",
-  ])("fails closed with invalid STRIPE_EVENT_LIVEMODE=%s", async (value) => {
-    vi.stubEnv("STRIPE_EVENT_LIVEMODE", value);
-    const { POST } = await import("./route");
-    expect((await POST(request())).status).toBe(503);
-    expect(cloud.store).not.toHaveBeenCalled();
-  });
+  it.each(["", "test", "live", "TRUE", "1"])(
+    "fails closed with invalid STRIPE_EVENT_LIVEMODE=%s",
+    async (value) => {
+      vi.stubEnv("STRIPE_EVENT_LIVEMODE", value);
+      const { POST } = await import("./route");
+      expect((await POST(request())).status).toBe(503);
+      expect(cloud.store).not.toHaveBeenCalled();
+    },
+  );
   it("verifies original bytes and records a callback completion", async () => {
     const { POST } = await import("./route");
     expect((await POST(request())).status).toBe(200);

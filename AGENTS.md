@@ -39,7 +39,9 @@ independently of Next.js build mode. Keep provider terms (`livemode`, `test`/`li
 key prefixes) at API boundaries, and keep automated tests and `NODE_ENV=test`
 named as tests. A production build can use development billing.
 
-Human setup: [README.md](README.md). Full validation: `pnpm check`.
+Human setup: [README.md](README.md). Checks and the full ordinary test suite:
+`devenv tasks run test:all`. Builds: `devenv tasks run build:all`.
+Provider-backed tests remain separately authorized.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

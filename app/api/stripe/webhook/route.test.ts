@@ -130,28 +130,25 @@ describe("Next.js Stripe route", () => {
     ).toEqual({ result: "Ignored" });
     expect(cloud.store).not.toHaveBeenCalled();
   });
-  it.each([
-    { livemode: true },
-    { account: "acct_connected" },
-  ])("rejects wrong environment/account %o", async (event) => {
-    const { POST } = await import("./route");
-    expect((await POST(signedRequest(paymentEvent({}, event)))).status).toBe(
-      400,
-    );
-    expect(cloud.store).not.toHaveBeenCalled();
-  });
-  it.each([
-    "",
-    "test",
-    "live",
-    "TRUE",
-    "1",
-  ])("fails closed with invalid STRIPE_EVENT_LIVEMODE=%s", async (value) => {
-    vi.stubEnv("STRIPE_EVENT_LIVEMODE", value);
-    const { POST } = await import("./route");
-    expect((await POST(signedRequest())).status).toBe(503);
-    expect(cloud.store).not.toHaveBeenCalled();
-  });
+  it.each([{ livemode: true }, { account: "acct_connected" }])(
+    "rejects wrong environment/account %o",
+    async (event) => {
+      const { POST } = await import("./route");
+      expect((await POST(signedRequest(paymentEvent({}, event)))).status).toBe(
+        400,
+      );
+      expect(cloud.store).not.toHaveBeenCalled();
+    },
+  );
+  it.each(["", "test", "live", "TRUE", "1"])(
+    "fails closed with invalid STRIPE_EVENT_LIVEMODE=%s",
+    async (value) => {
+      vi.stubEnv("STRIPE_EVENT_LIVEMODE", value);
+      const { POST } = await import("./route");
+      expect((await POST(signedRequest())).status).toBe(503);
+      expect(cloud.store).not.toHaveBeenCalled();
+    },
+  );
   it("rejects missing, incorrect, expired and tampered signatures", async () => {
     const { POST } = await import("./route");
     const valid = signedRequest();
@@ -331,37 +328,38 @@ function setup(overrides: { mode?: "development" | "production" } = {}) {
 }
 
 describe("welcome email eligibility and completion", () => {
-  it.each([
-    1, 2, 3, 4, 5,
-  ])("renders and durably completes %i issues", async (quantity) => {
-    const { handler, send, store } = setup();
-    const event = paymentEvent();
-    event.data.object.lines.data[0].quantity = quantity;
-    const response = await handler(signedRequest(event));
-    expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({
-      result: "completed",
-      resendId: "mail_accepted",
-    });
-    const record = [...store.records.values()][0];
-    const mail = JSON.parse(record.request);
-    expect(mail.to).toEqual([recipient]);
-    expect(mail.subject).toBe("Thank you for subscribing!");
-    expect(mail.text.replace(/\s+/g, " ")).toContain(
-      `${quantity} ${quantity === 1 ? "issue is" : "issues are"} marked in progress at a time`,
-    );
-    expect(mail.reply_to).toBe(config.replyTo);
-    expect(record).toMatchObject({
-      state: "accepted",
-      eventId: event.id,
-      invoiceId: event.data.object.id,
-      operationId: testId,
-    });
-    expect(send).toHaveBeenCalledWith(
-      record.request,
-      "welcome/development/sub_fixture_customer",
-    );
-  });
+  it.each([1, 2, 3, 4, 5])(
+    "renders and durably completes %i issues",
+    async (quantity) => {
+      const { handler, send, store } = setup();
+      const event = paymentEvent();
+      event.data.object.lines.data[0].quantity = quantity;
+      const response = await handler(signedRequest(event));
+      expect(response.status).toBe(200);
+      expect(await response.json()).toMatchObject({
+        result: "completed",
+        resendId: "mail_accepted",
+      });
+      const record = [...store.records.values()][0];
+      const mail = JSON.parse(record.request);
+      expect(mail.to).toEqual([recipient]);
+      expect(mail.subject).toBe("Thank you for subscribing!");
+      expect(mail.text.replace(/\s+/g, " ")).toContain(
+        `${quantity} ${quantity === 1 ? "issue is" : "issues are"} marked in progress at a time`,
+      );
+      expect(mail.reply_to).toBe(config.replyTo);
+      expect(record).toMatchObject({
+        state: "accepted",
+        eventId: event.id,
+        invoiceId: event.data.object.id,
+        operationId: testId,
+      });
+      expect(send).toHaveBeenCalledWith(
+        record.request,
+        "welcome/development/sub_fixture_customer",
+      );
+    },
+  );
   it("allows a customer inbox in explicit production billing", async () => {
     const { handler, store } = setup({ mode: "production" });
     expect(
@@ -439,24 +437,22 @@ describe("welcome email eligibility and completion", () => {
     );
     expect(send).not.toHaveBeenCalled();
   });
-  it.each([
-    0,
-    6,
-    1.5,
-    null,
-  ])("rejects invalid capacity %s", async (quantity) => {
-    const { handler, send } = setup();
-    const event = paymentEvent({
-      lines: {
-        has_more: false,
-        data: [
-          { quantity, pricing: { price_details: { price: config.priceId } } },
-        ],
-      },
-    });
-    expect((await handler(signedRequest(event))).status).toBe(400);
-    expect(send).not.toHaveBeenCalled();
-  });
+  it.each([0, 6, 1.5, null])(
+    "rejects invalid capacity %s",
+    async (quantity) => {
+      const { handler, send } = setup();
+      const event = paymentEvent({
+        lines: {
+          has_more: false,
+          data: [
+            { quantity, pricing: { price_details: { price: config.priceId } } },
+          ],
+        },
+      });
+      expect((await handler(signedRequest(event))).status).toBe(400);
+      expect(send).not.toHaveBeenCalled();
+    },
+  );
   it("rejects truncated lists and duplicate lines", async () => {
     const { handler } = setup();
     const event = paymentEvent();
@@ -487,29 +483,30 @@ describe("welcome email eligibility and completion", () => {
       }),
     );
   });
-  it.each([
-    "delivered",
-    "bounced",
-    "complained",
-    "suppressed",
-  ])("uses only the %s simulator", async (delivery) => {
-    const { handler, store } = setup();
-    const event = paymentEvent();
-    event.data.object.customer_email = `${delivery}+${testId}@resend.dev`;
-    expect((await handler(signedRequest(event))).status).toBe(200);
-    expect(JSON.parse([...store.records.values()][0].request).to).toEqual([
-      event.data.object.customer_email,
-    ]);
-  });
+  it.each(["delivered", "bounced", "complained", "suppressed"])(
+    "uses only the %s simulator",
+    async (delivery) => {
+      const { handler, store } = setup();
+      const event = paymentEvent();
+      event.data.object.customer_email = `${delivery}+${testId}@resend.dev`;
+      expect((await handler(signedRequest(event))).status).toBe(200);
+      expect(JSON.parse([...store.records.values()][0].request).to).toEqual([
+        event.data.object.customer_email,
+      ]);
+    },
+  );
   it.each([
     "customer@example.com",
     "delivered@resend.dev.evil.test",
     `delivered+other-${"a".repeat(32)}@resend.dev`,
     "delivered@resend.dev",
-  ])("blocks unsafe development recipient %s at the sending boundary", async (email) => {
-    const { handler, send } = setup();
-    const event = paymentEvent({ customer_email: email });
-    expect((await handler(signedRequest(event))).status).toBe(503);
-    expect(send).not.toHaveBeenCalled();
-  });
+  ])(
+    "blocks unsafe development recipient %s at the sending boundary",
+    async (email) => {
+      const { handler, send } = setup();
+      const event = paymentEvent({ customer_email: email });
+      expect((await handler(signedRequest(event))).status).toBe(503);
+      expect(send).not.toHaveBeenCalled();
+    },
+  );
 });

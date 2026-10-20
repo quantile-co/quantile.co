@@ -62,6 +62,22 @@ next-env.d.ts
 /.pi/memory/SCRATCHPAD.md
 /.pi/memory/recovery/
 
-# Keep QMD's native config; exclude its worktree-local index and locks.
+# QMD configuration is linked from Factory; its index and locks are local.
 /.qmd/*
-!/.qmd/index.yml
+
+# Devenv-managed files and state.
+/secretspec.toml
+/.devenv/
+/.direnv/
+/biome.json
+/.editorconfig
+/.editorconfig-checker.json
+/.pre-commit-config.yaml
+/.cz.toml
+/.shellcheckrc
+/.tflint.hcl
+/.github/actionlint.yaml
+/.pi/settings.json
+/.pi/skills/
+/.semgrep
+/.semgrepignore

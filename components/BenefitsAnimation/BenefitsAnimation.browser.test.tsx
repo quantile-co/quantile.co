@@ -69,76 +69,83 @@ afterEach(async () => {
 });
 
 describe("Shared illustration styling", () => {
-  it.each([
-    "light",
-    "dark",
-  ] as const)("shows a populated static hero with one active issue and editor in %s mode", async (colorScheme) => {
-    root?.render(
-      <MantineProvider theme={theme} forceColorScheme={colorScheme}>
-        <div style={{ maxWidth: 672, padding: 20 }}>
-          <HeroAnimation />
-        </div>
-      </MantineProvider>,
-    );
-    await vi.waitFor(() =>
-      expect(element("[data-hero-animation]").hasAttribute("data-static")).toBe(
-        true,
-      ),
-    );
-    await document.fonts.ready;
-    for (const width of [320, 768, 1440]) {
-      await page.viewport(width, 1000);
-      await nextFrame();
-      const scene = element("[data-hero-animation]");
-      const todo = Array.from(
-        scene.querySelectorAll<HTMLElement>('[data-static-position^="todo-"]'),
+  it.each(["light", "dark"] as const)(
+    "shows a populated static hero with one active issue and editor in %s mode",
+    async (colorScheme) => {
+      root?.render(
+        <MantineProvider theme={theme} forceColorScheme={colorScheme}>
+          <div style={{ maxWidth: 672, padding: 20 }}>
+            <HeroAnimation />
+          </div>
+        </MantineProvider>,
       );
-      const done = Array.from(
-        scene.querySelectorAll<HTMLElement>('[data-static-position^="done-"]'),
+      await vi.waitFor(() =>
+        expect(
+          element("[data-hero-animation]").hasAttribute("data-static"),
+        ).toBe(true),
       );
-      const active = element('[data-static-position="in-progress"]');
-      expect(todo).toHaveLength(5);
-      expect(done).toHaveLength(5);
-      expect(
-        scene.querySelectorAll('[data-static-position="in-progress"]'),
-      ).toHaveLength(1);
-      for (const card of [...todo, active, ...done]) {
-        expect(getComputedStyle(card).visibility).toBe("visible");
-        expect(card.getBoundingClientRect().right).toBeLessThanOrEqual(
-          scene.getBoundingClientRect().right,
+      await document.fonts.ready;
+      for (const width of [320, 768, 1440]) {
+        await page.viewport(width, 1000);
+        await nextFrame();
+        const scene = element("[data-hero-animation]");
+        const todo = Array.from(
+          scene.querySelectorAll<HTMLElement>(
+            '[data-static-position^="todo-"]',
+          ),
+        );
+        const done = Array.from(
+          scene.querySelectorAll<HTMLElement>(
+            '[data-static-position^="done-"]',
+          ),
+        );
+        const active = element('[data-static-position="in-progress"]');
+        expect(todo).toHaveLength(5);
+        expect(done).toHaveLength(5);
+        expect(
+          scene.querySelectorAll('[data-static-position="in-progress"]'),
+        ).toHaveLength(1);
+        for (const card of [...todo, active, ...done]) {
+          expect(getComputedStyle(card).visibility).toBe("visible");
+          expect(card.getBoundingClientRect().right).toBeLessThanOrEqual(
+            scene.getBoundingClientRect().right,
+          );
+        }
+        expect(todo[0].getBoundingClientRect().right).toBeLessThan(
+          active.getBoundingClientRect().left,
+        );
+        expect(active.getBoundingClientRect().right).toBeLessThan(
+          done[0].getBoundingClientRect().left,
+        );
+        expect(
+          element('[data-static-position="done-1"]').getBoundingClientRect()
+            .top,
+        ).toBeCloseTo(active.getBoundingClientRect().top, 1);
+        const editor = element("[data-active-panel]");
+        expect(getComputedStyle(editor).visibility).toBe("visible");
+        expect(editor.getBoundingClientRect().top).toBeGreaterThan(
+          active.getBoundingClientRect().bottom,
+        );
+        expect(editor.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+          scene.getBoundingClientRect().bottom,
+        );
+        expect(editor.textContent).toContain("evals.py");
+        for (const line of scene.querySelectorAll<HTMLElement>(
+          "[data-code-line]",
+        )) {
+          expect(getComputedStyle(line).visibility).toBe("visible");
+          expect(line.getBoundingClientRect().width).toBeGreaterThan(10);
+        }
+        expect(
+          getComputedStyle(element("[data-merged-panel]")).visibility,
+        ).toBe("hidden");
+        expect(scene.getAnimations({ subtree: true })).toHaveLength(0);
+        expect(container.scrollWidth).toBeLessThanOrEqual(
+          container.clientWidth,
         );
       }
-      expect(todo[0].getBoundingClientRect().right).toBeLessThan(
-        active.getBoundingClientRect().left,
-      );
-      expect(active.getBoundingClientRect().right).toBeLessThan(
-        done[0].getBoundingClientRect().left,
-      );
-      expect(
-        element('[data-static-position="done-1"]').getBoundingClientRect().top,
-      ).toBeCloseTo(active.getBoundingClientRect().top, 1);
-      const editor = element("[data-active-panel]");
-      expect(getComputedStyle(editor).visibility).toBe("visible");
-      expect(editor.getBoundingClientRect().top).toBeGreaterThan(
-        active.getBoundingClientRect().bottom,
-      );
-      expect(editor.getBoundingClientRect().bottom).toBeLessThanOrEqual(
-        scene.getBoundingClientRect().bottom,
-      );
-      expect(editor.textContent).toContain("evals.py");
-      for (const line of scene.querySelectorAll<HTMLElement>(
-        "[data-code-line]",
-      )) {
-        expect(getComputedStyle(line).visibility).toBe("visible");
-        expect(line.getBoundingClientRect().width).toBeGreaterThan(10);
-      }
-      expect(getComputedStyle(element("[data-merged-panel]")).visibility).toBe(
-        "hidden",
-      );
-      expect(scene.getAnimations({ subtree: true })).toHaveLength(0);
-      expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
-    }
-  });
+    },
+  );
 
   it("switches every illustration to reduced motion after load and safely restarts the hero", async () => {
     reduceMotion(false);
@@ -213,120 +220,127 @@ describe("Shared illustration styling", () => {
     expect(container.childElementCount).toBe(0);
   });
 
-  it.each([
-    "light",
-    "dark",
-  ] as const)("softens hero decoration while preserving title and completion contrast in %s mode", async (colorScheme) => {
-    root?.render(
-      <MantineProvider theme={theme} forceColorScheme={colorScheme}>
-        <HeroAnimation />
-      </MantineProvider>,
-    );
-    await vi.waitFor(() => expect(element("[data-task-card]")).toBeTruthy());
-    await document.fonts.ready;
-    for (const width of [320, 768, 1440]) {
-      await page.viewport(width, 1000);
-      await nextFrame();
-      const style = (selector: string) => getComputedStyle(element(selector));
-      const divider = style('[class*="checks"]').borderTopColor;
-      const secondary = style('[class*="fileIcon"]').color;
-      const mark = style("[data-merge-mark]");
-      for (const selector of [
-        "[data-task-card]",
-        "[data-active-panel]",
-        "[data-merged-panel]",
-      ]) {
-        expect(style(selector).borderTopColor).toBe(divider);
-        expect(style(selector).borderTopWidth).toBe("1px");
-      }
-      for (const selector of [
-        '[class*="columnLabel"]',
-        '[class*="fileName"]',
-        '[class*="changeCount"]',
-      ])
-        expect(style(selector).color).toBe(secondary);
-      const lines = container.querySelectorAll<HTMLElement>(
-        '[class*="codeLine"]',
+  it.each(["light", "dark"] as const)(
+    "softens hero decoration while preserving title and completion contrast in %s mode",
+    async (colorScheme) => {
+      root?.render(
+        <MantineProvider theme={theme} forceColorScheme={colorScheme}>
+          <HeroAnimation />
+        </MantineProvider>,
       );
-      expect(lines).toHaveLength(4);
-      for (const line of lines) {
-        expect(getComputedStyle(line).opacity).toBe("0.25");
-        expect(getComputedStyle(line).backgroundColor).toBe(secondary);
+      await vi.waitFor(() => expect(element("[data-task-card]")).toBeTruthy());
+      await document.fonts.ready;
+      for (const width of [320, 768, 1440]) {
+        await page.viewport(width, 1000);
+        await nextFrame();
+        const style = (selector: string) => getComputedStyle(element(selector));
+        const divider = style('[class*="checks"]').borderTopColor;
+        const secondary = style('[class*="fileIcon"]').color;
+        const mark = style("[data-merge-mark]");
+        for (const selector of [
+          "[data-task-card]",
+          "[data-active-panel]",
+          "[data-merged-panel]",
+        ]) {
+          expect(style(selector).borderTopColor).toBe(divider);
+          expect(style(selector).borderTopWidth).toBe("1px");
+        }
+        for (const selector of [
+          '[class*="columnLabel"]',
+          '[class*="fileName"]',
+          '[class*="changeCount"]',
+        ])
+          expect(style(selector).color).toBe(secondary);
+        const lines = container.querySelectorAll<HTMLElement>(
+          '[class*="codeLine"]',
+        );
+        expect(lines).toHaveLength(4);
+        for (const line of lines) {
+          expect(getComputedStyle(line).opacity).toBe("0.25");
+          expect(getComputedStyle(line).backgroundColor).toBe(secondary);
+        }
+        expect(style('[class*="issueTitle"]').color).toBe(mark.backgroundColor);
+        expect(mark.color).toBe(style("[data-task-card]").backgroundColor);
+        expect(mark.fontWeight).toBe("700");
       }
-      expect(style('[class*="issueTitle"]').color).toBe(mark.backgroundColor);
-      expect(mark.color).toBe(style("[data-task-card]").backgroundColor);
-      expect(mark.fontWeight).toBe("700");
-    }
-  });
+    },
+  );
 
-  it.each([
-    "light",
-    "dark",
-  ] as const)("balances the hero merge card without overflow in %s mode", async (colorScheme) => {
-    root?.render(
-      <MantineProvider theme={theme} forceColorScheme={colorScheme}>
-        <HeroSection
-          CheckoutForm={CheckoutForm}
-          title="Preview"
-          description="Preview"
-          visual={<HeroAnimation />}
-        />
-      </MantineProvider>,
-    );
-    await vi.waitFor(() => expect(element("[data-merged-panel]")).toBeTruthy());
-    await document.fonts.ready;
-    for (const width of [320, 390, 600, 767, 768, 769, 820, 1024, 1440, 1920]) {
-      await page.viewport(width, 1000);
-      await nextFrame();
-      const panel = element("[data-merged-panel]").getBoundingClientRect();
-      const scene = element("[data-hero-animation]").getBoundingClientRect();
-      const status = element("[data-merge-status]").getBoundingClientRect();
-      const mark = element("[data-merge-mark]").getBoundingClientRect();
-      const label = element(
-        "[data-merge-status] > span:last-child",
-      ).getBoundingClientRect();
-      const number = element("[data-merge-reference]").getBoundingClientRect();
-      const title = element("[data-merged-panel] strong");
-      const titleBounds = title.getBoundingClientRect();
-      expect(mark.left).toBeCloseTo(titleBounds.left, 1);
-      expect(label.left - mark.right).toBeCloseTo(4, 1);
-      if (width <= 768) {
-        expect(number.left).toBeCloseTo(titleBounds.left, 1);
-      } else {
-        expect(number.right).toBeCloseTo(titleBounds.right, 1);
-      }
-      expect(titleBounds.top).toBeGreaterThan(status.bottom);
-      if (scene.width <= 432 || width <= 768) {
-        expect(number.top).toBeGreaterThan(titleBounds.bottom);
-      } else {
-        expect(label.right + 4).toBeLessThanOrEqual(number.left);
-        expect((number.top + number.bottom) / 2).toBeCloseTo(
-          (status.top + status.bottom) / 2,
-          1,
-        );
-      }
-      for (const selector of [
-        "[data-merge-status] > span:last-child",
-        "[data-merge-reference]",
-      ])
-        expect(getComputedStyle(element(selector)).fontSize).toBe(
-          getComputedStyle(title).fontSize,
-        );
-      expect(getComputedStyle(title).webkitLineClamp).toBe("2");
-      expect(getComputedStyle(title).whiteSpace).toBe("normal");
-      expect(panel.bottom, `merge card fits at ${width}px`).toBeLessThanOrEqual(
-        scene.bottom,
+  it.each(["light", "dark"] as const)(
+    "balances the hero merge card without overflow in %s mode",
+    async (colorScheme) => {
+      root?.render(
+        <MantineProvider theme={theme} forceColorScheme={colorScheme}>
+          <HeroSection
+            CheckoutForm={CheckoutForm}
+            title="Preview"
+            description="Preview"
+            visual={<HeroAnimation />}
+          />
+        </MantineProvider>,
       );
-      for (const selector of [
-        "[data-merge-status]",
-        "[data-merged-panel] strong",
-        "[data-merge-reference]",
+      await vi.waitFor(() =>
+        expect(element("[data-merged-panel]")).toBeTruthy(),
+      );
+      await document.fonts.ready;
+      for (const width of [
+        320, 390, 600, 767, 768, 769, 820, 1024, 1440, 1920,
       ]) {
-        const node = element(selector);
-        expect(node.scrollWidth).toBeLessThanOrEqual(node.clientWidth + 1);
+        await page.viewport(width, 1000);
+        await nextFrame();
+        const panel = element("[data-merged-panel]").getBoundingClientRect();
+        const scene = element("[data-hero-animation]").getBoundingClientRect();
+        const status = element("[data-merge-status]").getBoundingClientRect();
+        const mark = element("[data-merge-mark]").getBoundingClientRect();
+        const label = element(
+          "[data-merge-status] > span:last-child",
+        ).getBoundingClientRect();
+        const number = element(
+          "[data-merge-reference]",
+        ).getBoundingClientRect();
+        const title = element("[data-merged-panel] strong");
+        const titleBounds = title.getBoundingClientRect();
+        expect(mark.left).toBeCloseTo(titleBounds.left, 1);
+        expect(label.left - mark.right).toBeCloseTo(4, 1);
+        if (width <= 768) {
+          expect(number.left).toBeCloseTo(titleBounds.left, 1);
+        } else {
+          expect(number.right).toBeCloseTo(titleBounds.right, 1);
+        }
+        expect(titleBounds.top).toBeGreaterThan(status.bottom);
+        if (scene.width <= 432 || width <= 768) {
+          expect(number.top).toBeGreaterThan(titleBounds.bottom);
+        } else {
+          expect(label.right + 4).toBeLessThanOrEqual(number.left);
+          expect((number.top + number.bottom) / 2).toBeCloseTo(
+            (status.top + status.bottom) / 2,
+            1,
+          );
+        }
+        for (const selector of [
+          "[data-merge-status] > span:last-child",
+          "[data-merge-reference]",
+        ])
+          expect(getComputedStyle(element(selector)).fontSize).toBe(
+            getComputedStyle(title).fontSize,
+          );
+        expect(getComputedStyle(title).webkitLineClamp).toBe("2");
+        expect(getComputedStyle(title).whiteSpace).toBe("normal");
+        expect(
+          panel.bottom,
+          `merge card fits at ${width}px`,
+        ).toBeLessThanOrEqual(scene.bottom);
+        for (const selector of [
+          "[data-merge-status]",
+          "[data-merged-panel] strong",
+          "[data-merge-reference]",
+        ]) {
+          const node = element(selector);
+          expect(node.scrollWidth).toBeLessThanOrEqual(node.clientWidth + 1);
+        }
       }
-    }
-  });
+    },
+  );
 
   it("shares a four-size type scale without changing hero heading-to-card spacing", async () => {
     root?.render(
@@ -444,133 +458,138 @@ describe("Shared illustration styling", () => {
     }
   });
 
-  it.each([
-    "light",
-    "dark",
-  ] as const)("balances responsive hero copy with the Kanban in %s mode", async (colorScheme) => {
-    root?.render(
-      <MantineProvider theme={theme} forceColorScheme={colorScheme}>
-        <HeroSection
-          CheckoutForm={CheckoutForm}
-          title={"Fractional data\nand AI engineering"}
-          description="Fast, flexible, senior data + AI engineering capacity without expensive hires or agency headaches."
-          visual={<HeroAnimation />}
-        />
-        <SocialProofSection ariaLabel="Hero proof spacing" />
-      </MantineProvider>,
-    );
-    await vi.waitFor(() =>
-      expect(container.querySelector("h1")).not.toBeNull(),
-    );
-    await document.fonts.ready;
-    for (const width of [
-      767, 768, 800, 801, 820, 832, 833, 960, 1023, 1024, 1088, 1089, 1200,
-      1280, 1440, 1920, 2560,
-    ]) {
-      await page.viewport(width, 1000);
-      await nextFrame();
-      const title = element("h1");
-      const description = element("h1 + p");
-      const tablet = width >= 768 && width <= 1088;
-      expect(Number.parseFloat(getComputedStyle(title).fontSize)).toBeCloseTo(
-        tablet ? 48 : Math.max(48, Math.min(64, width * 0.05)),
-        2,
+  it.each(["light", "dark"] as const)(
+    "balances responsive hero copy with the Kanban in %s mode",
+    async (colorScheme) => {
+      root?.render(
+        <MantineProvider theme={theme} forceColorScheme={colorScheme}>
+          <HeroSection
+            CheckoutForm={CheckoutForm}
+            title={"Fractional data\nand AI engineering"}
+            description="Fast, flexible, senior data + AI engineering capacity without expensive hires or agency headaches."
+            visual={<HeroAnimation />}
+          />
+          <SocialProofSection ariaLabel="Hero proof spacing" />
+        </MantineProvider>,
       );
-      expect(
-        Number.parseFloat(getComputedStyle(description).fontSize),
-      ).toBeCloseTo(tablet ? 16 : Math.max(18, Math.min(22, width * 0.017)), 2);
-      for (const button of container.querySelectorAll<HTMLElement>(
-        '[data-site-cta="hero"]',
-      )) {
-        expect(
-          Number.parseFloat(getComputedStyle(button).fontSize),
-        ).toBeCloseTo(
-          Math.max(width >= 768 ? 13 : 14, Math.min(16, width * 0.01111)),
+      await vi.waitFor(() =>
+        expect(container.querySelector("h1")).not.toBeNull(),
+      );
+      await document.fonts.ready;
+      for (const width of [
+        767, 768, 800, 801, 820, 832, 833, 960, 1023, 1024, 1088, 1089, 1200,
+        1280, 1440, 1920, 2560,
+      ]) {
+        await page.viewport(width, 1000);
+        await nextFrame();
+        const title = element("h1");
+        const description = element("h1 + p");
+        const tablet = width >= 768 && width <= 1088;
+        expect(Number.parseFloat(getComputedStyle(title).fontSize)).toBeCloseTo(
+          tablet ? 48 : Math.max(48, Math.min(64, width * 0.05)),
           2,
         );
-        expect(button.getBoundingClientRect().height).toBeGreaterThanOrEqual(
-          36,
+        expect(
+          Number.parseFloat(getComputedStyle(description).fontSize),
+        ).toBeCloseTo(
+          tablet ? 16 : Math.max(18, Math.min(22, width * 0.017)),
+          2,
         );
-      }
-      const controls = element(
-        '[data-site-cta="hero"]',
-      ).parentElement?.getBoundingClientRect();
-      if (!controls) throw new Error("Missing hero controls");
-      expect(
-        controls.top - description.getBoundingClientRect().bottom,
-        `subtitle/CTA gap at ${width}px`,
-      ).toBeCloseTo(
-        width >= 768 ? Math.max(24, Math.min(32, width / 45)) : 32,
-        1,
-      );
-      const content = title.parentElement?.getBoundingClientRect();
-      const board =
-        element("[data-task-card]").parentElement?.getBoundingClientRect();
-      if (!content || !board) throw new Error("Missing hero layout");
-      const cardTitle = element("[data-task-card] > span > span:first-child");
-      expect(
-        Number.parseFloat(getComputedStyle(cardTitle).fontSize),
-      ).toBeCloseTo(
-        width >= 768 && width <= 832 && board.width <= 416
-          ? Math.max(10, Math.min(11, board.width * 0.028))
-          : Math.max(11, Math.min(12, board.width * 0.02)),
-        2,
-      );
-      if (width === 768) {
-        const issueNumber = element(
-          "[data-task-card] > span > span:nth-child(2) > span:first-child",
+        for (const button of container.querySelectorAll<HTMLElement>(
+          '[data-site-cta="hero"]',
+        )) {
+          expect(
+            Number.parseFloat(getComputedStyle(button).fontSize),
+          ).toBeCloseTo(
+            Math.max(width >= 768 ? 13 : 14, Math.min(16, width * 0.01111)),
+            2,
+          );
+          expect(button.getBoundingClientRect().height).toBeGreaterThanOrEqual(
+            36,
+          );
+        }
+        const controls = element(
+          '[data-site-cta="hero"]',
+        ).parentElement?.getBoundingClientRect();
+        if (!controls) throw new Error("Missing hero controls");
+        expect(
+          controls.top - description.getBoundingClientRect().bottom,
+          `subtitle/CTA gap at ${width}px`,
+        ).toBeCloseTo(
+          width >= 768 ? Math.max(24, Math.min(32, width / 45)) : 32,
+          1,
         );
-        expect(getComputedStyle(issueNumber).fontSize).toBe("8px");
-      }
-      if (tablet) {
+        const content = title.parentElement?.getBoundingClientRect();
+        const board =
+          element("[data-task-card]").parentElement?.getBoundingClientRect();
+        if (!content || !board) throw new Error("Missing hero layout");
+        const cardTitle = element("[data-task-card] > span > span:first-child");
         expect(
-          content.height / board.height,
-          `copy/board balance at ${width}px`,
-        ).toBeLessThan(1.25);
-      }
-      if ([768, 1024, 1440, 1920, 2560].includes(width)) {
-        expect(
-          board.height / content.height,
-          `board too small at ${width}px`,
-        ).toBeGreaterThanOrEqual(1);
-        expect(
-          board.height / content.height,
-          `board too large at ${width}px`,
-        ).toBeLessThan(1.3);
-      }
-      if (width >= 768) {
-        const heroBounds = title.closest("section")?.getBoundingClientRect();
-        const proofBounds = element(
-          '[aria-label="Hero proof spacing"]',
-        ).getBoundingClientRect();
-        if (!heroBounds) throw new Error("Missing hero section");
-        expect(
-          heroBounds.height,
-          `content-scaled hero at ${width}px`,
-        ).toBeCloseTo(Math.min(768, (width - 48) * 0.64), 1);
-        expect(proofBounds.top).toBeCloseTo(heroBounds.bottom, 1);
-        const proofGap = proofBounds.top - board.bottom;
-        if (width === 768) expect(proofGap).toBeCloseTo(90.4, 1);
-        if (width >= 1440) expect(proofGap).toBeCloseTo(213.67, 1);
-      }
-      if (width === 768) expect(board.height).toBe(280);
-      if (width === 1024) expect(board.height).toBeCloseTo(288.34, 1);
-      if (width >= 1440) expect(board.width).toBe(672);
-      if (width >= 768) {
-        for (const copy of [title, description]) {
-          const range = document.createRange();
-          range.selectNodeContents(copy);
-          for (const line of range.getClientRects()) {
-            if (line.bottom > board.top && line.top < board.bottom) {
-              expect(
-                line.right + 8,
-                `copy/board clearance at ${width}px`,
-              ).toBeLessThanOrEqual(board.left);
+          Number.parseFloat(getComputedStyle(cardTitle).fontSize),
+        ).toBeCloseTo(
+          width >= 768 && width <= 832 && board.width <= 416
+            ? Math.max(10, Math.min(11, board.width * 0.028))
+            : Math.max(11, Math.min(12, board.width * 0.02)),
+          2,
+        );
+        if (width === 768) {
+          const issueNumber = element(
+            "[data-task-card] > span > span:nth-child(2) > span:first-child",
+          );
+          expect(getComputedStyle(issueNumber).fontSize).toBe("8px");
+        }
+        if (tablet) {
+          expect(
+            content.height / board.height,
+            `copy/board balance at ${width}px`,
+          ).toBeLessThan(1.25);
+        }
+        if ([768, 1024, 1440, 1920, 2560].includes(width)) {
+          expect(
+            board.height / content.height,
+            `board too small at ${width}px`,
+          ).toBeGreaterThanOrEqual(1);
+          expect(
+            board.height / content.height,
+            `board too large at ${width}px`,
+          ).toBeLessThan(1.3);
+        }
+        if (width >= 768) {
+          const heroBounds = title.closest("section")?.getBoundingClientRect();
+          const proofBounds = element(
+            '[aria-label="Hero proof spacing"]',
+          ).getBoundingClientRect();
+          if (!heroBounds) throw new Error("Missing hero section");
+          expect(
+            heroBounds.height,
+            `content-scaled hero at ${width}px`,
+          ).toBeCloseTo(Math.min(768, (width - 48) * 0.64), 1);
+          expect(proofBounds.top).toBeCloseTo(heroBounds.bottom, 1);
+          const proofGap = proofBounds.top - board.bottom;
+          if (width === 768) expect(proofGap).toBeCloseTo(90.4, 1);
+          if (width >= 1440) expect(proofGap).toBeCloseTo(213.67, 1);
+        }
+        if (width === 768) expect(board.height).toBe(280);
+        if (width === 1024) expect(board.height).toBeCloseTo(288.34, 1);
+        if (width >= 1440) expect(board.width).toBe(672);
+        if (width >= 768) {
+          for (const copy of [title, description]) {
+            const range = document.createRange();
+            range.selectNodeContents(copy);
+            for (const line of range.getClientRects()) {
+              if (line.bottom > board.top && line.top < board.bottom) {
+                expect(
+                  line.right + 8,
+                  `copy/board clearance at ${width}px`,
+                ).toBeLessThanOrEqual(board.left);
+              }
             }
           }
         }
+        expect(container.scrollWidth).toBeLessThanOrEqual(
+          container.clientWidth,
+        );
       }
-      expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
-    }
-  });
+    },
+  );
 });

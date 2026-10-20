@@ -3,63 +3,30 @@ name: Check
 on:
   pull_request:
   push:
-    branches: [main]
+    branches-ignore: [main, "dependabot/**"]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  all-checks:
+  # GitHub renders called jobs as "caller / called", so main requires the
+  # resulting "All / All" context even though each job is named "All".
+  all:
     name: All
+    if: github.ref != 'refs/heads/main'
+    uses: quantile-co/factory/.github/workflows/check.yaml@385fda43eadfe7cd6b7fea9b2faab3463011f98f
+
+  # Preserve the installed required context until the reviewed Terraform Apply
+  # changes it to All / All. This gate cannot pass if Factory checks skip or fail.
+  legacy-all:
+    name: All
+    needs: all
+    if: always() && github.ref != 'refs/heads/main'
     runs-on: namespace-profile-quantile-4x8
+    timeout-minutes: 2
     steps:
-      - name: Check out repository
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: 22.16.0
-
-      - name: Set up Java for Firestore emulator tests
-        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      - name: Install dependencies
-        run: |
-          corepack enable
-          pnpm install --frozen-lockfile
-          pnpm exec playwright install --with-deps chromium
-
-      - name: Check application
-        run: pnpm check
-
-      - name: Semgrep
+      - name: Require successful Factory checks
         env:
-          SEMGREP_SEND_METRICS: "off"
-          SEMGREP_ENABLE_VERSION_CHECK: "0"
-        run: |
-          set -euo pipefail
-          python3 -m venv "$RUNNER_TEMP/semgrep"
-          "$RUNNER_TEMP/semgrep/bin/python" -m pip install --disable-pip-version-check 'semgrep==1.179.0'
-          export PATH="$RUNNER_TEMP/semgrep/bin:$PATH"
-          semgrep --test .semgrep --metrics off
-          git ls-files --cached --others --exclude-standard -z -- \
-            '*.tf' '*.tofu' '*.tf.json' '*.tofu.json' ':(exclude).semgrep/**' | \
-            xargs -0 -r semgrep scan --config .semgrep --metrics off --error --strict --scan-unknown-extensions --quiet
-
-      - name: Set up OpenTofu
-        uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1
-        with:
-          tofu_version: 1.12.3
-
-      - name: Initialize without backend
-        run: tofu -chdir=tf init -backend=false -input=false
-
-      - name: Check formatting
-        run: tofu -chdir=tf fmt -check -recursive
-
-      - name: Validate repository root
-        run: tofu -chdir=tf validate
+          CHECK_RESULT: ${{ needs.all.result }}
+        run: test "$CHECK_RESULT" = success

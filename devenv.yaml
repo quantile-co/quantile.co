@@ -1,0 +1,27 @@
+# Runtime shell loading handles validation; avoid evaluation-time secret resolution.
+secretspec:
+  enable: false
+
+# The integration launcher uses ngrok; allow this package only.
+nixpkgs:
+  permitted_unfree_packages:
+    - ngrok
+
+inputs:
+  factory:
+    url: github:quantile-co/factory/385fda43eadfe7cd6b7fea9b2faab3463011f98f
+    flake: true
+  nixpkgs:
+    follows: factory/nixpkgs
+  devenv:
+    follows: factory/devenv
+  git-hooks:
+    follows: factory/git-hooks
+  go-overlay:
+    follows: factory/go-overlay
+  llm-agents:
+    follows: factory/llm-agents
+  mk-shell-bin:
+    follows: factory/mk-shell-bin
+  nix2container:
+    follows: factory/nix2container

@@ -15,17 +15,15 @@ import {
 } from "./env";
 
 describe("app instance", () => {
-  it.each([
-    "sample",
-    "a",
-    "customer-website",
-    "a".repeat(20),
-  ])("accepts caller configuration without repository or environment policy: %s", (appInstance) => {
-    expect(parseAppInstance(appInstance)).toBe(appInstance);
-    expect(
-      belongsToAppInstance(appInstance, `${appInstance}-${"a".repeat(32)}`),
-    ).toBe(true);
-  });
+  it.each(["sample", "a", "customer-website", "a".repeat(20)])(
+    "accepts caller configuration without repository or environment policy: %s",
+    (appInstance) => {
+      expect(parseAppInstance(appInstance)).toBe(appInstance);
+      expect(
+        belongsToAppInstance(appInstance, `${appInstance}-${"a".repeat(32)}`),
+      ).toBe(true);
+    },
+  );
   it.each([
     undefined,
     "",
@@ -161,13 +159,12 @@ describe("Fathom build settings", () => {
 });
 
 describe("Firestore connection settings", () => {
-  it.each([
-    "",
-    "https://evil.example",
-    "../project",
-  ])("rejects invalid project %s", (projectId) => {
-    expect(() => resolveFirestoreSettings({ projectId })).toThrow();
-  });
+  it.each(["", "https://evil.example", "../project"])(
+    "rejects invalid project %s",
+    (projectId) => {
+      expect(() => resolveFirestoreSettings({ projectId })).toThrow();
+    },
+  );
   it.each([
     "evil.example:8080",
     "127.0.0.1:0",
@@ -199,18 +196,18 @@ describe("development portal configuration", () => {
   it("leaves ordinary builds unchanged without requiring credentials", () => {
     expect(readDevelopmentPortalUrl({})).toBeUndefined();
   });
-  it.each([
-    "production",
-    "development",
-  ])("accepts a discovered development URL in %s", (NODE_ENV) => {
-    expect(
-      readDevelopmentPortalUrl({
-        NODE_ENV,
-        STRIPE_EVENT_LIVEMODE: "false",
-        QUANTILE_DEVELOPMENT_PORTAL_URL: url,
-      }),
-    ).toBe(url);
-  });
+  it.each(["production", "development"])(
+    "accepts a discovered development URL in %s",
+    (NODE_ENV) => {
+      expect(
+        readDevelopmentPortalUrl({
+          NODE_ENV,
+          STRIPE_EVENT_LIVEMODE: "false",
+          QUANTILE_DEVELOPMENT_PORTAL_URL: url,
+        }),
+      ).toBe(url);
+    },
+  );
   it.each([
     "",
     "not-a-url",
@@ -228,30 +225,33 @@ describe("development portal configuration", () => {
       }),
     ).toThrow("Invalid development billing portal URL.");
   });
-  it.each([
-    undefined,
-    "true",
-  ])("rejects overrides without explicit development billing: %s", (mode) => {
-    expect(() =>
-      readDevelopmentPortalUrl({
-        STRIPE_EVENT_LIVEMODE: mode,
-        QUANTILE_DEVELOPMENT_PORTAL_URL: url,
-      }),
-    ).toThrow();
-  });
+  it.each([undefined, "true"])(
+    "rejects overrides without explicit development billing: %s",
+    (mode) => {
+      expect(() =>
+        readDevelopmentPortalUrl({
+          STRIPE_EVENT_LIVEMODE: mode,
+          QUANTILE_DEVELOPMENT_PORTAL_URL: url,
+        }),
+      ).toThrow();
+    },
+  );
 });
 
 describe("staged environment readers", () => {
   it.each([
     ["false", "development"],
     ["true", "production"],
-  ])("maps Stripe livemode=%s independently of build mode", (STRIPE_EVENT_LIVEMODE, mode) => {
-    for (const NODE_ENV of ["development", "production", "test"])
-      expect(readBillingMode({ STRIPE_EVENT_LIVEMODE, NODE_ENV })).toEqual({
-        livemode: STRIPE_EVENT_LIVEMODE === "true",
-        mode,
-      });
-  });
+  ])(
+    "maps Stripe livemode=%s independently of build mode",
+    (STRIPE_EVENT_LIVEMODE, mode) => {
+      for (const NODE_ENV of ["development", "production", "test"])
+        expect(readBillingMode({ STRIPE_EVENT_LIVEMODE, NODE_ENV })).toEqual({
+          livemode: STRIPE_EVENT_LIVEMODE === "true",
+          mode,
+        });
+    },
+  );
   it("normalizes app settings without requiring unrelated secrets", () => {
     const env = {
       STRIPE_EVENT_LIVEMODE: "false",
@@ -274,17 +274,12 @@ describe("staged environment readers", () => {
       }),
     ).toEqual({ from: "sender@example.com", replyTo: "reply@example.com" });
   });
-  it.each([
-    undefined,
-    "",
-    "test",
-    "live",
-    "TRUE",
-    "1",
-    "0",
-  ])("fails closed for invalid STRIPE_EVENT_LIVEMODE=%s", (value) => {
-    expect(() => readBillingMode({ STRIPE_EVENT_LIVEMODE: value })).toThrow();
-  });
+  it.each([undefined, "", "test", "live", "TRUE", "1", "0"])(
+    "fails closed for invalid STRIPE_EVENT_LIVEMODE=%s",
+    (value) => {
+      expect(() => readBillingMode({ STRIPE_EVENT_LIVEMODE: value })).toThrow();
+    },
+  );
   it("refuses production billing against an emulator", () => {
     expect(() =>
       readFirestoreTarget(

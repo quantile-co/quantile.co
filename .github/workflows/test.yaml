@@ -1,0 +1,15 @@
+name: Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  all:
+    name: All
+    if: github.ref == 'refs/heads/main'
+    uses: quantile-co/factory/.github/workflows/test.yaml@385fda43eadfe7cd6b7fea9b2faab3463011f98f
+    secrets:
+      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}

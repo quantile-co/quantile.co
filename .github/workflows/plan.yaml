@@ -5,33 +5,40 @@ on:
 
 permissions:
   contents: read
+  actions: read
   id-token: write
 
-concurrency:
-  group: repository-settings-production
-  cancel-in-progress: false
-
 jobs:
-  plan:
+  production:
     name: Infrastructure
+    uses: quantile-co/factory/.github/workflows/plan.yaml@385fda43eadfe7cd6b7fea9b2faab3463011f98f
+    with:
+      tf_state_bucket: ${{ vars.TF_STATE_BUCKET }}
+      gcp_folder_id: ${{ vars.GCP_QUANTILE_CO_FOLDER_ID }}
+      gcp_maintainers: ${{ vars.GCP_MAINTAINERS }}
+    secrets:
+      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      GH_REPO_TOKEN: ${{ secrets.GH_REPO_TOKEN }}
+
+  # Initial reader access is part of the plan, so review that plan as ciphertext
+  # first. Remove this job and its local tools after the approved access grant.
+  handoff:
+    name: Encrypt the verified private saved plan (temporary)
+    needs: production
     if: >-
+      success() &&
       github.ref == 'refs/heads/main' &&
-      contains(fromJSON(vars.GH_MAINTAINERS), github.actor)
+      contains(fromJSON(vars.GH_MAINTAINERS), github.actor) &&
+      contains(fromJSON(vars.GH_MAINTAINERS), github.triggering_actor)
     runs-on: namespace-profile-quantile-4x8
     environment: prod
-    timeout-minutes: 15
-    env:
-      TF_IN_AUTOMATION: "true"
-      TF_VAR_gcp_billing_account: ${{ vars.GCP_BILLING_ACCOUNT }}
-      TF_VAR_gcp_quantile_co_folder_id: ${{ vars.GCP_QUANTILE_CO_FOLDER_ID }}
-      TF_VAR_gcp_wif_pool: ${{ vars.GCP_WIF_POOL }}
-      TF_VAR_github_maintainers: ${{ vars.GH_MAINTAINERS }}
-      TF_VAR_github_quantile_co_token: ${{ secrets.GH_REPO_TOKEN }}
-      GH_TOKEN: ${{ secrets.GH_REPO_TOKEN }}
-
+    concurrency:
+      group: factory-production
+      cancel-in-progress: false
+    timeout-minutes: 20
     steps:
       - name: Check out repository
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -41,19 +48,41 @@ jobs:
           project_id: ${{ vars.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
 
-      - name: Set up OpenTofu
-        uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1
+      - name: Mount the Nix store and database
+        uses: namespacelabs/nscloud-cache-action@1124a6f3ce44e5cf84cc22111530961f4d2a15f9 # v1
         with:
-          tofu_version: 1.12.3
+          path: /nix
+          spacectl-version: 0.12.3
+          spacectl-system-binary: ignore
 
-      - name: Initialize state
-        run: >-
-          tofu -chdir=tf init -input=false -reconfigure
-          -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
-          -backend-config="prefix=repository/prod"
+      - name: Install Nix
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          install_options: --no-daemon
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            require-sigs = true
 
-      - name: Validate
-        run: tofu -chdir=tf validate
+      - name: Encrypt the exact successful Plan artifact
+        env:
+          SECRETSPEC_PROFILE: check
+          GH_TOKEN: ${{ github.token }}
+          GCP_TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+          TF_BACKEND_PREFIX: repository/prod
+          PLAN_RUN_ID: ${{ github.run_id }}
+          PLAN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          cli="$(nix build --no-link --print-out-paths '.#devenv-cli')/bin/devenv"
+          "$cli" shell -- bash .github/scripts/temporary-private-plan-handoff.sh
 
-      - name: Plan
-        run: tofu -chdir=tf plan -input=false -out=plan.tfplan
+      - name: Publish only encrypted ciphertext
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: private-plan-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/encrypted-plan/plan.tfplan.age
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Remove local ciphertext
+        if: always()
+        run: rm -rf -- "$RUNNER_TEMP/encrypted-plan"

@@ -5,6 +5,22 @@ import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
+const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+if (!executablePath) {
+  throw new Error(
+    "Enter the Devenv shell to use the pinned Playwright browser.",
+  );
+}
+const browser = () => ({
+  enabled: true,
+  headless: true,
+  provider: playwright({
+    launchOptions: {
+      executablePath,
+    },
+  }),
+  instances: [{ browser: "chromium" as const }],
+});
 
 export default defineConfig({
   resolve: { alias: { "@": dirname } },
@@ -43,12 +59,7 @@ export default defineConfig({
         ],
         test: {
           name: "storybook",
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: playwright({}),
-            instances: [{ browser: "chromium" }],
-          },
+          browser: browser(),
         },
       },
       {
@@ -73,12 +84,7 @@ export default defineConfig({
             "app/**/*.browser.test.tsx",
             "components/**/*.browser.test.tsx",
           ],
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: playwright({}),
-            instances: [{ browser: "chromium" }],
-          },
+          browser: browser(),
         },
       },
     ],
