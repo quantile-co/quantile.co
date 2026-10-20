@@ -1,6 +1,6 @@
 # Current project memory — PUBLIC application
 
-Source scope: `quantile-co/quantile.co`, including the Factory-consumer migration landed through PR #88, package version `0.2.16`. This describes reviewed source, **not a published release or live provider behavior**. Recheck this checkout's root `AGENTS.md`, code, tests and workflows before changes. Never import private Q1/DNS guidance into this public repository.
+Source scope: `quantile-co/quantile.co`, including the verified Factory repository/state migration and immutable source release `v0.2.16`. This does **not** verify application-provider behavior or publish the site. Recheck this checkout's root `AGENTS.md`, code, tests and workflows before changes. Never import private Q1/DNS guidance into this public repository.
 
 - This checkout has Next.js Checkout (`app/api/stripe/checkout/route.ts`), signed Stripe/Resend webhook routes, `lib/env/env.ts`, `lib/gcp/firestore.ts` and `lib/welcome/` delivery/store code. HTTP routes are explicit composition roots. Preserve provider signatures, bounded bodies, eligibility, event mode independent of `NODE_ENV`, lazy secret reads, test-operation identity and durable welcome replay semantics. A welcome 200 needs a persisted immutable request, provider acceptance and durable receipt; ignored 200 is not completion.
 - `tf/infrastructure/` declares repository settings and dedicated state infrastructure through pinned Factory modules; the former reusable `tf/quantile-co/` Stripe catalog module is **not in this branch**. Do not recreate its product/price/link resources or infer any live catalog state from the historical guide. Catalog changes, application source releases, provider webhook setup and production rollout are distinct reviewed actions.
@@ -31,13 +31,13 @@ The Devenv consumer links Factory's `deploy` and `day-zero-deploy` directories,
 including their references. These skills cover repository/state infrastructure,
 not the custom immutable-source Build or application-provider rollout. This is
 an existing installation: never use Day Zero to perform this migration. The
-original GCS bucket and `repository/prod` prefix remain in use. Review explicit
-resource-address moves, shared repository policy changes, new audit logging,
-plan-reader access and the retained `terraform_data.immutable_releases` and
-external immutability guard in a separately approved Plan. Standard
-`gcp_tf_state_bucket`, `gcp_tf_state_project_id` and `gh_repository_id` outputs
-match the shared skill. No state read, migration, Plan or Apply is implied by
-source adoption.
+original GCS bucket and `repository/prod` prefix remain in use. The reviewed
+migration moved ten managed addresses into Factory modules without replacements
+or deletions. It retained `terraform_data.immutable_releases` and the external
+immutability guard. Standard `gcp_tf_state_bucket`, `gcp_tf_state_project_id`
+and `gh_repository_id` outputs match the shared skill. Normal private saved-plan
+retrieval now works through the approved prefix-only reader; state-object access
+remains denied. New production operations still need separate authorization.
 
 Devenv patches Factory's native SecretSpec manifest inline and links the result;
 the runtime shell loader remains Factory-owned. Default/Check require no provider
@@ -110,16 +110,16 @@ the trusted main checkout and restricts operational steps to its pinned PATH
 before processing the candidate revision. Provider-backed tests have not run;
 main-workflow outcomes are recorded below.
 
-## Rollout authorization and preflight
+## Migration authorization and preflight (historical)
 
 On October 20 the user authorized committing, pushing and landing the completed,
 validated migration, followed by main Test, Build, Plan and Apply and the needed
 state-address migration. Preserve normal branch protection and inspect exact
 saved-plan bytes before Apply; stop on unexpected replacements, destruction or
 permission changes. The existing immutable v0.2.15 release cannot be reused;
-the proposed next release is v0.2.16. Live main still requires the legacy `All`
-context, so source landing must preserve that gate until Terraform adopts
-Factory's `All / All` policy. No protection bypass is authorized.
+v0.2.16 was selected instead. At migration start, main required the legacy `All`
+context, so source landing preserved that gate until Terraform adopted
+Factory's `All / All` policy. No protection bypass was used.
 
 Read-only preflight confirmed the existing prod provider secret and organization
 cache-secret access. The state project has no service audit configurations.
@@ -131,25 +131,23 @@ from the same successful Plan attempt, and remove temporary tooling after the
 reviewed Apply. Never grant broad/manual IAM or apply an unreviewed plan to
 create read access. No state bytes were obtained during preflight.
 
-The approved temporary handoff is implemented in the Plan caller, after the
-successful Factory Plan job, with the same protected-main/maintainer/prod/WIF
-and production concurrency boundaries. It checks receipt archive and plan
-hashes, backend, repository, SHA, attempt, age, private bucket protections and
-object generation before encrypting. Synthetic offline tests passed ciphertext
-roundtrip and rejection of failed producers, wrong workflow/backend/digest and
-expired artifacts. The private key stays outside Git; only its public recipient
-is committed. The verified existing operator is the single configured plan
-reader; this input grants nothing before the reviewed Terraform Apply.
+The temporary encrypted handoff followed the successful Factory Plan job under
+the same protected-main/maintainer/prod/WIF and concurrency boundaries. It
+verified receipt and plan digests, backend, repository, revision, attempt, age,
+bucket protections and exact object generation before encrypting. Synthetic
+roundtrip and rejection tests passed. Only the public recipient was committed;
+the private key and decrypted evidence stayed outside Git. The handoff and its
+recipient/package were removed after Apply and normal reader access were verified.
 
 Final v0.2.16 candidate validation passed Check, all 437 tests and both builds
 against Factory `385fda43eadfe7cd6b7fea9b2faab3463011f98f`. Seventeen reformatted
 test files have identical executable TypeScript/JSX ASTs before and after the
-formatting pass. The temporary `All` job requires successful Factory checks,
-never accepting skipped/failed checks. Remove it after state migration installs
-`All / All`, together with the encrypted-handoff job/script/recipient and the
-temporary age package selection. After the migration is verified, also remove
-`moved.tf`, the retained legacy provider alias and obsolete compatibility
-configuration. Do not retain migration shims as permanent architecture.
+formatting pass. The temporary `All` job required successful Factory checks,
+never accepting skipped/failed checks. Post-Apply cleanup removes that job,
+the encrypted-handoff job/script/recipient, its age package selection, `moved.tf`
+and the legacy provider alias. Do not retain migration shims as permanent
+architecture. Existing backend/folder caller inputs remain explicit consumer
+configuration, not a compatibility layer.
 
 ## Main rollout progress
 
@@ -175,4 +173,28 @@ installation and before `build:all`. The README Assets command uses that task.
 Keep task listings ordered Check, Fix, Test; this is not authorization to run
 fixes automatically during checks or tests. Local task execution generated all
 21 assets without source changes, then built the application and Storybook;
-Check passed. v0.2.16 is not yet published; Plan/Apply have not been dispatched.
+Check passed. PR #96 also adopted generic task discovery, the approved README
+cleanup and Factory's 15-minute Check/Test jobs. Both exact-head Checks passed;
+push Check `39472255080` needed 12 minutes 59 seconds, exceeding the old limit.
+Normal squash merge produced main `f1a7f0e487d887b4c7dfcccd7abf4fb55c6a6ebc`.
+Exact-main Check `39474323719` and full main Test `39474384237` passed.
+
+Build `39475543087` published immutable `v0.2.16` from that exact source. The tag,
+all three asset digests, Check/Build provenance and complete archive contents
+were verified. This is a source/Rules release, not a site deployment.
+
+Plan `39476218139` produced receipt `12288689117`. Both artifact archive digests,
+producer identity/age/revision, backend fingerprint and decrypted plan digest
+were verified privately. Full review found ten address moves, five additions,
+four updates, no replacements or deletions, unchanged CI Owner and state
+protections, and exactly the approved plans-only reader. Project and ancestor
+audit configurations were checked before adding all three Storage audit types.
+Authorized Apply `39477215702` succeeded on those exact saved bytes.
+
+Live verification confirmed signed/linear main with `All / All`, squash-only
+merges, optional PRs, no legacy push restriction, main-only `prod`, pinned
+selected actions, approval for all external PR workflows and immutable releases.
+Storage audit logging has no exemptions. A normal Google-user download matched
+the reviewed saved plan; state-object metadata remained inaccessible. No manual
+IAM grant, local Apply or backend reset was used. Post-Apply source cleanup is
+validated separately; its ordinary convergence Plan remains to be verified.

@@ -161,8 +161,6 @@ in
   ];
 
   packages = [
-    # Temporary encrypted first-plan handoff; remove after reader access is applied.
-    config.quantile.age.package
     config.quantile.bash.package
     config.quantile.coreutils.package
     config.quantile.diffutils.package

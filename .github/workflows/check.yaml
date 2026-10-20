@@ -16,17 +16,3 @@ jobs:
     name: All
     if: github.ref != 'refs/heads/main'
     uses: quantile-co/factory/.github/workflows/check.yaml@b9f948bcac26b50257b90186f499acfd7e7a8b2c
-
-  # Preserve the installed required context until the reviewed Terraform Apply
-  # changes it to All / All. This gate cannot pass if Factory checks skip or fail.
-  legacy-all:
-    name: All
-    needs: all
-    if: always() && github.ref != 'refs/heads/main'
-    runs-on: namespace-profile-quantile-4x8
-    timeout-minutes: 2
-    steps:
-      - name: Require successful Factory checks
-        env:
-          CHECK_RESULT: ${{ needs.all.result }}
-        run: test "$CHECK_RESULT" = success
