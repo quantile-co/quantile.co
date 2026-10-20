@@ -15,7 +15,7 @@ jobs:
   all:
     name: All
     if: github.ref != 'refs/heads/main'
-    uses: quantile-co/factory/.github/workflows/check.yaml@385fda43eadfe7cd6b7fea9b2faab3463011f98f
+    uses: quantile-co/factory/.github/workflows/check.yaml@67a955ddf9ad0a9a2fd335d7486b28d9f78a0243
 
   # Preserve the installed required context until the reviewed Terraform Apply
   # changes it to All / All. This gate cannot pass if Factory checks skip or fail.

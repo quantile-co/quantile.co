@@ -14,6 +14,12 @@ The plugin-native `.pi/memory/daily/2026-10-07.md` preserves the former **public
 
 ## Factory skills and SecretSpec
 
+The consumer also links Factory's generic `devenv-tasks` skill. It discovers
+names, descriptions, implementations and dependency relationships using the
+installed CLI and project configuration, with no fixed task inventory or
+Factory-specific assumptions. Discovery alone does not execute tasks. The
+user requested no README listing for this skill.
+
 The Devenv consumer links Factory's `deploy` and `day-zero-deploy` directories,
 including their references. These skills cover repository/state infrastructure,
 not the custom immutable-source Build or application-provider rollout. This is
@@ -134,7 +140,9 @@ test files have identical executable TypeScript/JSX ASTs before and after the
 formatting pass. The temporary `All` job requires successful Factory checks,
 never accepting skipped/failed checks. Remove it after state migration installs
 `All / All`, together with the encrypted-handoff job/script/recipient and the
-temporary age package selection.
+temporary age package selection. After the migration is verified, also remove
+`moved.tf`, the retained legacy provider alias and obsolete compatibility
+configuration. Do not retain migration shims as permanent architecture.
 
 ## Main rollout progress
 
