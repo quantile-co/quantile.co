@@ -9,7 +9,7 @@ nixpkgs:
 
 inputs:
   factory:
-    url: github:quantile-co/factory/67a955ddf9ad0a9a2fd335d7486b28d9f78a0243
+    url: github:quantile-co/factory/b9f948bcac26b50257b90186f499acfd7e7a8b2c
     flake: true
   nixpkgs:
     follows: factory/nixpkgs

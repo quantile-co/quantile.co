@@ -20,6 +20,13 @@ installed CLI and project configuration, with no fixed task inventory or
 Factory-specific assumptions. Discovery alone does not execute tasks. The
 user requested no README listing for this skill.
 
+The user approved 15-minute shared Check/Test jobs to accommodate cold or
+partially cached Nix closures. Both initial Checks of `d3a2416` reached the
+old 10-minute limit downloading dependencies, before checks ran; push Check
+39468727431 attempt 2 passed unchanged. Adopt Factory `b9f948b` consistently
+across inputs, workflow callers and Terraform sources. Preserve all checks,
+cache signatures and production guards; no Terraform module content changed.
+
 The Devenv consumer links Factory's `deploy` and `day-zero-deploy` directories,
 including their references. These skills cover repository/state infrastructure,
 not the custom immutable-source Build or application-provider rollout. This is
