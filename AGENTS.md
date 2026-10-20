@@ -1,10 +1,8 @@
 # Project knowledge index
 
 This is **public** `quantile-co/quantile.co`. Verified checkout-specific
-knowledge lives in [MEMORY.md](.pi/memory/MEMORY.md), with the full former
-public guides preserved as explicitly historical entries in the plugin-native
-[daily log](.pi/memory/daily/2026-10-07.md). Never copy private Q1/DNS guidance
-here. Pi-memory injects only an excerpt; read the complete MEMORY.md and the
+knowledge lives in [MEMORY.md](.pi/memory/MEMORY.md). Never copy private Q1/DNS
+guidance here. Pi-memory injects only an excerpt; read the complete MEMORY.md and the
 affected source/tests before changes. Historical descriptions, especially of
 the old reusable Stripe catalog, are not current source or live-state proof.
 
@@ -28,10 +26,9 @@ or production Checkout URLs.
 Update MEMORY.md only with branch-verified durable public project facts. Never
 store personal preferences, local machine/network details, credentials, or raw
 session transcripts in this repository's memory. Use memory outside this public
-checkout for unrelated topics. The dated daily log contains full obsolete
-research and old nested-file instructions for history, not an active runbook.
-Auto handoffs can still append session context; daily logs are not Git-ignored.
-Review and sanitize each daily log and memory change before staging or sharing;
+checkout for unrelated topics. Do not retain obsolete guides, automatic session
+handoffs or routine validation diaries in memory. Review and sanitize each
+memory change before staging or sharing;
 keep scratchpad and recovery data local and ignored.
 
 Use **development** and **production** for application billing environments,
