@@ -1,6 +1,6 @@
 # Current project memory — PUBLIC application
 
-Source scope: `quantile-co/quantile.co`, including the verified Factory repository/state migration and immutable source release `v0.2.16`. This does **not** verify application-provider behavior or publish the site. Recheck this checkout's root `AGENTS.md`, code, tests and workflows before changes. Never import private Q1/DNS guidance into this public repository.
+Source scope: `quantile-co/quantile.co`, including the verified Factory repository/state migration and immutable source release `v0.2.17`. This does **not** verify application-provider behavior or publish the site. Recheck this checkout's root `AGENTS.md`, code, tests and workflows before changes. Never import private Q1/DNS guidance into this public repository.
 
 - This checkout has Next.js Checkout (`app/api/stripe/checkout/route.ts`), signed Stripe/Resend webhook routes, `lib/env/env.ts`, `lib/gcp/firestore.ts` and `lib/welcome/` delivery/store code. HTTP routes are explicit composition roots. Preserve provider signatures, bounded bodies, eligibility, event mode independent of `NODE_ENV`, lazy secret reads, test-operation identity and durable welcome replay semantics. A welcome 200 needs a persisted immutable request, provider acceptance and durable receipt; ignored 200 is not completion.
 - `tf/infrastructure/` declares repository settings and dedicated state infrastructure through pinned Factory modules; the former reusable `tf/quantile-co/` Stripe catalog module is **not in this branch**. Do not recreate its product/price/link resources or infer any live catalog state from the historical guide. Catalog changes, application source releases, provider webhook setup and production rollout are distinct reviewed actions.
@@ -23,8 +23,8 @@ user requested no README listing for this skill.
 The user approved 15-minute shared Check/Test jobs to accommodate cold or
 partially cached Nix closures. Both initial Checks of `d3a2416` reached the
 old 10-minute limit downloading dependencies, before checks ran; push Check
-39468727431 attempt 2 passed unchanged. Adopt Factory `b9f948b` consistently
-across inputs, workflow callers and Terraform sources. Preserve all checks,
+39468727431 attempt 2 passed unchanged. Factory `b9f948b` introduced that budget;
+the current pin is recorded below. Preserve all checks,
 cache signatures and production guards; no Terraform module content changed.
 
 The Devenv consumer links Factory's `deploy` and `day-zero-deploy` directories,
@@ -121,9 +121,8 @@ separate, with no Assets subsection or tool inventory.
 
 The custom Build workflow invokes `build:release` from the trusted tooling
 checkout. `nix/build.nix` owns the executable and its pinned, restricted PATH.
-It requires a successful exact-source Check and job from the selected attempt,
-and main ancestry. All packaged inputs come from
-Git objects at the reviewed SHA. Existing tags or drafts stop publication for
+It requires a successful exact-source Check and job from the selected attempt
+and main ancestry. All packaged inputs come from Git objects at the reviewed SHA. Existing tags or drafts stop publication for
 manual inspection; API failures are never treated as absence. Draft recovery,
 provenance rewriting and semantic ZIP comparison are removed. Both draft and
 published metadata/digests, the tag target and downloaded asset bytes remain
@@ -140,6 +139,23 @@ The user separately authorized main Test, immutable-source Build `v0.2.17`, and
 Plan/review/Apply after source publication. Keep main fixed during plan review;
 stop on unexpected infrastructure changes. This is not site-deployment or
 provider-backed integration-test authorization.
+
+## Configuration-refactor rollout outcome
+
+Signed source `42561c3efc35302b9f208f72a4d9b20f4ff95f1e` passed exact-head Check
+`39492311810` and landed by protected fast-forward. Authorized main Test
+`39492936570` and Build `39493415503` succeeded. Immutable `v0.2.17` binds that
+source to the verified Check/Build provenance; all three asset hashes, Rules
+bytes and source archive were independently checked. Git ZIP timestamps use
+the process timezone; local byte comparison matched after using the runner's UTC.
+
+Plan `39494880931`, receipt `12297920416`, was retrieved through the normal
+plans-only reader after the operator reauthenticated. Producer, revision, age,
+backend, archive digest, exact GCS generation and plan digest were verified.
+The reviewed plan reported no changes across all sixteen managed resources.
+Authorized Apply `39496148733` succeeded on those exact saved bytes. The review
+is closed; no saved-plan approval carries forward to another operation. No
+provider-backed tests or site deployment ran, and private evidence stays outside Git.
 
 ## Migration authorization and preflight (historical)
 
