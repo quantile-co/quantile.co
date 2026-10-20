@@ -1,0 +1,48 @@
+{
+  config,
+  lib,
+  pkgs,
+}:
+pkgs.runCommand "biome.json" { } ''
+  set -euo pipefail
+  ${lib.getExe pkgs.jq} '
+    .files.includes = ["**", "!node_modules", "!.next", "!dist", "!build", "!components/**/*.module.css"] +
+      [.files.includes[] | select(startswith("!"))] |
+    .formatter.indentWidth = 2 |
+    .linter.rules.style.noProcessEnv = "error" |
+    .linter.rules.suspicious.noImportCycles = "error" |
+    .linter.domains = {next: "recommended", react: "recommended"} |
+    .assist.actions.source.organizeImports = "on" |
+    .overrides = [
+      {
+        includes: [
+          "app/**/route.ts", "app/**/page.tsx", "app/**/layout.tsx",
+          "scripts/**/*.ts", "lib/**/run.ts", "lib/env/env.ts",
+          "**/*.test.{ts,tsx}", "**/test.ts", "**/*.config.{ts,js,mjs,cjs,mts,cts}"
+        ],
+        linter: {rules: {style: {noProcessEnv: "off"}}}
+      },
+      {
+        includes: ["lib/**/*.{ts,tsx}", "!lib/**/run.ts", "!lib/**/*.test.{ts,tsx}", "!lib/**/test.ts"],
+        linter: {rules: {style: {noRestrictedImports: {
+          level: "error",
+          options: {patterns: [{
+            group: ["@/app/**", "@/scripts/**", "**/scripts/**", "**/route", "**/route.ts", "**/run", "**/run.ts"],
+            message: "Library modules must not import application entrypoints. Inject dependencies from the composition root."
+          }]}
+        }}}}
+      },
+      {
+        includes: ["components/**/*.{ts,tsx}"],
+        linter: {rules: {style: {noRestrictedImports: {
+          level: "error",
+          options: {patterns: [{
+            group: ["..", "../**", "@/**"],
+            message: "Components must remain standalone. Inject app code and sibling components through props in app/."
+          }]}
+        }}}}
+      }
+    ]
+  ' ${config.quantile.biome.configFile} |
+    ${lib.getExe pkgs.biome} format --stdin-file-path=biome.json --indent-style=space --indent-width=2 > "$out"
+''

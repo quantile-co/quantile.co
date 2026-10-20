@@ -4,7 +4,7 @@ Source scope: `quantile-co/quantile.co`, including the verified Factory reposito
 
 - This checkout has Next.js Checkout (`app/api/stripe/checkout/route.ts`), signed Stripe/Resend webhook routes, `lib/env/env.ts`, `lib/gcp/firestore.ts` and `lib/welcome/` delivery/store code. HTTP routes are explicit composition roots. Preserve provider signatures, bounded bodies, eligibility, event mode independent of `NODE_ENV`, lazy secret reads, test-operation identity and durable welcome replay semantics. A welcome 200 needs a persisted immutable request, provider acceptance and durable receipt; ignored 200 is not completion.
 - `tf/infrastructure/` declares repository settings and dedicated state infrastructure through pinned Factory modules; the former reusable `tf/quantile-co/` Stripe catalog module is **not in this branch**. Do not recreate its product/price/link resources or infer any live catalog state from the historical guide. Catalog changes, application source releases, provider webhook setup and production rollout are distinct reviewed actions.
-- `pnpm check` runs lint, type generation/type checking, Knip and asset checks, not tests or builds. Devenv `check:all` adds Factory source/infrastructure checks. `test:all` calls the existing `pnpm test`, including emulator and browser tests, without exclusions or a reduced target. Provider-backed `pnpm test:integration` remains separate. No local test proves live Checkout, routing, cloud IAM, email delivery or refunds. Never put a test Checkout or secret on the live site.
+- `pnpm check` runs lint, type generation/type checking, Knip and asset checks, not tests or builds. Devenv `check:all` adds Factory source/infrastructure checks. `test:all` calls the existing `pnpm test`, including emulator and browser tests, without exclusions or a reduced target. Provider-backed `test:integration` runs the existing pnpm script after dependency installation and remains separate from `test:all`. No local test proves live Checkout, routing, cloud IAM, email delivery or refunds. Never put a test Checkout or secret on the live site.
 - Check, Test, Build, Plan and Apply are distinct workflows. Check/Test/Plan/Apply call pinned Factory workflows; manual Build remains application-owned. Build requires a successful exact-source Check job and verifies that the source commit is on main before publishing an immutable source/Rules release. It does not run tests. Build, Plan, Apply and provider-backed tests each need separate approval. Keep WIF, locks, provenance and catalog test/live boundaries.
 
 - #source [[hosted-checkout-and-billing]] The current Checkout route omits `payment_method_types` so Stripe selects eligible enabled methods and accepts only exact HTTPS origins for `checkout.stripe.com` and `billing.quantile.co`; tests reject lookalike/HTTP/port variants. `CalendlyEmbed` and the welcome email reference the `/15min` event. The footer-only Billing link is checked in. These source facts do not prove branded TLS, customer Portal access, actual payment methods, or mail delivery. The global memory's October 10 release/Plan/Apply accounts are historical, not reusable approvals. Keep private deployment history in its owning private repo.
@@ -39,8 +39,8 @@ and `gh_repository_id` outputs match the shared skill. Normal private saved-plan
 retrieval now works through the approved prefix-only reader; state-object access
 remains denied. New production operations still need separate authorization.
 
-Devenv patches Factory's native SecretSpec manifest inline and links the result;
-the runtime shell loader remains Factory-owned. Default/Check require no provider
+`nix/secretspec.nix` patches Factory's native SecretSpec manifest; Devenv links
+the result. The runtime shell loader remains Factory-owned. Default/Check require no provider
 credentials; the CI Test profile requires only
 `CACHIX_AUTH_TOKEN`. Plan/Apply use runtime `GITHUB_TOKEN`, `REST_API_BEARER`, WIF
 ADC, backend identity and `TF_VAR_*` infrastructure inputs. Caller mappings retain
@@ -70,8 +70,8 @@ project/identity/signing requirements. Do not put these inputs in default,
 Check, or CI Test profiles, and never confuse the state project's CI
 `GCP_PROJECT_ID` with an application database target.
 
-Devenv's inline native Biome patch retains app-specific environment access,
-import boundaries and Next/React rules on top of Factory's base. The generated
+`nix/biome.nix` retains app-specific environment access, import boundaries and
+Next/React rules on top of Factory's native base. The generated
 SecretSpec file is linked; Biome's root config is formatted during generation
 and copied because Biome 2.5.15 panics on a symlinked root config. No consumer
 `etc/` directory is needed. These policies and
@@ -96,7 +96,7 @@ Factory now supplies individual Bash, Coreutils, Diffutils, Stripe CLI, ngrok,
 Resend CLI and Playwright packages; the consumer selects them explicitly.
 There is no release-shell bundle. ngrok's license permission is consumer-scoped.
 Playwright's Nix-patched browser and fonts match the npm version; the consumer
-asserts version parity and Vitest requires the declared executable rather than
+uses Factory's `withVersion` helper and Vitest requires the declared executable rather than
 falling back to a user's browser cache. The stock Chromium mismatch at 446px was
 resolved by matching the browser, not changing layout or assertions.
 
@@ -109,6 +109,37 @@ resolution passed without contacting providers. Custom Build loads tools from
 the trusted main checkout and restricts operational steps to its pinned PATH
 before processing the candidate revision. Provider-backed tests have not run;
 main-workflow outcomes are recorded below.
+
+## Consumer configuration and release tooling
+
+Factory is pinned consistently to `8293b5698cdf411da2fdc2b4fe969031796c8d95`
+across inputs, locks, workflow callers and Terraform module sources. Its
+zero-argument `check-devenv-locks` retains CI index validation. Biome and
+SecretSpec generation moved out of `devenv.nix` without changing generated
+bytes. README Development starts with Install; Checks, Tests and Build are
+separate, with no Assets subsection or tool inventory.
+
+The custom Build workflow invokes `build:release` from the trusted tooling
+checkout. `nix/build.nix` owns the executable and its pinned, restricted PATH.
+It requires a successful exact-source Check and job from the selected attempt,
+and main ancestry. All packaged inputs come from
+Git objects at the reviewed SHA. Existing tags or drafts stop publication for
+manual inspection; API failures are never treated as absence. Draft recovery,
+provenance rewriting and semantic ZIP comparison are removed. Both draft and
+published metadata/digests, the tag target and downloaded asset bytes remain
+verified. Build runs serialize without cancellation; actor/main gates, signed
+caches, permissions and the twenty-minute bound remain in the workflow.
+
+Testing retains one offline regression for a failed tag lookup, not a simulated
+GitHub release lifecycle. This adds one test to the unchanged 437-test ordinary
+suite. Local Check and all 438 tests in 44 files passed with the final Factory
+pin. Generated Biome and SecretSpec bytes still match the pre-extraction hashes.
+Application, Storybook and asset builds also passed without generated-source
+changes. No provider-backed tests or release publication are part of validation.
+The user separately authorized main Test, immutable-source Build `v0.2.17`, and
+Plan/review/Apply after source publication. Keep main fixed during plan review;
+stop on unexpected infrastructure changes. This is not site-deployment or
+provider-backed integration-test authorization.
 
 ## Migration authorization and preflight (historical)
 
@@ -169,7 +200,7 @@ Check `39403052631` and the authorized main Test `39463399029` passed. The user
 approved continuing Test/Build and the reviewed Plan/Apply sequence.
 
 The requested `build:assets` task runs `pnpm assets:generate` after dependency
-installation and before `build:all`. The README Assets command uses that task.
+installation and before `build:all`. The README documents that command under Build.
 Keep task listings ordered Check, Fix, Test; this is not authorization to run
 fixes automatically during checks or tests. Local task execution generated all
 21 assets without source changes, then built the application and Storybook;

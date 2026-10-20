@@ -1,5 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreBinaries": ["jq", "sha256sum"],
+  "ignoreBinaries": ["nix"],
   "ignore": ["lib/browser/test.tsx"]
 }

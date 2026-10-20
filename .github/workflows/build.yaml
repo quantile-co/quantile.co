@@ -27,20 +27,26 @@ jobs:
       contains(fromJSON(vars.GH_MAINTAINERS), github.actor) &&
       contains(fromJSON(vars.GH_MAINTAINERS), github.triggering_actor)
     runs-on: namespace-profile-quantile-4x8
+    concurrency:
+      group: source-release
+      cancel-in-progress: false
     timeout-minutes: 20
     permissions:
       actions: read
       contents: write
-    env:
-      APP_SHA: ${{ inputs.app_sha }}
-      CHECK_RUN_ID: ${{ inputs.check_run_id }}
-      RELEASE_VERSION: ${{ inputs.version }}
     steps:
       - name: Check out trusted release tooling
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.sha }}
           path: tooling
+          persist-credentials: false
+
+      - name: Check out candidate source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.app_sha }}
+          path: source
           persist-credentials: false
 
       - name: Mount the Nix store and database
@@ -60,213 +66,13 @@ jobs:
             extra-substituters = https://devenv.cachix.org https://quantile-co.cachix.org https://cache.numtide.com https://cachix.cachix.org https://pre-commit-hooks.cachix.org https://go-overlay.cachix.org
             extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw= quantile-co.cachix.org-1:OM+kQzUqP3Ija8QQMUxvQNs97u6PB5/s83ZJe7c9WIQ= niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g= cachix.cachix.org-1:eWNHQldwUO7G2VkjpnjDbWwy4KQ/HNxht7H4SSoMckM= pre-commit-hooks.cachix.org-1:Pkk3Panw5AW24TOv6kz3PvLhlH8puAsJTBbOPmBo7Rc= go-overlay.cachix.org-1:rJ155O3K6WUyUcoKE4MqcC6JcLlK2vPXnP5/76BxWD8=
 
-      - name: Load pinned development tools
+      - name: Publish reviewed source release
         working-directory: tooling
         env:
           SECRETSPEC_PROFILE: default
-        run: |
-          # Expand PATH inside the pinned shell, not the bootstrap runner shell.
-          # shellcheck disable=SC2016
-          nix run '.#devenv-cli' -- shell bash --noprofile --norc -euo pipefail -c '
-            IFS=: read -r -a paths <<< "$PATH"
-            pinned_path=
-            for path in "${paths[@]}"; do
-              case "$path" in
-                /nix/store/*)
-                  printf "%s\n" "$path" >> "$GITHUB_PATH"
-                  pinned_path="${pinned_path:+$pinned_path:}$path"
-                  ;;
-              esac
-            done
-            printf "PINNED_PATH=%s\n" "$pinned_path" >> "$GITHUB_ENV"
-          '
-
-      - name: Verify quantile-co/quantile.co Check
-        env:
+          SOURCE_DIR: ${{ github.workspace }}/source
+          APP_SHA: ${{ inputs.app_sha }}
+          CHECK_RUN_ID: ${{ inputs.check_run_id }}
+          RELEASE_VERSION: ${{ inputs.version }}
           GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          export PATH="$PINNED_PATH"
-          [[ "$APP_SHA" =~ ^[0-9a-f]{40}$ && "$CHECK_RUN_ID" =~ ^[1-9][0-9]*$ ]]
-          test "$GITHUB_REPOSITORY" = quantile-co/quantile.co
-          checked=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CHECK_RUN_ID")
-          jq -e --arg repo "$GITHUB_REPOSITORY" --arg sha "$APP_SHA" '
-            .repository.full_name == $repo and
-            .path == ".github/workflows/check.yaml" and
-            .event == "push" and .head_repository.full_name == $repo and
-            .head_sha == $sha and .status == "completed" and .conclusion == "success"
-          ' <<< "$checked" > /dev/null
-          # A successful workflow with skipped jobs is not a successful Check.
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CHECK_RUN_ID/jobs?filter=latest" |
-            jq -e --arg sha "$APP_SHA" '
-              any(.jobs[]; .name == "All / All" and .head_sha == $sha and
-                .status == "completed" and .conclusion == "success")
-            ' > /dev/null
-          # Check runs before landing. Only publish a checked commit now on main.
-          gh api "repos/$GITHUB_REPOSITORY/compare/$APP_SHA...main" |
-            jq -e --arg sha "$APP_SHA" '
-              (.status == "ahead" or .status == "identical") and
-              .merge_base_commit.sha == $sha
-            ' > /dev/null
-
-      - name: Check out quantile-co/quantile.co
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          ref: ${{ inputs.app_sha }}
-          path: source
-          persist-credentials: false
-
-      - name: Package reviewed source and client rules
-        working-directory: source
-        run: |
-          set -euo pipefail
-          export PATH="$PINNED_PATH"
-          test "$(git rev-parse HEAD)" = "$APP_SHA"
-          [[ "$RELEASE_VERSION" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
-          test "$RELEASE_VERSION" = "v$(jq -er '.version' package.json)"
-          jq -e '.firestore | (type == "object" and .rules == "firestore.rules")' firebase.json > /dev/null
-          test -s firestore.rules
-          git archive --format=zip --output="$RUNNER_TEMP/source.zip" HEAD
-          cp firestore.rules "$RUNNER_TEMP/firestore.rules"
-          jq -n --arg version "$RELEASE_VERSION" --arg sha "$APP_SHA" \
-            --arg check "$CHECK_RUN_ID" --arg build "$GITHUB_RUN_ID" \
-            --arg source "$(sha256sum "$RUNNER_TEMP/source.zip" | cut -d' ' -f1)" \
-            --arg rules "$(sha256sum "$RUNNER_TEMP/firestore.rules" | cut -d' ' -f1)" \
-            '{schema_version: 1, version: $version, app_sha: $sha,
-              check_run_id: $check, build_run_id: $build,
-              source_sha256: $source, rules_sha256: $rules}' > "$RUNNER_TEMP/release.json"
-
-      - name: Publish reviewed source release
-        working-directory: source
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          export PATH="$PINNED_PATH"
-          tag="$RELEASE_VERSION"
-          if gh api "repos/$GH_REPO/git/ref/tags/$tag" > /dev/null 2>&1; then
-            echo "Tag $tag already exists; inspect any partial release before retrying." >&2
-            exit 1
-          fi
-          gh api --method POST "repos/$GH_REPO/releases/generate-notes" \
-            -f "tag_name=$tag" -f "target_commitish=$APP_SHA" \
-            --jq .body > "$RUNNER_TEMP/notes.md"
-          # Markdown code spans are literal, not shell substitutions.
-          # shellcheck disable=SC2016
-          printf '\n\n### Build provenance\n\n- [Source commit](https://github.com/%s/commit/%s)\n- [Check](https://github.com/%s/actions/runs/%s)\n- [Build](https://github.com/%s/actions/runs/%s)\n\nReviewed source and client Rules are attached. Machine-readable provenance and checksums are in `release.json`.\n' \
-            "$GH_REPO" "$APP_SHA" "$GH_REPO" "$CHECK_RUN_ID" "$GH_REPO" "$GITHUB_RUN_ID" \
-            >> "$RUNNER_TEMP/notes.md"
-          existing=$(gh api "repos/$GH_REPO/releases?per_page=100" \
-            | jq -c --arg tag "$tag" '[.[] | select(.tag_name == $tag)]')
-          case "$(jq 'length' <<< "$existing")" in
-            0)
-              gh release create "$tag" \
-                "$RUNNER_TEMP/source.zip#source.zip" \
-                "$RUNNER_TEMP/firestore.rules#firestore.rules" \
-                "$RUNNER_TEMP/release.json#release.json" \
-                --target "$APP_SHA" --title "$tag" \
-                --notes-file "$RUNNER_TEMP/notes.md" --latest=false --draft
-              ;;
-            1)
-              jq -e '.[0].draft == true' <<< "$existing" > /dev/null
-              ;;
-            *) echo "Multiple releases for $tag; inspect before publishing." >&2; exit 1 ;;
-          esac
-
-          # Draft releases are absent from REST /releases/tags until publication.
-          release=$(gh release view "$tag" --json tagName,isDraft,targetCommitish,assets)
-          jq -e --arg tag "$tag" --arg sha "$APP_SHA" '
-            .tagName == $tag and .isDraft == true and .targetCommitish == $sha and
-            ([.assets[].name] | sort) == (["firestore.rules", "release.json", "source.zip"] | sort)
-          ' <<< "$release" > /dev/null
-          mkdir -p "$RUNNER_TEMP/release"
-          gh release download "$tag" --dir "$RUNNER_TEMP/release"
-          for name in source.zip firestore.rules release.json; do
-            digest=$(jq -er --arg name "$name" '.assets[] | select(.name == $name) | .digest' <<< "$release")
-            test "$digest" = "sha256:$(sha256sum "$RUNNER_TEMP/release/$name" | cut -d' ' -f1)"
-          done
-          jq -e --arg tag "$tag" --arg sha "$APP_SHA" --arg check "$CHECK_RUN_ID" \
-            --arg source "$(sha256sum "$RUNNER_TEMP/release/source.zip" | cut -d' ' -f1)" \
-            --arg rules "$(sha256sum "$RUNNER_TEMP/firestore.rules" | cut -d' ' -f1)" '
-            keys == ["app_sha", "build_run_id", "check_run_id", "rules_sha256", "schema_version", "source_sha256", "version"] and
-            .schema_version == 1 and .version == $tag and .app_sha == $sha and .check_run_id == $check and
-            (.build_run_id | type == "string" and test("^[1-9][0-9]*$")) and
-            .source_sha256 == $source and .rules_sha256 == $rules
-          ' "$RUNNER_TEMP/release/release.json" > /dev/null
-          cmp "$RUNNER_TEMP/release/firestore.rules" "$RUNNER_TEMP/firestore.rules"
-          python3 - "$RUNNER_TEMP/source.zip" "$RUNNER_TEMP/release/source.zip" <<'PY'
-          import sys
-          from zipfile import ZipFile
-
-          def files(path):
-              with ZipFile(path) as archive:
-                  entries = archive.infolist()
-                  names = [item.filename for item in entries]
-                  if len(names) != len(set(names)):
-                      raise SystemExit("Duplicate names in source archive")
-                  return {
-                      item.filename: (
-                          item.external_attr >> 16,
-                          item.create_system,
-                          None if item.is_dir() else archive.read(item),
-                      )
-                      for item in entries
-                  }
-
-          if files(sys.argv[1]) != files(sys.argv[2]):
-              raise SystemExit("Draft source differs from reviewed tracked source")
-          PY
-
-          # An approved retry may resume an intact draft. Refresh only its
-          # publishing run after verifying every asset and the tracked source.
-          # Preserve the verified archive digest, even if ZIP compression differs.
-          jq --arg build "$GITHUB_RUN_ID" '.build_run_id = $build' \
-            "$RUNNER_TEMP/release/release.json" > "$RUNNER_TEMP/release.json"
-          if ! cmp -s "$RUNNER_TEMP/release.json" "$RUNNER_TEMP/release/release.json"; then
-            gh release upload "$tag" "$RUNNER_TEMP/release.json#release.json" --clobber
-            cp "$RUNNER_TEMP/release.json" "$RUNNER_TEMP/release/release.json"
-          fi
-          release=$(gh release view "$tag" --json tagName,isDraft,targetCommitish,assets)
-          jq -e --arg tag "$tag" --arg sha "$APP_SHA" '
-            .tagName == $tag and .isDraft == true and .targetCommitish == $sha and
-            ([.assets[].name] | sort) == (["firestore.rules", "release.json", "source.zip"] | sort)
-          ' <<< "$release" > /dev/null
-          for name in source.zip firestore.rules release.json; do
-            digest=$(jq -er --arg name "$name" '.assets[] | select(.name == $name) | .digest' <<< "$release")
-            test "$digest" = "sha256:$(sha256sum "$RUNNER_TEMP/release/$name" | cut -d' ' -f1)"
-          done
-          gh release edit "$tag" --title "$tag" --notes-file "$RUNNER_TEMP/notes.md" --draft=false
-          published=
-          for _ in $(seq 1 12); do
-            candidate=$(gh api "repos/$GH_REPO/releases/tags/$tag" 2>/dev/null) || { sleep 5; continue; }
-            if jq -e --arg tag "$tag" '.tag_name == $tag and .draft == false and .immutable == true' \
-              <<< "$candidate" > /dev/null; then
-              published=$candidate
-              break
-            fi
-            sleep 5
-          done
-          test -n "$published" || {
-            echo "Release $tag failed immutability verification; inspect before using its assets." >&2
-            exit 1
-          }
-          digest=$(sha256sum "$RUNNER_TEMP/release/source.zip" | cut -d' ' -f1)
-          asset_id=$(jq -er --arg digest "sha256:$digest" '
-            .assets[] | select(.name == "source.zip" and .digest == $digest) | .id
-          ' <<< "$published")
-          jq -e --arg tag "$tag" --arg sha "$APP_SHA" '
-            .name == $tag and .target_commitish == $sha and
-            ([.assets[].name] | sort) == (["firestore.rules", "release.json", "source.zip"] | sort)
-          ' <<< "$published" > /dev/null
-          for name in source.zip firestore.rules release.json; do
-            digest=$(jq -er --arg name "$name" '.assets[] | select(.name == $name) | .digest' <<< "$published")
-            test "$digest" = "sha256:$(sha256sum "$RUNNER_TEMP/release/$name" | cut -d' ' -f1)"
-          done
-          gh api "repos/$GH_REPO/git/ref/tags/$tag" | jq -e --arg sha "$APP_SHA" '
-            .object.type == "commit" and .object.sha == $sha
-          ' > /dev/null
-          digest=$(sha256sum "$RUNNER_TEMP/release/source.zip" | cut -d' ' -f1)
-          # shellcheck disable=SC2016
-          printf 'Published immutable source release `%s` from Check `%s` (SHA `%s`). Source asset ID `%s`, SHA256 `%s`.\n' \
-            "$tag" "$CHECK_RUN_ID" "$APP_SHA" "$asset_id" "$digest" >> "$GITHUB_STEP_SUMMARY"
+        run: nix run '.#devenv-cli' -- tasks run --show-output build:release
