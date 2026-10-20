@@ -5,13 +5,6 @@ provider "github" {
   owner = "quantile-co"
 }
 
-# Retain the old provider address until the state address migration is applied.
-# tflint-ignore: terraform_unused_declarations
-provider "github" {
-  alias = "quantile_co"
-  owner = "quantile-co"
-}
-
 provider "restapi" {
   uri = "https://api.github.com"
 
