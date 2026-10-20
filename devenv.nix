@@ -263,8 +263,9 @@ in
       after = [ "devenv:files" ];
       before = [
         "check:all"
-        "test:all"
         "fix:all"
+        "test:all"
+        "build:assets"
         "build:all"
         "dev:app"
         "dev:storybook"
@@ -324,6 +325,12 @@ in
         ${exe config.quantile.semgrep.test.package}
         ${exe config.quantile.pnpm.package} run test
       '';
+    };
+
+    "build:assets" = {
+      description = "Build assets.";
+      before = [ "build:all" ];
+      exec = "${exe config.quantile.pnpm.package} run assets:generate";
     };
 
     "build:all" = {

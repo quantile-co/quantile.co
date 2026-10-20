@@ -45,7 +45,7 @@ Open <http://localhost:6006>.
 ### Assets
 
 ```sh
-pnpm assets:generate
+devenv tasks run --show-output build:assets
 ```
 
 ### Checks
