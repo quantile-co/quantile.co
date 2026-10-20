@@ -14,6 +14,19 @@ The plugin-native `.pi/memory/daily/2026-10-07.md` preserves the former **public
 
 ## Factory skills and SecretSpec
 
+The consumer also links Factory's generic `devenv-tasks` skill. It discovers
+names, descriptions, implementations and dependency relationships using the
+installed CLI and project configuration, with no fixed task inventory or
+Factory-specific assumptions. Discovery alone does not execute tasks. The
+user requested no README listing for this skill.
+
+The user approved 15-minute shared Check/Test jobs to accommodate cold or
+partially cached Nix closures. Both initial Checks of `d3a2416` reached the
+old 10-minute limit downloading dependencies, before checks ran; push Check
+39468727431 attempt 2 passed unchanged. Adopt Factory `b9f948b` consistently
+across inputs, workflow callers and Terraform sources. Preserve all checks,
+cache signatures and production guards; no Terraform module content changed.
+
 The Devenv consumer links Factory's `deploy` and `day-zero-deploy` directories,
 including their references. These skills cover repository/state infrastructure,
 not the custom immutable-source Build or application-provider rollout. This is
@@ -134,7 +147,9 @@ test files have identical executable TypeScript/JSX ASTs before and after the
 formatting pass. The temporary `All` job requires successful Factory checks,
 never accepting skipped/failed checks. Remove it after state migration installs
 `All / All`, together with the encrypted-handoff job/script/recipient and the
-temporary age package selection.
+temporary age package selection. After the migration is verified, also remove
+`moved.tf`, the retained legacy provider alias and obsolete compatibility
+configuration. Do not retain migration shims as permanent architecture.
 
 ## Main rollout progress
 
@@ -151,4 +166,13 @@ public cache settings already used by Factory Check/Test/Plan/Apply. It was not
 a failed application test or a release write. Align Build and the temporary
 handoff bootstrap with those existing signed caches and bound Build at twenty
 minutes. No new cache trust, token, WIF permission or provider credential is
-introduced. v0.2.16 is not published; Plan and Apply have not been dispatched.
+introduced. The correction landed through PR #95 as `a907389`; exact-main
+Check `39403052631` and the authorized main Test `39463399029` passed. The user
+approved continuing Test/Build and the reviewed Plan/Apply sequence.
+
+The requested `build:assets` task runs `pnpm assets:generate` after dependency
+installation and before `build:all`. The README Assets command uses that task.
+Keep task listings ordered Check, Fix, Test; this is not authorization to run
+fixes automatically during checks or tests. Local task execution generated all
+21 assets without source changes, then built the application and Storybook;
+Check passed. v0.2.16 is not yet published; Plan/Apply have not been dispatched.

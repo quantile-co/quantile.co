@@ -45,7 +45,7 @@ Open <http://localhost:6006>.
 ### Assets
 
 ```sh
-pnpm assets:generate
+devenv tasks run --show-output build:assets
 ```
 
 ### Checks
@@ -70,20 +70,16 @@ release; it does not run tests or deploy the site.
 
 ## Skills
 
-Run from this repository with Pi. These Factory skills manage this repository's
-settings and state infrastructure, not application publication.
+Run from this repository with Pi.
 
-- **Day Zero deployment** — new installations only:
+- **Day Zero deployment**:
 
   ```sh
   pi "/skill:day-zero-deploy"
   ```
 
-- **Steady-state deployment** — existing infrastructure:
+- **Steady-state deployment**:
 
   ```sh
   pi "/skill:deploy"
   ```
-
-Build, Plan and Apply each require separate approval. A passing Check or Test
-is not deployment authorization.

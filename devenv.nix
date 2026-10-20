@@ -237,6 +237,7 @@ in
       copyMode = "copy";
     };
     ".pi/settings.json".source = config.quantile.pi.settingsFile;
+    ".pi/skills/devenv-tasks".source = config.quantile.pi.skillsDir + "/devenv-tasks";
     ".pi/skills/deploy".source = config.quantile.pi.skillsDir + "/deploy";
     ".pi/skills/day-zero-deploy".source = config.quantile.pi.skillsDir + "/day-zero-deploy";
     ".pi/skills/seo-audit".source = config.quantile.pi.skillsDir + "/seo-audit";
@@ -263,8 +264,9 @@ in
       after = [ "devenv:files" ];
       before = [
         "check:all"
-        "test:all"
         "fix:all"
+        "test:all"
+        "build:assets"
         "build:all"
         "dev:app"
         "dev:storybook"
@@ -324,6 +326,12 @@ in
         ${exe config.quantile.semgrep.test.package}
         ${exe config.quantile.pnpm.package} run test
       '';
+    };
+
+    "build:assets" = {
+      description = "Build assets.";
+      before = [ "build:all" ];
+      exec = "${exe config.quantile.pnpm.package} run assets:generate";
     };
 
     "build:all" = {
