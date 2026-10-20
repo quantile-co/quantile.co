@@ -1,6 +1,6 @@
 # Current project memory — PUBLIC application
 
-Source scope: `quantile-co/quantile.co`, including the unpublished Factory-consumer migration on `refactor/factory-consumer`, package version `0.2.16`. This describes reviewed source, **not a published release or live provider behavior**. Recheck this checkout's root `AGENTS.md`, code, tests and workflows before changes. Never import private Q1/DNS guidance into this public repository.
+Source scope: `quantile-co/quantile.co`, including the Factory-consumer migration landed through PR #88, package version `0.2.16`. This describes reviewed source, **not a published release or live provider behavior**. Recheck this checkout's root `AGENTS.md`, code, tests and workflows before changes. Never import private Q1/DNS guidance into this public repository.
 
 - This checkout has Next.js Checkout (`app/api/stripe/checkout/route.ts`), signed Stripe/Resend webhook routes, `lib/env/env.ts`, `lib/gcp/firestore.ts` and `lib/welcome/` delivery/store code. HTTP routes are explicit composition roots. Preserve provider signatures, bounded bodies, eligibility, event mode independent of `NODE_ENV`, lazy secret reads, test-operation identity and durable welcome replay semantics. A welcome 200 needs a persisted immutable request, provider acceptance and durable receipt; ignored 200 is not completion.
 - `tf/infrastructure/` declares repository settings and dedicated state infrastructure through pinned Factory modules; the former reusable `tf/quantile-co/` Stripe catalog module is **not in this branch**. Do not recreate its product/price/link resources or infer any live catalog state from the historical guide. Catalog changes, application source releases, provider webhook setup and production rollout are distinct reviewed actions.
@@ -94,8 +94,8 @@ Firebase CLI fetched its versioned emulator into that empty cache; Java 21 is
 Nix-provided. Integration CLI listener-help smoke tests and effective command
 resolution passed without contacting providers. Custom Build loads tools from
 the trusted main checkout and restricts operational steps to its pinned PATH
-before processing the candidate revision. Provider-backed tests and production
-workflows have not run.
+before processing the candidate revision. Provider-backed tests have not run;
+main-workflow outcomes are recorded below.
 
 ## Rollout authorization and preflight
 
@@ -135,3 +135,20 @@ formatting pass. The temporary `All` job requires successful Factory checks,
 never accepting skipped/failed checks. Remove it after state migration installs
 `All / All`, together with the encrypted-handoff job/script/recipient and the
 temporary age package selection.
+
+## Main rollout progress
+
+Signed candidate `5205ce8` passed push Check `39398931150` and PR Check
+`39399044320`; normal squash merge of PR #88 produced verified main `3c1959c`.
+Because the installed policy required a PR and squash changes the commit SHA,
+a verification branch pointing to that exact main commit produced successful
+push Check `39399459320`. Main Test `39399922207` passed its full Check/test task.
+
+Authorized Build `39400671696` was stopped during tooling bootstrap, before
+source packaging or publication; both operational steps were skipped. Logs
+confirmed 1,869 derivations being built because this new bootstrap omitted the
+public cache settings already used by Factory Check/Test/Plan/Apply. It was not
+a failed application test or a release write. Align Build and the temporary
+handoff bootstrap with those existing signed caches and bound Build at twenty
+minutes. No new cache trust, token, WIF permission or provider credential is
+introduced. v0.2.16 is not published; Plan and Apply have not been dispatched.
