@@ -196,5 +196,19 @@ merges, optional PRs, no legacy push restriction, main-only `prod`, pinned
 selected actions, approval for all external PR workflows and immutable releases.
 Storage audit logging has no exemptions. A normal Google-user download matched
 the reviewed saved plan; state-object metadata remained inaccessible. No manual
-IAM grant, local Apply or backend reset was used. Post-Apply source cleanup is
-validated separately; its ordinary convergence Plan remains to be verified.
+IAM grant, local Apply or backend reset was used.
+
+Cleanup passed local Check and all 437 tests, plus push Check `39478406579`
+and PR Check `39478413044`. PR #97 landed as
+`7183229070f1623beaaff10fcd80483b2ea0fbe5`; exact-main Check `39479245052` passed.
+The ordinary Plan `39479160577`, receipt `12291141547`, reported no changes.
+Normal private GCS retrieval verified producer/revision/age, archive and plan
+digests, exact generation and backend identity without the encrypted handoff.
+Both saved state snapshots contain all sixteen managed resources at canonical
+module addresses (except the intentionally app-owned immutability marker),
+with no legacy provider bindings or pending moves. Nonempty backend lineage is
+unchanged and its serial advanced exactly once for the migration Apply.
+No further Apply is needed; the convergence review is closed. Temporary
+migration source is removed, and source publication plus repository/state
+migration are complete. Provider-backed application tests and site deployment
+were not performed.
