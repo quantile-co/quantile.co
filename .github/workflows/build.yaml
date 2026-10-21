@@ -30,7 +30,7 @@ jobs:
     concurrency:
       group: source-release
       cancel-in-progress: false
-    timeout-minutes: 20
+    timeout-minutes: 30
     permissions:
       actions: read
       contents: write

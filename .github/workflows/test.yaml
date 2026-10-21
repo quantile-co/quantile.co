@@ -10,6 +10,6 @@ jobs:
   all:
     name: All
     if: github.ref == 'refs/heads/main'
-    uses: quantile-co/factory/.github/workflows/test.yaml@8293b5698cdf411da2fdc2b4fe969031796c8d95
+    uses: quantile-co/factory/.github/workflows/test.yaml@d500b2ce146347a5749d55ab4b40b66733002424
     secrets:
       CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
