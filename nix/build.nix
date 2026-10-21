@@ -38,7 +38,7 @@ pkgs.writeShellApplication {
     attempt=$(jq -er '.run_attempt | numbers | select(. > 0 and . == floor)' <<< "$checked")
     gh api "repos/$GH_REPO/actions/runs/$CHECK_RUN_ID/attempts/$attempt/jobs?per_page=100" |
       jq -e --arg sha "$APP_SHA" '
-        any(.jobs[]; .name == "All / All" and .head_sha == $sha and
+        any(.jobs[]; .name == "All" and .head_sha == $sha and
           .status == "completed" and .conclusion == "success")
       ' > /dev/null
     gh api "repos/$GH_REPO/compare/$APP_SHA...main" |

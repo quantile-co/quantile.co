@@ -22,7 +22,7 @@ it("aborts on a failed tag lookup instead of treating it as an absent tag", () =
         "api repos/quantile-co/quantile.co/actions/runs/123")
           printf '{"repository":{"full_name":"quantile-co/quantile.co"},"head_repository":{"full_name":"quantile-co/quantile.co"},"path":".github/workflows/check.yaml","event":"push","head_sha":"%s","status":"completed","conclusion":"success","run_attempt":1}\\n' "$APP_SHA" ;;
         *"/attempts/1/jobs?per_page=100")
-          printf '{"jobs":[{"name":"All / All","head_sha":"%s","status":"completed","conclusion":"success"}]}\\n' "$APP_SHA" ;;
+          printf '{"jobs":[{"name":"All","head_sha":"%s","status":"completed","conclusion":"success"}]}\\n' "$APP_SHA" ;;
         *"/compare/"*)
           printf '{"status":"ahead","merge_base_commit":{"sha":"%s"}}\\n' "$APP_SHA" ;;
         *"/git/matching-refs/"*) echo 'Synthetic tag lookup failure' >&2; exit 41 ;;

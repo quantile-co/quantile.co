@@ -22,6 +22,7 @@ in
   imports = [
     inputs.factory.nixModules.default
     inputs.factory.devenvModules.files
+    inputs.site.nixModules.default
   ];
 
   cachix.pull = [
@@ -220,12 +221,12 @@ in
     "plan:infrastructure" = {
       description = "Plan infrastructure.";
       env.TF_DIR = terraformRoot;
-      exec = exe config.quantile.opentofu.plan.gcs.package;
+      exec = exe config.quantile.opentofu.plan.package;
     };
     "apply:infrastructure" = {
       description = "Apply infrastructure.";
       env.TF_DIR = terraformRoot;
-      exec = exe config.quantile.opentofu.apply.gcs.package;
+      exec = exe config.quantile.opentofu.apply.package;
     };
   };
 }

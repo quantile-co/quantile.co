@@ -8,20 +8,22 @@ nixpkgs:
     - ngrok
 
 inputs:
-  factory:
-    url: github:quantile-co/factory/d500b2ce146347a5749d55ab4b40b66733002424
+  site:
+    url: git+file:.
     flake: true
+  factory:
+    follows: site/factory
   nixpkgs:
-    follows: factory/nixpkgs
+    follows: site/nixpkgs
   devenv:
-    follows: factory/devenv
+    follows: site/devenv
   git-hooks:
-    follows: factory/git-hooks
+    follows: site/git-hooks
   go-overlay:
-    follows: factory/go-overlay
+    follows: site/go-overlay
   llm-agents:
-    follows: factory/llm-agents
+    follows: site/llm-agents
   mk-shell-bin:
-    follows: factory/mk-shell-bin
+    follows: site/mk-shell-bin
   nix2container:
-    follows: factory/nix2container
+    follows: site/nix2container

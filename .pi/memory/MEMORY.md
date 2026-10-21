@@ -65,8 +65,10 @@ an implementation-status record. Current source holds the authoritative copy.
 ## Factory and release tooling
 
 Consumers explicitly select pinned tools and native files. Use small `nix/`
-modules, not a consumer `etc/` directory or release-shell tool bundle. Keep all
-Factory pins/locks consistent; source declares their current revision. Checks are
+modules, not a consumer `etc/` directory or release-shell tool bundle. Pin
+Factory only in the local flake; Devenv follows `site/*` and imports the native
+workflow module through `nix/default.nix`. Keep both locks and Terraform module
+refs aligned with the flake. Checks are
 read-only; fixes and Git-hook installation are explicit. Do not weaken assertions
 or omit test projects to conceal a dependency mismatch.
 
@@ -91,8 +93,9 @@ verification, actor guards, serialization, signatures and bounded execution.
 
 `tf/infrastructure/` owns repository/state infrastructure through Factory modules,
 not a reusable Stripe catalog or application topology. Keep the existing bucket,
-`repository/prod`, lineage and immutable-release guard. Plan uses private GCS
-saved bytes and a receipt; Apply uses the approved exact artifact without replanning.
+`repository/prod`, lineage and immutable-release guard. Native Plan stores private GCS saved bytes and optional private diagnostics;
+Apply downloads the operator-selected `plan_ref` generation and applies those
+exact bytes without replanning. No GitHub artifact or receipt is produced.
 Maintain WIF, locks, protected environments and plans-only human reads. Keep main
 fixed during review. New production operations require new authorization.
 
