@@ -8,22 +8,22 @@ nixpkgs:
     - ngrok
 
 inputs:
-  site:
+  this:
     url: git+file:.
     flake: true
   factory:
-    follows: site/factory
+    follows: this/factory
   nixpkgs:
-    follows: site/nixpkgs
+    follows: this/nixpkgs
   devenv:
-    follows: site/devenv
+    follows: this/devenv
   git-hooks:
-    follows: site/git-hooks
+    follows: this/git-hooks
   go-overlay:
-    follows: site/go-overlay
+    follows: this/go-overlay
   llm-agents:
-    follows: site/llm-agents
+    follows: this/llm-agents
   mk-shell-bin:
-    follows: site/mk-shell-bin
+    follows: this/mk-shell-bin
   nix2container:
-    follows: site/nix2container
+    follows: this/nix2container

@@ -21,8 +21,7 @@ in
 {
   imports = [
     inputs.factory.nixModules.default
-    inputs.factory.devenvModules.files
-    inputs.site.nixModules.default
+    inputs.this.nixModules.default
   ];
 
   cachix.pull = [

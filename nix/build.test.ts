@@ -30,7 +30,7 @@ it("aborts on a failed tag lookup instead of treating it as an absent tag", () =
       esac
     '';
     config = (lib.evalModules {
-      modules = [ factory.nixModules.default { quantile.gh.package = mock; } ];
+      modules = [ factory.nixModules.coreutils factory.nixModules.git factory.nixModules.gh factory.nixModules.jq { quantile.gh.package = mock; } ];
       specialArgs = { inherit pkgs; };
     }).config;
     in import ${fileURLToPath(new URL("./build.nix", import.meta.url))} { inherit config lib pkgs; }`;

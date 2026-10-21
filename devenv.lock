@@ -3,25 +3,25 @@
     "bun2nix": {
       "inputs": {
         "flake-parts": [
-          "site",
+          "this",
           "factory",
           "llm-agents",
           "flake-parts"
         ],
         "nixpkgs": [
-          "site",
+          "this",
           "factory",
           "llm-agents",
           "nixpkgs"
         ],
         "systems": [
-          "site",
+          "this",
           "factory",
           "llm-agents",
           "systems"
         ],
         "treefmt-nix": [
-          "site",
+          "this",
           "factory",
           "llm-agents",
           "treefmt-nix"
@@ -117,17 +117,17 @@
         "semgrep-rules": "semgrep-rules"
       },
       "locked": {
-        "lastModified": 1792575314,
-        "narHash": "sha256-Sx5DS9eh0lJ7UYpMfvjvx3adh1IPWFVFuVLT0JEJzhA=",
+        "lastModified": 1792614569,
+        "narHash": "sha256-7vrK9MMdrRTeoTHGOmRku+wYUoIyqX8C53U1vr9CPkI=",
         "owner": "quantile-co",
         "repo": "factory",
-        "rev": "43e493b1be2ae40437b5d3cda4c8b74d4a38027c",
+        "rev": "a6ce017d2c3a36a6da24d132d4e6cf1641db3699",
         "type": "github"
       },
       "original": {
         "owner": "quantile-co",
         "repo": "factory",
-        "rev": "43e493b1be2ae40437b5d3cda4c8b74d4a38027c",
+        "rev": "a6ce017d2c3a36a6da24d132d4e6cf1641db3699",
         "type": "github"
       }
     },
@@ -182,7 +182,7 @@
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
-          "site",
+          "this",
           "factory",
           "devenv-cli",
           "nixpkgs"
@@ -205,7 +205,7 @@
     "flake-parts_2": {
       "inputs": {
         "nixpkgs-lib": [
-          "site",
+          "this",
           "factory",
           "llm-agents",
           "nixpkgs"
@@ -263,13 +263,13 @@
     "git-hooks": {
       "inputs": {
         "flake-compat": [
-          "site",
+          "this",
           "factory",
           "devenv-cli",
           "flake-compat"
         ],
         "nixpkgs": [
-          "site",
+          "this",
           "factory",
           "devenv-cli",
           "nixpkgs"
@@ -313,7 +313,7 @@
       "inputs": {
         "flake-compat": "flake-compat_3",
         "nixpkgs": [
-          "site",
+          "this",
           "factory",
           "go-overlay",
           "nixpkgs"
@@ -396,36 +396,36 @@
     "nix": {
       "inputs": {
         "flake-compat": [
-          "site",
+          "this",
           "factory",
           "devenv-cli",
           "flake-compat"
         ],
         "flake-parts": [
-          "site",
+          "this",
           "factory",
           "devenv-cli",
           "flake-parts"
         ],
         "git-hooks-nix": [
-          "site",
+          "this",
           "factory",
           "devenv-cli",
           "git-hooks"
         ],
         "nixpkgs": [
-          "site",
+          "this",
           "factory",
           "devenv-cli",
           "nixpkgs"
         ],
         "nixpkgs-23-11": [
-          "site",
+          "this",
           "factory",
           "devenv-cli"
         ],
         "nixpkgs-regression": [
-          "site",
+          "this",
           "factory",
           "devenv-cli"
         ]
@@ -448,7 +448,7 @@
     "nix2container": {
       "inputs": {
         "nixpkgs": [
-          "site",
+          "this",
           "factory",
           "nixpkgs"
         ]
@@ -471,13 +471,13 @@
     "nixd": {
       "inputs": {
         "flake-parts": [
-          "site",
+          "this",
           "factory",
           "devenv-cli",
           "flake-parts"
         ],
         "nixpkgs": [
-          "site",
+          "this",
           "factory",
           "devenv-cli",
           "nixpkgs"
@@ -621,44 +621,44 @@
     "root": {
       "inputs": {
         "devenv": [
-          "site",
+          "this",
           "devenv"
         ],
         "factory": [
-          "site",
+          "this",
           "factory"
         ],
         "git-hooks": [
-          "site",
+          "this",
           "git-hooks"
         ],
         "go-overlay": [
-          "site",
+          "this",
           "go-overlay"
         ],
         "llm-agents": [
-          "site",
+          "this",
           "llm-agents"
         ],
         "mk-shell-bin": [
-          "site",
+          "this",
           "mk-shell-bin"
         ],
         "nix2container": [
-          "site",
+          "this",
           "nix2container"
         ],
         "nixpkgs": [
-          "site",
+          "this",
           "nixpkgs"
         ],
-        "site": "site"
+        "this": "this"
       }
     },
     "rust-overlay": {
       "inputs": {
         "nixpkgs": [
-          "site",
+          "this",
           "factory",
           "devenv-cli",
           "nixpkgs"
@@ -695,59 +695,6 @@
         "type": "github"
       }
     },
-    "site": {
-      "inputs": {
-        "devenv": [
-          "site",
-          "factory",
-          "devenv"
-        ],
-        "devenv-cli": [
-          "site",
-          "factory",
-          "devenv-cli"
-        ],
-        "factory": "factory",
-        "git-hooks": [
-          "site",
-          "factory",
-          "git-hooks"
-        ],
-        "go-overlay": [
-          "site",
-          "factory",
-          "go-overlay"
-        ],
-        "llm-agents": [
-          "site",
-          "factory",
-          "llm-agents"
-        ],
-        "mk-shell-bin": [
-          "site",
-          "factory",
-          "mk-shell-bin"
-        ],
-        "nix2container": [
-          "site",
-          "factory",
-          "nix2container"
-        ],
-        "nixpkgs": [
-          "site",
-          "factory",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "type": "git",
-        "url": "file:."
-      },
-      "original": {
-        "type": "git",
-        "url": "file:."
-      }
-    },
     "systems": {
       "locked": {
         "lastModified": 1681028828,
@@ -778,10 +725,63 @@
         "type": "github"
       }
     },
+    "this": {
+      "inputs": {
+        "devenv": [
+          "this",
+          "factory",
+          "devenv"
+        ],
+        "devenv-cli": [
+          "this",
+          "factory",
+          "devenv-cli"
+        ],
+        "factory": "factory",
+        "git-hooks": [
+          "this",
+          "factory",
+          "git-hooks"
+        ],
+        "go-overlay": [
+          "this",
+          "factory",
+          "go-overlay"
+        ],
+        "llm-agents": [
+          "this",
+          "factory",
+          "llm-agents"
+        ],
+        "mk-shell-bin": [
+          "this",
+          "factory",
+          "mk-shell-bin"
+        ],
+        "nix2container": [
+          "this",
+          "factory",
+          "nix2container"
+        ],
+        "nixpkgs": [
+          "this",
+          "factory",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "type": "git",
+        "url": "file:."
+      },
+      "original": {
+        "type": "git",
+        "url": "file:."
+      }
+    },
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
-          "site",
+          "this",
           "factory",
           "devenv-cli",
           "nixd",
@@ -805,7 +805,7 @@
     "treefmt-nix_2": {
       "inputs": {
         "nixpkgs": [
-          "site",
+          "this",
           "factory",
           "llm-agents",
           "nixpkgs"
