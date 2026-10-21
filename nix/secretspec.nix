@@ -6,7 +6,7 @@ pkgs.runCommand "secretspec.toml" { } ''
   PORT = { description = "Local HTTP port; the launcher defaults to 3000.", required = false, providers = ["env"] }
   NODE_ENV = { description = "Framework-owned build/test mode, independent of billing.", required = false, providers = ["env"] }
   QUANTILE_APP_INSTANCE = { description = "Application instance; local development can generate one.", required = false, providers = ["env"] }
-  GCP_PROJECT_ID = { description = "Application database project; tests force demo-quantile. Infrastructure CI uses its separate state project.", required = false, providers = ["env"] }
+  GCP_PROJECT_ID = { description = "Application Firestore project, not the state project.", required = false, providers = ["env"] }
   FIRESTORE_EMULATOR_HOST = { description = "Loopback emulator address; the launcher starts an isolated emulator when needed.", required = false, providers = ["env"] }
   NEXT_TELEMETRY_DISABLED = { description = "Next telemetry switch supplied by Devenv.", required = false, providers = ["env"] }
   PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH = { description = "Chromium executable supplied by Devenv.", required = false, providers = ["env"] }
