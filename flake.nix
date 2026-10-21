@@ -2,7 +2,7 @@
   description = "Quantile public application development tools";
 
   inputs = {
-    factory.url = "github:quantile-co/factory/7c377256411ee08578aa27210d0af474ce0e6837";
+    factory.url = "github:quantile-co/factory/main";
     nixpkgs.follows = "factory/nixpkgs";
     devenv.follows = "factory/devenv";
     devenv-cli.follows = "factory/devenv-cli";

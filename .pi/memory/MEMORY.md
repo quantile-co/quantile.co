@@ -65,10 +65,11 @@ an implementation-status record. Current source holds the authoritative copy.
 ## Factory and release tooling
 
 Consumers explicitly select pinned tools and native files. Use small `nix/`
-modules, not a consumer `etc/` directory or release-shell tool bundle. Pin
-Factory only in the local flake; Devenv follows `this/*` and imports the native
-workflow module through `inputs.this.nixModules.default`. Keep both locks and Terraform module
-refs aligned with the flake. Checks are
+modules, not a consumer `etc/` directory or release-shell tool bundle. Devenv
+follows `this/*` and imports the native
+workflow module through `inputs.this.nixModules.default`. The committed flake lock pins
+Factory; Terraform module refs may lag a compatible revision. Keep both Nix locks
+in sync. Checks are
 read-only; fixes and Git-hook installation are explicit. Do not weaken assertions
 or omit test projects to conceal a dependency mismatch.
 
