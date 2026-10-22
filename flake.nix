@@ -123,7 +123,7 @@
               "trivy.yaml" = copy factory.trivy.configFile;
               "typos.toml" = copy factory.typos.configFile;
               ".vale.ini" = copy site.vale.configFile;
-              ".vale/styles" = copy factory.vale.stylesDirectory;
+              ".vale" = copy factory.vale.stylesDirectory;
               ".yamllint.yaml" = copy factory.yamllint.configFile;
               "next.config.ts" = copy site.next.configFile;
               "postcss.config.cjs" = copy site.postcss.configFile;

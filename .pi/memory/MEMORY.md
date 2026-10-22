@@ -77,7 +77,7 @@ Do not add duplicate native config templates or a local `nix/lib.nix`;
 reusable formatting comes from Factory's `biome.formatFile`. Keep only the
 ordinary Factory/site/copy bindings in the flake. Root configurations are tracked regular files;
 `.envrc` runs `factory-files write` and Check compares worktree and Git-index
-copies. Keep template sources out of runtime paths; Vale uses `.vale/styles/`.
+copies. Keep template sources out of runtime paths; Vale uses `.vale/` (`StylesPath = .vale`).
 Leave tool-mutated files such as `package.json`, dependency locks and pnpm build
 approvals tool-owned, not copied. Checks are read-only; fixes and Husky installation
 are explicit. Never omit test projects or weaken assertions to conceal a mismatch.
