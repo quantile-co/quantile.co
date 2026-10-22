@@ -1,7 +1,7 @@
 { pkgs, factory }:
 {
   ignoreFile = pkgs.writeText ".gitignore" (
-    builtins.readFile "${factory}/.gitignore"
+    builtins.readFile factory.git.ignoreFile
     + ''
 
       # Application build output, local credentials and emulator state.

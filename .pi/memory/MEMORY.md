@@ -86,7 +86,11 @@ Pnpm tasks live under `scripts/pnpm/`; dev/assets entry points are thin TypeScri
 wrappers around `lib/dev/` and `lib/brand/assets.ts`. Every checked-in workflow
 has an entry point under `scripts/github/`. Playwright's pinned Nix browser must
 match the npm client version, with separate Vitest browser provider instances.
-Keep README setup concise rather than duplicating inventories.
+Keep README setup concise rather than duplicating inventories. README is seeded
+once, then repository-owned. Gitignore and direnv patch Factory's native templates;
+Husky pre-push and the explicitly selected MIT license/notice are managed copies.
+Preserve legal terms and repository-specific notices. Copy complete selected skill
+directories so linked web-audit dependencies are available.
 
 There is no SecretSpec dependency. Credentials stay in process environment or
 ignored local environment files; `.envrc.local` does not authorize provider actions.

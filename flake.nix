@@ -25,7 +25,7 @@
       perSystem =
         { pkgs, factory }:
         let
-          site = import ./nix { inherit inputs pkgs factory; };
+          site = import ./nix { inherit pkgs factory; };
           copy = source: {
             inherit source;
             mode = "copy";
@@ -111,7 +111,18 @@
 
             # Committed regular files; direnv refreshes copy entries on shell entry.
             files = {
+              "README.md" = {
+                source = factory.readme.withProject {
+                  name = "quantile.co";
+                  description = "Quantile marketing site";
+                };
+                mode = "seed";
+              };
+              "LICENSE" = copy factory.license.mitFile;
+              "NOTICE.md" = copy factory.license.noticeFile;
               ".gitignore" = copy site.git.ignoreFile;
+              ".envrc" = copy site.direnv.configFile;
+              ".husky/pre-push" = copy factory.husky.prePushFile;
               ".editorconfig" = copy factory.editorconfig.configFile;
               ".editorconfig-checker.json" = copy site.editorconfig.checker.configFile;
               ".markdownlint-cli2.jsonc" = copy factory.markdownlint-cli2.configFile;
@@ -148,7 +159,11 @@
               ".pi/skills/web-perf" = copy (factory.pi.skillsDir + "/web-perf");
               ".pi/skills/web-quality-audit" = copy (factory.pi.skillsDir + "/web-quality-audit");
               ".pi/skills/webapp-testing" = copy (factory.pi.skillsDir + "/webapp-testing");
-              ".pi/skills/performance/references" = copy (factory.pi.skillsDir + "/performance/references");
+              ".pi/skills/performance" = copy (factory.pi.skillsDir + "/performance");
+              ".pi/skills/core-web-vitals" = copy (factory.pi.skillsDir + "/core-web-vitals");
+              ".pi/skills/accessibility" = copy (factory.pi.skillsDir + "/accessibility");
+              ".pi/skills/seo" = copy (factory.pi.skillsDir + "/seo");
+              ".pi/skills/best-practices" = copy (factory.pi.skillsDir + "/best-practices");
               ".qmd/index.yml" = copy factory.qmd.configFile;
               ".semgrep/tf" = copy (factory.semgrep.rulesDir + "/tf");
               ".semgrep/packs/typescript.yaml" = copy factory.semgrep.packs.typescript;
