@@ -35,7 +35,7 @@ export default defineConfig({
             "app/**/*.test.{ts,tsx}",
             "components/**/*.test.{ts,tsx}",
             "lib/**/*.test.{ts,tsx}",
-            "nix/*.test.ts",
+            "nix/**/*.test.ts",
           ],
           exclude: [
             "**/*.integration.test.{ts,tsx}",

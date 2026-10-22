@@ -9,8 +9,10 @@ let
   exe = lib.getExe;
   biomeConfig = import ./nix/biome.nix { inherit config lib pkgs; };
   secretspecConfig = import ./nix/secretspec.nix { inherit config pkgs; };
-  buildRelease = import ./nix/build.nix { inherit config lib pkgs; };
   terraformRoot = "tf/infrastructure";
+  firebaseHosting = builtins.fromJSON (builtins.readFile ./nix/firebase-hosting.json);
+  knipTemplate = builtins.readFile config.quantile.knip.configFile;
+  knipAnchor = "\"ignoreBinaries\": [\"nix\"]";
   dependabotFile = config.quantile.dependabot.withUpdates [
     "github-actions"
     "npm"
@@ -41,6 +43,9 @@ in
     config.quantile.pnpm.package
     config.quantile.opentofu.package
     config.quantile.tflint.package
+    config.quantile.github.workflows.plan.package
+    config.quantile.github.workflows.apply.package
+    config.quantile.github.workflows.public.build.package
     config.quantile.gcloud.package
     config.quantile.gh.package
     config.quantile.git.package
@@ -82,6 +87,60 @@ in
   enterShell = lib.mkBefore config.quantile.secretspec.shellHook;
 
   files = {
+    "tsconfig.json" = {
+      source = config.quantile.typescript.withOverrides {
+        compilerOptions = {
+          target = "ES2017";
+          lib = [
+            "dom"
+            "dom.iterable"
+            "esnext"
+          ];
+          allowJs = true;
+          allowImportingTsExtensions = true;
+          esModuleInterop = true;
+          module = "esnext";
+          moduleResolution = "bundler";
+          resolveJsonModule = true;
+          isolatedModules = true;
+          jsx = "react-jsx";
+          incremental = true;
+          plugins = [ { name = "next"; } ];
+          paths."@/*" = [ "./*" ];
+        };
+        include = [
+          "next-env.d.ts"
+          "**/*.ts"
+          "**/*.tsx"
+          ".next/types/**/*.ts"
+          ".next/dev/types/**/*.ts"
+          "**/*.mts"
+        ];
+        exclude = [ "node_modules" ];
+      };
+      copyMode = "copy";
+    };
+    "firebase.json" = {
+      source = config.quantile.firebase.withOverrides { hosting = firebaseHosting; };
+      copyMode = "copy";
+    };
+    "firestore.rules" = {
+      source = config.quantile.firebase.rulesFile;
+      copyMode = "copy";
+    };
+    "knip.json" = {
+      text =
+        assert lib.assertMsg (lib.hasInfix knipAnchor knipTemplate)
+          "Knip template no longer contains its patch point";
+        lib.replaceStrings
+          [ knipAnchor ]
+          [
+            ''
+              "ignoreBinaries": ["nix"],
+                "ignore": ["lib/browser/test.tsx"]''
+          ]
+          knipTemplate;
+    };
     "secretspec.toml".source = secretspecConfig;
     ".editorconfig".source = config.quantile.editorconfig.configFile;
     ".editorconfig-checker.json".source = config.quantile.editorconfig.checker.configFile;
@@ -95,6 +154,26 @@ in
       copyMode = "copy";
     };
     ".github/actionlint.yaml".source = config.quantile.actionlint.configFile;
+    ".github/workflows/check.yaml" = {
+      source = config.quantile.github.workflows.check.configFile;
+      copyMode = "copy";
+    };
+    ".github/workflows/test.yaml" = {
+      source = config.quantile.github.workflows.test.configFile;
+      copyMode = "copy";
+    };
+    ".github/workflows/build.yaml" = {
+      text = config.quantile.github.workflows.public.build.text;
+      copyMode = "copy";
+    };
+    ".github/workflows/plan.yaml" = {
+      text = config.quantile.github.workflows.public.plan.text;
+      copyMode = "copy";
+    };
+    ".github/workflows/apply.yaml" = {
+      text = config.quantile.github.workflows.public.apply.text;
+      copyMode = "copy";
+    };
     # GitHub consumes the tracked copy, not a Nix-store link.
     ".github/dependabot.yml" = {
       source = dependabotFile;
@@ -212,20 +291,5 @@ in
       '';
     };
 
-    "build:release" = {
-      description = "Publish a reviewed immutable source release.";
-      exec = ''${exe buildRelease} "''${SOURCE_DIR:?Set the reviewed source checkout}"'';
-    };
-
-    "plan:infrastructure" = {
-      description = "Plan infrastructure.";
-      env.TF_DIR = terraformRoot;
-      exec = exe config.quantile.opentofu.plan.package;
-    };
-    "apply:infrastructure" = {
-      description = "Apply infrastructure.";
-      env.TF_DIR = terraformRoot;
-      exec = exe config.quantile.opentofu.apply.package;
-    };
   };
 }

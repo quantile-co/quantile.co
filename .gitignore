@@ -52,6 +52,7 @@ yarn-error.log*
 !.envrc
 
 # typescript
+/tsconfig.json
 *.tsbuildinfo
 next-env.d.ts
 
@@ -66,6 +67,9 @@ next-env.d.ts
 /.qmd/*
 
 # Devenv-managed files and state.
+/firebase.json
+/firestore.rules
+/knip.json
 /secretspec.toml
 /.devenv/
 /.direnv/

@@ -87,16 +87,20 @@ is a separate, explicitly authorized entry point, not part of ordinary tests.
 
 Check, Test, Build, Plan and Apply are distinct operations. Build loads trusted
 pinned tooling and verifies exact-source Check, selected attempt/job, main ancestry
-and version before publishing immutable source/Rules assets. Package inputs come
-from reviewed Git objects. API errors are not absence; existing tags/drafts stop
-publication rather than trigger automatic recovery. Preserve asset/provenance
-verification, actor guards, serialization, signatures and bounded execution.
+and version before publishing immutable source/Rules assets. Package reviewed
+Git objects and their pinned Devenv-generated regular files in an isolated
+worktree without publisher credentials, never mutable operator files. The
+downstream builder receives a complete zip. API errors are not absence;
+existing tags/drafts stop publication rather than trigger automatic recovery.
+Preserve asset/provenance verification, actor guards, serialization, signatures
+and bounded execution.
 
 `tf/infrastructure/` owns repository/state infrastructure through Factory modules,
 not a reusable Stripe catalog or application topology. Keep the existing bucket,
-`repository/prod`, lineage and immutable-release guard. Native Plan stores private GCS saved bytes and optional private diagnostics;
-Apply downloads the operator-selected `plan_ref` generation and applies those
-exact bytes without replanning. No GitHub artifact or receipt is produced.
+`repository/prod`, lineage and immutable-release guard. Native Plan calls
+OpenTofu directly and stores private GCS saved bytes and optional private
+diagnostics; Apply downloads the operator-selected `plan_ref` generation and
+applies those exact bytes without replanning. No GitHub artifact or receipt is produced.
 Maintain WIF, locks, protected environments and plans-only human reads. Keep main
 fixed during review. New production operations require new authorization.
 
