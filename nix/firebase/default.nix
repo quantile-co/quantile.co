@@ -1,5 +1,20 @@
-{ factory }:
+{ pkgs, factory }:
 {
+  # Preserve the application's established deny-all Rules bytes.
+  rulesFile =
+    let
+      source = builtins.readFile factory.firebase.rulesFile;
+      comment = "Server IAM may read; direct client access stays denied.";
+    in
+    assert pkgs.lib.hasInfix comment source;
+    pkgs.writeText "firestore.rules" (
+      builtins.replaceStrings
+        [ comment ]
+        [
+          "Only the server's IAM-authenticated Firestore API may access receipts."
+        ]
+        source
+    );
   configFile = factory.firebase.withOverrides {
     hosting = {
       public = "out";

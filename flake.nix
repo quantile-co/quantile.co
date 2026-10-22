@@ -132,7 +132,7 @@
               "tsconfig.json" = copy site.typescript.configFile;
               "knip.json" = copy site.knip.configFile;
               "firebase.json" = copy site.firebase.configFile;
-              "firestore.rules" = copy factory.firebase.rulesFile;
+              "firestore.rules" = copy site.firebase.rulesFile;
               ".github/actionlint.yaml" = copy factory.actionlint.configFile;
               ".github/workflows/check.yaml" = copy factory.github.workflows.check.configFile;
               ".github/workflows/test.yaml" = copy factory.github.workflows.test.configFile;
