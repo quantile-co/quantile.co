@@ -1,6 +1,6 @@
 # trivy:ignore:AVD-GIT-0001
 module "github" {
-  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=a1652e1872e10152cd2784d51bf3913dce787ff1"
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=2e0f3f9ba9a437fcfce74fcdb50f21304c56d0ba"
 
   repository_name = "quantile.co"
   description     = "Quantile marketing site."
