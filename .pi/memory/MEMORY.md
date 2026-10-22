@@ -64,38 +64,45 @@ an implementation-status record. Current source holds the authoritative copy.
 
 ## Factory and release tooling
 
-Consumers explicitly select pinned tools and native files. Use small `nix/`
-modules, not a consumer `etc/` directory or release-shell tool bundle. Devenv
-follows `this/*` and imports the native
-workflow module through `inputs.this.nixModules.default`. The committed flake lock pins
-Factory; Terraform module refs may lag a compatible revision. Keep both Nix locks
-in sync. Checks are
-read-only; fixes and Git-hook installation are explicit. Do not weaken assertions
-or omit test projects to conceal a dependency mismatch.
+The committed flake lock pins Factory. `flake.nix` owns development tools and
+native root files through `lib.mkFlake`, without a local `nix/` directory.
+Extend Factory templates where available; define site-only configurations there
+and copy them from the store too. Root configurations are tracked regular files;
+`.envrc` runs `factory-files write` and Check compares worktree and Git-index
+copies. Keep template sources out of runtime paths; Vale uses `.vale/styles/`.
+Leave tool-mutated files such as `package.json`, dependency locks and pnpm build
+approvals tool-owned, not copied. Checks are read-only; fixes and Husky installation
+are explicit. Never omit test projects or weaken assertions to conceal a mismatch.
 
-`nix/biome.nix` extends native policy; its generated root file is copied because
-the pinned Biome version cannot safely use that config symlink. Playwright's
-browser must match the npm client version. Vitest browser projects need separate
-provider instances. Keep README setup concise rather than duplicating inventories.
+Pnpm tasks live under `scripts/pnpm/`; dev/assets entry points are thin TypeScript
+wrappers around `lib/dev/` and `lib/brand/assets.ts`. Every checked-in workflow
+has an entry point under `scripts/github/`. Playwright's pinned Nix browser must
+match the npm client version, with separate Vitest browser provider instances.
+Keep README setup concise rather than duplicating inventories.
 
-`nix/secretspec.nix` extends Factory's native manifest. Credential resolution is
-runtime-only; default/Check remain provider-credential-free. Profiles do not
-isolate ambient credentials, load Next dotenv files or authorize provider actions.
-Application semantics and child-credential scoping remain in the app's env/launcher
+There is no SecretSpec dependency. Credentials stay in process environment or
+ignored local environment files; `.envrc.local` does not authorize provider actions.
+Application semantics and child-credential scoping remain in the env/launcher
 code. Ordinary tests use an isolated demo emulator. Provider-backed integration
 is a separate, explicitly authorized entry point, not part of ordinary tests.
 
 Check, Test, Build, Plan and Apply are distinct operations. Build loads trusted
 pinned tooling and verifies exact-source Check, selected attempt/job, main ancestry
-and version before publishing immutable source/Rules assets. Package reviewed
-Git objects and their pinned Devenv-generated regular files in an isolated
-worktree without publisher credentials, never mutable operator files. The
-downstream builder receives a complete zip. API errors are not absence;
+and package version before publishing only an immutable tag/release. GitHub's
+automatic source archive is the sole public source handoff; there is no custom
+source.zip, separate Rules asset or release.json. Required root inputs are
+committed, so downstream Firebase source builds need no Nix or materialization;
+`pnpm run build` is ordinary `next build`. Never use mutable operator files or
+execute candidate source with the publishing token. API errors are not absence;
 existing tags/drafts stop publication rather than trigger automatic recovery.
-Preserve asset/provenance verification, actor guards, serialization, signatures
-and bounded execution.
+Preserve exact tag/commit and release immutability verification, actor guards,
+serialization, signatures and bounded execution. The public release contract
+may change independently of Q1; do not keep custom-asset compatibility or block
+public publication on Q1's later migration. Existing immutable releases remain
+unchanged; new production phases still require separate approval.
 
-`tf/infrastructure/` owns repository/state infrastructure through Factory modules,
+`tf/` is the single root; wrappers select `TF_DIR=tf`. It owns
+repository/state infrastructure through Factory modules,
 not a reusable Stripe catalog or application topology. Keep the existing bucket,
 `repository/prod`, lineage and immutable-release guard. Native Plan calls
 OpenTofu directly and stores private GCS saved bytes and optional private

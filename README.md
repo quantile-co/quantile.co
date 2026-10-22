@@ -30,14 +30,13 @@ direnv allow
 ### Install
 
 ```sh
-devenv tasks run --show-output install:git:hooks
-devenv tasks run --show-output install:dependencies
+pnpm install --frozen-lockfile
 ```
 
-### Application
+### App
 
 ```sh
-devenv tasks run --show-output dev:app
+pnpm dev
 ```
 
 Open <http://localhost:3000>.
@@ -45,7 +44,7 @@ Open <http://localhost:3000>.
 ### Components
 
 ```sh
-devenv tasks run --show-output dev:storybook
+pnpm run dev:storybook
 ```
 
 Open <http://localhost:6006>.
@@ -53,29 +52,26 @@ Open <http://localhost:6006>.
 ### Checks
 
 ```sh
-# Check source without running tests or builds, or accessing production state.
-devenv tasks run --show-output check:all
-
-# Apply source fixes explicitly.
-devenv tasks run --show-output fix:all
+pnpm run check
+pnpm run fix
 ```
 
 ### Tests
 
 ```sh
 # Run the existing unit, Firestore emulator and browser tests.
-devenv tasks run --show-output test:all
+pnpm test
 
 # Run provider-backed integration tests.
-devenv tasks run --show-output test:integration
+pnpm run test:integration
 ```
 
 ### Build
 
 ```sh
-devenv tasks run --show-output build:assets
-# Build the application and Storybook without running tests or publishing.
-devenv tasks run --show-output build:all
+pnpm run build:assets
+pnpm run build
+pnpm run build:storybook
 ```
 
 ## Skills

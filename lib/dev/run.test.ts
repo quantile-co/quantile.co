@@ -120,7 +120,7 @@ describe("integration configuration and process boundaries", () => {
       kind: "cleanup",
     });
     expect(() => parseCommand(["--unexpected=private"])).toThrow(
-      "Invalid arguments. Use pnpm dev --help.",
+      "Invalid development arguments.",
     );
   });
   it("requires explicit nonlive mode and a test key", () => {

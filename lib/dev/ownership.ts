@@ -137,7 +137,7 @@ async function createOwner(file: string, appInstance: string) {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "EEXIST")
       throw new Error(
-        "This checkout already has an integration owner. Inspect .quantile/webhooks.json; after its process stops, use pnpm dev --cleanup-integration.",
+        "This checkout already has an integration owner. Inspect .quantile/webhooks.json; after its process stops, clean up the integration.",
       );
     throw error;
   }

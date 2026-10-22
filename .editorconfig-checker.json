@@ -1,0 +1,9 @@
+{
+  "Exclude": [
+    "^\\.pi/memory/",
+    "^\\.semgrep/packs/",
+    ".*\\.sql\\.go$",
+    "^\\.pi/skills/",
+    "^public/images/logos/"
+  ]
+}

@@ -37,8 +37,19 @@ key prefixes) at API boundaries, and keep automated tests and `NODE_ENV=test`
 named as tests. A production build can use development billing.
 
 Human setup: [README.md](README.md). Checks and the full ordinary test suite:
-`devenv tasks run test:all`. Builds: `devenv tasks run build:all`.
+`pnpm test`. Builds: `pnpm run build` and `pnpm run build:storybook`.
 Provider-backed tests remain separately authorized.
+
+## Repository map
+
+- [flake.nix](flake.nix): Factory input, development tools and copied native files.
+- [.envrc](.envrc): pinned direnv shell and managed-file entry point.
+- [package.json](package.json): install/dev/check/fix/test/build entry points.
+- [scripts/pnpm/](scripts/pnpm/): task scripts and thin dev/assets entry points.
+- [scripts/github/](scripts/github/): workflow entry points and release publication.
+- [lib/brand/assets.ts](lib/brand/assets.ts): brand asset generation and checks.
+- [tf/](tf/): single repository/state deployment root.
+- [.github/workflows/](.github/workflows/): CI, source releases and protected deployment.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

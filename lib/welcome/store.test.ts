@@ -63,7 +63,7 @@ describe("official Firestore emulator: atomic persistence", () => {
       process.env.GCP_PROJECT_ID !== "demo-quantile"
     )
       throw new Error(
-        "Run pnpm test; these tests require its demo Firestore emulator.",
+        "These tests require the ordinary test suite's demo Firestore emulator.",
       );
     const client = getFirestore(
       readFirestoreTarget(process.env, "development"),

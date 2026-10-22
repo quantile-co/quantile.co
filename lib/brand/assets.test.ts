@@ -9,7 +9,7 @@ import {
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { runAssets } from "../../scripts/assets.mjs";
+import { checkBrandAssets, generateBrandAssets } from "./assets.ts";
 
 let root: string;
 beforeEach(async () => {
@@ -23,24 +23,19 @@ afterEach(async () => {
 });
 
 describe("brand asset commands", () => {
-  it("rejects invalid arguments without writing assets", async () => {
-    for (const args of [[], ["unknown"], ["generate", "extra"]]) {
-      expect(await runAssets(args, root)).toBe(1);
-      expect(await readdir(root)).toEqual([]);
-    }
-    expect(console.error).toHaveBeenCalledWith(
-      "Usage: node scripts/assets.mjs <generate|check>",
-    );
+  it("checks without generating missing assets", async () => {
+    expect(await checkBrandAssets(root)).toBe(1);
+    expect(await readdir(root)).toEqual([]);
   });
 
   it("reports stale and missing assets without repairing them during checks", async () => {
-    expect(await runAssets(["generate"], root)).toBe(0);
+    await generateBrandAssets(root);
     const stale = path.join(root, "app/icon.svg");
     const missing = path.join(root, "app/favicon.ico");
     await writeFile(stale, "outdated");
     await rm(missing);
 
-    expect(await runAssets(["check"], root)).toBe(1);
+    expect(await checkBrandAssets(root)).toBe(1);
     expect(console.error).toHaveBeenCalledWith(
       expect.stringContaining("app/icon.svg"),
     );

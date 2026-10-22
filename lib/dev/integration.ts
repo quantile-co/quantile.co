@@ -313,7 +313,7 @@ export async function startIntegration(options: {
       await cleanupOwner(root, owner, registry);
     } catch {
       throw new Error(
-        "Integration startup failed and cleanup could not be confirmed. Inspect .quantile/webhooks.json and run pnpm dev --cleanup-integration after resolving provider access/capacity.",
+        "Integration startup failed and cleanup could not be confirmed. Inspect .quantile/webhooks.json and clean up the stopped integration after resolving provider access/capacity.",
       );
     }
     throw error;

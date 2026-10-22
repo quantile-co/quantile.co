@@ -14,9 +14,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return siteHeaders(readHeaderSettings(runtimeEnvironment()));
   },
-  images: {
-    unoptimized: true,
-  },
+  images: { unoptimized: true },
   experimental: {
     optimizePackageImports: ["@mantine/core", "@mantine/hooks"],
   },

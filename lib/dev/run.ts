@@ -51,7 +51,7 @@ type DevelopmentCommand =
   | { kind: "target-test"; target: string };
 export function parseCommand(args: string[]): DevelopmentCommand | undefined {
   const cli = new Command()
-    .name("pnpm dev")
+    .name("dev")
     .description(
       "Development application and Firestore emulator; --integration adds remote providers.",
     )
@@ -76,7 +76,7 @@ export function parseCommand(args: string[]): DevelopmentCommand | undefined {
       error.code === "commander.helpDisplayed"
     )
       return undefined;
-    throw new Error("Invalid arguments. Use pnpm dev --help.");
+    throw new Error("Invalid development arguments.");
   }
   const v = cli.opts<{
     integration?: boolean;
@@ -167,7 +167,7 @@ export async function discoverDevelopmentPortal(key: string) {
 
 // Composition root. Development provider connections are opt-in.
 export async function runDevelopment(
-  args = process.argv.slice(2),
+  args: string[],
   discoverPortal = discoverDevelopmentPortal,
 ) {
   let command: DevelopmentCommand | undefined;
@@ -420,7 +420,7 @@ export async function runDevelopment(
   try {
     if (env.QUANTILE_STRIPE_WEBHOOK_URL)
       throw new Error(
-        "QUANTILE_STRIPE_WEBHOOK_URL is internal. Use pnpm test:integration --target <url>.",
+        "QUANTILE_STRIPE_WEBHOOK_URL is internal. Supply a target for integration tests.",
       );
     if (env.QUANTILE_CHECKOUT_TEST_ORIGIN)
       throw new Error("QUANTILE_CHECKOUT_TEST_ORIGIN is internal.");

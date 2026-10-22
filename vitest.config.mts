@@ -8,17 +8,13 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
 if (!executablePath) {
   throw new Error(
-    "Enter the Devenv shell to use the pinned Playwright browser.",
+    "Enter the direnv shell to use the pinned Playwright browser.",
   );
 }
 const browser = () => ({
   enabled: true,
   headless: true,
-  provider: playwright({
-    launchOptions: {
-      executablePath,
-    },
-  }),
+  provider: playwright({ launchOptions: { executablePath } }),
   instances: [{ browser: "chromium" as const }],
 });
 
@@ -35,7 +31,6 @@ export default defineConfig({
             "app/**/*.test.{ts,tsx}",
             "components/**/*.test.{ts,tsx}",
             "lib/**/*.test.{ts,tsx}",
-            "nix/**/*.test.ts",
           ],
           exclude: [
             "**/*.integration.test.{ts,tsx}",
@@ -58,17 +53,12 @@ export default defineConfig({
         plugins: [
           storybookTest({ configDir: path.join(dirname, ".storybook") }),
         ],
-        test: {
-          name: "storybook",
-          browser: browser(),
-        },
+        test: { name: "storybook", browser: browser() },
       },
       {
         extends: true,
         resolve: {
-          alias: {
-            "next/image": path.join(dirname, "lib/browser/test.tsx"),
-          },
+          alias: { "next/image": path.join(dirname, "lib/browser/test.tsx") },
         },
         optimizeDeps: {
           include: [
