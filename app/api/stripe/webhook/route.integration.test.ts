@@ -77,7 +77,7 @@ describe("provider-backed welcome completion", () => {
           {
             mode: "subscription",
             customer: customer.id,
-            payment_method_types: ["card"],
+            allowed_payment_method_types: ["card"],
             line_items: [{ price: price.id, quantity: 1 }],
             subscription_data: { metadata: operation.metadata },
             metadata: operation.metadata,
