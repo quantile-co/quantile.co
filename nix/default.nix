@@ -1,0 +1,23 @@
+{
+  inputs,
+  pkgs,
+  factory,
+}:
+{
+  biome = import ./biome { inherit pkgs factory; };
+  dependabot = import ./dependabot { inherit pkgs factory; };
+  editorconfig = import ./editorconfig { inherit pkgs factory; };
+  firebase = import ./firebase { inherit factory; };
+  git = import ./git {
+    inherit pkgs;
+    inherit (inputs) factory;
+  };
+  github.workflows = import ./github/workflows { inherit pkgs factory; };
+  knip = import ./knip { inherit pkgs factory; };
+  next = import ./next { inherit pkgs factory; };
+  pi = import ./pi { inherit factory; };
+  postcss = import ./postcss { inherit pkgs factory; };
+  typescript = import ./typescript { inherit factory; };
+  vale = import ./vale { inherit pkgs factory; };
+  vitest = import ./vitest { inherit pkgs factory; };
+}

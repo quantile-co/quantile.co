@@ -42,7 +42,9 @@ Provider-backed tests remain separately authorized.
 
 ## Repository map
 
-- [flake.nix](flake.nix): Factory input, development tools and copied native files.
+- [flake.nix](flake.nix): Factory input, development tools and copied-file selections.
+- [nix/](nix/): tool-owned configuration rendering and Factory overrides.
+- [nix/github/workflows/](nix/github/workflows/): workflow template customizations.
 - [.envrc](.envrc): pinned direnv shell and managed-file entry point.
 - [package.json](package.json): install/dev/check/fix/test/build entry points.
 - [scripts/pnpm/](scripts/pnpm/): task scripts and thin dev/assets entry points.

@@ -64,10 +64,14 @@ an implementation-status record. Current source holds the authoritative copy.
 
 ## Factory and release tooling
 
-The committed flake lock pins Factory. `flake.nix` owns development tools and
-native root files through `lib.mkFlake`, without a local `nix/` directory.
-Extend Factory templates where available; define site-only configurations there
-and copy them from the store too. Root configurations are tracked regular files;
+The committed flake lock pins Factory. `flake.nix` keeps inputs, systems, public
+packages, development tools and copied-file selections visible through
+`lib.mkFlake`. Tool-owned `nix/<tool>/default.nix` files patch Factory exports or
+encode site configuration as Nix data, using strings only for executable JS/TS.
+Keep workflow customizations in `nix/github/workflows/`, matching Factory.
+Do not add duplicate native config templates or a local `nix/lib.nix`;
+reusable formatting comes from Factory's `biome.formatFile`. Keep only the
+ordinary Factory/site/copy bindings in the flake. Root configurations are tracked regular files;
 `.envrc` runs `factory-files write` and Check compares worktree and Git-index
 copies. Keep template sources out of runtime paths; Vale uses `.vale/styles/`.
 Leave tool-mutated files such as `package.json`, dependency locks and pnpm build
