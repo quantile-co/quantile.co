@@ -7,10 +7,7 @@
 }:
 let
   exe = lib.getExe;
-  biomeConfig = import ./nix/biome.nix { inherit config lib pkgs; };
-  secretspecConfig = import ./nix/secretspec.nix { inherit config pkgs; };
   terraformRoot = "tf/infrastructure";
-  firebaseHosting = builtins.fromJSON (builtins.readFile ./nix/firebase-hosting.json);
   knipTemplate = builtins.readFile config.quantile.knip.configFile;
   knipAnchor = "\"ignoreBinaries\": [\"nix\"]";
   dependabotFile = config.quantile.dependabot.withUpdates [
@@ -79,7 +76,7 @@ in
   ] config.quantile.semgrep.packs;
 
   env = {
-    SECRETSPEC_FILE = "${secretspecConfig}";
+    SECRETSPEC_FILE = "${config.quantile.secretspecFile}";
     NEXT_TELEMETRY_DISABLED = "1";
     # The locked Playwright client uses the Nix browser without a second download.
     PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH = exe config.quantile.playwright.package;
@@ -121,7 +118,7 @@ in
       copyMode = "copy";
     };
     "firebase.json" = {
-      source = config.quantile.firebase.withOverrides { hosting = firebaseHosting; };
+      source = config.quantile.firebaseFile;
       copyMode = "copy";
     };
     "firestore.rules" = {
@@ -141,7 +138,7 @@ in
           ]
           knipTemplate;
     };
-    "secretspec.toml".source = secretspecConfig;
+    "secretspec.toml".source = config.quantile.secretspecFile;
     ".editorconfig".source = config.quantile.editorconfig.configFile;
     ".editorconfig-checker.json".source = config.quantile.editorconfig.checker.configFile;
     ".pre-commit-config.yaml".source = config.quantile.prek.configFile;
@@ -150,7 +147,7 @@ in
     ".tflint.hcl".source = config.quantile.tflint.configFile;
     # Biome 2.5.15 panics when its root config is a symlink (upstream #12158).
     "biome.json" = {
-      source = biomeConfig;
+      source = config.quantile.biomeFile;
       copyMode = "copy";
     };
     ".github/actionlint.yaml".source = config.quantile.actionlint.configFile;

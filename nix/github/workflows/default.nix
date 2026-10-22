@@ -196,7 +196,7 @@ let
         env -i HOME="$work/home" PATH="$PATH" CI=1 \
           NIX_CONFIG="''${NIX_CONFIG-}" NIX_SSL_CERT_FILE="''${NIX_SSL_CERT_FILE-}" \
           SSL_CERT_FILE="''${SSL_CERT_FILE-}" \
-          nix run '.#devenv-cli' -- tasks run --show-output devenv:files
+          nix --extra-experimental-features 'nix-command flakes' run '.#devenv-cli' -- tasks run --show-output devenv:files
       )
       git archive --format=zip --output="$work/source.zip" "$APP_SHA"
       for name in tsconfig.json firebase.json firestore.rules; do
