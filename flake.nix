@@ -71,6 +71,7 @@
                 jdk21
               ])
               ++ [
+                inputs.factory.packages.${pkgs.stdenv.hostPlatform.system}.herdr
                 (factory.playwright.withVersion (builtins.fromJSON (builtins.readFile ./package.json))
                   .devDependencies.playwright)
               ]
@@ -152,6 +153,7 @@
               ".github/workflows/apply.yaml" = copy site.github.workflows.apply.configFile;
               ".github/dependabot.yml" = copy site.dependabot.configFile;
               ".pi/settings.json" = copy factory.pi.settingsFile;
+              ".pi/extensions" = copy factory.pi.extensionsDir;
               ".pi/skills/deploy" = copy (factory.pi.skillsDir + "/deploy");
               ".pi/skills/day-zero-deploy" = copy (factory.pi.skillsDir + "/day-zero-deploy");
               ".pi/skills/seo-audit" = copy (factory.pi.skillsDir + "/seo-audit");

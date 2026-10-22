@@ -5,7 +5,10 @@
       builtins.toJSON (
         (builtins.fromJSON (builtins.readFile factory.knip.configFile))
         // {
-          ignore = [ "lib/browser/test.tsx" ];
+          ignore = [
+            "lib/browser/test.tsx"
+            ".pi/extensions/**"
+          ];
           ignoreDependencies = [ "@biomejs/biome" ];
         }
       )

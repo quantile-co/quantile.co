@@ -12,6 +12,7 @@
             "!build"
             "!components/**/*.module.css"
             "!!.pi/skills"
+            "!!.pi/extensions"
             "!!.semgrep"
           ];
           formatter.indentWidth = 2;
