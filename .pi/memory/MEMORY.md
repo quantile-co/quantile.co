@@ -69,6 +69,10 @@ packages, development tools and copied-file selections visible through
 `lib.mkFlake`. Tool-owned `nix/<tool>/default.nix` files patch Factory exports or
 encode site configuration as Nix data, using strings only for executable JS/TS.
 Keep workflow customizations in `nix/github/workflows/`, matching Factory.
+Every directory under `nix/`, including the root, has a `default.nix`. Root and
+intermediate defaults only wire imports/exports through adjacent directory entry
+points; leaf defaults own the implementation, normally beside `default.test.ts`.
+Do not split leaf implementation into `module.nix` or another forwarding-only file.
 Do not add duplicate native config templates or a local `nix/lib.nix`;
 reusable formatting comes from Factory's `biome.formatFile`. Keep only the
 ordinary Factory/site/copy bindings in the flake. Root configurations are tracked regular files;

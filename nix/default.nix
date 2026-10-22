@@ -12,7 +12,7 @@
     inherit pkgs;
     inherit (inputs) factory;
   };
-  github.workflows = import ./github/workflows { inherit pkgs factory; };
+  github = import ./github { inherit pkgs factory; };
   knip = import ./knip { inherit pkgs factory; };
   next = import ./next { inherit pkgs factory; };
   postcss = import ./postcss { inherit pkgs factory; };
