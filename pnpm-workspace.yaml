@@ -1,4 +1,6 @@
 allowBuilds:
   esbuild: true
   protobufjs: true
+  # Superstatic supports a JavaScript fallback; this repo uses glob Hosting rules.
+  re2: false
   sharp: true
