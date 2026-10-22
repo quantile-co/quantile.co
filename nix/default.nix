@@ -15,7 +15,6 @@
   github.workflows = import ./github/workflows { inherit pkgs factory; };
   knip = import ./knip { inherit pkgs factory; };
   next = import ./next { inherit pkgs factory; };
-  pi = import ./pi { inherit factory; };
   postcss = import ./postcss { inherit pkgs factory; };
   typescript = import ./typescript { inherit factory; };
   vale = import ./vale { inherit pkgs factory; };

@@ -140,7 +140,7 @@
               ".github/workflows/plan.yaml" = copy site.github.workflows.plan.configFile;
               ".github/workflows/apply.yaml" = copy site.github.workflows.apply.configFile;
               ".github/dependabot.yml" = copy site.dependabot.configFile;
-              ".pi/settings.json" = copy site.pi.settingsFile;
+              ".pi/settings.json" = copy factory.pi.settingsFile;
               ".pi/skills/deploy" = copy (factory.pi.skillsDir + "/deploy");
               ".pi/skills/day-zero-deploy" = copy (factory.pi.skillsDir + "/day-zero-deploy");
               ".pi/skills/seo-audit" = copy (factory.pi.skillsDir + "/seo-audit");
