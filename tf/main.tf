@@ -1,8 +1,3 @@
-moved {
-  from = module.github
-  to   = module.gh
-}
-
 # trivy:ignore:AVD-GIT-0001
 module "gh" {
   source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=5088c9c27846d4ca501dedb10a3b36f4bea41ed4"

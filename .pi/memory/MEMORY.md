@@ -132,9 +132,10 @@ not prove a pairing. Missing owner configuration denies protected workflows.
 `GCP_TF_STATE_BUCKET` replaces the legacy `TF_STATE_BUCKET` variable without
 changing the bucket or `repository/prod`. Billing account, folder and `US` bucket
 location are verified concrete-root values, not workflow overrides. Root outputs
-are `gh_repo_id`, `gcp_project_id` and `gcp_tf_state_bucket`; `module.gh` retains an
-explicit move from `module.github`. Review any address/output migration in a
-separately authorized plan, preserving existing platform instance keys. Use one
+are `gh_repo_id`, `gcp_project_id` and `gcp_tf_state_bucket`. The completed
+`module.github` → `module.gh` move is removed from the root after its approved
+Apply. Review future address/output migrations in a separately authorized plan,
+preserving existing platform instance keys. Use one
 operator `PLAN_REF` for saved-plan review and Apply. See the managed
 [configuration reference](../skills/deploy/references/configuration.md).
 
@@ -148,6 +149,11 @@ operator `PLAN_REF` for saved-plan review and Apply. See the managed
 - Configuration/release-tool refactor: source `42561c3`, immutable `v0.2.17`, Build
   `39493415503`; no-change Plan `39494880931`, receipt `12297920416`, approved Apply
   `39496148733`. Review is closed; no saved-plan approval carries forward.
+- Paired configuration contract: source `2acdf432549a7127185babb6fd882c3324ee8942`,
+  immutable `v0.2.20`, Build `39920543291`; repository-infrastructure Apply
+  `39923368115` succeeded. The temporary module-address move is retired. This
+  release and Infrastructure Apply do not establish a site deployment or authorize
+  another production phase.
 
 These were source/repository-infrastructure rollouts, not site deployments or
 provider-backed application tests. They do not establish present Checkout,
