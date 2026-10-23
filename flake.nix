@@ -166,7 +166,10 @@
               ".pi/skills/accessibility" = copy (factory.pi.skillsDir + "/accessibility");
               ".pi/skills/seo" = copy (factory.pi.skillsDir + "/seo");
               ".pi/skills/best-practices" = copy (factory.pi.skillsDir + "/best-practices");
-              ".qmd/index.yml" = copy factory.qmd.configFile;
+              ".qmd/index.yml" = {
+                source = factory.qmd.configFile;
+                mode = "seed";
+              };
               ".semgrep/tf" = copy (factory.semgrep.rulesDir + "/tf");
               ".semgrep/packs/typescript.yaml" = copy factory.semgrep.packs.typescript;
               ".semgrep/packs/terraform.yaml" = copy factory.semgrep.packs.terraform;
