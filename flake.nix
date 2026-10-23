@@ -81,7 +81,12 @@
                 prek.package
                 prek.tools.package
                 resend-cli.package
+                amp.package
+                clickhouse.package
+                clickhousectl.package
+                hunk.package
                 langfuse.package
+                tailscale.package
                 dependabot.check.package
                 prek.check.package
                 nixfmt.check.package
