@@ -45,11 +45,11 @@
         "semgrep-rules": "semgrep-rules"
       },
       "locked": {
-        "lastModified": 1792735087,
-        "narHash": "sha256-eRjLnfkpNeNX58zSftSlw6vTGwqhQxlVZIg5aNZUPFY=",
+        "lastModified": 1792737787,
+        "narHash": "sha256-jLlFU3d/GHPEuUr0bWB9k2WRy+oHDnUnjrGevKHio7s=",
         "owner": "quantile-co",
         "repo": "factory",
-        "rev": "2a268c8f600571eeaf168458ddb778786ded59ce",
+        "rev": "9e2fb4950e7d5502da2a6cbacb30e1e431227a74",
         "type": "github"
       },
       "original": {

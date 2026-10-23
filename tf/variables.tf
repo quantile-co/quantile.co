@@ -1,35 +1,45 @@
-variable "gcp_billing_account" {
-  description = "GCP billing account ID."
-  type        = string
-}
-
-variable "gcp_folder_id" {
-  description = "GCP folder containing this repository's state project."
-  type        = string
-}
-
-variable "gcp_maintainers" {
-  description = "Google account emails allowed to read saved plans, not state."
-  type        = set(string)
-}
-
-variable "gcp_state_location" {
-  description = "Existing location of the protected state bucket."
-  type        = string
-  default     = "US"
-}
-
 variable "gcp_wif_pool" {
-  description = "Full GitHub workload identity pool resource path."
+  description = "Existing, trusted GitHub WIF pool resource path supplied by Q0."
   type        = string
+  nullable    = false
 }
 
-variable "gh_maintainers" {
-  description = "GitHub maintainer usernames for protected workflow access."
-  type        = set(string)
+variable "project_owners" {
+  description = "Paired identities for existing plan readers and protected deployment actors."
+  type = list(object({
+    gcp_email   = string
+    gh_username = string
+  }))
+  nullable = false
 
   validation {
-    condition     = length(var.gh_maintainers) > 0
-    error_message = "At least one maintainer is required."
+    condition     = length(var.project_owners) > 0
+    error_message = "Supply at least one project owner."
   }
+
+  validation {
+    condition = alltrue([for person in concat(var.project_owners, var.project_members) :
+      can(regex("^[^@[:space:]]+@[^@[:space:]]+\\.[^@[:space:]]+$", person.gcp_email)) &&
+      can(regex("^[A-Za-z0-9][A-Za-z0-9-]{0,38}$", person.gh_username))
+    ])
+    error_message = "Each owner and member needs a Google account email and GitHub username."
+  }
+
+  validation {
+    condition = (
+      length(distinct([for person in concat(var.project_owners, var.project_members) : try(lower(person.gcp_email), "")])) == length(var.project_owners) + length(var.project_members) &&
+      length(distinct([for person in concat(var.project_owners, var.project_members) : try(lower(person.gh_username), "")])) == length(var.project_owners) + length(var.project_members)
+    )
+    error_message = "Each email and GitHub username must occur once across owners and members, ignoring case."
+  }
+}
+
+variable "project_members" {
+  description = "Paired repository writers; no protected deployment eligibility or GCP access."
+  type = list(object({
+    gcp_email   = string
+    gh_username = string
+  }))
+  default  = []
+  nullable = false
 }

@@ -1,7 +1,7 @@
 # Release immutability belongs to this application's publication contract.
 # Removing this marker never disables the remote setting.
 resource "terraform_data" "immutable_releases" {
-  input = module.github.repository_name
+  input = module.gh.repo_name
 
   provisioner "local-exec" {
     command = <<-EOT
@@ -30,7 +30,7 @@ data "external" "immutable_releases" {
   program = [
     "bash", "-c",
     "export GH_TOKEN=\"$GITHUB_TOKEN\"; exec gh api \"repos/quantile-co/$1/immutable-releases\" --jq '{enabled: (.enabled | tostring)}'",
-    "immutable-releases", module.github.repository_name,
+    "immutable-releases", module.gh.repo_name,
   ]
 
   lifecycle {

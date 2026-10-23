@@ -123,6 +123,21 @@ applies those exact bytes without replanning. No GitHub artifact or receipt is p
 Maintain WIF, locks, protected environments and plans-only human reads. Keep main
 fixed during review. New production operations require new authorization.
 
+The Factory configuration contract uses required paired `project_owners` and
+optional `project_members` (default `[]`), projected directly into platform modules.
+`PROJECT_OWNERS` gates both original and triggering actors for Build, Plan and
+Apply; members receive repository write only, never GCP/WIF or deployment grants.
+Confirm identity pairings before configuring rosters; separate legacy lists do
+not prove a pairing. Missing owner configuration denies protected workflows.
+`GCP_TF_STATE_BUCKET` replaces the legacy `TF_STATE_BUCKET` variable without
+changing the bucket or `repository/prod`. Billing account, folder and `US` bucket
+location are verified concrete-root values, not workflow overrides. Root outputs
+are `gh_repo_id`, `gcp_project_id` and `gcp_tf_state_bucket`; `module.gh` retains an
+explicit move from `module.github`. Review any address/output migration in a
+separately authorized plan, preserving existing platform instance keys. Use one
+operator `PLAN_REF` for saved-plan review and Apply. See the managed
+[configuration reference](../skills/deploy/references/configuration.md).
+
 ## Completed public rollouts
 
 - Factory migration: immutable `v0.2.16`, Build `39475543087`; Plan `39476218139`,

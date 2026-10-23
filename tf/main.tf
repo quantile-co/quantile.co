@@ -1,6 +1,11 @@
+moved {
+  from = module.github
+  to   = module.gh
+}
+
 # trivy:ignore:AVD-GIT-0001
-module "github" {
-  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=71090a5437fe99927b5cfc86a2ebfb5a56ce3281"
+module "gh" {
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=9e2fb4950e7d5502da2a6cbacb30e1e431227a74"
 
   allowed_action_patterns = [
     "quantile-co/factory/.github/workflows/*@*",
@@ -10,24 +15,26 @@ module "github" {
     "namespacelabs/nscloud-cache-action@1124a6f3ce44e5cf84cc22111530961f4d2a15f9",
   ]
 
-  repository_name = "quantile.co"
+  repo_name       = "quantile.co"
   description     = "Quantile marketing site."
   visibility      = "public"
-  maintainers     = var.gh_maintainers
+  owners          = [for person in var.project_owners : person.gh_username]
+  members         = [for person in var.project_members : person.gh_username]
   required_checks = ["All"]
   environments    = ["prod"]
 }
 
 module "gcp" {
-  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/gcp?ref=71090a5437fe99927b5cfc86a2ebfb5a56ce3281"
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/gcp?ref=9e2fb4950e7d5502da2a6cbacb30e1e431227a74"
 
   project_prefix    = "quantile-co"
-  folder_id         = var.gcp_folder_id
-  billing_account   = var.gcp_billing_account
-  tf_state_location = var.gcp_state_location
+  folder_id         = "145094075590"
+  billing_account   = "0120D4-52D1E2-9C3D0D"
+  tf_state_location = "US"
   wif_pool          = var.gcp_wif_pool
-  maintainers       = var.gcp_maintainers
+  owners            = [for person in var.project_owners : person.gcp_email]
+  members           = [for person in var.project_members : person.gcp_email]
 
-  repository_id             = module.github.repository_id
-  repository_maintainer_ids = module.github.maintainer_ids
+  gh_repo_id   = module.gh.repo_id
+  gh_owner_ids = module.gh.owner_ids
 }

@@ -25,8 +25,8 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' &&
       github.ref == 'refs/heads/main' &&
-      contains(fromJSON(vars.GH_MAINTAINERS), github.actor) &&
-      contains(fromJSON(vars.GH_MAINTAINERS), github.triggering_actor)
+      contains(fromJSON(vars.PROJECT_OWNERS || '[]').*.gh_username, github.actor) &&
+      contains(fromJSON(vars.PROJECT_OWNERS || '[]').*.gh_username, github.triggering_actor)
     concurrency:
       group: source-release
       cancel-in-progress: false

@@ -1,6 +1,6 @@
-output "gh_repository_id" {
+output "gh_repo_id" {
   description = "Immutable numeric GitHub repository ID."
-  value       = module.github.repository_id
+  value       = module.gh.repo_id
 }
 
 output "gcp_tf_state_bucket" {
@@ -8,7 +8,7 @@ output "gcp_tf_state_bucket" {
   value       = module.gcp.tf_state_bucket
 }
 
-output "gcp_tf_state_project_id" {
+output "gcp_project_id" {
   description = "GCP project containing this repository's OpenTofu state."
-  value       = module.gcp.tf_state_project_id
+  value       = module.gcp.project_id
 }
