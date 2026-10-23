@@ -59,17 +59,14 @@ pnpm run fix
 ### Tests
 
 ```sh
-# Run the existing unit, Firestore emulator and browser tests.
-pnpm test
-
-# Run provider-backed integration tests.
-pnpm run test:integration
+pnpm test # Run local tests.
+pnpm run test:integration # Run provider-backed integration tests.
 ```
 
 ### Build
 
 ```sh
-pnpm run build:assets
+pnpm run build:assets # Generate brand assets.
 pnpm run build
 pnpm run build:storybook
 ```
