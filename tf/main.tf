@@ -5,7 +5,7 @@ moved {
 
 # trivy:ignore:AVD-GIT-0001
 module "gh" {
-  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=9e2fb4950e7d5502da2a6cbacb30e1e431227a74"
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=5088c9c27846d4ca501dedb10a3b36f4bea41ed4"
 
   allowed_action_patterns = [
     "quantile-co/factory/.github/workflows/*@*",
@@ -25,7 +25,7 @@ module "gh" {
 }
 
 module "gcp" {
-  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/gcp?ref=9e2fb4950e7d5502da2a6cbacb30e1e431227a74"
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/gcp?ref=5088c9c27846d4ca501dedb10a3b36f4bea41ed4"
 
   project_prefix    = "quantile-co"
   folder_id         = "145094075590"

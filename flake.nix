@@ -81,6 +81,7 @@
                 prek.package
                 prek.tools.package
                 resend-cli.package
+                langfuse.package
                 dependabot.check.package
                 prek.check.package
                 nixfmt.check.package
