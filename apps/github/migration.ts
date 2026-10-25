@@ -1,8 +1,10 @@
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   appendFileSync,
   closeSync,
+  constants,
+  fstatSync,
   mkdirSync,
   mkdtempSync,
   openSync,
@@ -10,6 +12,8 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
+
+class MigrationFailure extends Error {}
 
 const repository = "quantile-co/quantile.co";
 const bucket = "quantile-co-9e46-tf-state";
@@ -21,7 +25,23 @@ const states = [
   },
 ];
 
+const exactJson = JSON as typeof JSON & {
+  rawJSON(source: string): unknown;
+  isRawJSON(value: unknown): boolean;
+};
+function parseExact(text: string): unknown {
+  return JSON.parse(
+    text,
+    (_key: string, value: unknown, context?: { source?: string }) => {
+      if (typeof value !== "number") return value;
+      if (!context?.source)
+        throw new MigrationFailure("Lossless JSON parsing is unavailable");
+      return exactJson.rawJSON(context.source);
+    },
+  );
+}
 function sorted(value: unknown): unknown {
+  if (exactJson.isRawJSON(value)) return value;
   if (Array.isArray(value)) return value.map(sorted);
   if (value && typeof value === "object")
     return Object.fromEntries(
@@ -44,9 +64,11 @@ export function stateDigest(bytes: Uint8Array) {
     !state.outputs ||
     typeof state.outputs !== "object"
   )
-    throw new Error("Invalid state snapshot");
+    throw new MigrationFailure("Invalid state snapshot");
   return createHash("sha256")
-    .update(JSON.stringify(sorted(state)))
+    .update(
+      JSON.stringify(sorted(parseExact(Buffer.from(bytes).toString("utf8")))),
+    )
     .digest("hex");
 }
 
@@ -56,16 +78,24 @@ export function verifyTransition(
   increment = 1,
 ) {
   const original = JSON.parse(Buffer.from(before).toString("utf8"));
+  const originalExact = parseExact(
+    Buffer.from(before).toString("utf8"),
+  ) as Record<string, unknown>;
   const migrated = JSON.parse(Buffer.from(after).toString("utf8"));
   stateDigest(before);
   stateDigest(after);
   if (
     migrated.serial !== original.serial + increment ||
     stateDigest(
-      Buffer.from(JSON.stringify({ ...original, serial: migrated.serial })),
+      Buffer.from(
+        JSON.stringify({
+          ...originalExact,
+          serial: exactJson.rawJSON(String(migrated.serial)),
+        }),
+      ),
     ) !== stateDigest(after)
   )
-    throw new Error("Unexpected state migration transition");
+    throw new MigrationFailure("Unexpected state migration transition");
 }
 
 export function migrationAnswer(output: string, backend = "gcs") {
@@ -81,63 +111,195 @@ export function migrationAnswer(output: string, backend = "gcs") {
     : "no\n";
 }
 
+const outputLimit = 100_000_000;
+const interruptGraceMs = 2_000;
+
+export async function runOwned(
+  name: string,
+  args: string[],
+  env: NodeJS.ProcessEnv,
+  log?: string,
+  interactiveBackend?: string,
+  signal?: AbortSignal,
+  timeoutMs = 300_000,
+): Promise<Buffer> {
+  signal?.throwIfAborted();
+  if (process.platform === "win32")
+    throw new MigrationFailure("POSIX process groups required");
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0)
+    throw new MigrationFailure("Invalid command timeout");
+  const fd =
+    log === undefined
+      ? undefined
+      : openSync(
+          log,
+          constants.O_WRONLY |
+            constants.O_APPEND |
+            constants.O_CREAT |
+            constants.O_NOFOLLOW,
+          0o600,
+        );
+  try {
+    if (fd !== undefined) {
+      const info = fstatSync(fd);
+      if (!info.isFile() || (info.mode & 0o077) !== 0)
+        throw new MigrationFailure(
+          "Diagnostics must be a private regular file",
+        );
+    }
+    return await new Promise<Buffer>((resolve, reject) => {
+      const child = spawn(name, args, {
+        env,
+        detached: true,
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+      const captured: Buffer[] = [];
+      let size = 0,
+        prompt = "",
+        answered = false;
+      let failure: Error | undefined;
+      let closed = false,
+        cleanupDone = false,
+        stopping = false;
+      let escalation: ReturnType<typeof setTimeout> | undefined;
+      let deadline: ReturnType<typeof setTimeout> | undefined;
+      let status: number | null = null;
+
+      const groupSignal = (value: NodeJS.Signals | 0) => {
+        if (!child.pid) return false;
+        try {
+          process.kill(-child.pid, value);
+          return true;
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== "ESRCH")
+            failure ??= new MigrationFailure(
+              "Owned process group cleanup failed",
+            );
+          return false;
+        }
+      };
+      const finish = () => {
+        if (!closed || !cleanupDone) return;
+        clearTimeout(deadline);
+        clearTimeout(escalation);
+        signal?.removeEventListener("abort", cancelled);
+        if (failure) reject(failure);
+        else if (status !== 0)
+          reject(
+            new MigrationFailure(
+              "Owned command failed; inspect private diagnostics",
+            ),
+          );
+        else if (interactiveBackend !== undefined && !answered)
+          reject(
+            new MigrationFailure("Missing empty-destination confirmation"),
+          );
+        else resolve(Buffer.concat(captured));
+      };
+      const cleanup = () => {
+        if (stopping) return;
+        stopping = true;
+        if (!groupSignal("SIGINT")) {
+          cleanupDone = true;
+          finish();
+          return;
+        }
+        escalation = setTimeout(() => {
+          // Kill remaining descendants even if the group leader has already exited.
+          groupSignal("SIGKILL");
+          cleanupDone = true;
+          finish();
+        }, interruptGraceMs);
+      };
+      const stop = (reason: string) => {
+        failure ??= new MigrationFailure(reason);
+        cleanup();
+      };
+      const cancelled = () => stop("Owned command interrupted");
+      child.once("error", () => stop("Owned command could not start"));
+      child.stdin.on("error", () => stop("Owned command stdin failed"));
+      child.stdout.on("error", () => stop("Owned command stdout failed"));
+      child.stderr.on("error", () => stop("Owned command stderr failed"));
+      const receive = (data: Buffer, stdout: boolean) => {
+        if (size + data.length > outputLimit) {
+          stop("Owned command output limit exceeded");
+          return;
+        }
+        size += data.length;
+        if (fd !== undefined) {
+          try {
+            appendFileSync(fd, data);
+          } catch {
+            stop("Private diagnostics write failed");
+            return;
+          }
+        }
+        if (stdout) captured.push(data);
+        if (interactiveBackend === undefined || failure) return;
+        prompt = (prompt + data.toString("utf8")).slice(-100_000);
+        if (prompt.includes("Enter a value:")) {
+          if (answered) {
+            stop("Unexpected additional migration confirmation");
+            return;
+          }
+          answered = true;
+          const answer = migrationAnswer(prompt, interactiveBackend);
+          prompt = "";
+          child.stdin.end(answer);
+          if (answer !== "yes\n")
+            stop("Refused nonempty or unknown migration prompt");
+        }
+      };
+      child.stdout.on("data", (data: Buffer) => receive(data, true));
+      child.stderr.on("data", (data: Buffer) => receive(data, false));
+      child.once("exit", () => {
+        if (groupSignal(0)) {
+          failure ??= new MigrationFailure("Owned command left descendants");
+          cleanup();
+        } else {
+          clearTimeout(escalation);
+          cleanupDone = true;
+        }
+        finish();
+      });
+      child.once("close", (code) => {
+        status = code;
+        closed = true;
+        if (!child.pid || !groupSignal(0)) {
+          clearTimeout(escalation);
+          cleanupDone = true;
+        } else {
+          failure ??= new MigrationFailure("Owned command left descendants");
+          cleanup();
+        }
+        finish();
+      });
+      signal?.addEventListener("abort", cancelled, { once: true });
+      deadline = setTimeout(() => stop("Owned command timed out"), timeoutMs);
+      if (signal?.aborted) cancelled();
+      if (interactiveBackend === undefined) child.stdin.end();
+    });
+  } finally {
+    if (fd !== undefined) closeSync(fd);
+  }
+}
+
 export async function migrateBackend(
   args: string[],
   env: NodeJS.ProcessEnv,
   log: string,
   backend = "gcs",
+  signal?: AbortSignal,
+  timeoutMs = 300_000,
 ) {
-  const fd = openSync(log, "a", 0o600);
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const child = spawn("tofu", args, {
-        env,
-        stdio: ["pipe", "pipe", "pipe"],
-      });
-      let output = "",
-        answered = false,
-        refused = false;
-      const timer = setTimeout(() => {
-        refused = true;
-        child.kill("SIGINT");
-      }, 300_000);
-      const receive = (data: Buffer) => {
-        appendFileSync(fd, data);
-        output = (output + data.toString()).slice(-100_000);
-        if (!answered && output.includes("Enter a value:")) {
-          answered = true;
-          const answer = migrationAnswer(output, backend);
-          refused = answer !== "yes\n";
-          child.stdin.end(answer);
-        }
-      };
-      child.stdout.on("data", receive);
-      child.stderr.on("data", receive);
-      child.once("error", (error) => {
-        clearTimeout(timer);
-        reject(error);
-      });
-      child.once("close", (code) => {
-        clearTimeout(timer);
-        if (code === 0 && answered && !refused) resolve();
-        else
-          reject(
-            new Error(
-              "Native backend migration did not complete with an empty-destination confirmation",
-            ),
-          );
-      });
-    });
-  } finally {
-    closeSync(fd);
-  }
+  await runOwned("tofu", args, env, log, backend, signal, timeoutMs);
 }
 
-async function main(env: NodeJS.ProcessEnv) {
+async function main(env: NodeJS.ProcessEnv, signal: AbortSignal) {
   process.umask(0o077);
   const required = (key: string) => {
     const value = env[key];
-    if (!value) throw new Error(`Missing ${key}`);
+    if (!value) throw new MigrationFailure(`Missing ${key}`);
     return value;
   };
   if (
@@ -149,13 +311,13 @@ async function main(env: NodeJS.ProcessEnv) {
       `${repository}/.github/workflows/apply.yaml@refs/heads/main` ||
     required("GCP_TF_STATE_BUCKET") !== bucket
   )
-    throw new Error("Migration workflow identity differs");
+    throw new MigrationFailure("Migration workflow identity differs");
   const phase = required("MIGRATION_PHASE");
   if (
     !["preflight", "migrate"].includes(phase) ||
     required("MIGRATION_CONFIRM") !== repository
   )
-    throw new Error("Migration phase or confirmation differs");
+    throw new MigrationFailure("Migration phase or confirmation differs");
   const runId = required("GITHUB_RUN_ID"),
     attempt = required("GITHUB_RUN_ATTEMPT"),
     repoId = required("GITHUB_REPOSITORY_ID"),
@@ -164,7 +326,7 @@ async function main(env: NodeJS.ProcessEnv) {
     ![runId, attempt, repoId].every((value) => /^[1-9][0-9]*$/.test(value)) ||
     !/^[0-9a-f]{40}$/.test(revision)
   )
-    throw new Error("Invalid workflow metadata");
+    throw new MigrationFailure("Invalid workflow metadata");
   const scratch = mkdtempSync(
     join(required("RUNNER_TEMP"), "backend-migration-"),
   );
@@ -189,33 +351,25 @@ async function main(env: NodeJS.ProcessEnv) {
     if (env[key] !== undefined) providerEnv[key] = env[key];
   providerEnv.TF_IN_AUTOMATION = "true";
   providerEnv.TF_WORKSPACE = "default";
-  const command = (name: string, args: string[], localEnv = providerEnv) => {
-    const result = spawnSync(name, args, {
-      env: localEnv,
-      encoding: "buffer",
-      maxBuffer: 100_000_000,
-    });
-    if (name !== "gcloud")
-      appendFileSync(
-        log,
-        Buffer.concat([
-          result.stdout ?? Buffer.alloc(0),
-          result.stderr ?? Buffer.alloc(0),
-        ]),
-      );
-    if (result.error || result.status !== 0)
-      throw new Error("Migration command failed; inspect private diagnostics");
-    return result.stdout;
-  };
-  const token = command("gcloud", ["auth", "print-access-token"])
+  const command = (name: string, args: string[], localEnv = providerEnv) =>
+    runOwned(
+      name,
+      args,
+      localEnv,
+      name === "gcloud" ? undefined : log,
+      undefined,
+      signal,
+    );
+  const token = (await command("gcloud", ["auth", "print-access-token"]))
     .toString()
     .trim();
-  if (!token) throw new Error("Missing workflow access token");
+  if (!token) throw new MigrationFailure("Missing workflow access token");
   const storage = async (url: string, init: RequestInit = {}) => {
+    signal.throwIfAborted();
     const response = await fetch(url, {
       ...init,
       headers: { Authorization: `Bearer ${token}`, ...init.headers },
-      signal: AbortSignal.timeout(60_000),
+      signal: AbortSignal.any([signal, AbortSignal.timeout(60_000)]),
       redirect: "error",
     });
     return response;
@@ -225,23 +379,27 @@ async function main(env: NodeJS.ProcessEnv) {
   const metadata = async (name: string) => {
     const response = await storage(objectUrl(name));
     if (response.status === 404) return undefined;
-    if (!response.ok) throw new Error("Object metadata access failed");
+    if (!response.ok)
+      throw new MigrationFailure(
+        `Object metadata access failed: HTTP ${response.status}`,
+      );
     const data = (await response.json()) as {
       generation: string;
       size: string;
     };
     if (!/^[1-9][0-9]*$/.test(data.generation) || !/^[0-9]+$/.test(data.size))
-      throw new Error("Invalid object metadata");
+      throw new MigrationFailure("Invalid object metadata");
     return data;
   };
   const bytes = async (name: string, generation: string) => {
     const response = await storage(
       `${objectUrl(name)}?alt=media&generation=${generation}`,
     );
-    if (!response.ok) throw new Error("Exact-generation object read failed");
+    if (!response.ok)
+      throw new MigrationFailure("Exact-generation object read failed");
     const body = Buffer.from(await response.arrayBuffer());
     if (body.length === 0 || body.length > 100_000_000)
-      throw new Error("Invalid state size");
+      throw new MigrationFailure("Invalid state size");
     return body;
   };
   const create = async (name: string, body: Buffer) => {
@@ -253,23 +411,53 @@ async function main(env: NodeJS.ProcessEnv) {
         body: new Uint8Array(body),
       },
     );
-    if (!response.ok) throw new Error("Create-only backup upload failed");
+    if (!response.ok)
+      throw new MigrationFailure("Create-only backup upload failed");
     const data = (await response.json()) as { generation: string };
     if (!/^[1-9][0-9]*$/.test(data.generation))
-      throw new Error("Invalid backup generation");
+      throw new MigrationFailure("Invalid backup generation");
     return data.generation;
   };
   const noDestination = async (prefix: string) => {
     const response = await storage(
       `https://storage.googleapis.com/storage/v1/b/${bucket}/o?prefix=${encodeURIComponent(`${prefix}/`)}&versions=true&maxResults=1`,
     );
-    if (!response.ok) throw new Error("Destination history access failed");
+    if (!response.ok)
+      throw new MigrationFailure("Destination history access failed");
     const data = (await response.json()) as {
       items?: unknown[];
       nextPageToken?: string;
     };
     if ((data.items?.length ?? 0) > 0 || data.nextPageToken)
-      throw new Error("Destination is not unused");
+      throw new MigrationFailure("Destination is not unused");
+  };
+  const sourceInventory = async (prefix: string) => {
+    const response = await storage(
+      `https://storage.googleapis.com/storage/v1/b/${bucket}/o?prefix=${encodeURIComponent(`${prefix}/`)}&delimiter=%2F&maxResults=1000`,
+    );
+    if (!response.ok)
+      throw new MigrationFailure("Source inventory access failed");
+    const listing = (await response.json()) as {
+      items?: { name?: string }[];
+      prefixes?: string[];
+      nextPageToken?: string;
+    };
+    const nested = states
+      .filter((state) => state.from.startsWith(`${prefix}/`))
+      .map(
+        (state) =>
+          `${prefix}/${state.from.slice(prefix.length + 1).split("/")[0]}/`,
+      );
+    if (
+      listing.nextPageToken ||
+      !Array.isArray(listing.items) ||
+      listing.items.length !== 1 ||
+      listing.items[0].name !== `${prefix}/default.tfstate` ||
+      (listing.prefixes ?? []).some((value) => !nested.includes(value))
+    )
+      throw new MigrationFailure(
+        "Unexpected source workspace or lock inventory",
+      );
   };
   const workflowGate = async () => {
     const get = async (path: string) => {
@@ -280,16 +468,16 @@ async function main(env: NodeJS.ProcessEnv) {
             Authorization: `Bearer ${required("GITHUB_TOKEN")}`,
             Accept: "application/vnd.github+json",
           },
-          signal: AbortSignal.timeout(30_000),
+          signal: AbortSignal.any([signal, AbortSignal.timeout(30_000)]),
           redirect: "error",
         },
       );
-      if (!response.ok) throw new Error("Workflow gate read failed");
+      if (!response.ok) throw new MigrationFailure("Workflow gate read failed");
       return response.json();
     };
     const ref = await get("git/ref/heads/main");
     if (ref.object?.sha !== revision)
-      throw new Error("Main changed during migration");
+      throw new MigrationFailure("Main changed during migration");
     for (const status of [
       "in_progress",
       "queued",
@@ -310,22 +498,24 @@ async function main(env: NodeJS.ProcessEnv) {
             ].includes(run.path),
         )
       )
-        throw new Error("Another production writer is active or queued");
+        throw new MigrationFailure(
+          "Another production writer is active or queued",
+        );
     }
   };
   let stage = "preflight";
   try {
     const version = JSON.parse(
-      command("tofu", ["version", "-json"]).toString(),
+      (await command("tofu", ["version", "-json"])).toString(),
     );
     if (version.terraform_version !== "1.13.1")
-      throw new Error("Unexpected OpenTofu version");
+      throw new MigrationFailure("Unexpected OpenTofu version");
     await workflowGate();
     const bucketResponse = await storage(
       `https://storage.googleapis.com/storage/v1/b/${bucket}`,
     );
     if (!bucketResponse.ok)
-      throw new Error("Bucket safeguards cannot be verified");
+      throw new MigrationFailure("Bucket safeguards cannot be verified");
     const bucketData = (await bucketResponse.json()) as {
       versioning?: { enabled?: boolean };
       iamConfiguration?: {
@@ -338,23 +528,24 @@ async function main(env: NodeJS.ProcessEnv) {
       bucketData.iamConfiguration?.publicAccessPrevention !== "enforced" ||
       !bucketData.iamConfiguration?.uniformBucketLevelAccess?.enabled
     )
-      throw new Error("Bucket safeguards differ");
+      throw new MigrationFailure("Bucket safeguards differ");
     const snapshots = [];
     for (const state of states) {
       const source = `${state.from}/default.tfstate`;
       const original = await metadata(source);
       if (!original || Number(original.size) <= 0)
-        throw new Error("Source state is absent");
+        throw new MigrationFailure("Source state is absent or empty");
       if (
         (await metadata(`${state.from}/default.tflock`)) ||
         (await metadata(`${state.to}/default.tflock`))
       )
-        throw new Error("A state lock is active");
+        throw new MigrationFailure("A state lock is active");
       await noDestination(state.to);
+      await sourceInventory(state.from);
       const before = await bytes(source, original.generation);
       stateDigest(before);
       if (JSON.parse(before.toString()).terraform_version !== "1.13.1")
-        throw new Error("Unexpected source state version");
+        throw new MigrationFailure("Unexpected source state version");
       snapshots.push({ ...state, source, original, before });
     }
     if (phase === "preflight") {
@@ -370,13 +561,13 @@ async function main(env: NodeJS.ProcessEnv) {
       if (
         (await metadata(state.source))?.generation !== state.original.generation
       )
-        throw new Error("Source changed before backup");
+        throw new MigrationFailure("Source changed before backup");
       const backup = `${backupPrefix}/${state.layer}.tfstate`;
       const backupGeneration = await create(backup, state.before);
       if (
         !Buffer.from(await bytes(backup, backupGeneration)).equals(state.before)
       )
-        throw new Error("Backup readback differs");
+        throw new MigrationFailure("Backup readback differs");
       const directory = join(scratch, state.layer);
       mkdirSync(directory, { mode: 0o700 });
       writeFileSync(
@@ -389,7 +580,7 @@ async function main(env: NodeJS.ProcessEnv) {
         TF_DATA_DIR: join(directory, ".terraform"),
       };
       stage = `${state.layer}:initialize-source`;
-      command(
+      await command(
         "tofu",
         [
           `-chdir=${directory}`,
@@ -402,28 +593,30 @@ async function main(env: NodeJS.ProcessEnv) {
         localEnv,
       );
       if (
-        command(
-          "tofu",
-          [`-chdir=${directory}`, "workspace", "list", "-no-color"],
-          localEnv,
+        (
+          await command(
+            "tofu",
+            [`-chdir=${directory}`, "workspace", "list", "-no-color"],
+            localEnv,
+          )
         )
           .toString()
           .trim() !== "* default"
       )
-        throw new Error("Unexpected state workspaces");
-      const before = command(
+        throw new MigrationFailure("Unexpected state workspaces");
+      const before = await command(
         "tofu",
         [`-chdir=${directory}`, "state", "pull"],
         localEnv,
       );
       if (stateDigest(before) !== stateDigest(state.before))
-        throw new Error(
+        throw new MigrationFailure(
           "Native source snapshot differs from the backed-up object",
         );
       if (
         (await metadata(state.source))?.generation !== state.original.generation
       )
-        throw new Error("Source changed before migration");
+        throw new MigrationFailure("Source changed before migration");
       await noDestination(state.to);
       stage = `${state.layer}:native-migration`;
       await migrateBackend(
@@ -439,9 +632,11 @@ async function main(env: NodeJS.ProcessEnv) {
         ],
         localEnv,
         log,
+        "gcs",
+        signal,
       );
       stage = `${state.layer}:verify`;
-      const after = command(
+      const after = await command(
         "tofu",
         [`-chdir=${directory}`, "state", "pull"],
         localEnv,
@@ -449,7 +644,8 @@ async function main(env: NodeJS.ProcessEnv) {
       verifyTransition(before, after);
       const destination = `${state.to}/default.tfstate`,
         destinationMetadata = await metadata(destination);
-      if (!destinationMetadata) throw new Error("Destination state is absent");
+      if (!destinationMetadata)
+        throw new MigrationFailure("Destination state is absent");
       verifyTransition(
         state.before,
         await bytes(destination, destinationMetadata.generation),
@@ -457,52 +653,69 @@ async function main(env: NodeJS.ProcessEnv) {
       if (
         (await metadata(state.source))?.generation !== state.original.generation
       )
-        throw new Error("Source changed during migration");
+        throw new MigrationFailure("Source changed during migration");
       if (
         (await metadata(`${state.from}/default.tflock`)) ||
         (await metadata(`${state.to}/default.tflock`))
       )
-        throw new Error("Native migration left a state lock");
+        throw new MigrationFailure("Native migration left a state lock");
       await workflowGate();
       stage = `${state.layer}:retire-old-object`;
+      if (
+        (await metadata(`${state.from}/default.tflock`)) ||
+        (await metadata(`${state.to}/default.tflock`))
+      )
+        throw new MigrationFailure("A state lock appeared before retirement");
       if (
         (await metadata(destination))?.generation !==
         destinationMetadata.generation
       )
-        throw new Error("Destination changed before source retirement");
+        throw new MigrationFailure(
+          "Destination changed before source retirement",
+        );
       const retired = await storage(
         `${objectUrl(state.source)}?ifGenerationMatch=${state.original.generation}`,
         { method: "DELETE" },
       );
       if (retired.status !== 204 || (await metadata(state.source)))
-        throw new Error("Old state retirement was not verified");
+        throw new MigrationFailure("Old state retirement was not verified");
       const result = `${state.layer}: verified same state at ${state.to}; backup ${backup}#${backupGeneration}; destination generation ${destinationMetadata.generation}.\n`;
       appendFileSync(required("GITHUB_STEP_SUMMARY"), result);
       console.log(
         `${state.layer}: native migration and exact state verification passed.`,
       );
     }
-  } catch {
-    if (phase === "migrate") {
+  } catch (error) {
+    if (phase === "migrate" && !signal.aborted) {
       try {
         await create(`${backupPrefix}/migration.log`, readFileSync(log));
       } catch {
         /* State backups already uploaded remain protected. */
       }
     }
-    throw new Error(
-      `Stopped at ${stage}; inspect private state backups and diagnostics under gs://${bucket}/${backupPrefix}/. Do not retry automatically.`,
+    throw new MigrationFailure(
+      `Stopped at ${stage}: ${error instanceof MigrationFailure ? error.message : "unexpected runtime failure"}; inspect private state backups and diagnostics under gs://${bucket}/${backupPrefix}/. Do not retry automatically.`,
     );
   }
 }
 
 if (import.meta.main) {
+  const abort = new AbortController();
+  const interrupt = () =>
+    abort.abort(new MigrationFailure("Migration interrupted"));
+  const terminate = () =>
+    abort.abort(new MigrationFailure("Migration terminated"));
+  process.once("SIGINT", interrupt);
+  process.once("SIGTERM", terminate);
   try {
-    await main(process.env);
+    await main(process.env, abort.signal);
   } catch (error) {
     console.error(
       error instanceof Error ? error.message : "State migration failed",
     );
-    process.exitCode = 1;
+    process.exitCode = abort.signal.aborted ? 130 : 1;
+  } finally {
+    process.removeListener("SIGINT", interrupt);
+    process.removeListener("SIGTERM", terminate);
   }
 }

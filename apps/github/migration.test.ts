@@ -54,6 +54,32 @@ it("accepts only the reviewed GCS serial increment without payload changes", () 
     );
 });
 
+it("detects changes to numbers outside JavaScript integer precision", () => {
+  const before = Buffer.from(
+    '{"version":4,"terraform_version":"1.13.1","serial":78,"lineage":"same","resources":[],"outputs":{"number":{"type":"number","value":9007199254740992}}}',
+  );
+  const after = Buffer.from(
+    before
+      .toString()
+      .replace('"serial":78', '"serial":79')
+      .replace("9007199254740992", "9007199254740993"),
+  );
+  expect(stateDigest(before)).not.toBe(
+    stateDigest(
+      Buffer.from(
+        before.toString().replace("9007199254740992", "9007199254740993"),
+      ),
+    ),
+  );
+  expect(() => verifyTransition(before, after)).toThrow(/transition/);
+  expect(() =>
+    verifyTransition(
+      before,
+      Buffer.from(before.toString().replace('"serial":78', '"serial":79')),
+    ),
+  ).not.toThrow();
+});
+
 it("migrates only an empty backend and preserves an existing destination", async () => {
   const directory = mkdtempSync(join(tmpdir(), "native-state-migration-"));
   const env = {
@@ -156,7 +182,7 @@ it("migrates only an empty backend and preserves an existing destination", async
         join(directory, "migration.log"),
         "local",
       ),
-    ).rejects.toThrow(/empty-destination confirmation/);
+    ).rejects.toThrow(/Refused nonempty or unknown migration prompt/);
     expect(readFileSync(occupied).equals(foreign)).toBe(true);
   } finally {
     rmSync(directory, { recursive: true, force: true });
