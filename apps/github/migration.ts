@@ -20,6 +20,7 @@ const bucket = "quantile-co-9e46-tf-state";
 const states = [
   {
     layer: "infrastructure",
+    directory: "tf",
     from: "repository/prod",
     to: "quantile.co/prod/infrastructure",
   },
@@ -113,24 +114,17 @@ export function migrationAnswer(output: string, backend = "gcs") {
 
 export function verifySourceInventory(
   prefix: string,
-  sources: string[],
   listing: {
     items?: { name?: string }[];
     prefixes?: string[];
     nextPageToken?: string;
   },
 ) {
-  const nested = sources
-    .filter((source) => source.startsWith(`${prefix}/`))
-    .map(
-      (source) => `${prefix}/${source.slice(prefix.length + 1).split("/")[0]}/`,
-    );
   if (
     listing.nextPageToken ||
     !Array.isArray(listing.items) ||
     listing.items.length !== 1 ||
-    listing.items[0].name !== `${prefix}/default.tfstate` ||
-    (listing.prefixes ?? []).some((value) => !nested.includes(value))
+    listing.items[0].name !== `${prefix}/default.tfstate`
   )
     throw new MigrationFailure("Unexpected source workspace or lock inventory");
 }
@@ -466,11 +460,7 @@ async function main(env: NodeJS.ProcessEnv, signal: AbortSignal) {
       prefixes?: string[];
       nextPageToken?: string;
     };
-    verifySourceInventory(
-      prefix,
-      states.map((state) => state.from),
-      listing,
-    );
+    verifySourceInventory(prefix, listing);
   };
   const workflowGate = async () => {
     const get = async (path: string) => {
@@ -597,6 +587,11 @@ async function main(env: NodeJS.ProcessEnv, signal: AbortSignal) {
       writeFileSync(
         join(directory, "backend.tf"),
         'terraform {\n  backend "gcs" {}\n}\n',
+        { mode: 0o600, flag: "wx" },
+      );
+      writeFileSync(
+        join(directory, ".terraform.lock.hcl"),
+        readFileSync(join(state.directory, ".terraform.lock.hcl")),
         { mode: 0o600, flag: "wx" },
       );
       const localEnv = {

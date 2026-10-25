@@ -81,24 +81,19 @@ it("detects changes to numbers outside JavaScript integer precision", () => {
   ).not.toThrow();
 });
 
-it("rejects extra source workspaces, locks and unknown nested prefixes", () => {
+it("rejects extra immediate workspaces and locks, not unrelated directories", () => {
   const prefix = "example/prod";
   const inventory = {
     items: [{ name: `${prefix}/default.tfstate` }],
-    prefixes: [`${prefix}/application/`],
+    prefixes: [`${prefix}/historical-backups/`],
   };
-  expect(() =>
-    verifySourceInventory(prefix, [prefix, `${prefix}/application`], inventory),
-  ).not.toThrow();
+  expect(() => verifySourceInventory(prefix, inventory)).not.toThrow();
   for (const listing of [
     { items: [...inventory.items, { name: `${prefix}/other.tfstate` }] },
     { items: [...inventory.items, { name: `${prefix}/other.tflock` }] },
-    { ...inventory, prefixes: [`${prefix}/unknown/`] },
     { ...inventory, nextPageToken: "more" },
   ])
-    expect(() =>
-      verifySourceInventory(prefix, [prefix, `${prefix}/application`], listing),
-    ).toThrow(/inventory/);
+    expect(() => verifySourceInventory(prefix, listing)).toThrow(/inventory/);
 });
 
 it("migrates only an empty backend and preserves an existing destination", async () => {
