@@ -14,6 +14,8 @@ const workspace = path.resolve(
   "../..",
 );
 const nextConfig: NextConfig = {
+  // Workspace guidance stays in the root AGENTS.md.
+  agentRules: false,
   outputFileTracingRoot: workspace,
   turbopack: { root: workspace },
   compiler: {

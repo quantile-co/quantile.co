@@ -15,6 +15,8 @@
       const portalUrl = readDevelopmentPortalUrl(runtimeEnvironment());
       const workspace = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
       const nextConfig: NextConfig = {
+        // Workspace guidance stays in the root AGENTS.md.
+        agentRules: false,
         outputFileTracingRoot: workspace,
         turbopack: { root: workspace },
         compiler: {

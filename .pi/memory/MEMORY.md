@@ -68,6 +68,9 @@ The application lives in `apps/web/`, including Next, Storybook, site-native
 configuration, tests and brand assets. Its build is `next build`; root commands
 orchestrate pnpm/Turbo workspaces. Keep app semantics and approved copy unchanged.
 There is no shared package until actual shared behavior warrants one.
+The root AGENTS index remains canonical. Next's documented `agentRules: false`
+prevents `next dev` from creating a nested guide after relocation; agents still
+read version-matched documentation from the web workspace's installed Next package.
 
 `apps/repo/` owns repository checks/fixes and dispatches site dev/assets commands.
 Site launchers retain native Node 24 TypeScript execution and explicit
