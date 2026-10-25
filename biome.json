@@ -33,6 +33,7 @@
         "apps/web/lib/**/run.ts",
         "apps/web/lib/env/env.ts",
         "apps/*/cli.ts",
+        "apps/github/migration.ts",
         "apps/web/dev.ts",
         "apps/web/assets.ts",
         "**/*.test.{ts,tsx}",

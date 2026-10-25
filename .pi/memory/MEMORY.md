@@ -117,10 +117,20 @@ at `apps/web/firestore.rules`.
 The single `tf/` root owns repository/state infrastructure, not application
 deployment or a reusable Stripe catalog. Keep the existing bucket, resource
 addresses, lineage and immutable-release guard. The prepared backend target is
-`quantile.co/prod/infrastructure`. This source cutover must not land or run before
-the existing `repository/prod` state is separately reviewed and migrated under
-explicit authorization. No state migration has been performed by this source
-change. Never point normal workflows at empty state or reuse a prior saved-plan approval.
+`quantile.co/prod/infrastructure`. Normal resource operations must not activate
+that mapping before the existing `repository/prod` state is separately reviewed
+and migrated under explicit authorization. A separately approved state-only
+bridge may stage this source while normal resource workflows remain frozen.
+No state migration has been performed by this source change. Never point normal
+workflows at empty state or reuse a prior saved-plan approval.
+The transient bridge freezes resource Plan and replaces Apply with the protected
+OIDC state-only controller. Its native GCS migration requires the same lineage and
+all canonical payload fields unchanged, with exactly one serial increment; the
+isolated local-backend regression has a distinct two-increment expectation.
+Backups are create-only under `state-backups/`, never `plans/`. Old live source
+retirement is an exact-object generation-CAS delete after complete verification.
+Remove the transient controller, tests, task and workflow overrides only after
+separately approved migration verification; then require a newly reviewed Plan.
 
 Owner/member identity pairs live in Terraform source. Workflow actor-roster
 variables are no longer inputs; retain protected main/prod, required All, Namespace
