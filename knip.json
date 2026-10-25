@@ -1,6 +1,9 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignore": ["lib/browser/test.tsx", ".pi/extensions/**"],
-  "ignoreBinaries": ["nix"],
-  "ignoreDependencies": ["@biomejs/biome"]
+  "workspaces": {
+    ".": {
+      "ignoreDependencies": ["@biomejs/biome", "@quantile-co/factory-pi"]
+    },
+    "apps/web": { "ignore": ["lib/browser/test.tsx"] }
+  }
 }

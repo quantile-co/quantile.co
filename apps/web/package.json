@@ -1,0 +1,63 @@
+{
+  "name": "@quantile-co/web",
+  "version": "0.2.20",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node dev.ts",
+    "dev:storybook": "storybook dev -p 6006 --disable-telemetry",
+    "check": "next typegen && tsc --noEmit --incremental false && node assets.ts --check",
+    "test": "node dev.ts --test",
+    "test:integration": "node dev.ts --test --integration",
+    "build": "next build",
+    "build:assets": "node assets.ts",
+    "build:storybook": "storybook build --quiet --disable-telemetry --output-dir storybook-static"
+  },
+  "dependencies": {
+    "@fontsource-variable/outfit": "5.3.0",
+    "@fontsource/prompt": "5.3.0",
+    "@google-cloud/firestore": "9.3.1",
+    "@mantine/core": "9.6.1",
+    "@mantine/hooks": "9.6.1",
+    "@tabler/icons-react": "3.49.0",
+    "fathom-client": "3.7.2",
+    "motion": "14.2.0",
+    "next": "16.4.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-email": "6.11.0",
+    "server-only": "0.0.1",
+    "stripe": "23.0.0",
+    "svix": "2.6.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@next/env": "16.4.1",
+    "@storybook/addon-a11y": "10.6.2",
+    "@storybook/addon-docs": "10.6.2",
+    "@storybook/addon-themes": "10.6.2",
+    "@storybook/addon-vitest": "10.6.2",
+    "@storybook/nextjs-vite": "10.6.2",
+    "@types/fontkit": "^2.0.9",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitest/browser-playwright": "4.1.11",
+    "commander": "15.0.0",
+    "firebase-tools": "15.34.0",
+    "fontkit": "2.0.4",
+    "playwright": "1.64.1",
+    "png-to-ico": "3.0.2",
+    "postcss": "8.5.28",
+    "postcss-preset-mantine": "1.18.0",
+    "postcss-simple-vars": "7.0.1",
+    "sharp": "0.35.5",
+    "storybook": "10.6.2",
+    "typescript": "^5",
+    "vitest": "4.1.11"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

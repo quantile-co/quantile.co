@@ -47,9 +47,11 @@ Provider-backed tests remain separately authorized.
 - [nix/github/workflows/](nix/github/workflows/): workflow template customizations.
 - [.envrc](.envrc): pinned direnv shell and managed-file entry point.
 - [package.json](package.json): install/dev/check/fix/test/build entry points.
-- [scripts/pnpm/](scripts/pnpm/): task scripts and thin dev/assets entry points.
-- [scripts/github/](scripts/github/): workflow entry points and release publication.
-- [lib/brand/assets.ts](lib/brand/assets.ts): brand asset generation and checks.
+- [apps/web/](apps/web/): Next application, Storybook, site configuration and tests.
+- [apps/repo/](apps/repo/): repository checks and site dev/assets command dispatch.
+- [apps/github/](apps/github/): immutable source publication and saved-plan transport.
+- [apps/web/lib/brand/assets.ts](apps/web/lib/brand/assets.ts): brand asset generation and checks.
+- Next guides: `apps/web/node_modules/next/dist/docs/`.
 - [tf/](tf/): single repository/state deployment root.
 - [.github/workflows/](.github/workflows/): CI, source releases and protected deployment.
 

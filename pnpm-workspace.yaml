@@ -1,6 +1,16 @@
+packages:
+  - apps/*
+  - packages/*
+
+verifyDepsBeforeRun: false
+
+# Reviewed initial Factory releases; normal release-age protection stays enabled.
+minimumReleaseAgeExclude:
+  - '@quantile-co/factory-github@0.1.0'
+  - '@quantile-co/factory-pi@0.1.0'
+
 allowBuilds:
-  esbuild: true
+  esbuild: false
   protobufjs: true
-  # Superstatic supports a JavaScript fallback; this repo uses glob Hosting rules.
   re2: false
   sharp: true

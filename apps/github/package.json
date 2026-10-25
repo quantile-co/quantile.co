@@ -1,0 +1,13 @@
+{
+  "name": "@quantile-co/github",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "check": "tsc --noEmit -p ../../tsconfig.json && vitest run --config ../../vitest.config.mts"
+  },
+  "dependencies": {
+    "@quantile-co/factory-github": "0.1.0",
+    "commander": "15.0.0"
+  }
+}

@@ -5,18 +5,18 @@
     + ''
 
       # Application build output, local credentials and emulator state.
-      /.quantile/
-      /firebase-debug.log
-      /firestore-debug.log
-      /ui-debug.log
-      /.pnpm-store/
-      /.next/
-      /out/
-      /build/
-      /storybook-static/
-      /coverage/
+      .quantile/
+      firebase-debug.log
+      firestore-debug.log
+      ui-debug.log
+      .pnpm-store/
+      .next/
+      out/
+      build/
+      storybook-static/
+      coverage/
       **/__screenshots__/
-      /.vitest-attachments/
+      .vitest-attachments/
       .DS_Store
       *.pem
       *-debug.log*

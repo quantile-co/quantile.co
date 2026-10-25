@@ -1,0 +1,11 @@
+{
+  "name": "@quantile-co/repo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "check": "tsx cli.ts check",
+    "fix": "tsx cli.ts fix",
+    "test": "tsx cli.ts test"
+  }
+}

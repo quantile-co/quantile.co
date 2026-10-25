@@ -1,7 +1,6 @@
 {
   description = "Quantile marketing site";
 
-  # Moving refs propose updates; flake.lock fixes exact revisions.
   inputs = {
     factory.url = "github:quantile-co/factory/main";
     nixpkgs.follows = "factory/nixpkgs";
@@ -10,114 +9,109 @@
   outputs =
     inputs:
     let
-      inherit (inputs) factory;
-    in
-    factory.lib.mkFlake {
-      inherit (inputs) nixpkgs;
-      modules = [ factory.nixModules.default ];
-      nixpkgsConfig.allowUnfree = true;
+      lib = inputs.nixpkgs.lib;
       systems = [
         "x86_64-linux"
         "aarch64-linux"
         "aarch64-darwin"
       ];
-
-      perSystem =
-        { pkgs, factory }:
+      project =
+        { config, pkgs, ... }:
         let
-          site = import ./nix { inherit pkgs factory; };
+          factory = config.quantile-co.factory;
+          agents = inputs.factory.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
           copy = source: {
             inherit source;
             mode = "copy";
           };
+          site = import ./nix { inherit pkgs factory; };
         in
         {
-          # Public flake packages for workflow entry points.
-          packages = {
-            inherit (pkgs) direnv;
-            github-workflow-plan = factory.github.workflows.plan.package;
-            github-workflow-apply = factory.github.workflows.apply.package;
-          };
-
-          # Only tools and configuration used to develop this repository.
-          devShell = {
-            packages =
-              (with pkgs; [
-                bash
-                coreutils
-                diffutils
-                direnv
-                git
-                git-lfs
-                jq
-                nix
-                nodejs_24
-                pnpm
-                gh
-                google-cloud-sdk
-                opentofu
-                tflint
-                actionlint
-                semgrep
-                shellcheck
-                shfmt
-                taplo
-                trivy
-                typos
-                vale
-                yamllint
-                stripe-cli
-                ngrok
-                jdk21
-              ])
-              ++ [
-                inputs.factory.packages.${pkgs.stdenv.hostPlatform.system}.herdr
-                (factory.playwright.withVersion (builtins.fromJSON (builtins.readFile ./package.json))
+          quantile-co.factory = {
+            github.workflows.layers = [ "infrastructure" ];
+            github.workflows.build.layers = [ "application" ];
+            flake.packages.direnv = pkgs.direnv;
+            flake.devShell = {
+              shellHook = lib.concatStringsSep "\n" [
+                factory.files.shellHook
+                factory.pi.shellHook
+                ''
+                  export NEXT_TELEMETRY_DISABLED=1
+                  export PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="${factory.playwright.withVersion (builtins.fromJSON (builtins.readFile ./apps/web/package.json)).devDependencies.playwright}/bin/chromium-headless-shell"
+                ''
+              ];
+              packages = [
+                pkgs.bash
+                pkgs.coreutils
+                pkgs.diffutils
+                pkgs.direnv
+                pkgs.git
+                pkgs.git-lfs
+                pkgs.jq
+                pkgs.nix
+                pkgs.nodejs_24
+                pkgs.pnpm
+                pkgs.gh
+                pkgs.google-cloud-sdk
+                pkgs.opentofu
+                pkgs.tflint
+                pkgs.actionlint
+                pkgs.gitleaks
+                pkgs.semgrep
+                pkgs.shellcheck
+                pkgs.shfmt
+                pkgs.taplo
+                pkgs.trivy
+                pkgs.typos
+                pkgs.vale
+                pkgs.yamllint
+                pkgs.stripe-cli
+                pkgs.ngrok
+                pkgs.jdk21
+                (factory.playwright.withVersion (builtins.fromJSON (builtins.readFile ./apps/web/package.json))
                   .devDependencies.playwright)
-              ]
-              ++ (with factory; [
-                pi.package
-                qmd.package
-                prek.package
-                prek.tools.package
-                resend-cli.package
-                amp.package
-                clickhouse.package
-                clickhousectl.package
-                hunk.package
-                langfuse.package
-                tailscale.package
-                dependabot.check.package
-                prek.check.package
-                nixfmt.check.package
-                deadnix.check.package
-                statix.check.package
-                editorconfig.check.package
-                shellcheck.check.package
-                shfmt.check.package
-                markdownlint-cli2.check.package
-                actionlint.check.package
-                semgrep.test.package
-                semgrep.check.package
-                trivy.check.package
-                typos.check.package
-                vale.check.package
-                yamllint.check.package
-                taplo.check.package
-                taplo.format.package
-                opentofu.nonempty.package
-                opentofu.format.package
-                opentofu.check.package
-                tflint.check.package
-                opentofu.fix.package
-                nixfmt.fix.package
-                shfmt.fix.package
-                taplo.fix.package
-                editorconfig.fix.package
-              ]);
-
-            # Committed regular files; direnv refreshes copy entries on shell entry.
-            files = {
+                factory.resend-cli.package
+                agents.herdr
+                agents.amp
+                agents.hunk
+                pkgs.clickhouse
+                pkgs.tailscale
+                factory.clickhousectl.package
+                factory.langfuse.package
+                factory.pi.package
+                factory.qmd.package
+                factory.prek.package
+                factory.prek.tools.package
+                factory.dependabot.check.package
+                factory.prek.check.package
+                factory.nixfmt.check.package
+                factory.deadnix.check.package
+                factory.statix.check.package
+                factory.editorconfig.check.package
+                factory.shellcheck.check.package
+                factory.shfmt.check.package
+                factory.markdownlint-cli2.check.package
+                factory.actionlint.check.package
+                factory.semgrep.test.package
+                factory.semgrep.check.package
+                factory.trivy.check.package
+                factory.typos.check.package
+                factory.vale.check.package
+                factory.yamllint.check.package
+                factory.taplo.check.package
+                factory.taplo.format.package
+                factory.opentofu.nonempty.package
+                factory.opentofu.format.package
+                factory.opentofu.check.package
+                factory.tflint.check.package
+                factory.opentofu.fix.package
+                factory.nixfmt.fix.package
+                factory.shfmt.fix.package
+                factory.taplo.fix.package
+                factory.editorconfig.fix.package
+              ];
+            };
+            files.entries = {
               "README.md" = {
                 source = factory.readme.withProject {
                   name = "quantile.co";
@@ -125,32 +119,69 @@
                 };
                 mode = "seed";
               };
+              "package.json" = {
+                source = factory.pnpm.packageJsonFile;
+                mode = "seed";
+              };
+              "pnpm-workspace.yaml" = {
+                source = factory.pnpm.workspaceFile;
+                mode = "seed";
+              };
+              "turbo.json" = {
+                source = factory.turbo.configFile;
+                mode = "seed";
+              };
               "LICENSE" = copy factory.license.mitFile;
               "NOTICE.md" = copy factory.license.noticeFile;
               ".gitignore" = copy site.git.ignoreFile;
-              ".envrc" = copy site.direnv.configFile;
+              ".envrc" = copy factory.direnv.configFile;
               ".husky/pre-push" = copy factory.husky.prePushFile;
               ".editorconfig" = copy factory.editorconfig.configFile;
               ".editorconfig-checker.json" = copy site.editorconfig.checker.configFile;
               ".markdownlint-cli2.jsonc" = copy factory.markdownlint-cli2.configFile;
               ".pre-commit-config.yaml" = copy factory.prek.configFile;
+              ".gitleaks.toml" = copy factory.gitleaks.configFile;
               ".cz.toml" = copy factory.commitizen.configFile;
               ".shellcheckrc" = copy factory.shellcheck.configFile;
               ".tflint.hcl" = copy factory.tflint.configFile;
+              "statix.toml" = copy (
+                pkgs.writeText "statix.toml" ''
+                  disabled = ["manual_inherit_from"]
+                ''
+              );
               "taplo.toml" = copy factory.taplo.configFile;
               "trivy.yaml" = copy factory.trivy.configFile;
               "typos.toml" = copy factory.typos.configFile;
               ".vale.ini" = copy site.vale.configFile;
               ".vale" = copy factory.vale.stylesDirectory;
               ".yamllint.yaml" = copy factory.yamllint.configFile;
-              "next.config.ts" = copy site.next.configFile;
-              "postcss.config.cjs" = copy site.postcss.configFile;
-              "vitest.config.mts" = copy site.vitest.configFile;
               "biome.json" = copy site.biome.configFile;
-              "tsconfig.json" = copy site.typescript.configFile;
               "knip.json" = copy site.knip.configFile;
-              "firebase.json" = copy site.firebase.configFile;
-              "firestore.rules" = copy site.firebase.rulesFile;
+              "apps/web/next.config.ts" = copy site.next.configFile;
+              "apps/web/postcss.config.cjs" = copy site.postcss.configFile;
+              "apps/web/vitest.config.mts" = copy site.vitest.configFile;
+              "apps/web/tsconfig.json" = copy site.typescript.configFile;
+              "apps/web/firebase.json" = copy site.firebase.configFile;
+              "apps/web/firestore.rules" = copy site.firebase.rulesFile;
+              "vitest.config.mts" = copy site.vitest.toolingConfigFile;
+              "tsconfig.json" = copy (
+                factory.typescript.withOverrides {
+                  compilerOptions = {
+                    module = "ESNext";
+                    moduleResolution = "Bundler";
+                    allowImportingTsExtensions = true;
+                    types = [ "node" ];
+                  };
+                  include = [
+                    "apps/github/**/*.ts"
+                    "apps/repo/**/*.ts"
+                  ];
+                  exclude = [
+                    "**/dist/**"
+                    "**/node_modules/**"
+                  ];
+                }
+              );
               ".github/actionlint.yaml" = copy factory.actionlint.configFile;
               ".github/workflows/check.yaml" = copy factory.github.workflows.check.configFile;
               ".github/workflows/test.yaml" = copy factory.github.workflows.test.configFile;
@@ -159,24 +190,12 @@
               ".github/workflows/apply.yaml" = copy site.github.workflows.apply.configFile;
               ".github/dependabot.yml" = copy site.dependabot.configFile;
               ".pi/settings.json" = copy factory.pi.settingsFile;
-              ".pi/extensions" = copy factory.pi.extensionsDir;
-              ".pi/skills/deploy" = copy (factory.pi.skillsDir + "/deploy");
-              ".pi/skills/day-zero-deploy" = copy (factory.pi.skillsDir + "/day-zero-deploy");
-              ".pi/skills/seo-audit" = copy (factory.pi.skillsDir + "/seo-audit");
-              ".pi/skills/web-design-guidelines" = copy (factory.pi.skillsDir + "/web-design-guidelines");
-              ".pi/skills/web-perf" = copy (factory.pi.skillsDir + "/web-perf");
-              ".pi/skills/web-quality-audit" = copy (factory.pi.skillsDir + "/web-quality-audit");
-              ".pi/skills/webapp-testing" = copy (factory.pi.skillsDir + "/webapp-testing");
-              ".pi/skills/performance" = copy (factory.pi.skillsDir + "/performance");
-              ".pi/skills/core-web-vitals" = copy (factory.pi.skillsDir + "/core-web-vitals");
-              ".pi/skills/accessibility" = copy (factory.pi.skillsDir + "/accessibility");
-              ".pi/skills/seo" = copy (factory.pi.skillsDir + "/seo");
-              ".pi/skills/best-practices" = copy (factory.pi.skillsDir + "/best-practices");
               ".qmd/index.yml" = {
                 source = factory.qmd.configFile;
                 mode = "seed";
               };
               ".semgrep/tf" = copy (factory.semgrep.rulesDir + "/tf");
+              ".semgrep/tests/tf" = copy (factory.semgrep.test.fixturesDir + "/tf");
               ".semgrep/packs/typescript.yaml" = copy factory.semgrep.packs.typescript;
               ".semgrep/packs/terraform.yaml" = copy factory.semgrep.packs.terraform;
               ".semgrep/packs/github-actions.yaml" = copy factory.semgrep.packs.github-actions;
@@ -184,5 +203,25 @@
             };
           };
         };
+      configurations = lib.genAttrs systems (
+        system:
+        (lib.evalModules {
+          specialArgs = {
+            pkgs = import inputs.nixpkgs {
+              inherit system;
+              config.allowUnfree = true;
+            };
+            factoryInputs = inputs.factory.inputs;
+          };
+          modules = [
+            inputs.factory.nixModules.default
+            project
+          ];
+        }).config.quantile-co.factory.flake.outputs
+      );
+    in
+    {
+      packages = builtins.mapAttrs (_: configuration: configuration.packages) configurations;
+      devShells = builtins.mapAttrs (_: configuration: configuration.devShells) configurations;
     };
 }

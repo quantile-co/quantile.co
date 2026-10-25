@@ -16,7 +16,7 @@ related changes without recurring note-only validation cycles.
 
 - HTTP routes are explicit composition roots; use ordinary typed dependency
   injection, not service locators, dispatch frameworks or duplicate DTO layers.
-- `lib/env/env.ts` owns staged environment parsing. Validate verification inputs
+- `apps/web/lib/env/env.ts` owns staged environment parsing. Validate verification inputs
   first and other secrets only when needed. Module import and ignored/replayed
   events must not require unrelated sender credentials. Domain helpers receive
   explicit values rather than rereading ambient environment.
@@ -62,82 +62,75 @@ GCP, AWS, Snowflake and Databricks; Azure needs a new copy decision. Approved he
 animation titles are retained in the [copy decisions](daily/2026-10-12.md), not as
 an implementation-status record. Current source holds the authoritative copy.
 
-## Factory and release tooling
+## Factory and workspace tooling
 
-The committed flake lock pins Factory. `flake.nix` keeps inputs, systems, public
-packages, development tools and copied-file selections visible through
-`lib.mkFlake`. Tool-owned `nix/<tool>/default.nix` files patch Factory exports or
-encode site configuration as Nix data, using strings only for executable JS/TS.
-Keep workflow customizations in `nix/github/workflows/`, matching Factory.
-Every directory under `nix/`, including the root, has a `default.nix`. Root and
-intermediate defaults only wire imports/exports through adjacent directory entry
-points; leaf defaults own the implementation, normally beside `default.test.ts`.
-Do not split leaf implementation into `module.nix` or another forwarding-only file.
-Do not add duplicate native config templates or a local `nix/lib.nix`;
-reusable formatting comes from Factory's `biome.formatFile`. Keep only the
-ordinary Factory/site/copy bindings in the flake. Root configurations are tracked regular files;
-`.envrc` runs `factory-files write` and Check compares worktree and Git-index
-copies. Keep template sources out of runtime paths; Vale uses `.vale/` (`StylesPath = .vale`).
-Leave tool-mutated files such as `package.json`, dependency locks and pnpm build
-approvals tool-owned, not copied. Checks are read-only; fixes and Husky installation
-are explicit. Never omit test projects or weaken assertions to conceal a mismatch.
+The application lives in `apps/web/`, including Next, Storybook, site-native
+configuration, tests and brand assets. Its build is `next build`; root commands
+orchestrate pnpm/Turbo workspaces. Keep app semantics and approved copy unchanged.
+There is no shared package until actual shared behavior warrants one.
 
-Pnpm tasks live under `scripts/pnpm/`; dev/assets entry points are thin TypeScript
-wrappers around `lib/dev/` and `lib/brand/assets.ts`. Every checked-in workflow
-has an entry point under `scripts/github/`. Playwright's pinned Nix browser must
-match the npm client version, with separate Vitest browser provider instances.
-Keep README setup concise rather than duplicating inventories. README is seeded
-once, then repository-owned. Gitignore and direnv patch Factory's native templates;
-Husky pre-push and the explicitly selected MIT license/notice are managed copies.
-Preserve legal terms and repository-specific notices. Copy complete selected skill
-directories so linked web-audit dependencies are available.
+`apps/repo/` owns repository checks/fixes and dispatches site dev/assets commands.
+Site launchers retain native Node 24 TypeScript execution and explicit
+child-credential isolation. Ordinary tests own an isolated demo emulator and run
+unit, browser and Storybook projects; provider-backed integration stays separate.
+Keep heavy webhook-module initialization outside timed tests and preserve the
+module cache; cold dependency transformation is not handler behavior.
 
-There is no SecretSpec dependency. Credentials stay in process environment or
-ignored local environment files; `.envrc.local` does not authorize provider actions.
-Application semantics and child-credential scoping remain in the env/launcher
-code. Ordinary tests use an isolated demo emulator. Provider-backed integration
-is a separate, explicitly authorized entry point, not part of ordinary tests.
+Factory is composed through explicit `lib.evalModules`, package/file selections,
+and Files then Pi shell hooks. `.envrc` only enters the pinned shell.
+Meaningful `nix/<tool>/default.nix` renderers own site configuration; Factory
+provides native defaults and formatting. Managed files are tracked regular copies;
+Check compares both worktree and index. Manifests and locks remain seed/tool-owned.
+Install dependencies explicitly, then run checks. Neither shell entry nor checks
+install dependencies or synchronize skills. Turbo caches reproducible build outputs
+locally only; checks, fixes and tests always execute.
 
-Check, Test, Build, Plan and Apply are distinct operations. Build loads trusted
-pinned tooling and verifies exact-source Check, selected attempt/job, main ancestry
-and package version before publishing only an immutable tag/release. GitHub's
-automatic source archive is the sole public source handoff; there is no custom
-source.zip, separate Rules asset or release.json. Required root inputs are
-committed, so downstream Firebase source builds need no Nix or materialization;
-`pnpm run build` is ordinary `next build`. Never use mutable operator files or
-execute candidate source with the publishing token. API errors are not absence;
-existing tags/drafts stop publication rather than trigger automatic recovery.
-Preserve exact tag/commit and release immutability verification, actor guards,
-serialization, signatures and bounded execution. The public release contract
-may change independently of Q1; do not keep custom-asset compatibility or block
-public publication on Q1's later migration. Existing immutable releases remain
-unchanged; new production phases still require separate approval.
+Exact published `@quantile-co/factory-github@0.1.0` and
+`@quantile-co/factory-pi@0.1.0` replace copied runtime code. Pi loads the prebuilt
+extension through native settings. `pnpm run skills:sync` explicitly installs
+the selected deploy and web-quality catalog into ignored native skill locations;
+the committed skills lock records provenance. Do not recreate shared extensions,
+copied skills or a consumer `etc/` tree.
 
-`tf/` is the single root; wrappers select `TF_DIR=tf`. It owns
-repository/state infrastructure through Factory modules,
-not a reusable Stripe catalog or application topology. Keep the existing bucket,
-`repository/prod`, lineage and immutable-release guard. Native Plan calls
-OpenTofu directly and stores private GCS saved bytes and optional private
-diagnostics; Apply downloads the operator-selected `plan_ref` generation and
-applies those exact bytes without replanning. No GitHub artifact or receipt is produced.
-Maintain WIF, locks, protected environments and plans-only human reads. Keep main
-fixed during review. New production operations require new authorization.
+## Source release and infrastructure boundaries
 
-The Factory configuration contract uses required paired `project_owners` and
-optional `project_members` (default `[]`), projected directly into platform modules.
-`PROJECT_OWNERS` gates both original and triggering actors for Build, Plan and
-Apply; members receive repository write only, never GCP/WIF or deployment grants.
-Confirm identity pairings before configuring rosters; separate legacy lists do
-not prove a pairing. Missing owner configuration denies protected workflows.
-`GCP_TF_STATE_BUCKET` replaces the legacy `TF_STATE_BUCKET` variable without
-changing the bucket or `repository/prod`. Billing account, folder and `US` bucket
-location are verified concrete-root values, not workflow overrides. Root outputs
-are `gh_repo_id`, `gcp_project_id` and `gcp_tf_state_bucket`. The completed
-`module.github` → `module.gh` move is removed from the root after its approved
-Apply. Review future address/output migrations in a separately authorized plan,
-preserving existing platform instance keys. Use one
-operator `PLAN_REF` for saved-plan review and Apply. See the managed
-[configuration reference](../skills/deploy/references/configuration.md).
+`apps/github/` owns workflow entry points and immutable source publication.
+Check, Test, Build, Plan and Apply remain distinct operations. Build uses trusted
+pinned tooling, separately checks out candidate source, verifies exact-source Check,
+selected attempt/All job, main ancestry and the committed `apps/web/package.json`
+version/build script. Never execute candidate code with the publishing token.
+API errors are not absence; existing tags/drafts stop publication. Retry visibility
+reads only, never publication writes. Verify exact commit/tag and release immutability.
+
+GitHub's automatic source archive is the sole handoff: no custom ZIP, Rules asset
+or release manifest. Commit the complete root pnpm workspace/lock/Turbo configuration
+and app-native files so source builds require no Nix materialization. Firebase App
+Hosting supports the Turborepo workspace with archive `rootDirectory: apps/web`;
+the web build remains `next build`, not a custom Docker/image build. Keep private
+runtime configuration out of public source. `apps/web/firebase.json` supplies
+Next's security-header policy. Deny-all Rules retain their exact established bytes
+at `apps/web/firestore.rules`.
+
+The single `tf/` root owns repository/state infrastructure, not application
+deployment or a reusable Stripe catalog. Keep the existing bucket, resource
+addresses, lineage and immutable-release guard. The active backend is still
+`repository/prod`; its approved naming target `quantile.co/prod/infrastructure`
+requires a separately reviewed/authorized state migration before source cutover.
+Never point normal workflows at empty state or reuse a prior saved-plan approval.
+
+Owner/member identity pairs live in Terraform source. Workflow actor-roster
+variables are no longer inputs; retain protected main/prod, required All, Namespace
+runners, WIF/IAM and production/source-release serialization. Q0-supplied WIF remains
+a standing workflow setting. Only provider subprocesses receive repository
+credentials and native provider mappings; storage transport receives a separate
+allowlisted environment.
+
+Plan/Apply run locked `tsx` directly, outside Turbo and without a tooling-build
+prerequisite. Frozen installation immediately precedes each workflow task.
+Plan stores saved bytes and private diagnostics in GCS. Apply consumes the exact
+operator-selected `GH_PLAN_REF` generation without replanning. No GitHub plan
+artifact or receipt is produced. Build/publication, Plan, Apply, provider-backed
+testing, state migration and credential changes each require separate authorization.
 
 ## Completed public rollouts
 

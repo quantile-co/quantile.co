@@ -10,7 +10,7 @@ in
         // {
           Exclude = base.Exclude ++ [
             "^\\.pi/skills/"
-            "^public/images/logos/"
+            "^apps/web/public/images/logos/"
           ];
         }
       )

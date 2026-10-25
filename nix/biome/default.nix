@@ -10,9 +10,8 @@
             "!.next"
             "!dist"
             "!build"
-            "!components/**/*.module.css"
+            "!apps/web/components/**/*.module.css"
             "!!.pi/skills"
-            "!!.pi/extensions"
             "!!.semgrep"
           ];
           formatter.indentWidth = 2;
@@ -28,13 +27,14 @@
           overrides = [
             {
               includes = [
-                "app/**/route.ts"
-                "app/**/page.tsx"
-                "app/**/layout.tsx"
-                "lib/**/run.ts"
-                "lib/env/env.ts"
-                "scripts/pnpm/*.ts"
-                "lib/release/*.test.ts"
+                "apps/web/app/**/route.ts"
+                "apps/web/app/**/page.tsx"
+                "apps/web/app/**/layout.tsx"
+                "apps/web/lib/**/run.ts"
+                "apps/web/lib/env/env.ts"
+                "apps/*/cli.ts"
+                "apps/web/dev.ts"
+                "apps/web/assets.ts"
                 "**/*.test.{ts,tsx}"
                 "**/test.ts"
                 "**/*.config.{ts,js,mjs,cjs,mts,cts}"
@@ -43,10 +43,10 @@
             }
             {
               includes = [
-                "lib/**/*.{ts,tsx}"
-                "!lib/**/run.ts"
-                "!lib/**/*.test.{ts,tsx}"
-                "!lib/**/test.ts"
+                "apps/web/lib/**/*.{ts,tsx}"
+                "!apps/web/lib/**/run.ts"
+                "!apps/web/lib/**/*.test.{ts,tsx}"
+                "!apps/web/lib/**/test.ts"
               ];
               linter.rules.style.noRestrictedImports = {
                 level = "error";
@@ -65,7 +65,7 @@
               };
             }
             {
-              includes = [ "components/**/*.{ts,tsx}" ];
+              includes = [ "apps/web/components/**/*.{ts,tsx}" ];
               linter.rules.style.noRestrictedImports = {
                 level = "error";
                 options.patterns = [

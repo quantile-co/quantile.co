@@ -4,6 +4,6 @@
     "^\\.semgrep/packs/",
     ".*\\.sql\\.go$",
     "^\\.pi/skills/",
-    "^public/images/logos/"
+    "^apps/web/public/images/logos/"
   ]
 }
