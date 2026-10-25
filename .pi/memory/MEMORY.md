@@ -145,11 +145,14 @@ testing, state migration and credential changes each require separate authorizat
   `quantile.co/prod/infrastructure` in the existing bucket. Native migration
   preserved lineage and operational resource/provider/output content with exactly
   one serial increment; only transient top-level validation-check metadata was
-  allowed to normalize. Create-only byte-verified raw backups remain privately
-  under `state-backups/1386602830/40171942856/1/`, outside plan-reader access.
-  Exact-generation CAS retired the old live object. Temporary migration tooling
-  and workflow overrides are removed. No resource Plan/Apply, source publication
-  or application build/rollout was performed or authorized by this cutover.
+  allowed to normalize. Create-only byte-verified raw backups were held outside
+  plan-reader access until approved post-lifecycle retirement. Exact-generation
+  CAS retired the old live object. Maintenance Apply `40177161874` subsequently
+  deleted 19 obsolete object generations: seven recovery copies/logs, nine old
+  backend versions and three noncurrent active-backend versions. Current state,
+  saved plans and bucket safeguards were excluded. Temporary migration and
+  maintenance code, tests and workflow overrides are removed. The original
+  state-only cutover did not itself authorize resource operations or rollout.
 
 - Factory migration: immutable `v0.2.16`, Build `39475543087`; Plan `39476218139`,
   receipt `12288689117`, approved Apply `39477215702`. Ten address moves preserved

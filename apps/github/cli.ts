@@ -141,55 +141,6 @@ for (const phase of ["plan", "apply"] as const) {
           : ["-chdir=tf", "apply", "-input=false", planFile],
         { logFile, append: true, signal },
       );
-      if (
-        phase === "apply" &&
-        options.gcpTfStateBucket === "quantile-co-9e46-tf-state"
-      ) {
-        const rows: {
-          url: string;
-          metadata?: { name: string; generation: string; timeDeleted?: string };
-        }[] = JSON.parse(
-          await storage(
-            "gcloud",
-            [
-              "storage",
-              "ls",
-              "--all-versions",
-              "--json",
-              `gs://${options.gcpTfStateBucket}/**`,
-            ],
-            { signal },
-          ),
-        );
-        for (const { url, metadata } of rows) {
-          const name = metadata?.name;
-          if (
-            !metadata ||
-            !name ||
-            name.endsWith(".tflock") ||
-            !(
-              name.startsWith("state-backups/") ||
-              ([
-                "repository/prod/default.tfstate",
-                "quantile.co/prod/infrastructure/default.tfstate",
-              ].includes(name) &&
-                metadata?.timeDeleted)
-            )
-          )
-            continue;
-          if (
-            !/^[1-9][0-9]*$/.test(metadata.generation) ||
-            url !==
-              `gs://${options.gcpTfStateBucket}/${name}#${metadata.generation}`
-          )
-            throw new Error("Expected exact-generation cleanup object");
-          await storage("gcloud", ["storage", "rm", url], {
-            logFile,
-            append: true,
-            signal,
-          });
-        }
-      }
     };
     const storage = processRunner(environment);
     if (phase === "plan")
