@@ -141,6 +141,43 @@ for (const phase of ["plan", "apply"] as const) {
           : ["-chdir=tf", "apply", "-input=false", planFile],
         { logFile, append: true, signal },
       );
+      if (
+        phase === "apply" &&
+        options.gcpTfStateBucket === "quantile-co-9e46-tf-state"
+      ) {
+        const rows: {
+          url: string;
+          metadata?: { name: string; timeDeleted?: string };
+        }[] = JSON.parse(
+          await storage(
+            "gcloud",
+            [
+              "storage",
+              "ls",
+              "--all-versions",
+              "--json",
+              `gs://${options.gcpTfStateBucket}/**`,
+            ],
+            { signal },
+          ),
+        );
+        for (const { url, metadata } of rows) {
+          const name = metadata?.name;
+          if (
+            name &&
+            !name.endsWith(".tflock") &&
+            (name.startsWith("state-backups/") ||
+              name === "repository/prod/default.tfstate" ||
+              (name === "quantile.co/prod/infrastructure/default.tfstate" &&
+                metadata?.timeDeleted))
+          )
+            await storage("gcloud", ["storage", "rm", url], {
+              logFile,
+              append: true,
+              signal,
+            });
+        }
+      }
     };
     const storage = processRunner(environment);
     if (phase === "plan")
