@@ -86,7 +86,16 @@ provides native defaults and formatting. Managed files are tracked regular copie
 Check compares both worktree and index. Manifests and locks remain seed/tool-owned.
 Install dependencies explicitly, then run checks. Neither shell entry nor checks
 install dependencies or synchronize skills. Turbo caches reproducible build outputs
-locally only; checks, fixes and tests always execute.
+locally by default; checks, fixes and tests always execute.
+
+Local caching remains the default. CI persists .turbo/cache on the existing
+Restricted Namespace volume and may use remote team main in this repository's
+workspace. The native TURBO_TOKEN secret is a server-scoped reader at
+organization/repository scope, overridden by a cache-only writer in the dedicated
+main-only turbo-cache environment for manual Test. External/fork PRs receive no
+remote token; developers use reader-scoped credentials. Checks/tests/fixes and
+Plan/Apply remain uncached. Live credential provisioning and Restricted-runner
+authentication/hit/write-denial qualification are separate pending operations.
 
 Exact published `@quantile-co/factory-github@0.1.0` and
 `@quantile-co/factory-pi@0.1.0` replace copied runtime code. Pi loads the prebuilt

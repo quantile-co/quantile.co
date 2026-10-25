@@ -13,7 +13,7 @@ module "gh" {
   owners          = [for person in local.project_owners : person.gh_username]
   members         = [for person in local.project_members : person.gh_username]
   required_checks = ["All"]
-  environments    = ["prod"]
+  environments    = ["prod", "turbo-cache"]
 }
 
 module "gcp" {

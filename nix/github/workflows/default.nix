@@ -18,7 +18,8 @@ let
     "group: factory-production"
     "      - name: Check out repository\n"
     "          persist-credentials: false\n"
-    "      - name: Build\n"
+    "            .turbo/cache\n"
+    "      - name: Build\n        env:\n"
   ];
   to = [
     (indent "    " ''
@@ -43,6 +44,7 @@ let
       path: tooling
       persist-credentials: false
     '')
+    "            tooling/.turbo/cache\n"
     (indent "      " ''
       - name: Check out candidate source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
