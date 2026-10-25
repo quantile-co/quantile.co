@@ -22,7 +22,7 @@
     "@mantine/hooks": "9.6.1",
     "@tabler/icons-react": "3.49.0",
     "fathom-client": "3.7.2",
-    "motion": "14.2.0",
+    "motion": "14.3.0",
     "next": "16.4.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
