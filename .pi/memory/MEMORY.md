@@ -50,6 +50,9 @@ PR counts. Do not invent turnaround, support, refund, banked-time or legal polic
 or change the offer to conceal an unimplemented billing capability. Social proof
 must reflect actual experience, not invented customers or endorsements.
 
+Colocate component regression tests with their component, not directly under
+`apps/web/app/`.
+
 Components remain standalone and receive behavior/siblings through props. Keep
 shared layout tokens, light/dark themes, keyboard access, reduced motion and
 semantic structure. Page and Storybook composition must agree. Layout changes
