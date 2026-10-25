@@ -113,10 +113,11 @@ at `apps/web/firestore.rules`.
 
 The single `tf/` root owns repository/state infrastructure, not application
 deployment or a reusable Stripe catalog. Keep the existing bucket, resource
-addresses, lineage and immutable-release guard. The active backend is still
-`repository/prod`; its approved naming target `quantile.co/prod/infrastructure`
-requires a separately reviewed/authorized state migration before source cutover.
-Never point normal workflows at empty state or reuse a prior saved-plan approval.
+addresses, lineage and immutable-release guard. The prepared backend target is
+`quantile.co/prod/infrastructure`. This source cutover must not land or run before
+the existing `repository/prod` state is separately reviewed and migrated under
+explicit authorization. No state migration has been performed by this source
+change. Never point normal workflows at empty state or reuse a prior saved-plan approval.
 
 Owner/member identity pairs live in Terraform source. Workflow actor-roster
 variables are no longer inputs; retain protected main/prod, required All, Namespace

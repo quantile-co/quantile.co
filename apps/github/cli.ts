@@ -124,7 +124,7 @@ for (const phase of ["plan", "apply"] as const) {
           "-input=false",
           "-lockfile=readonly",
           `-backend-config=bucket=${options.gcpTfStateBucket}`,
-          "-backend-config=prefix=repository/prod",
+          "-backend-config=prefix=quantile.co/prod/infrastructure",
         ],
         { logFile, append: true, signal },
       );

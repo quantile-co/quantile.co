@@ -106,7 +106,7 @@ else if(a[0] !== "storage" || a[1] !== "cp") process.exit(82);
       "-input=false",
       "-lockfile=readonly",
       "-backend-config=bucket=private-bucket",
-      "-backend-config=prefix=repository/prod",
+      "-backend-config=prefix=quantile.co/prod/infrastructure",
     ]);
     assert.equal(
       providers.filter((call) => call.args.includes("plan")).length,
