@@ -95,9 +95,17 @@ organization/repository scope, overridden by a cache-only writer in the existing
 prod environment for trusted main Test/Build. Test, Build, Plan and Apply use prod
 where they exist; no separate cache environment is used. External/fork PRs receive
 no remote token; developers use reader-scoped credentials. Checks/tests/fixes and
-Plan/Apply remain uncached. CI readers are installed. Prod writer provisioning and
-complete cross-run cache qualification remain pending. The rejected separate-
-environment plans are obsolete and must not be applied.
+Plan/Apply remain uncached. CI readers and expiring, cache-only prod writers are
+installed; rotate the current 90-day credentials before 2027-01-23.
+On 2026-10-25, population run 40190338612 and verification run 40191374711
+qualified all four cache layers on quantile-4x8: Turbo local-only and remote-only
+hits, changed-input misses, Nix store reuse with builds/substitutions disabled,
+and signed remote imports from the intended Cachix cache into an empty isolated store.
+Volume snapshots initially missed or were stale; later independent runners reused
+both caches. This is best-effort fleet-local reuse, not guaranteed freshness.
+Repository/profile isolation, Restricted access and main-only publication were
+unchanged. Other profiles are not implicitly warm. Temporary diagnostics were
+removed. The rejected separate-environment plans are obsolete and must not be applied.
 
 Exact published `@quantile-co/factory-github@0.1.0` and
 `@quantile-co/factory-pi@0.1.0` replace copied runtime code. Pi loads the prebuilt
