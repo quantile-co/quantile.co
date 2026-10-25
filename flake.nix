@@ -28,12 +28,8 @@
         in
         {
           quantile-co.factory = {
-            github.workflows = {
-              layers = [ "infrastructure" ];
-              build.layers = [ "application" ];
-              plan.configFile = ./nix/github/workflows/state-freeze.yaml;
-              apply.configFile = ./nix/github/workflows/state-migration.yaml;
-            };
+            github.workflows.layers = [ "infrastructure" ];
+            github.workflows.build.layers = [ "application" ];
             flake.packages.direnv = pkgs.direnv;
             flake.devShell = {
               shellHook = lib.concatStringsSep "\n" [

@@ -14,9 +14,6 @@
           "apps/web" = {
             ignore = [ "lib/browser/test.tsx" ];
           };
-          "apps/github" = {
-            ignoreBinaries = [ "tofu" ];
-          };
         };
       }
     )

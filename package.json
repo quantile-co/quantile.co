@@ -21,7 +21,6 @@
     "github:build": "tsx apps/github/cli.ts build",
     "github:plan": "tsx apps/github/cli.ts plan",
     "github:apply": "tsx apps/github/cli.ts apply",
-    "github:migrate": "tsx apps/github/migration.ts",
     "skills:sync": "skills experimental_sync --agent pi --copy --yes --include @quantile-co/factory-pi#deploy @quantile-co/factory-pi#day-zero-deploy @quantile-co/factory-pi#seo-audit @quantile-co/factory-pi#web-design-guidelines @quantile-co/factory-pi#web-perf @quantile-co/factory-pi#web-quality-audit @quantile-co/factory-pi#webapp-testing @quantile-co/factory-pi#performance @quantile-co/factory-pi#core-web-vitals @quantile-co/factory-pi#accessibility @quantile-co/factory-pi#seo @quantile-co/factory-pi#best-practices"
   },
   "devDependencies": {

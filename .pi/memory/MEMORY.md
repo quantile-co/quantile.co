@@ -116,21 +116,10 @@ at `apps/web/firestore.rules`.
 
 The single `tf/` root owns repository/state infrastructure, not application
 deployment or a reusable Stripe catalog. Keep the existing bucket, resource
-addresses, lineage and immutable-release guard. The prepared backend target is
-`quantile.co/prod/infrastructure`. Normal resource operations must not activate
-that mapping before the existing `repository/prod` state is separately reviewed
-and migrated under explicit authorization. A separately approved state-only
-bridge may stage this source while normal resource workflows remain frozen.
-No state migration has been performed by this source change. Never point normal
-workflows at empty state or reuse a prior saved-plan approval.
-The transient bridge freezes resource Plan and replaces Apply with the protected
-OIDC state-only controller. Its native GCS migration requires the same lineage and
-all canonical payload fields unchanged, with exactly one serial increment; the
-isolated local-backend regression has a distinct two-increment expectation.
-Backups are create-only under `state-backups/`, never `plans/`. Old live source
-retirement is an exact-object generation-CAS delete after complete verification.
-Remove the transient controller, tests, task and workflow overrides only after
-separately approved migration verification; then require a newly reviewed Plan.
+addresses, lineage and immutable-release guard. Its active backend is
+`quantile.co/prod/infrastructure`; the old `repository/prod` live state was retired.
+Do not recreate the old backend or add a runtime fallback. Future resource
+operations require fresh Plan review and separate exact Apply authorization.
 
 Owner/member identity pairs live in Terraform source. Workflow actor-roster
 variables are no longer inputs; retain protected main/prod, required All, Namespace
@@ -147,6 +136,17 @@ artifact or receipt is produced. Build/publication, Plan, Apply, provider-backed
 testing, state migration and credential changes each require separate authorization.
 
 ## Completed public rollouts
+
+- Workspace/backend cutover: state-only Apply `40171942856` from source
+  `20190f991c8517f294cd6b6a76dc0ff00bab9918` moved `repository/prod` to
+  `quantile.co/prod/infrastructure` in the existing bucket. Native migration
+  preserved lineage and operational resource/provider/output content with exactly
+  one serial increment; only transient top-level validation-check metadata was
+  allowed to normalize. Create-only byte-verified raw backups remain privately
+  under `state-backups/1386602830/40171942856/1/`, outside plan-reader access.
+  Exact-generation CAS retired the old live object. Temporary migration tooling
+  and workflow overrides are removed. No resource Plan/Apply, source publication
+  or application build/rollout was performed or authorized by this cutover.
 
 - Factory migration: immutable `v0.2.16`, Build `39475543087`; Plan `39476218139`,
   receipt `12288689117`, approved Apply `39477215702`. Ten address moves preserved

@@ -4,7 +4,6 @@
     ".": {
       "ignoreDependencies": ["@biomejs/biome", "@quantile-co/factory-pi"]
     },
-    "apps/github": { "ignoreBinaries": ["tofu"] },
     "apps/web": { "ignore": ["lib/browser/test.tsx"] }
   }
 }
