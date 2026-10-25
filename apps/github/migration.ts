@@ -111,6 +111,30 @@ export function migrationAnswer(output: string, backend = "gcs") {
     : "no\n";
 }
 
+export function verifySourceInventory(
+  prefix: string,
+  sources: string[],
+  listing: {
+    items?: { name?: string }[];
+    prefixes?: string[];
+    nextPageToken?: string;
+  },
+) {
+  const nested = sources
+    .filter((source) => source.startsWith(`${prefix}/`))
+    .map(
+      (source) => `${prefix}/${source.slice(prefix.length + 1).split("/")[0]}/`,
+    );
+  if (
+    listing.nextPageToken ||
+    !Array.isArray(listing.items) ||
+    listing.items.length !== 1 ||
+    listing.items[0].name !== `${prefix}/default.tfstate` ||
+    (listing.prefixes ?? []).some((value) => !nested.includes(value))
+  )
+    throw new MigrationFailure("Unexpected source workspace or lock inventory");
+}
+
 const outputLimit = 100_000_000;
 const interruptGraceMs = 2_000;
 
@@ -442,22 +466,11 @@ async function main(env: NodeJS.ProcessEnv, signal: AbortSignal) {
       prefixes?: string[];
       nextPageToken?: string;
     };
-    const nested = states
-      .filter((state) => state.from.startsWith(`${prefix}/`))
-      .map(
-        (state) =>
-          `${prefix}/${state.from.slice(prefix.length + 1).split("/")[0]}/`,
-      );
-    if (
-      listing.nextPageToken ||
-      !Array.isArray(listing.items) ||
-      listing.items.length !== 1 ||
-      listing.items[0].name !== `${prefix}/default.tfstate` ||
-      (listing.prefixes ?? []).some((value) => !nested.includes(value))
-    )
-      throw new MigrationFailure(
-        "Unexpected source workspace or lock inventory",
-      );
+    verifySourceInventory(
+      prefix,
+      states.map((state) => state.from),
+      listing,
+    );
   };
   const workflowGate = async () => {
     const get = async (path: string) => {
@@ -533,7 +546,11 @@ async function main(env: NodeJS.ProcessEnv, signal: AbortSignal) {
     for (const state of states) {
       const source = `${state.from}/default.tfstate`;
       const original = await metadata(source);
-      if (!original || Number(original.size) <= 0)
+      if (
+        !original ||
+        Number(original.size) <= 0 ||
+        Number(original.size) > outputLimit
+      )
         throw new MigrationFailure("Source state is absent or empty");
       if (
         (await metadata(`${state.from}/default.tflock`)) ||
@@ -549,6 +566,13 @@ async function main(env: NodeJS.ProcessEnv, signal: AbortSignal) {
       snapshots.push({ ...state, source, original, before });
     }
     if (phase === "preflight") {
+      for (const state of snapshots) {
+        const serial = JSON.parse(state.before.toString()).serial;
+        appendFileSync(
+          required("GITHUB_STEP_SUMMARY"),
+          `${state.layer}: source generation ${state.original.generation}, serial ${serial}, format 4 / OpenTofu 1.13.1; default-only inventory, no locks, unused destination and bucket safeguards verified. No writes.\n`,
+        );
+      }
       console.log(
         "Read-only preflight passed; no state or backup was written.",
       );
@@ -679,7 +703,8 @@ async function main(env: NodeJS.ProcessEnv, signal: AbortSignal) {
       );
       if (retired.status !== 204 || (await metadata(state.source)))
         throw new MigrationFailure("Old state retirement was not verified");
-      const result = `${state.layer}: verified same state at ${state.to}; backup ${backup}#${backupGeneration}; destination generation ${destinationMetadata.generation}.\n`;
+      const serial = JSON.parse(state.before.toString()).serial;
+      const result = `${state.layer}: verified same lineage/content at ${state.to}, serial ${serial} -> ${serial + 1}; backup ${backup}#${backupGeneration}; destination generation ${destinationMetadata.generation}.\n`;
       appendFileSync(required("GITHUB_STEP_SUMMARY"), result);
       console.log(
         `${state.layer}: native migration and exact state verification passed.`,

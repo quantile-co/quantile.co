@@ -7,6 +7,7 @@ import {
   migrateBackend,
   migrationAnswer,
   stateDigest,
+  verifySourceInventory,
   verifyTransition,
 } from "./migration.ts";
 
@@ -78,6 +79,26 @@ it("detects changes to numbers outside JavaScript integer precision", () => {
       Buffer.from(before.toString().replace('"serial":78', '"serial":79')),
     ),
   ).not.toThrow();
+});
+
+it("rejects extra source workspaces, locks and unknown nested prefixes", () => {
+  const prefix = "example/prod";
+  const inventory = {
+    items: [{ name: `${prefix}/default.tfstate` }],
+    prefixes: [`${prefix}/application/`],
+  };
+  expect(() =>
+    verifySourceInventory(prefix, [prefix, `${prefix}/application`], inventory),
+  ).not.toThrow();
+  for (const listing of [
+    { items: [...inventory.items, { name: `${prefix}/other.tfstate` }] },
+    { items: [...inventory.items, { name: `${prefix}/other.tflock` }] },
+    { ...inventory, prefixes: [`${prefix}/unknown/`] },
+    { ...inventory, nextPageToken: "more" },
+  ])
+    expect(() =>
+      verifySourceInventory(prefix, [prefix, `${prefix}/application`], listing),
+    ).toThrow(/inventory/);
 });
 
 it("migrates only an empty backend and preserves an existing destination", async () => {
