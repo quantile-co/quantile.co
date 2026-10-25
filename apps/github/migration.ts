@@ -66,10 +66,14 @@ export function stateDigest(bytes: Uint8Array) {
     typeof state.outputs !== "object"
   )
     throw new MigrationFailure("Invalid state snapshot");
+  const canonical = parseExact(Buffer.from(bytes).toString("utf8")) as Record<
+    string,
+    unknown
+  >;
+  // Native variable-check addresses are a transient validation cache.
+  delete canonical.check_results;
   return createHash("sha256")
-    .update(
-      JSON.stringify(sorted(parseExact(Buffer.from(bytes).toString("utf8")))),
-    )
+    .update(JSON.stringify(sorted(canonical)))
     .digest("hex");
 }
 
