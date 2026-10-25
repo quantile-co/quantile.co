@@ -91,11 +91,13 @@ locally by default; checks, fixes and tests always execute.
 Local caching remains the default. CI persists .turbo/cache on the existing
 Restricted Namespace volume and may use remote team main in this repository's
 workspace. The native TURBO_TOKEN secret is a server-scoped reader at
-organization/repository scope, overridden by a cache-only writer in the dedicated
-main-only turbo-cache environment for manual Test. External/fork PRs receive no
-remote token; developers use reader-scoped credentials. Checks/tests/fixes and
-Plan/Apply remain uncached. Live credential provisioning and Restricted-runner
-authentication/hit/write-denial qualification are separate pending operations.
+organization/repository scope, overridden by a cache-only writer in the existing
+prod environment for trusted main Test/Build. Test, Build, Plan and Apply use prod
+where they exist; no separate cache environment is used. External/fork PRs receive
+no remote token; developers use reader-scoped credentials. Checks/tests/fixes and
+Plan/Apply remain uncached. CI readers are installed. Prod writer provisioning and
+complete cross-run cache qualification remain pending. The rejected separate-
+environment plans are obsolete and must not be applied.
 
 Exact published `@quantile-co/factory-github@0.1.0` and
 `@quantile-co/factory-pi@0.1.0` replace copied runtime code. Pi loads the prebuilt
