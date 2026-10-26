@@ -1,6 +1,4 @@
-import { execFile } from "node:child_process";
 import path from "node:path";
-import { promisify } from "node:util";
 import { Command, CommanderError, Option } from "commander";
 import Stripe from "stripe";
 import {
@@ -12,6 +10,7 @@ import {
 } from "../env/env.ts";
 import { readIntegrationTarget } from "../stripe/test.ts";
 import { startEmulator } from "./emulator.ts";
+import { assertFunnelStopped, tailscaleReader } from "./funnel.ts";
 import {
   type IntegrationConfig,
   resendRegistry,
@@ -311,28 +310,6 @@ export async function runDevelopment(
           throw new Error("Production build for development billing failed.");
       }
       if (config) {
-        let ngrokConfig: string;
-        try {
-          const { stdout } = await promisify(execFile)(
-            "ngrok",
-            [
-              "config",
-              "check",
-              ...(env.NGROK_CONFIG ? ["--config", env.NGROK_CONFIG] : []),
-            ],
-            {
-              timeout: 5000,
-              env: childEnvironment(env, "tools") as NodeJS.ProcessEnv,
-            },
-          );
-          ngrokConfig =
-            stdout.match(/Valid configuration file at (.+)/)?.[1]?.trim() ?? "";
-          if (!ngrokConfig) throw new Error("No config path");
-        } catch {
-          throw new Error(
-            "ngrok config check failed. Authenticate the installed ngrok CLI first (or provide NGROK_CONFIG). No token needs to be copied into this project.",
-          );
-        }
         const owner = await acquireOwner(root, appInstance as string);
         integration = await startIntegration({
           root,
@@ -344,7 +321,6 @@ export async function runDevelopment(
           start: runner.start,
           registry: resendRegistry(config.managementKey),
           signal: abort.signal,
-          ngrokConfig,
         });
         env = {
           ...env,
@@ -434,6 +410,7 @@ export async function runDevelopment(
         throw new Error(
           "The integration owner process still exists. Stop it before cleanup; never kill a PID based solely on a stale journal.",
         );
+      await assertFunnelStopped(tailscaleReader(env), owner.endpoint);
       await cleanupOwner(
         root,
         owner,

@@ -1,5 +1,10 @@
-import { writeFile } from "node:fs/promises";
-import path from "node:path";
+import {
+  assertFunnelStopped,
+  funnelIsReady,
+  prepareFunnel,
+  type ReadTailscale,
+  tailscaleReader,
+} from "./funnel.ts";
 import {
   cleanupOwner,
   type IntegrationOwner,
@@ -19,7 +24,7 @@ import {
 export type IntegrationConfig = {
   stripeKey: string;
   managementKey: string;
-  origin?: string;
+  funnelPort?: number;
 };
 export function resendRegistry(
   key: string,
@@ -112,7 +117,7 @@ export async function startIntegration(options: {
   start: Start;
   registry: ResendRegistry;
   signal: AbortSignal;
-  ngrokConfig: string;
+  readTailscale?: ReadTailscale;
 }) {
   const {
     root,
@@ -124,13 +129,10 @@ export async function startIntegration(options: {
     start,
     registry,
     signal,
-    ngrokConfig,
+    readTailscale = tailscaleReader(environment),
   } = options;
-  const { origin: requestedOrigin } = config;
-  let origin = "";
   const children: Child[] = [];
   let stripeSecret = "";
-  let tunnelReady = false;
   let failure: Error | undefined;
   const spawn = (
     name: string,
@@ -152,68 +154,13 @@ export async function startIntegration(options: {
     signal.throwIfAborted();
     if (failure) throw failure;
   };
-  const configFile = path.join(root, ".quantile/ngrok.yml");
   try {
-    // Merge a secret-free overlay with the existing authenticated CLI config.
-    // Never read, copy or print the saved authtoken. Disable the shared local
-    // inspection port and never enable endpoint pooling between app versions.
-    await writeFile(
-      configFile,
-      `version: "3"\nagent:\n  web_addr: false\n  update_check: false\n`,
-      { mode: 0o600 },
-    );
-    spawn(
-      "ngrok",
-      "ngrok",
-      [
-        "http",
-        `http://127.0.0.1:${resendPort}`,
-        ...(requestedOrigin ? ["--url", requestedOrigin] : []),
-        "--config",
-        ngrokConfig,
-        "--config",
-        configFile,
-        "--metadata",
-        owner.token,
-        "--inspect=false",
-        "--log",
-        "stdout",
-        "--log-format",
-        "json",
-      ],
-      childEnvironment(environment, "tools"),
-      (line) => {
-        try {
-          const message = JSON.parse(line);
-          if (message.msg === "started tunnel") {
-            const url = new URL(message.url);
-            if (
-              url.protocol === "https:" &&
-              !url.username &&
-              !url.password &&
-              !url.search &&
-              !url.hash &&
-              url.pathname === "/" &&
-              (!requestedOrigin || url.origin === requestedOrigin)
-            ) {
-              origin = url.origin;
-              tunnelReady = true;
-            }
-          }
-        } catch {
-          /* not a readiness message */
-        }
-      },
-    );
-    await until(
-      async () => {
-        alive();
-        return tunnelReady || undefined;
-      },
-      "ngrok",
-      signal,
-    );
-    const endpointUrl = `${origin}/api/resend/webhook/${owner.token}`;
+    const origin = await prepareFunnel(readTailscale, config.funnelPort);
+    const webhookPath = `/api/resend/webhook/${owner.token}`;
+    const endpointUrl = `${origin}${webhookPath}`;
+    const target = `http://127.0.0.1:${resendPort}`;
+    // Persist the exact route before publishing it, including crashes before
+    // Resend registration. Native foreground ownership/CAS rejects port races.
     owner.endpoint = endpointUrl;
     await saveOwner(root, owner);
     spawn(
@@ -297,6 +244,34 @@ export async function startIntegration(options: {
       throw new Error(
         "Resend registration or signing secret was not confirmed.",
       );
+    // Confirm local binding/registration and listener liveness before making
+    // the route public, not while its local port is still unclaimed.
+    alive();
+    spawn(
+      "Tailscale Funnel",
+      "tailscale",
+      [
+        "funnel",
+        `--https=${new URL(origin).port || "443"}`,
+        `--set-path=${webhookPath}`,
+        target,
+      ],
+      childEnvironment(environment, "tools"),
+    );
+    await until(
+      async () => {
+        alive();
+        const configuration = await readTailscale([
+          "serve",
+          "status",
+          "--json",
+        ]);
+        alive();
+        return funnelIsReady(configuration, endpointUrl, target) || undefined;
+      },
+      "Tailscale Funnel",
+      signal,
+    );
     return {
       stripeSecret,
       resendSecret: configured.signing_secret,
@@ -304,12 +279,14 @@ export async function startIntegration(options: {
       done: Promise.race(children.map((child) => child.done)),
       stop: async () => {
         await stopChildren(children);
+        await assertFunnelStopped(readTailscale, owner.endpoint);
         await cleanupOwner(root, owner, registry);
       },
     };
   } catch (error) {
     try {
       await stopChildren(children);
+      await assertFunnelStopped(readTailscale, owner.endpoint);
       await cleanupOwner(root, owner, registry);
     } catch {
       throw new Error(

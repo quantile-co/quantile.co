@@ -137,16 +137,16 @@ describe("integration configuration and process boundaries", () => {
       ),
     ).toThrow();
     expect(readIntegrationConfig(env, "sample")).toMatchObject({
-      origin: undefined,
+      funnelPort: undefined,
       stripeKey: env.STRIPE_TEST_API_KEY,
       managementKey: env.RESEND_MANAGEMENT_API_KEY,
     });
     expect(
       readIntegrationConfig(
-        { ...env, NGROK_URL: "https://{appInstance}.example.com" },
+        { ...env, TAILSCALE_FUNNEL_PORT: "8443" },
         "sample",
       ),
-    ).toMatchObject({ origin: "https://sample.example.com" });
+    ).toMatchObject({ funnelPort: 8443 });
   });
   it.each(["true", "test", "live", "TRUE", "1", "0"])(
     "rejects invalid STRIPE_EVENT_LIVEMODE=%s",
@@ -173,16 +173,17 @@ describe("integration configuration and process boundaries", () => {
       readIntegrationConfig({ ...env, ...invalid }, "sample"),
     ).toThrow();
   });
-  it.each([
-    "http://example.com",
-    "https://user:pass@example.com",
-    "https://example.com/path",
-    "https://example.com?q=secret",
-  ])("rejects unsafe tunnel %s", (url) => {
-    expect(() =>
-      readIntegrationConfig({ ...env, NGROK_URL: url }, "sample"),
-    ).toThrow();
-  });
+  it.each(["80", "3000", "0", "65536", "https://example.com", "8443/path"])(
+    "rejects invalid Funnel port %s",
+    (port) => {
+      expect(() =>
+        readIntegrationConfig(
+          { ...env, TAILSCALE_FUNNEL_PORT: port },
+          "sample",
+        ),
+      ).toThrow();
+    },
+  );
   it.each([
     "https://example.com/api/stripe/webhook",
     "http://127.0.0.1:3000/api/stripe/webhook",
@@ -210,6 +211,8 @@ describe("integration configuration and process boundaries", () => {
       CUSTOM_TOOL_CONFIG: "tool-value",
       XDG_CACHE_HOME: "/normal-cache",
       GOOGLE_APPLICATION_CREDENTIALS: "/credential",
+      TAILSCALE_OAUTH_CLIENT_SECRET: "never-forward",
+      TS_AUTHKEY: "never-forward",
     };
     const app = childEnvironment(full, "runtime");
     expect(app.RESEND_API_KEY).toBe(env.RESEND_API_KEY);
@@ -218,6 +221,18 @@ describe("integration configuration and process boundaries", () => {
     expect(app.RESEND_MANAGEMENT_API_KEY).toBe("");
     expect(app.CUSTOM_TOOL_CONFIG).toBe("tool-value");
     expect(app.XDG_CACHE_HOME).toBe("/normal-cache");
+    for (const purpose of [
+      "tools",
+      "runtime",
+      "unit-test",
+      "integration-test",
+    ] as const) {
+      const child = childEnvironment(full, purpose);
+      expect(child.TAILSCALE_OAUTH_CLIENT_SECRET).toBe(
+        purpose === "tools" ? undefined : "",
+      );
+      expect(child.TS_AUTHKEY).toBe(purpose === "tools" ? undefined : "");
+    }
     const tests = childEnvironment(full, "integration-test");
     expect(tests.RESEND_API_KEY).toBe("");
     expect(tests.STRIPE_API_KEY).toBe("");

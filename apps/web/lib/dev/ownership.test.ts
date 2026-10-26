@@ -92,11 +92,10 @@ describe("app identity and internal integration ownership", () => {
     expect(api.remove).toHaveBeenCalledExactlyOnceWith("owned");
     await expect(readOwner(root)).rejects.toThrow();
   });
-  it("serializes cleanup and removes the overlay before allowing a replacement", async () => {
+  it("serializes cleanup before allowing a replacement", async () => {
     const owner = await ownedEndpoint();
     owner.resendId = "owned";
     await saveOwner(root, owner);
-    await writeFile(path.join(root, ".quantile/ngrok.yml"), "old overlay");
     const api = registry();
     const gate = Promise.withResolvers<null>();
     vi.mocked(api.get).mockReturnValueOnce(gate.promise);
@@ -110,9 +109,6 @@ describe("app identity and internal integration ownership", () => {
     );
     gate.resolve(null);
     await cleanup;
-    await expect(
-      access(path.join(root, ".quantile/ngrok.yml")),
-    ).rejects.toThrow();
     const next = await acquireOwner(root, "sample");
     expect(next.token).not.toBe(owner.token);
     await expect(cleanupOwner(root, owner, api)).rejects.toThrow(

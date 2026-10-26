@@ -66,7 +66,6 @@
                 pkgs.vale
                 pkgs.yamllint
                 pkgs.stripe-cli
-                pkgs.ngrok
                 pkgs.jdk21
                 (factory.playwright.withVersion (builtins.fromJSON (builtins.readFile ./apps/web/package.json))
                   .devDependencies.playwright)

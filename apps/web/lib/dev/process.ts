@@ -24,6 +24,13 @@ const credentials = [
   "RESEND_WEBHOOK_SECRET",
   "GOOGLE_APPLICATION_CREDENTIALS",
   "GOOGLE_CLOUD_QUOTA_PROJECT",
+  "TAILSCALE_API_KEY",
+  "TAILSCALE_AUTHKEY",
+  "TAILSCALE_AUTH_KEY",
+  "TAILSCALE_OAUTH_CLIENT_ID",
+  "TAILSCALE_OAUTH_CLIENT_SECRET",
+  "TAILSCALE_ID_TOKEN",
+  "TS_AUTHKEY",
 ];
 export function childEnvironment(
   env: Environment,
@@ -91,9 +98,9 @@ export function createProcessRunner(root: string) {
       reader.on("line", (text) => {
         if (/too many.*sessions|rate.limit|quota|maximum.*webhooks/i.test(text))
           problem = `${name}: provider capacity/rate limit reached. Inspect owned registrations; no other lifecycle will be evicted.`;
-        const ngrokCode = text.match(/\bERR_NGROK_[A-Z0-9_]+\b/)?.[0];
-        if (ngrokCode)
-          problem = `ngrok failed (${ngrokCode}). Check the configured URL, account permissions and plan capacity.`;
+        if (name === "Tailscale Funnel")
+          problem =
+            "Tailscale Funnel stopped. Check HTTPS/Funnel permission, daemon connectivity and unused public ports; no existing listener will be replaced.";
         // Provider output can contain secrets/payloads. Only the supplied callback
         // may consume it; roots opt in to forwarding ordinary app/test output.
         line?.(text);

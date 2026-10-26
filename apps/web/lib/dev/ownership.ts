@@ -254,9 +254,6 @@ export async function cleanupOwner(
     }
     if ((await readOwner(root)).token !== current.token)
       throw new Error("Integration ownership changed during cleanup.");
-    // Remove the overlay BEFORE releasing ownership. A newly started run must
-    // never lose its config to a previous run's delayed cleanup.
-    await rm(path.join(root, ".quantile/ngrok.yml"), { force: true });
     await rm(path.join(root, ".quantile/webhooks.json"));
   } finally {
     await rm(guard, { recursive: true, force: true });

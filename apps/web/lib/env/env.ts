@@ -68,30 +68,14 @@ export function readIntegrationSettings(env: Environment, appInstance: string) {
     throw new Error(
       `Invalid integration configuration: ${parsed.error.issues.map((issue) => issue.path.join(".")).join(", ")}.`,
     );
-  let origin: string | undefined;
-  if (env.NGROK_URL) {
-    let url: URL;
-    try {
-      url = new URL(env.NGROK_URL.replaceAll("{appInstance}", appInstance));
-    } catch {
-      throw new Error("Invalid ngrok origin.");
-    }
-    if (
-      url.protocol !== "https:" ||
-      url.username ||
-      url.password ||
-      url.search ||
-      url.hash ||
-      url.pathname !== "/" ||
-      ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
-    )
-      throw new Error(
-        "NGROK_URL must be a reserved public HTTPS origin, unique to this app instance.",
-      );
-    origin = url.origin;
-  }
+  const port = z
+    .enum(["443", "8443", "10000"])
+    .optional()
+    .safeParse(env.TAILSCALE_FUNNEL_PORT || undefined);
+  if (!port.success)
+    throw new Error("TAILSCALE_FUNNEL_PORT must be 443, 8443 or 10000.");
   return {
-    origin,
+    funnelPort: port.data === undefined ? undefined : Number(port.data),
     stripeKey: parsed.data.STRIPE_TEST_API_KEY,
     managementKey: parsed.data.RESEND_MANAGEMENT_API_KEY,
   };

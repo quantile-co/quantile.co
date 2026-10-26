@@ -82,6 +82,21 @@ unit, browser and Storybook projects; provider-backed integration stays separate
 Keep heavy webhook-module initialization outside timed tests and preserve the
 module cache; cold dependency transformation is not handler behavior.
 
+Provider-backed development uses foreground Tailscale Funnel for the Resend
+CLI listener only; Stripe keeps its independent CLI forwarding connection.
+Use an already signed-in local daemon, version 1.98.2 or newer, with MagicDNS,
+HTTPS and Funnel permission enabled beforehand. The launcher never changes
+account/network setup or resets shared Serve/Funnel configuration. It selects
+an unused public port in order 8443, 10000, 443; `TAILSCALE_FUNNEL_PORT` can
+select one explicitly. Native foreground ownership/CAS rejects startup races,
+and exact route readback precedes application startup. The Resend CLI binds and
+registers its listener before publication. Journal the unique route before
+registration or publication; confirm its disappearance on the same device
+before releasing ownership. After a launcher crash, stop its orphaned foreground CLI
+before `pnpm dev --cleanup-integration`; cleanup never kills a journal PID or
+resets shared settings. Tailscale credentials are excluded from child processes.
+Ordinary development and tests do not contact the daemon or publish a Funnel.
+
 Factory is composed through explicit `lib.evalModules`, package/file selections,
 and Files then Pi shell hooks. `.envrc` only enters the pinned shell.
 Meaningful `nix/<tool>/default.nix` renderers own site configuration; Factory
