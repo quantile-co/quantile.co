@@ -10,11 +10,12 @@ import {
 } from "../env/env.ts";
 import { readIntegrationTarget } from "../stripe/test.ts";
 import { startEmulator } from "./emulator.ts";
-import { assertFunnelStopped, tailscaleReader } from "./funnel.ts";
 import {
+  assertFunnelStopped,
   type IntegrationConfig,
   resendRegistry,
   startIntegration,
+  tailscaleReader,
 } from "./integration.ts";
 import {
   acquireOwner,
