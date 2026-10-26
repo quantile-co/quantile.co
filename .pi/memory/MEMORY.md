@@ -127,8 +127,8 @@ version/build script. Never execute candidate code with the publishing token.
 API errors are not absence; existing tags/drafts stop publication. Retry visibility
 reads only, never publication writes. Verify exact commit/tag and release immutability.
 
-The replatformed web package selects source version `0.2.21`, requiring a new
-immutable `v0.2.21` publication; never republish the existing `v0.2.20` tag.
+Each new publication needs an unused immutable version matching
+`apps/web/package.json`; never republish an existing tag.
 
 GitHub's automatic source archive is the sole handoff: no custom ZIP, Rules asset
 or release manifest. Commit the complete root pnpm workspace/lock/Turbo configuration
