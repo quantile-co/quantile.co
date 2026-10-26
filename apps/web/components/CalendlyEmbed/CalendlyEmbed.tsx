@@ -6,9 +6,9 @@ import { useEffect, useRef, useState } from "react";
 import classes from "./CalendlyEmbed.module.css";
 
 const lightCalendlyUrl =
-  "https://calendly.com/aj-quantile/15min?hide_gdpr_banner=1&background_color=fafafa&text_color=09090b&primary_color=09090b";
+  "https://calendly.com/aj-quantile/book-a-call?hide_gdpr_banner=1&background_color=fafafa&text_color=09090b&primary_color=09090b";
 const darkCalendlyUrl =
-  "https://calendly.com/aj-quantile/15min?hide_gdpr_banner=1&background_color=09090b&text_color=fafafa&primary_color=fafafa";
+  "https://calendly.com/aj-quantile/book-a-call?hide_gdpr_banner=1&background_color=09090b&text_color=fafafa&primary_color=fafafa";
 const calendlyRenderDelay = 1500;
 const calendlyLoadMargin = "1500px 0px";
 

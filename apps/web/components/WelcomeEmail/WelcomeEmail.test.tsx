@@ -99,7 +99,9 @@ describe("WelcomeEmail", () => {
       expect(text).toContain("15+ years experience");
       expect(text).not.toContain("CompilerWorks");
       expect(html).toContain('href="mailto:aj@quantile.co"');
-      expect(html).toContain('href="https://calendly.com/aj-quantile/15min"');
+      expect(html).toContain(
+        'href="https://calendly.com/aj-quantile/book-a-call"',
+      );
       expect(html).toContain(`href="${billingPortalLoginUrl}"`);
       expect(html).toContain('href="https://quantile.co/#faq"');
       expect(html).toContain("#fafafa");

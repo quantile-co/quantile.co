@@ -127,7 +127,7 @@ export function WelcomeEmail({
                 <strong style={label}>Schedule a call (optional).</strong> Feel
                 free to{" "}
                 <Link
-                  href="https://calendly.com/aj-quantile/15min"
+                  href="https://calendly.com/aj-quantile/book-a-call"
                   style={link}
                 >
                   book an intro call
