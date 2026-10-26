@@ -19,7 +19,7 @@
 - [Nix](https://nix.dev/install-nix.html)
 - [direnv](https://direnv.net/docs/installation.html)
 - For webhook integration, run [Tailscale](https://tailscale.com/download)
-  1.98.2+ and connect to the Funnel-enabled Quantile tailnet.
+  1.98.2+ and connect to a tailnet with Funnel enabled.
 
 After cloning, allow direnv to load the development environment:
 
