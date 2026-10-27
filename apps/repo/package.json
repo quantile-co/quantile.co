@@ -1,5 +1,5 @@
 {
-  "name": "@quantile-co/repo",
+  "name": "@quantile-co/quantile.co-repo-cli",
   "private": true,
   "type": "module",
   "scripts": {

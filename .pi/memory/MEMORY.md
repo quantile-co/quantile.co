@@ -67,6 +67,9 @@ an implementation-status record. Current source holds the authoritative copy.
 
 ## Factory and workspace tooling
 
+JS/TS app names use `@quantile-co/quantile.co-<app>`, adding `-cli` for CLI apps.
+The root remains `@quantile-co/quantile.co`.
+
 The application lives in `apps/web/`, including Next, Storybook, site-native
 configuration, tests and brand assets. Its build is `next build`; root commands
 orchestrate pnpm/Turbo workspaces. Keep app semantics and approved copy unchanged.

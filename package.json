@@ -10,11 +10,11 @@
   "scripts": {
     "prepare": "husky",
     "dev": "tsx apps/repo/cli.ts dev",
-    "dev:storybook": "pnpm --filter @quantile-co/web run dev:storybook",
+    "dev:storybook": "pnpm --filter @quantile-co/quantile.co-web run dev:storybook",
     "check": "TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run check",
     "fix": "TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run fix",
     "test": "pnpm run check && TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run test",
-    "test:integration": "pnpm --filter @quantile-co/web run test:integration",
+    "test:integration": "pnpm --filter @quantile-co/quantile.co-web run test:integration",
     "build": "TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run build",
     "build:assets": "tsx apps/repo/cli.ts assets",
     "build:storybook": "TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run build:storybook",

@@ -1,5 +1,5 @@
 {
-  "name": "@quantile-co/github",
+  "name": "@quantile-co/quantile.co-github-cli",
   "private": true,
   "type": "module",
   "scripts": {
