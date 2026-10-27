@@ -82,26 +82,28 @@ read version-matched documentation from the web workspace's installed Next packa
 Site launchers retain native Node 24 TypeScript execution and explicit
 child-credential isolation. Ordinary tests own an isolated demo emulator and run
 unit, browser and Storybook projects; provider-backed integration stays separate.
+Integration browsers honor the pinned Chromium path and use tool-scoped credentials.
 Keep heavy webhook-module initialization outside timed tests and preserve the
 module cache; cold dependency transformation is not handler behavior.
 
-Provider-backed development uses foreground Tailscale Funnel for the Resend
-CLI listener only; Stripe keeps its independent CLI forwarding connection.
-Use an already signed-in local daemon, version 1.98.2 or newer, with MagicDNS,
-HTTPS and Funnel permission enabled beforehand. The launcher never changes
-account/network setup or resets shared Serve/Funnel configuration. It selects
-an unused public port in order 8443, 10000, 443; `TAILSCALE_FUNNEL_PORT` can
-select one explicitly. Native foreground ownership/CAS rejects startup races,
-and exact route readback precedes application startup. The Resend CLI binds and
-registers its listener before publication. Journal the unique route before
-registration or publication; confirm its disappearance on the same device
-before releasing ownership. After a launcher crash, stop its orphaned foreground CLI
-before `pnpm dev --cleanup-integration`; cleanup never kills a journal PID or
-resets shared settings. Tailscale credentials are excluded from child processes.
-Ordinary development and tests do not contact the daemon or publish a Funnel.
+Provider-backed development reuses a dedicated background Tailscale Funnel on
+HTTPS 8443, mounted at `/api/resend/webhook/` to `http://127.0.0.1:4318`.
+Machine setup owns it; the launcher only reads its configuration and never
+publishes, resets or stops a Funnel. The fixed Resend listener port admits one
+integrated run per laptop, including worktrees. Other laptops remain independent.
+Stripe keeps its independent CLI forwarding connection. Each run journals its
+unique Resend URL before registration and verifies exact registration cleanup.
+After a launcher crash, stop its orphaned provider CLIs before
+`pnpm dev --cleanup-integration`; cleanup never kills a journal PID.
+Keep app/operation identity, signature checks and child-credential isolation.
+Integration tests distinguish provider acceptance (two minutes) from verified
+callbacks (ten minutes for provider retries); keep the same listener alive rather
+than resending email or accepting API-only proof. Ordinary development and tests
+do not contact the daemon. See README for the one-time Funnel prerequisite.
 
 Factory is composed through explicit `lib.evalModules`, package/file selections,
-and Files then Pi shell hooks. `.envrc` only enters the pinned shell.
+and Files then Pi shell hooks. `.envrc` sources optional ignored `.envrc.local`
+before entering the pinned shell.
 Meaningful `nix/<tool>/default.nix` renderers own site configuration; Factory
 provides native defaults and formatting. Managed files are tracked regular copies;
 Check compares both worktree and index. Manifests and locks remain seed/tool-owned.

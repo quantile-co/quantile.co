@@ -18,7 +18,7 @@ import {
 } from "./process.ts";
 
 type ReadTailscale = (args: string[]) => Promise<unknown>;
-export function tailscaleReader(environment: Environment): ReadTailscale {
+function tailscaleReader(environment: Environment): ReadTailscale {
   return async (args) => {
     try {
       const { stdout } = await promisify(execFile)("tailscale", args, {
@@ -36,19 +36,12 @@ export function tailscaleReader(environment: Environment): ReadTailscale {
   };
 }
 
-const portKey = z
-  .string()
-  .regex(/^[1-9][0-9]{0,4}$/)
-  .refine((v) => Number(v) <= 65535);
-const hostPortKey = z
-  .string()
-  .refine((v) => portKey.safeParse(v.split(":").at(-1)).success);
-const configSchema = z
+const serverSchema = z
   .object({
-    TCP: z.record(portKey, z.unknown()).optional(),
+    TCP: z.record(z.string(), z.unknown()).optional(),
     Web: z
       .record(
-        hostPortKey,
+        z.string(),
         z
           .object({
             Handlers: z.record(z.string(), z.unknown()),
@@ -56,202 +49,74 @@ const configSchema = z
           .passthrough(),
       )
       .optional(),
-    AllowFunnel: z.record(hostPortKey, z.boolean()).optional(),
+    AllowFunnel: z.record(z.string(), z.boolean()).optional(),
     Foreground: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();
 
-function configurations(value: unknown) {
-  try {
-    const root = configSchema.parse(value === null ? {} : value);
-    const foreground = Object.values(root.Foreground ?? {}).map((value) => {
-      const config = configSchema.parse(value);
-      if (Object.keys(config.Foreground ?? {}).length) throw new Error();
-      return config;
-    });
-    return { root, foreground };
-  } catch {
-    throw new Error(
-      "Invalid Tailscale Serve configuration; refusing to use shared settings.",
-    );
-  }
-}
-
-type Config = z.infer<typeof configSchema>;
-function usesPort(config: Config, port: number) {
-  return (
-    Object.hasOwn(config.TCP ?? {}, String(port)) ||
-    [
-      ...Object.keys(config.Web ?? {}),
-      ...Object.keys(config.AllowFunnel ?? {}),
-    ].some((host) => host.endsWith(`:${port}`))
-  );
-}
-
-export async function prepareFunnel(
-  read: ReadTailscale,
-  requestedPort?: number,
-) {
+// Machine setup owns the persistent listener. This check never changes it.
+export async function readFunnelOrigin(read: ReadTailscale) {
   const status = z
     .object({
-      Version: z.string(),
       BackendState: z.literal("Running"),
       CurrentTailnet: z.object({ MagicDNSEnabled: z.literal(true) }),
       Self: z.object({
-        DNSName: z.string(),
+        DNSName: z.string().regex(/^[a-z0-9-]+\.[a-z0-9-]+\.ts\.net\.?$/),
         CapMap: z.record(z.string(), z.unknown()),
       }),
     })
     .safeParse(await read(["status", "--json", "--peers=false"]));
-  if (!status.success)
-    throw new Error(
-      "Integration requires a signed-in Tailscale daemon with MagicDNS enabled.",
-    );
-  const { Version, Self } = status.data;
-  const version = Version.match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/)
-    ?.slice(1)
-    .map(Number);
-  // Verified native foreground-port conflict protection and configuration CAS.
   if (
-    !version ||
-    !(
-      version[0] > 1 ||
-      (version[0] === 1 &&
-        (version[1] > 98 || (version[1] === 98 && version[2] >= 2)))
-    )
+    !status.success ||
+    !Object.hasOwn(status.data.Self.CapMap, "https") ||
+    !Object.hasOwn(status.data.Self.CapMap, "funnel")
   )
     throw new Error(
-      "Tailscale daemon 1.98.2 or newer is required for safe foreground port ownership.",
+      "Integration requires a signed-in Tailscale daemon with MagicDNS, HTTPS and Funnel enabled.",
     );
-  const hostname = Self.DNSName.replace(/\.$/, "");
-  if (
-    !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.ts\.net$/.test(
-      hostname,
-    )
-  )
-    throw new Error(
-      "Tailscale must provide a valid device hostname in its ts.net domain.",
-    );
-  if (
-    !Object.hasOwn(Self.CapMap, "https") ||
-    !Object.hasOwn(Self.CapMap, "funnel")
-  )
-    throw new Error(
-      "Enable HTTPS and grant this device Funnel permission through the tailnet administrator first; the launcher never enables them.",
-    );
-
-  const allowed = Object.keys(Self.CapMap).flatMap((key) => {
-    if (!key.startsWith("https://tailscale.com/cap/funnel-ports?")) return [];
-    const url = new URL(key);
-    return url.searchParams.get("ports")?.split(",") ?? [];
-  });
-  const { root, foreground } = configurations(
+  const hostname = status.data.Self.DNSName.replace(/\.$/, "");
+  const hostPort = hostname + ":8443";
+  const configuration = serverSchema.safeParse(
     await read(["serve", "status", "--json"]),
   );
-  const candidates =
-    requestedPort === undefined ? [8443, 10000, 443] : [requestedPort];
-  const port = candidates.find(
-    (port) =>
-      [443, 8443, 10000].includes(port) &&
-      allowed.some((range) => {
-        const parts = range.split("-");
-        if (
-          parts.length > 2 ||
-          parts.some((v) => !portKey.safeParse(v).success)
-        )
-          return false;
-        return port >= Number(parts[0]) && port <= Number(parts[1] ?? parts[0]);
-      }) &&
-      ![root, ...foreground].some((config) => usesPort(config, port)),
-  );
-  if (port === undefined)
-    throw new Error(
-      "No permitted unused Tailscale Funnel port is available (443, 8443, 10000). Existing private Serve and public Funnel listeners will not be replaced.",
+  const setupError = () =>
+    new Error(
+      "Configure the dedicated background Funnel on HTTPS 8443 to 127.0.0.1:4318 as documented in README.md. Existing Serve/Funnel settings were not changed.",
     );
-  return `https://${hostname}${port === 443 ? "" : `:${port}`}`;
-}
-
-export function funnelIsReady(
-  value: unknown,
-  endpoint: string,
-  target: string,
-) {
-  const url = new URL(endpoint);
-  const port = Number(url.port || 443);
-  const hostPort = `${url.hostname}:${port}`;
-  const { root, foreground } = configurations(value);
-  const matches = foreground.filter((config) => usesPort(config, port));
-  if (!usesPort(root, port) && matches.length === 0) return false;
-  const config = matches[0];
+  if (!configuration.success) throw setupError();
+  const config = configuration.data;
+  const handlers = config.Web?.[hostPort]?.Handlers ?? {};
+  const foreground = Object.values(config.Foreground ?? {}).map((c) =>
+    serverSchema.safeParse(c),
+  );
   if (
-    usesPort(root, port) ||
-    matches.length !== 1 ||
-    !config ||
-    Object.keys(config.TCP ?? {}).length !== 1 ||
     !z
       .object({ HTTPS: z.literal(true) })
       .strict()
-      .safeParse(config.TCP?.[String(port)]).success ||
-    Object.keys(config.Web ?? {}).length !== 1 ||
-    Object.keys(config.Web?.[hostPort]?.Handlers ?? {}).length !== 1 ||
+      .safeParse(config.TCP?.["8443"]).success ||
+    Object.keys(config.Web ?? {}).filter((h) => h.endsWith(":8443")).length !==
+      1 ||
+    Object.keys(handlers).length !== 1 ||
     !z
-      .object({ Proxy: z.literal(target) })
+      .object({ Proxy: z.literal("http://127.0.0.1:4318") })
       .strict()
-      .safeParse(config.Web?.[hostPort]?.Handlers[url.pathname]).success ||
-    Object.keys(config.AllowFunnel ?? {}).length !== 1 ||
-    config.AllowFunnel?.[hostPort] !== true
-  )
-    throw new Error(
-      "Tailscale Funnel port ownership or routing changed. Refusing to share or replace another listener.",
-    );
-  return true;
-}
-
-export async function assertFunnelStopped(
-  read: ReadTailscale,
-  endpoint?: string,
-) {
-  if (!endpoint) return;
-  const url = new URL(endpoint);
-  const pathname = url.pathname;
-  try {
-    const current = z
-      .object({ Self: z.object({ DNSName: z.string() }) })
-      .safeParse(await read(["status", "--json", "--peers=false"]));
-    if (
-      !current.success ||
-      current.data.Self.DNSName.replace(/\.$/, "") !== url.hostname
+      .safeParse(handlers["/api/resend/webhook/"]).success ||
+    config.AllowFunnel?.[hostPort] !== true ||
+    foreground.some(
+      (c) =>
+        !c.success ||
+        Object.hasOwn(c.data.TCP ?? {}, "8443") ||
+        Object.keys(c.data.Web ?? {}).some((h) => h.endsWith(":8443")) ||
+        Object.keys(c.data.AllowFunnel ?? {}).some((h) => h.endsWith(":8443")),
     )
-      throw new Error("Tailscale device identity changed.");
-    await until(
-      async () => {
-        const { root, foreground } = configurations(
-          await read(["serve", "status", "--json"]),
-        );
-        const remains = [root, ...foreground].some((config) =>
-          Object.values(config.Web ?? {}).some(
-            ({ Handlers }) =>
-              Object.hasOwn(Handlers, pathname) ||
-              Object.hasOwn(Handlers, `${pathname}/`),
-          ),
-        );
-        return remains ? undefined : true;
-      },
-      "owned Tailscale Funnel shutdown",
-      new AbortController().signal,
-      5000,
-    );
-  } catch {
-    throw new Error(
-      "Funnel shutdown could not be confirmed. Stop this integration's foreground Tailscale CLI before cleanup; ownership has been retained and no shared settings were reset.",
-    );
-  }
+  )
+    throw setupError();
+  return "https://" + hostPort;
 }
 
 export type IntegrationConfig = {
   stripeKey: string;
   managementKey: string;
-  funnelPort?: number;
 };
 export function resendRegistry(
   key: string,
@@ -340,7 +205,6 @@ export async function startIntegration(options: {
   environment: Environment;
   owner: IntegrationOwner;
   appPort: number;
-  resendPort: number;
   start: Start;
   registry: ResendRegistry;
   signal: AbortSignal;
@@ -352,7 +216,6 @@ export async function startIntegration(options: {
     environment,
     owner,
     appPort,
-    resendPort,
     start,
     registry,
     signal,
@@ -372,7 +235,8 @@ export async function startIntegration(options: {
     children.push(child);
     void child.done.then(() => {
       failure ??= new Error(
-        `${name} stopped unexpectedly. Check authentication and provider capacity.`,
+        name +
+          " stopped unexpectedly. Check authentication and provider capacity.",
       );
     });
     return child;
@@ -382,49 +246,13 @@ export async function startIntegration(options: {
     if (failure) throw failure;
   };
   try {
-    const origin = await prepareFunnel(readTailscale, config.funnelPort);
-    const webhookPath = `/api/resend/webhook/${owner.token}`;
-    const endpointUrl = `${origin}${webhookPath}`;
-    const target = `http://127.0.0.1:${resendPort}`;
-    // Persist the exact route before publishing it, including crashes before
-    // Resend registration. Native foreground ownership/CAS rejects port races.
+    const origin = await readFunnelOrigin(readTailscale);
+    const endpointUrl = origin + "/api/resend/webhook/" + owner.token;
+    // Journal the unique registration URL before starting the provider CLI.
     owner.endpoint = endpointUrl;
     await saveOwner(root, owner);
-    spawn(
-      "Stripe CLI",
-      "stripe",
-      [
-        "listen",
-        "--skip-update",
-        "--latest",
-        "--events",
-        "invoice.payment_succeeded",
-        "--events-from",
-        "@self",
-        "--device-name",
-        owner.token,
-        "--forward-to",
-        `http://127.0.0.1:${appPort}/api/stripe/webhook`,
-      ],
-      {
-        ...childEnvironment(environment, "tools"),
-        STRIPE_API_KEY: config.stripeKey,
-      },
-      (line) => {
-        stripeSecret ||=
-          line.match(
-            /Your webhook signing secret is (whsec_[A-Za-z0-9]+)\b/,
-          )?.[1] ?? "";
-      },
-    );
-    await until(
-      async () => {
-        alive();
-        return stripeSecret || undefined;
-      },
-      "Stripe CLI",
-      signal,
-    );
+    // Binding the fixed port admits only one integrated run per laptop,
+    // including other worktrees. Resend binds before registering its webhook.
     spawn(
       "Resend CLI",
       "resend",
@@ -432,18 +260,30 @@ export async function startIntegration(options: {
         "webhooks",
         "listen",
         "--url",
-        owner.endpoint,
+        endpointUrl,
         "--port",
-        String(resendPort),
+        "4318",
         "--events",
         "email.sent",
         "--forward-to",
-        `http://127.0.0.1:${appPort}/api/resend/webhook`,
+        "http://127.0.0.1:" + appPort + "/api/resend/webhook",
         "--json",
       ],
       {
         ...childEnvironment(environment, "tools"),
         RESEND_API_KEY: config.managementKey,
+      },
+      (line) => {
+        // CLI errors span multiple lines. Recognize the bind failure without
+        // parsing or echoing provider payloads and secrets.
+        if (
+          /Failed to start local server on port 4318:.*\bEADDRINUSE\b/.test(
+            line,
+          )
+        )
+          failure = new Error(
+            "Resend port 4318 is already in use. Only one integration run per laptop, including worktrees, is supported; stop the other listener first.",
+          );
       },
     );
     const endpoint = await until(
@@ -471,49 +311,53 @@ export async function startIntegration(options: {
       throw new Error(
         "Resend registration or signing secret was not confirmed.",
       );
-    // Confirm local binding/registration and listener liveness before making
-    // the route public, not while its local port is still unclaimed.
     alive();
     spawn(
-      "Tailscale Funnel",
-      "tailscale",
+      "Stripe CLI",
+      "stripe",
       [
-        "funnel",
-        `--https=${new URL(origin).port || "443"}`,
-        `--set-path=${webhookPath}`,
-        target,
+        "listen",
+        "--skip-update",
+        "--latest",
+        "--events",
+        "invoice.payment_succeeded",
+        "--device-name",
+        owner.token,
+        "--forward-to",
+        "http://127.0.0.1:" + appPort + "/api/stripe/webhook",
       ],
-      childEnvironment(environment, "tools"),
+      {
+        ...childEnvironment(environment, "tools"),
+        STRIPE_API_KEY: config.stripeKey,
+      },
+      (line) => {
+        stripeSecret ||=
+          line.match(
+            /Your webhook signing secret is (whsec_[A-Za-z0-9]+)\b/,
+          )?.[1] ?? "";
+      },
     );
     await until(
       async () => {
         alive();
-        const configuration = await readTailscale([
-          "serve",
-          "status",
-          "--json",
-        ]);
-        alive();
-        return funnelIsReady(configuration, endpointUrl, target) || undefined;
+        return stripeSecret || undefined;
       },
-      "Tailscale Funnel",
+      "Stripe CLI",
       signal,
     );
     return {
       stripeSecret,
       resendSecret: configured.signing_secret,
-      target: `http://127.0.0.1:${appPort}/api/stripe/webhook`,
+      target: "http://127.0.0.1:" + appPort + "/api/stripe/webhook",
       done: Promise.race(children.map((child) => child.done)),
       stop: async () => {
         await stopChildren(children);
-        await assertFunnelStopped(readTailscale, owner.endpoint);
         await cleanupOwner(root, owner, registry);
       },
     };
   } catch (error) {
     try {
       await stopChildren(children);
-      await assertFunnelStopped(readTailscale, owner.endpoint);
       await cleanupOwner(root, owner, registry);
     } catch {
       throw new Error(

@@ -3,6 +3,7 @@ import { chromium } from "playwright";
 import Stripe from "stripe";
 import { expect, it } from "vitest";
 import { z } from "zod";
+import { childEnvironment } from "@/lib/dev/process";
 import {
   appInstanceSchema,
   belongsToAppInstance,
@@ -86,11 +87,16 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
     );
     let sessionId: string | undefined;
     let operation: ReturnType<typeof createTestOperation> | undefined;
-    let stage = "landing-page Checkout";
+    let stage = "browser launch";
     const failures: Error[] = [];
     try {
-      const browser = await chromium.launch({ headless: true });
+      const browser = await chromium.launch({
+        headless: true,
+        executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+        env: childEnvironment(process.env, "tools") as Record<string, string>,
+      });
       try {
+        stage = "landing-page Checkout";
         const page = await browser.newPage();
         const home = await page.goto(origin);
         expect(home?.ok()).toBe(true);
@@ -205,15 +211,22 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
           await stripe.subscriptions.retrieve(subscriptionId),
           operation,
         );
-        stage = "signed invoice and Resend callback";
-        const completionDeadline = Date.now() + 120_000;
+        stage = "Stripe delivery and Resend acceptance";
+        let completionDeadline = Date.now() + 120_000;
+        let resendId: string | undefined;
         let completed = false;
         while (Date.now() < completionDeadline) {
           const record = await store.get({
             mode: "development",
             subscriptionId,
           });
+          if (record?.state === "accepted" && !resendId) {
+            resendId = record.resendId;
+            stage = "verified Resend callback";
+            completionDeadline = Date.now() + 600_000;
+          }
           if (record?.state === "accepted" && record.callbackReceivedAt) {
+            expect(record.resendId).toBe(resendId);
             expect(record).toMatchObject({
               mode: "development",
               appInstance: env.QUANTILE_APP_INSTANCE,
@@ -265,5 +278,5 @@ it.skipIf(!process.env.QUANTILE_CHECKOUT_TEST_ORIGIN)(
         "Landing Checkout integration failed.",
       );
   },
-  420_000,
+  900_000,
 );

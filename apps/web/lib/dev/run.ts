@@ -11,11 +11,9 @@ import {
 import { readIntegrationTarget } from "../stripe/test.ts";
 import { startEmulator } from "./emulator.ts";
 import {
-  assertFunnelStopped,
   type IntegrationConfig,
   resendRegistry,
   startIntegration,
-  tailscaleReader,
 } from "./integration.ts";
 import {
   acquireOwner,
@@ -318,7 +316,6 @@ export async function runDevelopment(
           environment: env,
           owner,
           appPort: port,
-          resendPort: await freePort(),
           start: runner.start,
           registry: resendRegistry(config.managementKey),
           signal: abort.signal,
@@ -411,7 +408,6 @@ export async function runDevelopment(
         throw new Error(
           "The integration owner process still exists. Stop it before cleanup; never kill a PID based solely on a stale journal.",
         );
-      await assertFunnelStopped(tailscaleReader(env), owner.endpoint);
       await cleanupOwner(
         root,
         owner,

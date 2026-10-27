@@ -68,14 +68,7 @@ export function readIntegrationSettings(env: Environment, appInstance: string) {
     throw new Error(
       `Invalid integration configuration: ${parsed.error.issues.map((issue) => issue.path.join(".")).join(", ")}.`,
     );
-  const port = z
-    .enum(["443", "8443", "10000"])
-    .optional()
-    .safeParse(env.TAILSCALE_FUNNEL_PORT || undefined);
-  if (!port.success)
-    throw new Error("TAILSCALE_FUNNEL_PORT must be 443, 8443 or 10000.");
   return {
-    funnelPort: port.data === undefined ? undefined : Number(port.data),
     stripeKey: parsed.data.STRIPE_TEST_API_KEY,
     managementKey: parsed.data.RESEND_MANAGEMENT_API_KEY,
   };

@@ -137,16 +137,9 @@ describe("integration configuration and process boundaries", () => {
       ),
     ).toThrow();
     expect(readIntegrationConfig(env, "sample")).toMatchObject({
-      funnelPort: undefined,
       stripeKey: env.STRIPE_TEST_API_KEY,
       managementKey: env.RESEND_MANAGEMENT_API_KEY,
     });
-    expect(
-      readIntegrationConfig(
-        { ...env, TAILSCALE_FUNNEL_PORT: "8443" },
-        "sample",
-      ),
-    ).toMatchObject({ funnelPort: 8443 });
   });
   it.each(["true", "test", "live", "TRUE", "1", "0"])(
     "rejects invalid STRIPE_EVENT_LIVEMODE=%s",
@@ -173,17 +166,6 @@ describe("integration configuration and process boundaries", () => {
       readIntegrationConfig({ ...env, ...invalid }, "sample"),
     ).toThrow();
   });
-  it.each(["80", "3000", "0", "65536", "https://example.com", "8443/path"])(
-    "rejects invalid Funnel port %s",
-    (port) => {
-      expect(() =>
-        readIntegrationConfig(
-          { ...env, TAILSCALE_FUNNEL_PORT: port },
-          "sample",
-        ),
-      ).toThrow();
-    },
-  );
   it.each([
     "https://example.com/api/stripe/webhook",
     "http://127.0.0.1:3000/api/stripe/webhook",
