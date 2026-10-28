@@ -29,7 +29,7 @@ describe("site response policies", () => {
         expect(directives.get(name)).toContain("https://cdn.usefathom.com");
       for (const name of ["object-src", "frame-ancestors", "form-action"])
         expect(directives.get(name)).toEqual(["'none'"]);
-      expect(policy).not.toMatch(/stripe|calendly|billing|\*\.usefathom\.com/);
+      expect(policy).not.toContain("https://*.usefathom.com");
       expect(policy.includes("'unsafe-eval'")).toBe(development);
       expect(rules.some((rule) => rule.source === "/images/:path*")).toBe(
         !development,

@@ -10,7 +10,11 @@
   --section-gap: clamp(2rem, 6vw, 4rem);
   --page-edge-space: clamp(1.5rem, 4vw, 3rem);
   --title-line-height: 1.05;
-  --letter-contact-font-size: clamp(1.0125rem, 1.84vw, 1.2375rem);
+  /* Outfit's tallest desktop line includes the descender in “your”. */
+  --letter-contact-font-size: min(
+    clamp(1.0125rem, 1.84vw, 1.2375rem),
+    calc(var(--title-font-size) * 0.93 / (3.25 + 0.45 + 1.5 * 7 / 11))
+  );
   --letter-cta-height: calc(var(--letter-contact-font-size) * 3.25);
   --letter-email-size: calc(var(--letter-contact-font-size) * 7 / 11);
   --letter-contact-gap: calc(var(--letter-contact-font-size) * 0.45);
@@ -75,7 +79,10 @@
 }
 
 .headingContact {
-  --contact-font-size: max(1rem, calc(var(--letter-contact-font-size) * 0.85));
+  --contact-font-size: min(
+    var(--letter-contact-font-size),
+    max(1rem, calc(var(--letter-contact-font-size) * 0.85))
+  );
 
   grid-area: 1 / 1;
   align-self: start;
@@ -123,7 +130,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  font-size: var(--contact-font-size, clamp(1.0125rem, 1.84vw, 1.2375rem));
+  font-size: var(--contact-font-size, var(--letter-contact-font-size));
   gap: 0.45em;
 }
 
@@ -172,42 +179,40 @@
   .page {
     --title-team-scale: 0.85;
     /* Keep the middle line fitted while adjusting the outer-line contrast. */
-    --title-font-size: calc(100cqw / 6.5625 / var(--title-team-scale));
+    --title-font-size: calc(
+      (100cqw - 2 * var(--site-page-padding)) /
+      6.5625 /
+      var(--title-team-scale)
+    );
     --letter-font-size: clamp(
       1rem,
       calc((100vw - 2 * var(--site-page-padding)) / 17.85),
       calc(12rem / 7)
     );
-    /* A 280px row at the narrowest supported viewport, capped at 392px.
-       Both rows share these columns and one unit for every internal dimension. */
+    /* Keep horizontal room for readable text while capping both row heights. */
     --support-unit: min(
       0.875rem,
-      calc((100vw - 2 * var(--site-page-padding)) / 28)
+      calc((100cqw - 2 * var(--site-page-padding)) / 29.4)
     );
-    --support-button-height: calc(var(--support-unit) * 4.4);
-    --support-email-size: calc(var(--support-unit) * 1.05);
-    --support-contact-gap: calc(var(--support-unit) * 0.6);
-    --support-row-height: calc(
-      var(--support-button-height) +
-      var(--support-contact-gap) +
-      var(--support-email-size) *
-      1.5
-    );
+    --support-row-height: 5.5em;
+
+    container-type: inline-size;
   }
 
   .intro,
   .footer {
     display: grid;
     grid-template-columns:
-      calc(var(--support-unit) * 17.8)
+      calc(var(--support-unit) * 19.2)
       calc(var(--support-unit) * 10.2)
       minmax(0, 1fr);
+    /* 0.79em stays within the tallest mobile line's visible Outfit glyphs. */
+    font-size: min(0.8125rem, calc(var(--title-font-size) * 0.79 / 5.5));
     align-items: start;
     column-gap: 0;
   }
 
   .intro {
-    container-type: inline-size;
     row-gap: var(--section-gap);
   }
 
@@ -260,25 +265,26 @@
   }
 
   .contactActions {
-    --contact-unit: var(
-      --support-unit,
-      min(0.875rem, calc((100vw - 2 * var(--site-page-padding)) / 28))
-    );
-
-    width: calc(var(--contact-unit) * 9.6);
-    font-size: calc(var(--contact-unit) * 1.4);
-    gap: calc(var(--contact-unit) * 0.6);
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    width: calc(var(--support-unit) * 9.6);
+    height: var(--support-row-height);
+    align-items: stretch;
+    font-size: inherit;
+    gap: 0.25em;
   }
 
   .contactActions .callToAction {
     width: 100%;
     min-width: 0;
-    height: calc(var(--contact-unit) * 4.4);
-    min-height: 2.75rem;
-    padding-inline: calc(var(--contact-unit) * 0.5);
+    height: 100%;
+    min-height: 1.5rem;
+    padding-inline: 0.4em;
+    font-size: min(calc(var(--support-unit) * 1.25), 1.7em);
   }
 
   .email {
-    font-size: calc(var(--contact-unit) * 1.05);
+    font-size: 1.2em;
+    line-height: 1.25;
   }
 }

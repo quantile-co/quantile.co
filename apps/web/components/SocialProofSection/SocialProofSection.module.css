@@ -285,7 +285,7 @@
     --proof-square-size: var(--support-row-height, 6.575em);
     --proof-media-size: var(--support-row-height, 6.575em);
 
-    font-size: var(--support-unit, 0.875rem);
+    font-size: inherit;
   }
 
   .mediaSquare {
@@ -294,20 +294,31 @@
   }
 
   .proofContent {
-    row-gap: 0.2em;
+    row-gap: 0.15em;
   }
 
   .proofTitle {
-    font-size: 1.5em;
+    font-size: 1.4em;
   }
 
   .profileRole,
   .profileDescription {
-    font-size: 0.85em;
+    font-size: 1em;
+  }
+
+  .profileDescription {
+    display: block;
+    line-height: 1.2;
+    white-space: normal;
+    text-wrap: balance;
+  }
+
+  .profileDescription > span {
+    display: contents;
   }
 
   .experienceContext {
-    font-size: 0.8em;
+    font-size: 1em;
     column-gap: 0.25em;
 
     & span + span {
@@ -316,27 +327,26 @@
   }
 
   .customerLogos {
-    row-gap: 0.35em;
+    row-gap: 0;
   }
 
   .customers {
     width: max-content;
-    grid-template-columns: repeat(3, max-content);
+    grid-template-columns: repeat(3, minmax(max-content, 1fr));
     column-gap: 0.5em;
   }
 
   .clientsLabel {
-    top: 0;
-    font-size: 0.8em;
+    display: none;
   }
 
   .customerLogo {
-    width: 1.3em;
-    height: 1.3em;
+    width: 1.1em;
+    height: 1.1em;
   }
 
   .customerName {
-    font-size: max(0.5rem, 0.75em);
+    font-size: 0.95em;
   }
 }
 

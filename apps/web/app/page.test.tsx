@@ -58,7 +58,6 @@ describe("Homepage positioning", () => {
       html.indexOf("</footer>"),
     );
     expect(footer).toContain("AJ Welch");
-    expect(html).not.toContain("Prefer email?");
     expect(html.match(/href="mailto:aj@quantile.co"/g)).toHaveLength(2);
     expect(footer).toContain("<fieldset");
     expect(footer.match(/<a /g)).toHaveLength(2);

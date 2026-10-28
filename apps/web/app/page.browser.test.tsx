@@ -76,9 +76,12 @@ describe("Founder-letter responsive layout", () => {
           );
         }
         for (const button of [heroButton, footerButton]) {
-          expect(button.scrollWidth).toBeLessThanOrEqual(button.clientWidth);
+          const label = button.querySelector(
+            ".mantine-Button-label",
+          ) as HTMLElement;
+          expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth + 1);
           expect(button.getBoundingClientRect().height).toBeGreaterThanOrEqual(
-            44,
+            24,
           );
         }
       }

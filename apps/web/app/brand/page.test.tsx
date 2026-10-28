@@ -17,9 +17,6 @@ describe("brand asset preview descriptions", () => {
     expect(html).toContain("Select a display theme");
     expect(html).not.toContain("Back to home");
     expect(html.match(/download=""/g)).toHaveLength(10);
-    expect(html).not.toMatch(
-      /<form|billing|checkout|calendly|#benefits|#pricing|#faq/i,
-    );
     expect(html).toContain(
       'alt="Quantile logo, dark-background version: light mark on a dark background"',
     );

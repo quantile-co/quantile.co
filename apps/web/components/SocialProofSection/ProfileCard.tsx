@@ -23,9 +23,8 @@ export function ProfileCard({ inactive = false }: { inactive?: boolean }) {
         <Text className={classes.proofTitle}>AJ Welch</Text>
         <Text className={classes.profileRole}>Staff Data Engineer</Text>
         <Text className={classes.profileDescription}>
-          <span>15+ years experience at</span>
-          <span>Google, CompilerWorks,</span>
-          <span>and Chartio.</span>
+          <span>15+ years experience at</span>{" "}
+          <span>Google, CompilerWorks,</span> <span>and Chartio.</span>
         </Text>
       </div>
     </article>

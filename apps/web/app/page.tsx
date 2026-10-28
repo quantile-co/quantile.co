@@ -50,7 +50,7 @@ function ContactActions({ className = "" }: { className?: string }) {
   return (
     <div className={`${classes.contactActions} ${className}`}>
       <Button
-        aria-label="Let’s talk — book a call"
+        aria-label="Book a call"
         autoContrast
         className={classes.callToAction}
         classNames={{ section: classes.callToActionSection }}
@@ -63,7 +63,7 @@ function ContactActions({ className = "" }: { className?: string }) {
         size="xl"
         variant="filled"
       >
-        Let’s talk
+        Book a call
       </Button>
       <p className={classes.email}>
         <a href="mailto:aj@quantile.co">aj@quantile.co</a>
@@ -98,7 +98,7 @@ export default function Home() {
             aria-labelledby="founder-letter-title"
             className={classes.letter}
           >
-            {/* Original placeholder copy for this local design exploration. */}
+            {/* Placeholder letter copy pending review. */}
             <p>Hey, I’m AJ.</p>
             <p>
               You have a product to build. But somewhere along the way, the data
