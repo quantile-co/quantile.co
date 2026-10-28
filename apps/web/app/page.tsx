@@ -49,10 +49,7 @@ export default function Home() {
       <LetterLandingPage
         skipLink={<SkipLink href="#main-content">Skip to content</SkipLink>}
         socialProof={
-          <SocialProofSection
-            flushCarousel
-            ariaLabel="AJ Welch's experience and client work"
-          />
+          <SocialProofSection ariaLabel="AJ Welch's experience and client work" />
         }
         founderProfile={<FounderProfile />}
         themeSwitcher={<ThemeSwitcher />}

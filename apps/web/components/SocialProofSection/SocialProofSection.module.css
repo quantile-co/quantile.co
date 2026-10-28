@@ -3,85 +3,12 @@
 
   position: relative;
   overflow: hidden;
-
-  @media (max-width: $mantine-breakpoint-xs) {
-    &[data-hide-mobile] {
-      display: none;
-    }
-
-    &[data-embedded] .experiencePage {
-      padding-block: 0;
-    }
-  }
 }
 
 .founderProfile {
   width: 18.75rem;
   max-width: 100%;
   container: standalone-profile / inline-size;
-}
-
-.compactSection {
-  container: faq-proof / inline-size;
-}
-
-.compactGrid {
-  --compact-media-size: 2.75rem;
-  --compact-logo-gap: 0.25rem;
-
-  display: grid;
-  font-size: 0.375rem;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-
-.compactTenure {
-  display: flex;
-  width: var(--compact-media-size);
-  height: var(--compact-media-size);
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--proof-foreground);
-  border-radius: var(--mantine-radius-sm);
-  flex-direction: column;
-  color: var(--proof-foreground);
-  text-align: center;
-}
-
-.compactTenure strong {
-  font-size: clamp(0.875rem, 5cqw, 1.5rem);
-  font-weight: 500;
-  letter-spacing: -0.04em;
-  line-height: 1;
-}
-
-.compactTenure span {
-  font-size: clamp(0.4375rem, 2cqw, 0.6875rem);
-  line-height: 1.1;
-}
-
-@container faq-proof (min-width: 18rem) {
-  .compactGrid {
-    --compact-media-size: 3.25rem;
-
-    font-size: 0.4375rem;
-  }
-}
-
-@container faq-proof (min-width: 24rem) {
-  .compactGrid {
-    --compact-media-size: 4rem;
-    --compact-logo-gap: 0.375rem;
-
-    font-size: 0.5rem;
-  }
-}
-
-@container faq-proof (min-width: 26rem) {
-  .compactGrid {
-    --compact-media-size: 4.5rem;
-
-    font-size: 0.5625rem;
-  }
 }
 
 .wrapper {
@@ -142,6 +69,7 @@
   --proof-media-size: 5.5em;
 
   display: grid;
+  font-size: 1rem;
   height: var(--proof-card-height);
   min-width: 0;
   overflow: visible;
@@ -154,60 +82,9 @@
   container-type: inline-size;
 }
 
-.proofCard:not([data-compact]) {
-  font-size: 1rem;
-}
-
 .founderProfile .proofCard {
   --proof-card-height: var(--proof-media-size);
   --proof-padding-block: 0;
-}
-
-.proofCard[data-compact] {
-  --proof-foreground: var(--site-text-secondary);
-  --proof-padding-block: 0;
-  --proof-padding-right: 0;
-  --proof-media-size: var(--compact-media-size);
-
-  height: var(--proof-media-size);
-  grid-template-columns: var(--proof-media-size);
-}
-
-.proofCard[data-compact] .mediaSquare {
-  margin-top: 0;
-}
-
-.proofCard[data-compact][data-company] .mediaSquare {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--compact-logo-gap);
-  flex-direction: column;
-}
-
-.proofCard[data-compact][data-company] .googleMark,
-.proofCard[data-compact][data-company] .companyMarkImage {
-  height: 42%;
-}
-
-.proofCard[data-compact][data-company="Google"] .googleMark {
-  transform: scale(1.18);
-}
-
-@container faq-proof (max-width: 17.99rem) {
-  .proofCard[data-compact][data-company="Google"] .googleMark {
-    transform: translateY(0.5px) scale(1.14);
-  }
-}
-
-.compactCompanyName {
-  max-width: 100%;
-  color: var(--proof-foreground);
-  font-size: inherit;
-  font-weight: 500;
-  letter-spacing: -0.04em;
-  line-height: 1.1;
-  white-space: nowrap;
 }
 
 .mediaSquare {
@@ -392,7 +269,7 @@
 /* One shared unit scales the square, text, logos and spacing together. */
 @media (min-width: 48em) {
   @container social-proof (max-width: 75rem) {
-    .experiencePage > .proofCard:not([data-compact]) {
+    .experiencePage > .proofCard {
       font-size: clamp(0.75rem, 1.583333cqw, 1.1875rem);
     }
   }
@@ -407,7 +284,7 @@
     grid-template-columns: repeat(3, max-content);
   }
 
-  .proofCard:not([data-compact]) {
+  .proofCard {
     font-size: clamp(1rem, 2.5cqw, 1.25rem);
   }
 
@@ -417,7 +294,7 @@
 }
 
 @media (max-width: 36em) {
-  .proofCard:not([data-compact]) {
+  .proofCard {
     font-size: clamp(1rem, 5cqw, 1.25rem);
   }
 
@@ -435,11 +312,11 @@
 }
 
 @media (max-width: 47.9375em) {
-  .section[data-flush-carousel] .experiencePage {
+  .experiencePage {
     padding-block: 0;
   }
 
-  .section[data-flush-carousel] .proofCard {
+  .experiencePage > .proofCard {
     --proof-card-height: var(--proof-media-size);
     --proof-padding-block: 0;
   }

@@ -12,94 +12,44 @@ check counts and investigation transcripts. Never retain credentials, customer
 payloads, state, saved plans or live Checkout URLs. Commit sanitized notes with
 related changes without recurring note-only validation cycles.
 
-## Application boundaries
+## Application and UI
 
-- HTTP routes are explicit composition roots; use ordinary typed dependency
-  injection, not service locators, dispatch frameworks or duplicate DTO layers.
-- `apps/web/lib/env/env.ts` owns staged environment parsing. Validate verification inputs
-  first and other secrets only when needed. Module import and ignored/replayed
-  events must not require unrelated sender credentials. Domain helpers receive
-  explicit values rather than rereading ambient environment.
-- Billing environment is independent of `NODE_ENV`. Keep development/production
-  terminology internally and provider test/live terms at API boundaries. Reject
-  live billing with an emulator. App identity remains stable across releases;
-  test-operation/lifecycle identifiers are not extra configured instances.
-- Preserve unchanged-byte signature checks, bounded bodies, invoice eligibility,
-  complete pagination, safe errors and explicit ownership. Only Stripe initiates
-  welcome operations; verified Resend callbacks reconcile existing requests.
-- Welcome completion requires an immutable persisted request, provider acceptance
-  and a durable receipt before completed HTTP 200. An ignored 200 is not delivery.
-  Replays reuse the stored request and idempotency key. Preserve the first accepted
-  ID, use receipt CAS/readback and never send email inside a database transaction.
-  Timeouts can leave successful writes or sends; do not erase pending records.
-- Recovery audits start from the eligible invoice population, not only failed
-  webhooks. Distinguish accepted, pending, absent and conflicting records. Prefer
-  callback reconciliation for known acceptance; a late retry beyond provider
-  idempotency retention can duplicate email. Do not claim lifetime exactly-once
-  delivery or infer nonacceptance from missing old logs.
-- The official Firestore SDK belongs in the shared client factory; domain stores
-  own persistence semantics. Emulator tests do not prove cloud IAM or routing.
-  Integration cleanup must verify exact ownership, never broadly delete endpoints
-  or terminate another owner's processes.
+This branch contains only the founder-letter landing page, brand downloads and
+a minimal 404, with optional Fathom analytics. Checkout, webhooks, welcome email,
+database access, provider integration tooling and Storybook are removed.
+This source state is not evidence of a deployed rollout or external-resource
+retirement. The letter is still placeholder copy pending separate review.
 
-## Approved UI and copy decisions
+Preserve the current responsive design, light/dark themes, keyboard access,
+reduced-motion behavior and semantic structure. Components receive siblings
+through props; avoid service locators and unnecessary abstractions. Keep focused
+tests for current behavior rather than retaining coverage for deleted features.
 
-Preserve approved marketing copy; README changes require explicit approval.
-Capacity means concurrent in-progress issues, not monthly throughput, hours or
-PR counts. Do not invent turnaround, support, refund, banked-time or legal policies,
-or change the offer to conceal an unimplemented billing capability. Social proof
-must reflect actual experience, not invented customers or endorsements.
+The landing page uses an external booking link and a mailto link; no embedded
+calendar or local form is needed. The top social proof switches to a carousel
+below 768px. The standalone founder card aligns optically with the CTA/email
+block on larger viewports. Theme controls reveal on scroll, hover and focus.
 
-Colocate component regression tests with their component, not directly under
-`apps/web/app/`.
-
-Components remain standalone and receive behavior/siblings through props. Keep
-shared layout tokens, light/dark themes, keyboard access, reduced motion and
-semantic structure. Page and Storybook composition must agree. Layout changes
-need responsive inspection, not merely a passing build.
-
-The hosted Portal link is footer-only, labeled “Billing” after FAQ, not a header
-or magic-link URL. Checkout lets Stripe select eligible enabled payment methods;
-exact HTTPS-origin checks permit only approved hosts. FAQ examples prioritize
-GCP, AWS, Snowflake and Databricks; Azure needs a new copy decision. Approved hero
-animation titles are retained in the [copy decisions](daily/2026-10-12.md), not as
-an implementation-status record. Current source holds the authoritative copy.
+Keep `/brand`, its downloads, sitemap entry and generated assets. The 404 page
+only offers a way home. Neither page includes legacy marketing navigation,
+Checkout, billing or old funnel content. README edits require explicit approval.
 
 ## Factory and workspace tooling
 
 JS/TS app names use `@quantile-co/quantile.co-<app>`, adding `-cli` for CLI apps.
 The root remains `@quantile-co/quantile.co`.
 
-The application lives in `apps/web/`, including Next, Storybook, site-native
-configuration, tests and brand assets. Its build is `next build`; root commands
+The application lives in `apps/web/`, including Next, site-native configuration,
+tests and brand assets. Its build is `next build`; root commands
 orchestrate pnpm/Turbo workspaces. Keep app semantics and approved copy unchanged.
 There is no shared package until actual shared behavior warrants one.
 The root AGENTS index remains canonical. Next's documented `agentRules: false`
 prevents `next dev` from creating a nested guide after relocation; agents still
 read version-matched documentation from the web workspace's installed Next package.
 
-`apps/repo/` owns repository checks/fixes and dispatches site dev/assets commands.
-Site launchers retain native Node 24 TypeScript execution and explicit
-child-credential isolation. Ordinary tests own an isolated demo emulator and run
-unit, browser and Storybook projects; provider-backed integration stays separate.
-Integration browsers honor the pinned Chromium path and use tool-scoped credentials.
-Keep heavy webhook-module initialization outside timed tests and preserve the
-module cache; cold dependency transformation is not handler behavior.
-
-Provider-backed development reuses a dedicated background Tailscale Funnel on
-HTTPS 8443, mounted at `/api/resend/webhook/` to `http://127.0.0.1:4318`.
-Machine setup owns it; the launcher only reads its configuration and never
-publishes, resets or stops a Funnel. The fixed Resend listener port admits one
-integrated run per laptop, including worktrees. Other laptops remain independent.
-Stripe keeps its independent CLI forwarding connection. Each run journals its
-unique Resend URL before registration and verifies exact registration cleanup.
-After a launcher crash, stop its orphaned provider CLIs before
-`pnpm dev --cleanup-integration`; cleanup never kills a journal PID.
-Keep app/operation identity, signature checks and child-credential isolation.
-Integration tests distinguish provider acceptance (two minutes) from verified
-callbacks (ten minutes for provider retries); keep the same listener alive rather
-than resending email or accepting API-only proof. Ordinary development and tests
-do not contact the daemon. See README for the one-time Funnel prerequisite.
+`apps/repo/` owns repository checks/fixes. Development runs native `next dev`;
+ordinary tests run Vitest unit/browser projects directly, with no emulator,
+provider credentials or tunnel. Brand assets use the repository-owned generator.
 
 Factory is composed through explicit `lib.evalModules`, package/file selections,
 and Files then Pi shell hooks. `.envrc` sources optional ignored `.envrc.local`
@@ -155,9 +105,10 @@ or release manifest. Commit the complete root pnpm workspace/lock/Turbo configur
 and app-native files so source builds require no Nix materialization. Firebase App
 Hosting supports the Turborepo workspace with archive `rootDirectory: apps/web`;
 the web build remains `next build`, not a custom Docker/image build. Keep private
-runtime configuration out of public source. `apps/web/firebase.json` supplies
-Next's security-header policy. Deny-all Rules retain their exact established bytes
-at `apps/web/firestore.rules`.
+runtime configuration out of public source. `apps/web/lib/http/headers.ts` owns
+Next security/cache headers. Source releases no longer require Firebase Hosting
+configuration or Firestore Rules files; deployment consumers must use the matching
+landing-page-only archive contract.
 
 The single `tf/` root owns repository/state infrastructure, not application
 deployment or a reusable Stripe catalog. Keep the existing bucket, resource
@@ -177,8 +128,8 @@ Plan/Apply run locked `tsx` directly, outside Turbo and without a tooling-build
 prerequisite. Frozen installation immediately precedes each workflow task.
 Plan stores saved bytes and private diagnostics in GCS. Apply consumes the exact
 operator-selected `GH_PLAN_REF` generation without replanning. No GitHub plan
-artifact or receipt is produced. Build/publication, Plan, Apply, provider-backed
-testing, state migration and credential changes each require separate authorization.
+artifact or receipt is produced. Build/publication, Plan, Apply,
+state migration and credential changes each require separate authorization.
 
 ## Completed public rollouts
 
@@ -211,6 +162,4 @@ testing, state migration and credential changes each require separate authorizat
   another production phase.
 
 These were source/repository-infrastructure rollouts, not site deployments or
-provider-backed application tests. They do not establish present Checkout,
-Billing TLS, webhook, inbox-delivery or refund behavior. The historical missing
-Link-option report was resolved; do not reopen it from stale notes.
+external-resource retirement. They do not authorize another production phase.

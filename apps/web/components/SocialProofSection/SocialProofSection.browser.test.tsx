@@ -24,7 +24,7 @@ async function renderProof(colorScheme: "light" | "dark", column: number) {
   root = createRoot(container);
   root.render(
     <MantineProvider theme={theme} forceColorScheme={colorScheme}>
-      <SocialProofSection ariaLabel="Experience" flushCarousel />
+      <SocialProofSection ariaLabel="Experience" />
       <FounderProfile />
     </MantineProvider>,
   );

@@ -28,12 +28,7 @@ async function renderPage(colorScheme: "light" | "dark") {
     <MantineProvider defaultColorScheme={colorScheme} theme={theme}>
       <LetterLandingPage
         skipLink={<SkipLink href="#main-content">Skip to content</SkipLink>}
-        socialProof={
-          <SocialProof.SocialProofSection
-            flushCarousel
-            ariaLabel="Experience"
-          />
-        }
+        socialProof={<SocialProof.SocialProofSection ariaLabel="Experience" />}
         founderProfile={<SocialProof.FounderProfile />}
         themeSwitcher={<ThemeSwitcher />}
       />

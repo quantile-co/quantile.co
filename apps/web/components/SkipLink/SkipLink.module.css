@@ -1,7 +1,7 @@
 .link {
   position: fixed;
   z-index: 1000001;
-  top: calc(var(--site-header-height) + 8px);
+  top: 8px;
   left: var(--site-page-padding);
   display: flex;
   min-height: 24px;

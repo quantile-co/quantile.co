@@ -24,9 +24,6 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
       "env": [
-        "QUANTILE_SITE_ORIGIN",
-        "STRIPE_EVENT_LIVEMODE",
-        "QUANTILE_DEVELOPMENT_PORTAL_URL",
         "NEXT_PUBLIC_FATHOM_SITE_ID",
         "NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS"
       ]
@@ -39,16 +36,6 @@
     },
     "test": {
       "cache": false
-    },
-    "build:storybook": {
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["storybook-static/**"],
-      "env": [
-        "QUANTILE_DEVELOPMENT_PORTAL_URL",
-        "STRIPE_EVENT_LIVEMODE",
-        "NEXT_PUBLIC_FATHOM_SITE_ID",
-        "NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS"
-      ]
     }
   }
 }

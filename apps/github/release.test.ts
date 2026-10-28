@@ -31,8 +31,6 @@ it("publishes only a verified tag/release and fails closed before publication", 
       "pnpm-workspace.yaml",
       "turbo.json",
       "apps/web/tsconfig.json",
-      "apps/web/firebase.json",
-      "apps/web/firestore.rules",
       "apps/web/next.config.ts",
       "apps/web/postcss.config.cjs",
       "pnpm-lock.yaml",
@@ -145,9 +143,7 @@ if (call.includes("/actions/runs/123/attempts/1/jobs")) {
     const recorded = readFileSync(calls, "utf8");
     expect(recorded.match(/^release create /gm)).toHaveLength(1);
     expect(recorded.match(/^release edit /gm)).toHaveLength(1);
-    expect(recorded).not.toMatch(
-      /source\.zip|firestore\.rules|release\.json|release upload/,
-    );
+    expect(recorded).not.toMatch(/source\.zip|release\.json|release upload/);
     expect(readFileSync(summary, "utf8")).toContain(sha);
     expect(readFileSync(summary, "utf8")).toContain("automatic source archive");
 

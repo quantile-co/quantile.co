@@ -27,13 +27,9 @@
           overrides = [
             {
               includes = [
-                "apps/web/app/**/route.ts"
                 "apps/web/app/**/page.tsx"
                 "apps/web/app/**/layout.tsx"
-                "apps/web/lib/**/run.ts"
-                "apps/web/lib/env/env.ts"
                 "apps/*/cli.ts"
-                "apps/web/dev.ts"
                 "apps/web/assets.ts"
                 "**/*.test.{ts,tsx}"
                 "**/test.ts"
@@ -44,7 +40,6 @@
             {
               includes = [
                 "apps/web/lib/**/*.{ts,tsx}"
-                "!apps/web/lib/**/run.ts"
                 "!apps/web/lib/**/*.test.{ts,tsx}"
                 "!apps/web/lib/**/test.ts"
               ];
@@ -54,10 +49,6 @@
                   {
                     group = [
                       "@/app/**"
-                      "**/route"
-                      "**/route.ts"
-                      "**/run"
-                      "**/run.ts"
                     ];
                     message = "Library modules must not import application entrypoints. Inject dependencies from the composition root.";
                   }

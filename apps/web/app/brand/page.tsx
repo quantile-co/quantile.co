@@ -4,28 +4,13 @@ import {
   type BrandAssetGroup,
   BrandAssetsSection,
 } from "@/components/BrandAssetsSection/BrandAssetsSection";
-import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
-import { CheckoutAction } from "@/components/CheckoutForm/CheckoutForm";
-import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
-import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 import classes from "./page.module.css";
 
 const brandDescription =
   "Download the Quantile logo, wordmark, and social banners.";
 const brandTitle = "Quantile brand assets";
-const primarySections = [
-  { href: "/#benefits", label: "Benefits" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" },
-] as const;
-const headerCheckoutActions = {
-  desktop: <CheckoutAction size="xs" />,
-  mobile: <CheckoutAction size="md" siteCta="section" />,
-};
-
 export const metadata: Metadata = {
   title: brandTitle,
   description: brandDescription,
@@ -191,15 +176,12 @@ export default function BrandPage() {
   return (
     <div>
       <SkipLink href="#main-content">Skip to content</SkipLink>
-      <SiteHeader
-        bookCallHref="/#book-a-call"
-        homeHref="/"
-        logo={<BrandLogo />}
-        sections={primarySections}
-        checkoutActions={headerCheckoutActions}
-      />
       <main className={classes.main} id="main-content" tabIndex={-1}>
         <Container className={classes.container} size="xl">
+          <nav aria-label="Brand navigation" className={classes.navigation}>
+            <a href="/">← Back to home</a>
+            <ThemeSwitcher />
+          </nav>
           <div className={classes.intro}>
             <Title className={classes.title} order={1}>
               Brand assets
@@ -211,13 +193,6 @@ export default function BrandPage() {
           <BrandAssetsSection groups={groups} />
         </Container>
       </main>
-      <SiteFooter
-        billingPortalLoginUrl={billingPortalLoginUrl}
-        homeHref="/"
-        logo={<BrandLogo />}
-        sections={primarySections}
-        themeSwitcher={<ThemeSwitcher />}
-      />
     </div>
   );
 }

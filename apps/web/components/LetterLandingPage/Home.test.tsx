@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 // biome-ignore lint/style/noRestrictedImports: Verify the route composition and public metadata together.
 import { metadata as layoutMetadata } from "@/app/layout";
-// biome-ignore lint/style/noRestrictedImports: Verify the route renders this landing page without checkout forms.
+// biome-ignore lint/style/noRestrictedImports: Verify the route composition.
 import Home, { metadata } from "@/app/page";
 
 describe("Homepage positioning", () => {
@@ -47,20 +47,10 @@ describe("Homepage positioning", () => {
       description: metadata.description,
     });
 
-    const forms = html.match(
-      /<form\b[^>]*action="\/api\/stripe\/checkout"[^>]*method="post"[^>]*>/g,
-    );
-    expect(forms).toBeNull();
+    expect(html).not.toContain("<form");
     expect(html).not.toContain("<header");
     expect(html).not.toContain("<h2");
-    expect(html).not.toContain("Ready to build");
     expect(html).toContain('href="https://cal.com/aj-welch/book-a-call"');
     expect(html).toContain('href="mailto:aj@quantile.co"');
-    expect(html).not.toContain("calendly");
-    expect(html).not.toContain('id="book-a-call"');
-    expect(html).not.toContain('id="benefits"');
-    expect(html).not.toContain('id="pricing"');
-    expect(html).not.toContain('id="faq"');
-    expect(html).not.toContain('form="subscription-checkout"');
   });
 });

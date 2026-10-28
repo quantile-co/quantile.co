@@ -13,6 +13,19 @@
   padding: clamp(4rem, 8vw, 7rem) var(--site-page-padding);
 }
 
+.navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.navigation a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
 .intro {
   max-width: 40rem;
 }

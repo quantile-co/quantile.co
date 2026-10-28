@@ -1,34 +1,45 @@
-import firebaseConfig from "../../firebase.json";
-
-function hostingHeaders(source: string) {
-  const rule = firebaseConfig.hosting.headers.find(
-    (entry) => entry.source === source,
-  );
-  if (!rule) throw new Error(`Missing Firebase Hosting headers for ${source}`);
-  return rule.headers;
-}
-
-export function siteHeaders(settings: {
-  development: boolean;
-  cacheAssets: boolean;
-}) {
-  const security = hostingHeaders("**").map((header) => {
-    if (!settings.development || header.key !== "Content-Security-Policy")
-      return header;
-    // Next/React's development debugging needs eval; production never does.
-    // Same-origin connect-src covers the development server.
-    return {
-      ...header,
-      value: header.value.replace(
-        "script-src 'self'",
-        "script-src 'self' 'unsafe-eval'",
-      ),
-    };
-  });
+export function siteHeaders(development: boolean) {
   return [
-    { source: "/:path*", headers: security },
-    ...(settings.cacheAssets
-      ? [{ source: "/images/:path*", headers: hostingHeaders("/images/**") }]
+    {
+      source: "/:path*",
+      headers: [
+        {
+          key: "Content-Security-Policy",
+          value: [
+            "default-src 'self'",
+            "base-uri 'self'",
+            "connect-src 'self' https://cdn.usefathom.com",
+            "font-src 'self' data:",
+            "form-action 'none'",
+            "frame-ancestors 'none'",
+            "frame-src 'none'",
+            "img-src 'self' data: blob: https://cdn.usefathom.com",
+            "object-src 'none'",
+            `script-src 'self' 'unsafe-inline'${development ? " 'unsafe-eval'" : ""} https://cdn.usefathom.com`,
+            "style-src 'self' 'unsafe-inline'",
+          ].join("; "),
+        },
+        {
+          key: "Permissions-Policy",
+          value: "camera=(), geolocation=(), microphone=(), payment=()",
+        },
+        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "X-Frame-Options", value: "DENY" },
+      ],
+    },
+    ...(!development
+      ? [
+          {
+            source: "/images/:path*",
+            headers: [
+              {
+                key: "Cache-Control",
+                value: "public, max-age=86400, stale-while-revalidate=604800",
+              },
+            ],
+          },
+        ]
       : []),
   ];
 }

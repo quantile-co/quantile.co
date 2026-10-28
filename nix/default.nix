@@ -6,7 +6,6 @@
   biome = import ./biome { inherit pkgs factory; };
   dependabot = import ./dependabot { inherit pkgs factory; };
   editorconfig = import ./editorconfig { inherit pkgs factory; };
-  firebase = import ./firebase { inherit pkgs factory; };
   git = import ./git { inherit pkgs factory; };
   github = import ./github { inherit pkgs factory; };
   knip = import ./knip { inherit pkgs factory; };

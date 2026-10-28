@@ -65,17 +65,11 @@
                 pkgs.typos
                 pkgs.vale
                 pkgs.yamllint
-                pkgs.stripe-cli
-                pkgs.jdk21
                 (factory.playwright.withVersion (builtins.fromJSON (builtins.readFile ./apps/web/package.json))
                   .devDependencies.playwright)
-                factory.resend-cli.package
                 agents.herdr
                 agents.amp
                 agents.hunk
-                pkgs.clickhouse
-                pkgs.tailscale
-                factory.clickhousectl.package
                 factory.langfuse.package
                 factory.pi.package
                 factory.qmd.package
@@ -160,8 +154,6 @@
               "apps/web/postcss.config.cjs" = copy site.postcss.configFile;
               "apps/web/vitest.config.mts" = copy site.vitest.configFile;
               "apps/web/tsconfig.json" = copy site.typescript.configFile;
-              "apps/web/firebase.json" = copy site.firebase.configFile;
-              "apps/web/firestore.rules" = copy site.firebase.rulesFile;
               "vitest.config.mts" = copy site.vitest.toolingConfigFile;
               "tsconfig.json" = copy (
                 factory.typescript.withOverrides {

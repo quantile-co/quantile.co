@@ -95,56 +95,47 @@ function CompanyMark({ company }: { company: ExperienceItem["company"] }) {
 }
 
 function CompanyCard({
-  compact = false,
   inactive = false,
   item,
 }: {
-  compact?: boolean;
   inactive?: boolean;
   item: ExperienceItem;
 }) {
   return (
     <article
       aria-hidden={inactive || undefined}
-      aria-label={compact ? item.company : undefined}
       className={`${classes.proofCard}${inactive ? ` ${classes.inactiveCard}` : ""}`}
-      data-compact={compact || undefined}
       data-company={item.company}
     >
       <div className={classes.mediaSquare} data-company={item.company}>
         <CompanyMark company={item.company} />
-        {compact && (
-          <span className={classes.compactCompanyName}>{item.company}</span>
-        )}
       </div>
 
-      {!compact && (
-        <div className={classes.proofContent}>
-          <Text className={classes.proofTitle}>{item.company}</Text>
-          <div className={classes.experienceContext}>
-            {item.context.map((context) => (
-              <span key={context}>{context}</span>
-            ))}
-          </div>
-          <div className={classes.customerLogos}>
-            <span className={classes.clientsLabel}>Clients:</span>
-            {item.customers.map((customer) => (
-              <div className={classes.customer} key={customer.name}>
-                <span
-                  aria-hidden="true"
-                  className={classes.customerLogo}
-                  style={
-                    {
-                      "--logo-image": `url("${customer.logo}")`,
-                    } as CSSProperties
-                  }
-                />
-                <span className={classes.customerName}>{customer.name}</span>
-              </div>
-            ))}
-          </div>
+      <div className={classes.proofContent}>
+        <Text className={classes.proofTitle}>{item.company}</Text>
+        <div className={classes.experienceContext}>
+          {item.context.map((context) => (
+            <span key={context}>{context}</span>
+          ))}
         </div>
-      )}
+        <div className={classes.customerLogos}>
+          <span className={classes.clientsLabel}>Clients:</span>
+          {item.customers.map((customer) => (
+            <div className={classes.customer} key={customer.name}>
+              <span
+                aria-hidden="true"
+                className={classes.customerLogo}
+                style={
+                  {
+                    "--logo-image": `url("${customer.logo}")`,
+                  } as CSSProperties
+                }
+              />
+              <span className={classes.customerName}>{customer.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </article>
   );
 }
@@ -157,44 +148,11 @@ export function FounderProfile() {
   );
 }
 
-export function CompactSocialProof() {
-  return (
-    <section
-      aria-label="AJ Welch's experience and client work"
-      className={`${classes.section} ${classes.compactSection}`}
-    >
-      <div className={classes.compactGrid}>
-        <ProfileCard compact />
-        <div className={classes.compactTenure}>
-          <strong>15+</strong>
-          <span>
-            years of
-            <br />
-            experience
-          </span>
-        </div>
-        {experience.map((item) => (
-          <CompanyCard compact item={item} key={item.company} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export function SocialProofSection({
-  ariaLabel,
-  carouselLabel,
-  flushCarousel = false,
-  embedded = false,
-  hideOnMobile = false,
+  ariaLabel = "Experience",
 }: {
   ariaLabel?: string;
-  carouselLabel?: string;
-  flushCarousel?: boolean;
-  embedded?: boolean;
-  hideOnMobile?: boolean;
 }) {
-  const Root = ariaLabel ? "section" : "div";
   const isCarousel = useMediaQuery("(max-width: 47.9375em)");
   const isSingleCard = useMediaQuery("(max-width: 36em)");
   const canHover = useMediaQuery("(hover: hover)");
@@ -272,13 +230,6 @@ export function SocialProofSection({
       />
     );
   });
-  const carouselName =
-    carouselLabel ??
-    (embedded
-      ? "Pricing experience"
-      : hideOnMobile
-        ? "Additional experience"
-        : "Experience");
   const carouselInstruction = reducedMotion
     ? "Automatic card changes are disabled by your motion preference."
     : userPaused
@@ -286,18 +237,12 @@ export function SocialProofSection({
       : "Automatic card changes are playing. Click, tap, or press Enter or Space to pause.";
 
   return (
-    <Root
-      aria-label={ariaLabel}
-      className={classes.section}
-      data-embedded={embedded || undefined}
-      data-flush-carousel={flushCarousel || undefined}
-      data-hide-mobile={hideOnMobile || undefined}
-    >
+    <section aria-label={ariaLabel} className={classes.section}>
       <Container className={classes.wrapper} size="xl">
         <section
           aria-label={
             isCarousel
-              ? `${carouselName} carousel. ${carouselInstruction}`
+              ? `Experience carousel. ${carouselInstruction}`
               : undefined
           }
           aria-roledescription={isCarousel ? "carousel" : undefined}
@@ -307,12 +252,8 @@ export function SocialProofSection({
               setFocusWithin(false);
             }
           }}
-          onClick={(event) => {
-            if (
-              !isCarousel ||
-              reducedMotion ||
-              (event.target as HTMLElement).closest("a")
-            ) {
+          onClick={() => {
+            if (!isCarousel || reducedMotion) {
               return;
             }
 
@@ -323,7 +264,6 @@ export function SocialProofSection({
             if (
               !isCarousel ||
               reducedMotion ||
-              (event.target as HTMLElement).closest("a") ||
               (event.key !== "Enter" && event.key !== " ")
             ) {
               return;
@@ -360,6 +300,6 @@ export function SocialProofSection({
           )}
         </section>
       </Container>
-    </Root>
+    </section>
   );
 }

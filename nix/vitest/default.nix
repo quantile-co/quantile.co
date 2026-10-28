@@ -14,7 +14,6 @@
     pkgs.writeText "vitest.config.mts" ''
       import path from "node:path";
       import { fileURLToPath } from "node:url";
-      import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
       import { playwright } from "@vitest/browser-playwright";
       import { defineConfig } from "vitest/config";
 
@@ -44,23 +43,8 @@
                   "components/**/*.test.{ts,tsx}",
                   "lib/**/*.test.{ts,tsx}",
                 ],
-                exclude: ["**/*.integration.test.{ts,tsx}", "**/*.browser.test.{ts,tsx}"],
+                exclude: ["**/*.browser.test.{ts,tsx}"],
               },
-            },
-            {
-              extends: true,
-              test: {
-                name: "integration",
-                environment: "node",
-                include: ["app/**/*.integration.test.{ts,tsx}"],
-                fileParallelism: false,
-              },
-            },
-            {
-              extends: true,
-              optimizeDeps: { include: ["react-dom/server", "react-email"] },
-              plugins: [storybookTest({ configDir: path.join(dirname, ".storybook") })],
-              test: { name: "storybook", browser: browser() },
             },
             {
               extends: true,

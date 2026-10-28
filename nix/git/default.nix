@@ -4,16 +4,12 @@
     builtins.readFile factory.git.ignoreFile
     + ''
 
-      # Application build output, local credentials and emulator state.
+      # Application build output, local credentials and development artifacts.
       .quantile/
-      firebase-debug.log
-      firestore-debug.log
-      ui-debug.log
       .pnpm-store/
       .next/
       out/
       build/
-      storybook-static/
       coverage/
       **/__screenshots__/
       .vitest-attachments/

@@ -8,7 +8,7 @@ import {
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { FathomAnalytics } from "@/components/FathomAnalytics/FathomAnalytics";
-import { readFathomSettings } from "@/lib/env/env";
+import { readFathomSettings } from "@/components/FathomAnalytics/settings";
 import { theme } from "./theme";
 
 export const metadata: Metadata = {

@@ -2,19 +2,11 @@ import { Text } from "@mantine/core";
 import Image from "next/image";
 import classes from "./SocialProofSection.module.css";
 
-export function ProfileCard({
-  compact = false,
-  inactive = false,
-}: {
-  compact?: boolean;
-  inactive?: boolean;
-}) {
+export function ProfileCard({ inactive = false }: { inactive?: boolean }) {
   return (
     <article
       aria-hidden={inactive || undefined}
-      aria-label={compact ? "AJ Welch" : undefined}
       className={`${classes.proofCard}${inactive ? ` ${classes.inactiveCard}` : ""}`}
-      data-compact={compact || undefined}
       data-profile
     >
       <div className={classes.mediaSquare} data-company="AJ Welch">
@@ -22,26 +14,20 @@ export function ProfileCard({
           alt="Portrait of AJ Welch"
           className={classes.profileImage}
           fill
-          sizes={
-            compact
-              ? "72px"
-              : "(max-width: 767px) 88px, (max-width: 1024px) 68px, 80px"
-          }
+          sizes="110px"
           src="/images/aj-welch.webp"
         />
       </div>
 
-      {!compact && (
-        <div className={classes.proofContent}>
-          <Text className={classes.proofTitle}>AJ Welch</Text>
-          <Text className={classes.profileRole}>Staff Data Engineer</Text>
-          <Text className={classes.profileDescription}>
-            <span>15+ years experience at</span>
-            <span>Google, CompilerWorks,</span>
-            <span>and Chartio.</span>
-          </Text>
-        </div>
-      )}
+      <div className={classes.proofContent}>
+        <Text className={classes.proofTitle}>AJ Welch</Text>
+        <Text className={classes.profileRole}>Staff Data Engineer</Text>
+        <Text className={classes.profileDescription}>
+          <span>15+ years experience at</span>
+          <span>Google, CompilerWorks,</span>
+          <span>and Chartio.</span>
+        </Text>
+      </div>
     </article>
   );
 }
