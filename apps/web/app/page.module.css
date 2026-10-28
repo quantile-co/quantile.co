@@ -1,0 +1,284 @@
+.page {
+  --letter-content-width: 60rem;
+  /* Keep both lines intact, with room for the desktop contact block. */
+  --title-font-size: clamp(
+    4.5rem,
+    calc((100vw - 2 * var(--site-page-padding)) / 9.7),
+    6.125rem
+  );
+  --letter-font-size: clamp(1.25rem, 4vw, 2.375rem);
+  --section-gap: clamp(2rem, 6vw, 4rem);
+  --page-edge-space: clamp(1.5rem, 4vw, 3rem);
+  --title-line-height: 1.05;
+  --letter-contact-font-size: clamp(1.0125rem, 1.84vw, 1.2375rem);
+  --letter-cta-height: calc(var(--letter-contact-font-size) * 3.25);
+  --letter-email-size: calc(var(--letter-contact-font-size) * 7 / 11);
+  --letter-contact-gap: calc(var(--letter-contact-font-size) * 0.45);
+
+  padding-top: var(--page-edge-space);
+}
+
+.footer {
+  display: flex;
+  width: 100%;
+  max-width: calc(var(--letter-content-width) + (2 * var(--site-page-padding)));
+  padding: var(--section-gap) var(--site-page-padding) var(--page-edge-space);
+  margin-inline: auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-xl);
+}
+
+.proof {
+  --site-content-width: var(--letter-content-width);
+  --site-page-padding: 0px;
+
+  grid-area: 2 / 1;
+  min-width: 0;
+  margin-top: var(--section-gap);
+}
+
+.letter {
+  width: 100%;
+  max-width: calc(var(--letter-content-width) + (2 * var(--site-page-padding)));
+  padding: var(--section-gap) var(--site-page-padding) 0;
+  margin-inline: auto;
+  color: var(--site-text-primary);
+  font-family: var(--mantine-font-family-headings);
+  font-size: var(--letter-font-size);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.4;
+  overflow-wrap: break-word;
+}
+
+.intro {
+  display: grid;
+  width: 100%;
+  max-width: calc(var(--letter-content-width) + (2 * var(--site-page-padding)));
+  padding-inline: var(--site-page-padding);
+  margin: 0 auto;
+}
+
+.title {
+  grid-area: 1 / 1;
+  margin: 0;
+  color: var(--site-text-primary);
+  font-family: var(--mantine-font-family-headings);
+  font-size: var(--title-font-size);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: var(--title-line-height);
+  white-space: nowrap;
+  text-box-edge: cap alphabetic;
+  text-box-trim: trim-both;
+}
+
+.headingContact {
+  --contact-font-size: max(1rem, calc(var(--letter-contact-font-size) * 0.85));
+
+  grid-area: 1 / 1;
+  align-self: start;
+  justify-self: end;
+}
+
+.letter p {
+  margin: 0 0 1em;
+  text-box-edge: cap alphabetic;
+}
+
+.letter p:first-child {
+  text-box-trim: trim-start;
+}
+
+.letter p:last-child {
+  /* Leave room for price glyphs that descend below the trimmed baseline. */
+  padding-bottom: 0.12em;
+  margin-bottom: 0;
+  text-box-trim: trim-end;
+}
+
+.price {
+  font-weight: 500;
+}
+
+.founderProfile {
+  /* Match the contact block, inset 4px for the email's lower line-box space. */
+  --founder-profile-font-size: calc(
+    (
+      var(--letter-cta-height) +
+      var(--letter-contact-gap) +
+      var(--letter-email-size) *
+      1.5 -
+      0.25rem
+    ) /
+    5.5
+  );
+
+  min-width: 0;
+  max-width: 100%;
+}
+
+.contactActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: var(--contact-font-size, clamp(1.0125rem, 1.84vw, 1.2375rem));
+  gap: 0.45em;
+}
+
+.contactActions .callToAction {
+  border-radius: calc(var(--mantine-radius-sm) + 2px);
+  min-width: 9.5em;
+  height: 3.25em;
+  padding-inline: 1.25em;
+  font-size: inherit;
+  font-weight: 650;
+}
+
+.callToActionSection {
+  margin-inline-start: 0.5em;
+}
+
+.callToAction svg {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.email {
+  align-self: stretch;
+  margin: 0;
+  text-align: right;
+  color: var(--site-text-secondary);
+  font-size: calc(1em * 7 / 11);
+  letter-spacing: normal;
+  line-height: 1.5;
+}
+
+.email a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+
+@media (min-width: 48em) {
+  .footer {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 47.9375em) {
+  .page {
+    --title-team-scale: 0.85;
+    /* Keep the middle line fitted while adjusting the outer-line contrast. */
+    --title-font-size: calc(100cqw / 6.5625 / var(--title-team-scale));
+    --letter-font-size: clamp(
+      1rem,
+      calc((100vw - 2 * var(--site-page-padding)) / 17.85),
+      calc(12rem / 7)
+    );
+    /* A 280px row at the narrowest supported viewport, capped at 392px.
+       Both rows share these columns and one unit for every internal dimension. */
+    --support-unit: min(
+      0.875rem,
+      calc((100vw - 2 * var(--site-page-padding)) / 28)
+    );
+    --support-button-height: calc(var(--support-unit) * 4.4);
+    --support-email-size: calc(var(--support-unit) * 1.05);
+    --support-contact-gap: calc(var(--support-unit) * 0.6);
+    --support-row-height: calc(
+      var(--support-button-height) +
+      var(--support-contact-gap) +
+      var(--support-email-size) *
+      1.5
+    );
+  }
+
+  .intro,
+  .footer {
+    display: grid;
+    grid-template-columns:
+      calc(var(--support-unit) * 17.8)
+      calc(var(--support-unit) * 10.2)
+      minmax(0, 1fr);
+    align-items: start;
+    column-gap: 0;
+  }
+
+  .intro {
+    container-type: inline-size;
+    row-gap: var(--section-gap);
+  }
+
+  .title {
+    grid-area: 1 / 1 / 2 / -1;
+    text-box-trim: none;
+  }
+
+  .title > span {
+    display: block;
+  }
+
+  .desktopBreak {
+    display: none;
+  }
+
+  .titleTransform {
+    text-box-edge: cap alphabetic;
+    text-box-trim: trim-start;
+  }
+
+  .titleTeam {
+    font-size: calc(1em * var(--title-team-scale));
+    letter-spacing: -0.04em;
+  }
+
+  .titleAI {
+    text-box-edge: cap alphabetic;
+    text-box-trim: trim-end;
+  }
+
+  .proof {
+    margin-top: 0;
+  }
+
+  .headingContact {
+    grid-area: 2 / 2;
+    align-self: start;
+    justify-self: start;
+    margin-left: calc(var(--support-unit) * 0.6);
+  }
+
+  .founderProfile {
+    grid-area: 1 / 1;
+  }
+
+  .footer > .contact {
+    grid-area: 1 / 2;
+    margin-left: calc(var(--support-unit) * 0.6);
+  }
+
+  .contactActions {
+    --contact-unit: var(
+      --support-unit,
+      min(0.875rem, calc((100vw - 2 * var(--site-page-padding)) / 28))
+    );
+
+    width: calc(var(--contact-unit) * 9.6);
+    font-size: calc(var(--contact-unit) * 1.4);
+    gap: calc(var(--contact-unit) * 0.6);
+  }
+
+  .contactActions .callToAction {
+    width: 100%;
+    min-width: 0;
+    height: calc(var(--contact-unit) * 4.4);
+    min-height: 2.75rem;
+    padding-inline: calc(var(--contact-unit) * 0.5);
+  }
+
+  .email {
+    font-size: calc(var(--contact-unit) * 1.05);
+  }
+}

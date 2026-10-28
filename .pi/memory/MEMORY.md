@@ -27,29 +27,42 @@ tests for current behavior rather than retaining coverage for deleted features.
 
 The landing page uses an external booking link and a mailto link; no embedded
 calendar or local form is needed. The top social proof switches to a carousel
-below 768px. The standalone founder card aligns optically with the CTA/email
-block on larger viewports. Theme controls reveal on scroll, hover and focus.
+below 768px. With reduced motion enabled, it intentionally stays static
+(initially showing AJ), without manual navigation. The standalone founder card
+aligns optically with the CTA/email
+block on larger viewports. Homepage and brand markup/styles live alongside their
+routes, not in single-use section components. The shared fixed bottom-right
+`ThemeSwitcher` reveals on scroll, pointer interaction, hover or keyboard focus
+on all pages and hides after inactivity.
 
-Keep `/brand`, its downloads, sitemap entry and generated assets. The 404 page
-only offers a way home. Neither page includes legacy marketing navigation,
-Checkout, billing or old funnel content. README edits require explicit approval.
+Keep `/brand`, its downloads, sitemap entry and generated assets. Brand and 404
+have no header or booking CTA; the 404 retains its central home button. Neither
+page includes legacy marketing navigation, Checkout, billing or old funnel
+content. README edits require explicit approval.
 
 ## Factory and workspace tooling
 
-JS/TS app names use `@quantile-co/quantile.co-<app>`, adding `-cli` for CLI apps.
-The root remains `@quantile-co/quantile.co`.
+JS/TS workspace names include organization and repository:
+`@quantile-co/quantile.co-<name>`, adding `-cli` for CLI apps.
+This applies to `packages/` as well as `apps/`. The root remains
+`@quantile-co/quantile.co`.
 
 The application lives in `apps/web/`, including Next, site-native configuration,
 tests and brand assets. Its build is `next build`; root commands
 orchestrate pnpm/Turbo workspaces. Keep app semantics and approved copy unchanged.
-There is no shared package until actual shared behavior warrants one.
+`packages/brand` owns the shared generator and `quantile-brand-assets` CLI.
+Apps consume it as a workspace dependency. The CLI writes/checks the calling
+app directory; library functions accept an explicit output directory.
+`packages/testing` exports the Next Image browser-test stub; it is not production
+UI. Both packages stay flat. The web app has no generic `lib/` directory.
 The root AGENTS index remains canonical. Next's documented `agentRules: false`
 prevents `next dev` from creating a nested guide after relocation; agents still
 read version-matched documentation from the web workspace's installed Next package.
 
 `apps/repo/` owns repository checks/fixes. Development runs native `next dev`;
 ordinary tests run Vitest unit/browser projects directly, with no emulator,
-provider credentials or tunnel. Brand assets use the repository-owned generator.
+provider credentials or tunnel. Direct TypeScript scripts and the asset CLI run
+through `tsx`.
 
 Factory is composed through explicit `lib.evalModules`, package/file selections,
 and Files then Pi shell hooks. `.envrc` sources optional ignored `.envrc.local`
@@ -105,8 +118,8 @@ or release manifest. Commit the complete root pnpm workspace/lock/Turbo configur
 and app-native files so source builds require no Nix materialization. Firebase App
 Hosting supports the Turborepo workspace with archive `rootDirectory: apps/web`;
 the web build remains `next build`, not a custom Docker/image build. Keep private
-runtime configuration out of public source. `apps/web/lib/http/headers.ts` owns
-Next security/cache headers. Source releases no longer require Firebase Hosting
+runtime configuration out of public source. `apps/web/next.config.ts` owns
+security/cache headers through its `nix/next/default.nix` source. Source releases no longer require Firebase Hosting
 configuration or Firestore Rules files; deployment consumers must use the matching
 landing-page-only archive contract.
 

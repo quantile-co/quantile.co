@@ -25,7 +25,8 @@
       const browser = () => ({
         enabled: true,
         headless: true,
-        provider: playwright({ launchOptions: { executablePath } }),
+        // Native scrollbars must participate in layout, just as in a real browser.
+        provider: playwright({ launchOptions: { executablePath, ignoreDefaultArgs: ["--hide-scrollbars"] } }),
         instances: [{ browser: "chromium" as const }],
       });
 
@@ -41,14 +42,14 @@
                 include: [
                   "app/**/*.test.{ts,tsx}",
                   "components/**/*.test.{ts,tsx}",
-                  "lib/**/*.test.{ts,tsx}",
+                  "*.test.ts",
                 ],
                 exclude: ["**/*.browser.test.{ts,tsx}"],
               },
             },
             {
               extends: true,
-              resolve: { alias: { "next/image": path.join(dirname, "lib/browser/test.tsx") } },
+              resolve: { alias: { "next/image": fileURLToPath(import.meta.resolve("@quantile-co/quantile.co-testing/next-image")) } },
               optimizeDeps: {
                 include: ["@mantine/hooks", "@tabler/icons-react", "fathom-client", "next/navigation", "react-dom", "react-dom/client"],
               },

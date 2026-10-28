@@ -120,20 +120,22 @@ function CompanyCard({
         </div>
         <div className={classes.customerLogos}>
           <span className={classes.clientsLabel}>Clients:</span>
-          {item.customers.map((customer) => (
-            <div className={classes.customer} key={customer.name}>
-              <span
-                aria-hidden="true"
-                className={classes.customerLogo}
-                style={
-                  {
-                    "--logo-image": `url("${customer.logo}")`,
-                  } as CSSProperties
-                }
-              />
-              <span className={classes.customerName}>{customer.name}</span>
-            </div>
-          ))}
+          <div className={classes.customers}>
+            {item.customers.map((customer) => (
+              <div className={classes.customer} key={customer.name}>
+                <span
+                  aria-hidden="true"
+                  className={classes.customerLogo}
+                  style={
+                    {
+                      "--logo-image": `url("${customer.logo}")`,
+                    } as CSSProperties
+                  }
+                />
+                <span className={classes.customerName}>{customer.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </article>
@@ -154,10 +156,9 @@ export function SocialProofSection({
   ariaLabel?: string;
 }) {
   const isCarousel = useMediaQuery("(max-width: 47.9375em)");
-  const isSingleCard = useMediaQuery("(max-width: 36em)");
   const canHover = useMediaQuery("(hover: hover)");
   const reducedMotion = useReducedMotion();
-  const cardsPerPage = isCarousel ? (isSingleCard ? 1 : 2) : proofCardCount;
+  const cardsPerPage = isCarousel ? 1 : proofCardCount;
   const [page, setPage] = useState(0);
   const [animationsReady, setAnimationsReady] = useState(false);
   const [hovered, setHovered] = useState(false);

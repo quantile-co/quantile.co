@@ -36,8 +36,9 @@ Brand asset generation: `pnpm run build:assets`.
 - [apps/web/](apps/web/): Next application, configuration, assets and tests.
 - [apps/repo/](apps/repo/): repository checks and fixes.
 - [apps/github/](apps/github/): immutable source publication and saved-plan transport.
-- [apps/web/lib/brand/assets.ts](apps/web/lib/brand/assets.ts): brand asset generation.
-- [apps/web/lib/http/headers.ts](apps/web/lib/http/headers.ts): security/cache headers.
+- [packages/brand/](packages/brand/): shared asset generator and CLI.
+- [packages/testing/](packages/testing/): reusable browser-test support.
+- [apps/web/next.config.ts](apps/web/next.config.ts): Next configuration and headers.
 - [tf/](tf/): repository/state infrastructure, not application hosting.
 - [.github/workflows/](.github/workflows/): checks, source releases and protected infrastructure.
 

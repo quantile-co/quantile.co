@@ -1,4 +1,5 @@
 import { SkipLink } from "@/components/SkipLink/SkipLink";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
 import classes from "./not-found.module.css";
 
 export default function NotFound() {
@@ -15,6 +16,7 @@ export default function NotFound() {
           </a>
         </div>
       </main>
+      <ThemeSwitcher />
     </div>
   );
 }

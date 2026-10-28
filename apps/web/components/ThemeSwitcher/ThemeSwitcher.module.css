@@ -1,4 +1,12 @@
 .root {
+  position: fixed;
+  z-index: 100;
+  right: max(var(--site-page-padding), env(safe-area-inset-right));
+  bottom: max(var(--site-page-padding), env(safe-area-inset-bottom));
+  background-color: var(--mantine-color-body);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
   isolation: isolate;
   display: flex;
   width: fit-content;
@@ -62,5 +70,26 @@
     outline: 2px solid Highlight;
     outline-offset: 1px;
     box-shadow: none;
+  }
+}
+
+/* Keep the reveal area hoverable on pointer devices while hidden.
+   Touch-only devices retain click-through behavior until scrolling. */
+@media (hover: hover) {
+  .root {
+    pointer-events: auto;
+  }
+}
+
+.root[data-visible],
+.root:focus-within,
+.root:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    transition: none;
   }
 }

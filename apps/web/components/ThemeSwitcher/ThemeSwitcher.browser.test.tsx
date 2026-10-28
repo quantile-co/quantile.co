@@ -1,8 +1,9 @@
+import { MantineProvider } from "@mantine/core";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
-import { ScrollThemeControl } from "./ScrollThemeControl";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -14,16 +15,16 @@ async function renderControl() {
   root = createRoot(container);
   flushSync(() =>
     root.render(
-      <ScrollThemeControl>
-        <button type="button">Theme</button>
-      </ScrollThemeControl>,
+      <MantineProvider>
+        <ThemeSwitcher />
+      </MantineProvider>,
     ),
   );
   await vi.waitFor(() =>
-    expect(container.querySelector("button")).not.toBeNull(),
+    expect(container.querySelector("fieldset")).not.toBeNull(),
   );
   await userEvent.hover(document.body);
-  return container.firstElementChild as HTMLElement;
+  return container.querySelector("fieldset") as HTMLElement;
 }
 
 afterEach(() => {
@@ -33,7 +34,24 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("Scroll-revealed theme control", () => {
+describe("Theme switcher", () => {
+  it("reveals on a tap even when the page cannot scroll", async () => {
+    const control = await renderControl();
+    expect(getComputedStyle(control).position).toBe("fixed");
+    expect(getComputedStyle(control).right).toBe("20px");
+    expect(getComputedStyle(control).bottom).toBe("20px");
+    expect(control.hasAttribute("data-visible")).toBe(false);
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    flushSync(() =>
+      window.dispatchEvent(
+        new PointerEvent("pointerdown", { pointerType: "touch" }),
+      ),
+    );
+    expect(control.hasAttribute("data-visible")).toBe(true);
+    flushSync(() => vi.advanceTimersByTime(1000));
+    expect(control.hasAttribute("data-visible")).toBe(false);
+  });
+
   it("starts hidden, reveals on scroll, and hides one second after the last scroll", async () => {
     const control = await renderControl();
     expect(control.hasAttribute("data-visible")).toBe(false);
@@ -69,7 +87,7 @@ describe("Scroll-revealed theme control", () => {
 
   it("can be revealed by keyboard focus without scrolling", async () => {
     const control = await renderControl();
-    const button = control.querySelector("button") as HTMLButtonElement;
+    const button = control.querySelector("input") as HTMLInputElement;
     expect(getComputedStyle(control).pointerEvents).toBe(
       window.matchMedia("(hover: hover)").matches ? "auto" : "none",
     );
@@ -88,6 +106,7 @@ describe("Scroll-revealed theme control", () => {
     flushSync(() => window.dispatchEvent(new Event("scroll")));
     root.unmount();
     expect(remove).toHaveBeenCalledWith("scroll", expect.any(Function));
+    expect(remove).toHaveBeenCalledWith("pointerdown", expect.any(Function));
     expect(vi.getTimerCount()).toBe(0);
   });
 });

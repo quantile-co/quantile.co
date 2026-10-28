@@ -30,30 +30,11 @@
                 "apps/web/app/**/page.tsx"
                 "apps/web/app/**/layout.tsx"
                 "apps/*/cli.ts"
-                "apps/web/assets.ts"
                 "**/*.test.{ts,tsx}"
                 "**/test.ts"
                 "**/*.config.{ts,js,mjs,cjs,mts,cts}"
               ];
               linter.rules.style.noProcessEnv = "off";
-            }
-            {
-              includes = [
-                "apps/web/lib/**/*.{ts,tsx}"
-                "!apps/web/lib/**/*.test.{ts,tsx}"
-                "!apps/web/lib/**/test.ts"
-              ];
-              linter.rules.style.noRestrictedImports = {
-                level = "error";
-                options.patterns = [
-                  {
-                    group = [
-                      "@/app/**"
-                    ];
-                    message = "Library modules must not import application entrypoints. Inject dependencies from the composition root.";
-                  }
-                ];
-              };
             }
             {
               includes = [ "apps/web/components/**/*.{ts,tsx}" ];

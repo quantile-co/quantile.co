@@ -11,7 +11,11 @@ describe("brand asset preview descriptions", () => {
       </MantineProvider>,
     );
 
-    expect(html).toContain('href="/">← Back to home');
+    expect(html).not.toMatch(
+      /<header|data-site-cta|aria-label="Quantile home"/,
+    );
+    expect(html).toContain("Select a display theme");
+    expect(html).not.toContain("Back to home");
     expect(html.match(/download=""/g)).toHaveLength(10);
     expect(html).not.toMatch(
       /<form|billing|checkout|calendly|#benefits|#pricing|#faq/i,

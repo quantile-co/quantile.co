@@ -1,6 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { siteHeaders } from "@/lib/http/headers";
 import RootLayout from "./layout";
 
 vi.mock("@/components/FathomAnalytics/FathomAnalytics", () => ({
@@ -41,22 +40,4 @@ describe("root analytics composition", () => {
       expect(html).not.toContain("data-analytics-site");
     },
   );
-
-  it("allows only the Fathom CDN for script, image collection and departure beacons", () => {
-    const policy = siteHeaders(false)[0].headers.find(
-      (header) => header.key === "Content-Security-Policy",
-    )?.value;
-    const directives = new Map(
-      policy?.split(";").map((directive) => {
-        const [name, ...sources] = directive.trim().split(/\s+/);
-        return [name, sources];
-      }),
-    );
-    for (const name of ["script-src", "img-src", "connect-src"])
-      expect(directives.get(name)).toContain("https://cdn.usefathom.com");
-    expect(policy).not.toContain("https://*.usefathom.com");
-    expect(policy).not.toContain("'unsafe-eval'");
-    expect(directives.get("object-src")).toEqual(["'none'"]);
-    expect(directives.get("frame-ancestors")).toEqual(["'none'"]);
-  });
 });

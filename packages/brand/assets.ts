@@ -1,11 +1,10 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as fontkit from "fontkit";
 import pngToIco from "png-to-ico";
 import sharp from "sharp";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const fontUrl = new URL(
   import.meta.resolve("@fontsource/prompt/files/prompt-latin-800-italic.woff"),
 );
@@ -320,10 +319,10 @@ async function writeAssets(assets: Map<string, Buffer>, outputRoot: string) {
   console.log(`Generated ${assets.size} brand assets.`);
 }
 
-export async function checkBrandAssets(outputRoot: string = root) {
+export async function checkBrandAssets(outputRoot: string) {
   return checkAssets(await buildAssets(), outputRoot);
 }
 
-export async function generateBrandAssets(outputRoot: string = root) {
+export async function generateBrandAssets(outputRoot: string) {
   await writeAssets(await buildAssets(), outputRoot);
 }

@@ -18,9 +18,6 @@
   padding-block: 0;
   padding-inline: var(--site-page-padding);
 
-  @media (max-width: 26.5625em) {
-    padding-inline: 0;
-  }
 }
 
 .experienceGrid {
@@ -30,31 +27,21 @@
 
 .experiencePage {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* AJ's shorter copy needs less width; balance the visible gaps, not quarters. */
+  grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.03fr) minmax(0, 1.03fr) minmax(0, 1fr);
   column-gap: 0;
   row-gap: 0;
   background-color: transparent;
 
   @media (max-width: 47.9375em) {
     grid-template-columns: none;
-    grid-auto-columns: 50%;
+    grid-auto-columns: 100%;
     grid-auto-flow: column;
-    overflow-x: hidden;
+    /* Clip both axes: x-only hiding makes y scrollable and steals card width. */
+    overflow: clip;
     touch-action: pan-y;
   }
 
-  @media (max-width: $mantine-breakpoint-xs) {
-    grid-template-columns: none;
-    grid-auto-columns: calc(
-      100vw - (2 * var(--mantine-spacing-md))
-    );
-    grid-auto-flow: column;
-    overflow-x: hidden;
-    padding: var(--mantine-spacing-md);
-    gap: var(--mantine-spacing-md);
-    background-color: transparent;
-    touch-action: pan-y;
-  }
 }
 
 .inactiveCard {
@@ -77,11 +64,16 @@
   padding-right: var(--proof-padding-right);
   padding-left: 0;
   column-gap: var(--proof-column-gap);
-  grid-template-columns: var(--proof-media-size) minmax(0, 1fr);
+  grid-template-columns: var(--proof-square-size, var(--proof-media-size)) minmax(0, 1fr);
   background-color: var(--mantine-color-body);
   container-type: inline-size;
 }
 
+.founderProfile .proofCard {
+  font-size: var(--founder-profile-font-size, 1.25rem);
+}
+
+.experiencePage > .proofCard,
 .founderProfile .proofCard {
   --proof-card-height: var(--proof-media-size);
   --proof-padding-block: 0;
@@ -90,8 +82,8 @@
 .mediaSquare {
   position: relative;
   display: grid;
-  width: var(--proof-media-size);
-  height: var(--proof-media-size);
+  width: var(--proof-square-size, var(--proof-media-size));
+  height: var(--proof-square-size, var(--proof-media-size));
   align-self: start;
   margin-top: calc(
     (
@@ -186,7 +178,7 @@
   align-content: flex-start;
   align-items: flex-start;
   margin-top: 0;
-  column-gap: 0.375em;
+  column-gap: 0.1875em;
   row-gap: 0.125em;
   flex-wrap: wrap;
 
@@ -195,7 +187,7 @@
   }
 
   & span + span {
-    padding-left: 0.375em;
+    padding-left: 0.1875em;
     border-left: 1px solid var(--proof-foreground);
   }
 }
@@ -217,8 +209,16 @@
   align-self: end;
   align-items: end;
   justify-content: start;
-  column-gap: 0.625em;
   row-gap: 0.1875em;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.customers {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  align-items: end;
+  column-gap: 0.625em;
   grid-template-columns: repeat(3, minmax(max-content, 1fr));
 }
 
@@ -274,51 +274,69 @@
     }
   }
 
+}
+
+/* Both mobile rows share a square as tall as the full text/contact block. */
+@media (max-width: 47.9375em) {
+  .experiencePage > .proofCard,
   .founderProfile .proofCard {
-    font-size: var(--founder-profile-font-size, 1.25rem);
-  }
-}
+    --proof-padding-right: 0;
+    --proof-column-gap: 0.7em;
+    --proof-square-size: var(--support-row-height, 6.575em);
+    --proof-media-size: var(--support-row-height, 6.575em);
 
-@media (max-width: 47.9375em) {
+    font-size: var(--support-unit, 0.875rem);
+  }
+
+  .mediaSquare {
+    align-self: start;
+    margin-top: 0;
+  }
+
+  .proofContent {
+    row-gap: 0.2em;
+  }
+
+  .proofTitle {
+    font-size: 1.5em;
+  }
+
+  .profileRole,
+  .profileDescription {
+    font-size: 0.85em;
+  }
+
+  .experienceContext {
+    font-size: 0.8em;
+    column-gap: 0.25em;
+
+    & span + span {
+      padding-left: 0.25em;
+    }
+  }
+
   .customerLogos {
+    row-gap: 0.35em;
+  }
+
+  .customers {
+    width: max-content;
     grid-template-columns: repeat(3, max-content);
+    column-gap: 0.5em;
   }
 
-  .proofCard {
-    font-size: clamp(1rem, 2.5cqw, 1.25rem);
+  .clientsLabel {
+    top: 0;
+    font-size: 0.8em;
   }
 
-  .experiencePage > .proofCard {
-    font-size: clamp(0.95rem, 2.375cqw, 1.1875rem);
-  }
-}
-
-@media (max-width: 36em) {
-  .proofCard {
-    font-size: clamp(1rem, 5cqw, 1.25rem);
+  .customerLogo {
+    width: 1.3em;
+    height: 1.3em;
   }
 
-  .experiencePage > .proofCard {
-    font-size: clamp(0.95rem, 4.25cqw, 1.0625rem);
-  }
-}
-
-@media (max-width: 26.5625em) {
-  .experiencePage {
-    grid-auto-columns: calc(100vw - (2 * var(--site-page-padding)));
-    padding: var(--site-page-padding);
-    gap: var(--site-page-padding);
-  }
-}
-
-@media (max-width: 47.9375em) {
-  .experiencePage {
-    padding-block: 0;
-  }
-
-  .experiencePage > .proofCard {
-    --proof-card-height: var(--proof-media-size);
-    --proof-padding-block: 0;
+  .customerName {
+    font-size: max(0.5rem, 0.75em);
   }
 }
 

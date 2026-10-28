@@ -1,10 +1,8 @@
 import { MantineProvider } from "@mantine/core";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-// biome-ignore lint/style/noRestrictedImports: Verify the route composition and public metadata together.
-import { metadata as layoutMetadata } from "@/app/layout";
-// biome-ignore lint/style/noRestrictedImports: Verify the route composition.
-import Home, { metadata } from "@/app/page";
+import { metadata as layoutMetadata } from "./layout";
+import Home, { metadata } from "./page";
 
 describe("Homepage positioning", () => {
   it("renders the founder letter and preserves the public data and AI metadata", () => {
@@ -14,7 +12,10 @@ describe("Homepage positioning", () => {
       </MantineProvider>,
     );
 
-    expect(html).toContain("Your data shouldn’t slow you down.</h1>");
+    expect(html.replace(/<[^>]+>/g, "")).toContain(
+      "Transform your data team with AI.",
+    );
+    expect(html.indexOf("<h1")).toBeLessThan(html.indexOf("<section"));
     expect(html).toContain("$6k · 40hrs / month.");
     expect(html).toContain(
       "Fast, flexible, senior data + AI engineering capacity",
@@ -52,5 +53,15 @@ describe("Homepage positioning", () => {
     expect(html).not.toContain("<h2");
     expect(html).toContain('href="https://cal.com/aj-welch/book-a-call"');
     expect(html).toContain('href="mailto:aj@quantile.co"');
+    const footer = html.slice(
+      html.indexOf("<footer"),
+      html.indexOf("</footer>"),
+    );
+    expect(footer).toContain("AJ Welch");
+    expect(html).not.toContain("Prefer email?");
+    expect(html.match(/href="mailto:aj@quantile.co"/g)).toHaveLength(2);
+    expect(footer).toContain("<fieldset");
+    expect(footer.match(/<a /g)).toHaveLength(2);
+    expect(html).toContain('href="#main-content"');
   });
 });
