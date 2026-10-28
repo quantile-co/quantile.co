@@ -66,6 +66,7 @@ export default defineConfig({
             "@tabler/icons-react",
             "fathom-client",
             "next/navigation",
+            "react-dom",
             "react-dom/client",
           ],
         },

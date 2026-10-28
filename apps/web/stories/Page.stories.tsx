@@ -15,3 +15,14 @@ export const Default: Story = {};
 export const Dark: Story = {
   globals: { theme: "dark" },
 };
+
+export const Mobile: Story = {
+  globals: { viewport: { value: "mobile", isRotated: false } },
+};
+
+export const MobileDark: Story = {
+  globals: {
+    theme: "dark",
+    viewport: { value: "mobile", isRotated: false },
+  },
+};

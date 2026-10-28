@@ -66,7 +66,7 @@
               extends: true,
               resolve: { alias: { "next/image": path.join(dirname, "lib/browser/test.tsx") } },
               optimizeDeps: {
-                include: ["@mantine/hooks", "@tabler/icons-react", "fathom-client", "next/navigation", "react-dom/client"],
+                include: ["@mantine/hooks", "@tabler/icons-react", "fathom-client", "next/navigation", "react-dom", "react-dom/client"],
               },
               test: {
                 name: "browser",

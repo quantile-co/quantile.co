@@ -1,0 +1,160 @@
+.page {
+  --letter-content-width: 60rem;
+
+  padding-top: clamp(1.5rem, 4vw, 3rem);
+}
+
+.footer {
+  --letter-cta-height: clamp(3rem, 5vw, 4.5rem);
+  --letter-email-size: 0.875rem;
+
+  display: flex;
+  width: 100%;
+  max-width: calc(var(--letter-content-width) + (2 * var(--site-page-padding)));
+  padding: 0.5rem var(--site-page-padding) calc((2 * var(--site-page-padding)) + 2rem);
+  margin-inline: auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-xl);
+}
+
+.proof {
+  --site-content-width: var(--letter-content-width);
+}
+
+.letter {
+  width: 100%;
+  max-width: calc(var(--letter-content-width) + (2 * var(--site-page-padding)));
+  padding: clamp(3rem, 7vw, 6rem) var(--site-page-padding) 0;
+  margin-inline: auto;
+  color: var(--site-text-primary);
+  font-family: var(--mantine-font-family-headings);
+  font-size: clamp(1.5rem, 3.5vw, 2.625rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.4;
+  overflow-wrap: break-word;
+}
+
+.letter h1 {
+  margin: 0 0 1.25em;
+  font-size: inherit;
+  font-weight: 500;
+  letter-spacing: inherit;
+  line-height: inherit;
+}
+
+.letter p {
+  margin: 0 0 1em;
+}
+
+.letter p:last-child {
+  margin-bottom: 0.75em;
+}
+
+.email a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+
+.price {
+  font-weight: 500;
+}
+
+.founderProfile {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--mantine-spacing-xs);
+}
+
+.footer .callToAction {
+  border-radius: calc(var(--mantine-radius-sm) + 2px);
+  min-width: clamp(10rem, 16vw, 13rem);
+  height: var(--letter-cta-height);
+  padding-inline: clamp(1.5rem, 2.22vw, 2rem);
+  font-size: clamp(1rem, 1.6vw, 1.375rem);
+  font-weight: 650;
+}
+
+.callToAction svg {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.email {
+  margin: 0;
+  color: var(--site-text-secondary);
+  font-size: var(--letter-email-size);
+  letter-spacing: normal;
+  line-height: 1.5;
+}
+
+.themeSwitcher {
+  position: fixed;
+  z-index: 100;
+  right: max(var(--site-page-padding), env(safe-area-inset-right));
+  bottom: max(var(--site-page-padding), env(safe-area-inset-bottom));
+  border-radius: 999px;
+  background-color: var(--mantine-color-body);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+/* Keep the reveal area hoverable on pointer devices while hidden.
+   Touch-only devices retain click-through behavior until scrolling. */
+@media (hover: hover) {
+  .themeSwitcher {
+    pointer-events: auto;
+  }
+}
+
+.themeSwitcher[data-visible],
+.themeSwitcher:focus-within,
+.themeSwitcher:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .themeSwitcher {
+    transition: none;
+  }
+}
+
+@media (min-width: 48em) {
+  .footer {
+    align-items: flex-start;
+  }
+
+  .founderProfile {
+    /* Align the portrait with the button top and inset its bottom by 4px:
+       the email line box extends below the visible Outfit glyphs. */
+    --founder-profile-font-size: calc(
+      (var(--letter-cta-height) + var(--mantine-spacing-xs) + (var(--letter-email-size) * 1.5) - 0.25rem) / 5.5
+    );
+  }
+}
+
+@media (max-width: 47.9375em) {
+  .letter {
+    padding-top: clamp(1.5rem, 4vw, 2rem);
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .contact {
+    align-items: flex-start;
+  }
+}

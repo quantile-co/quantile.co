@@ -1,18 +1,21 @@
 import { MantineProvider } from "@mantine/core";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { metadata as layoutMetadata } from "./layout";
-import Home, { metadata } from "./page";
+// biome-ignore lint/style/noRestrictedImports: Verify the route composition and public metadata together.
+import { metadata as layoutMetadata } from "@/app/layout";
+// biome-ignore lint/style/noRestrictedImports: Verify the route renders this landing page without checkout forms.
+import Home, { metadata } from "@/app/page";
 
 describe("Homepage positioning", () => {
-  it("uses the data and AI engineering headline and supporting copy", () => {
+  it("renders the founder letter and preserves the public data and AI metadata", () => {
     const html = renderToStaticMarkup(
       <MantineProvider>
         <Home />
       </MantineProvider>,
     );
 
-    expect(html).toContain("Fractional data\nand AI engineering</h1>");
+    expect(html).toContain("Your data shouldn’t slow you down.</h1>");
+    expect(html).toContain("$6k · 40hrs / month.");
     expect(html).toContain(
       "Fast, flexible, senior data + AI engineering capacity",
     );
@@ -47,7 +50,17 @@ describe("Homepage positioning", () => {
     const forms = html.match(
       /<form\b[^>]*action="\/api\/stripe\/checkout"[^>]*method="post"[^>]*>/g,
     );
-    expect(forms).toHaveLength(5);
+    expect(forms).toBeNull();
+    expect(html).not.toContain("<header");
+    expect(html).not.toContain("<h2");
+    expect(html).not.toContain("Ready to build");
+    expect(html).toContain('href="https://cal.com/aj-welch/book-a-call"');
+    expect(html).toContain('href="mailto:aj@quantile.co"');
+    expect(html).not.toContain("calendly");
+    expect(html).not.toContain('id="book-a-call"');
+    expect(html).not.toContain('id="benefits"');
+    expect(html).not.toContain('id="pricing"');
+    expect(html).not.toContain('id="faq"');
     expect(html).not.toContain('form="subscription-checkout"');
   });
 });

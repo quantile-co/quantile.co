@@ -1,28 +1,11 @@
 import type { Metadata } from "next";
-import { BenefitsAnimation1 } from "@/components/BenefitsAnimation/BenefitsAnimation1";
-import { BenefitsAnimation2 } from "@/components/BenefitsAnimation/BenefitsAnimation2";
-import { BenefitsAnimation3 } from "@/components/BenefitsAnimation/BenefitsAnimation3";
-import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
-import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
-import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
-import { CalendlyEmbed } from "@/components/CalendlyEmbed/CalendlyEmbed";
-import {
-  CheckoutAction,
-  CheckoutForm,
-} from "@/components/CheckoutForm/CheckoutForm";
-import { FaqSection } from "@/components/FaqSection/FaqSection";
-import { HeroAnimation } from "@/components/HeroAnimation/HeroAnimation";
-import { HeroSection } from "@/components/HeroSection/HeroSection";
-import { PricingSection } from "@/components/PricingSection/PricingSection";
-import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
+import { LetterLandingPage } from "@/components/LetterLandingPage/LetterLandingPage";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
 import {
-  CompactSocialProof,
+  FounderProfile,
   SocialProofSection,
 } from "@/components/SocialProofSection/SocialProofSection";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
-import { billingPortalLoginUrl } from "@/lib/stripe/portal";
 
 const pageTitle = "Quantile | Fractional data and AI engineering";
 const heroDescription =
@@ -60,65 +43,23 @@ const organizationStructuredData = {
   },
 };
 
-const homeSections = [
-  { href: "#benefits", label: "Benefits" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#faq", label: "FAQ" },
-] as const;
-
-const headerCheckoutActions = {
-  desktop: <CheckoutAction size="xs" />,
-  mobile: <CheckoutAction size="md" siteCta="section" />,
-};
-
 export default function Home() {
   return (
-    <div>
-      <SkipLink href="#main-content">Skip to content</SkipLink>
-      <SiteHeader
-        bookCallHref="#book-a-call"
-        homeHref="#top"
-        logo={<BrandLogo />}
-        sections={homeSections}
-        checkoutActions={headerCheckoutActions}
-      />
-      <main id="main-content" tabIndex={-1}>
-        <HeroSection
-          description={heroDescription}
-          id="top-hero"
-          CheckoutForm={CheckoutForm}
-          title={"Fractional data\nand AI engineering"}
-          visual={<HeroAnimation />}
-        />
-        <SocialProofSection ariaLabel="AJ Welch's experience and client work" />
-        <BenefitsSection
-          CheckoutForm={CheckoutForm}
-          onboardingVisual={<BenefitsAnimation1 />}
-          expertiseVisual={<BenefitsAnimation2 />}
-          capacityVisual={<BenefitsAnimation3 />}
-        />
-        <PricingSection
-          mobileProof={<SocialProofSection embedded />}
-          CheckoutForm={CheckoutForm}
-        />
-        <SocialProofSection hideOnMobile />
-        <FaqSection
-          billingPortalLoginUrl={billingPortalLoginUrl}
-          compactProof={<CompactSocialProof />}
-          CheckoutForm={CheckoutForm}
-        />
-      </main>
-      <SiteFooter
-        billingPortalLoginUrl={billingPortalLoginUrl}
-        callToAction={<BookACallSection calendar={<CalendlyEmbed />} />}
-        homeHref="#top"
-        logo={<BrandLogo />}
-        sections={homeSections}
+    <>
+      <LetterLandingPage
+        skipLink={<SkipLink href="#main-content">Skip to content</SkipLink>}
+        socialProof={
+          <SocialProofSection
+            flushCarousel
+            ariaLabel="AJ Welch's experience and client work"
+          />
+        }
+        founderProfile={<FounderProfile />}
         themeSwitcher={<ThemeSwitcher />}
       />
       <script type="application/ld+json">
         {JSON.stringify(organizationStructuredData).replace(/</g, "\\u003c")}
       </script>
-    </div>
+    </>
   );
 }

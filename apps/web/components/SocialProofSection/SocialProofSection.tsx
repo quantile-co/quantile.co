@@ -11,7 +11,7 @@ import classes from "./SocialProofSection.module.css";
 const experience = [
   {
     company: "Google",
-    context: ["GCP", "BigQuery"],
+    context: ["Google Cloud", "BigQuery"],
     customers: [
       {
         name: "Palo Alto",
@@ -122,11 +122,12 @@ function CompanyCard({
         <div className={classes.proofContent}>
           <Text className={classes.proofTitle}>{item.company}</Text>
           <div className={classes.experienceContext}>
-            {[...item.context, "Clients:"].map((context) => (
+            {item.context.map((context) => (
               <span key={context}>{context}</span>
             ))}
           </div>
           <div className={classes.customerLogos}>
+            <span className={classes.clientsLabel}>Clients:</span>
             {item.customers.map((customer) => (
               <div className={classes.customer} key={customer.name}>
                 <span
@@ -145,6 +146,14 @@ function CompanyCard({
         </div>
       )}
     </article>
+  );
+}
+
+export function FounderProfile() {
+  return (
+    <div className={`${classes.section} ${classes.founderProfile}`}>
+      <ProfileCard />
+    </div>
   );
 }
 
@@ -174,10 +183,14 @@ export function CompactSocialProof() {
 
 export function SocialProofSection({
   ariaLabel,
+  carouselLabel,
+  flushCarousel = false,
   embedded = false,
   hideOnMobile = false,
 }: {
   ariaLabel?: string;
+  carouselLabel?: string;
+  flushCarousel?: boolean;
   embedded?: boolean;
   hideOnMobile?: boolean;
 }) {
@@ -259,11 +272,13 @@ export function SocialProofSection({
       />
     );
   });
-  const carouselName = embedded
-    ? "Pricing experience"
-    : hideOnMobile
-      ? "Additional experience"
-      : "Experience";
+  const carouselName =
+    carouselLabel ??
+    (embedded
+      ? "Pricing experience"
+      : hideOnMobile
+        ? "Additional experience"
+        : "Experience");
   const carouselInstruction = reducedMotion
     ? "Automatic card changes are disabled by your motion preference."
     : userPaused
@@ -275,6 +290,7 @@ export function SocialProofSection({
       aria-label={ariaLabel}
       className={classes.section}
       data-embedded={embedded || undefined}
+      data-flush-carousel={flushCarousel || undefined}
       data-hide-mobile={hideOnMobile || undefined}
     >
       <Container className={classes.wrapper} size="xl">

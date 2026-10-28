@@ -1,7 +1,7 @@
 import { Button } from "@mantine/core";
 import type { ReactNode } from "react";
 
-export function CheckoutForm({ children }: { children: ReactNode }) {
+function CheckoutForm({ children }: { children: ReactNode }) {
   return (
     <form action="/api/stripe/checkout" method="post">
       {children}

@@ -15,6 +15,12 @@
   }
 }
 
+.founderProfile {
+  width: 18.75rem;
+  max-width: 100%;
+  container: standalone-profile / inline-size;
+}
+
 .compactSection {
   container: faq-proof / inline-size;
 }
@@ -92,6 +98,7 @@
 
 .experienceGrid {
   overflow: hidden;
+  container: social-proof / inline-size;
 }
 
 .experiencePage {
@@ -128,11 +135,11 @@
 }
 
 .proofCard {
-  --proof-card-height: 8.75rem;
-  --proof-padding-block: 0.625rem;
-  --proof-padding-right: 0.5rem;
-  --proof-column-gap: 0.5rem;
-  --proof-media-size: 5rem;
+  --proof-card-height: 9.625em;
+  --proof-padding-block: 0.625em;
+  --proof-padding-right: 0.5em;
+  --proof-column-gap: 0.5em;
+  --proof-media-size: 5.5em;
 
   display: grid;
   height: var(--proof-card-height);
@@ -145,6 +152,15 @@
   grid-template-columns: var(--proof-media-size) minmax(0, 1fr);
   background-color: var(--mantine-color-body);
   container-type: inline-size;
+}
+
+.proofCard:not([data-compact]) {
+  font-size: 1rem;
+}
+
+.founderProfile .proofCard {
+  --proof-card-height: var(--proof-media-size);
+  --proof-padding-block: 0;
 }
 
 .proofCard[data-compact] {
@@ -252,15 +268,10 @@
           var(--proof-media-size)
       ) / 2
   );
-  grid-template-rows: auto auto auto;
-  align-content: space-between;
+  /* Share title/context rows; anchor the bio and customer marks to the bottom. */
+  grid-template-rows: auto auto minmax(0, 1fr);
+  row-gap: 0.1875em;
   text-align: left;
-}
-
-.profileContent {
-  grid-template-rows: auto auto 1fr;
-  align-content: stretch;
-  row-gap: 0.0625rem;
 }
 
 .proofTitle {
@@ -268,7 +279,7 @@
   overflow: hidden;
   margin: 0;
   color: var(--proof-foreground);
-  font-size: clamp(0.875rem, 7.5cqw, 1.375rem);
+  font-size: 1.25em;
   font-weight: 500;
   letter-spacing: -0.025em;
   line-height: 1.1;
@@ -280,7 +291,7 @@
 .profileRole,
 .profileDescription {
   color: var(--proof-foreground);
-  font-size: clamp(0.40625rem, 3.6cqw, 0.8125rem);
+  font-size: max(0.5rem, 0.65625em);
   font-weight: 400;
   line-height: 1.2;
 }
@@ -291,76 +302,35 @@
 }
 
 .experienceContext {
+  letter-spacing: -0.02em;
   display: flex;
   min-width: 0;
-  min-height: 1.42em;
+  min-height: 1.2em;
   align-content: flex-start;
   align-items: flex-start;
-  margin-top: 0.1875rem;
-  overflow: hidden;
-  gap: clamp(0.0625rem, 0.75cqw, 0.1875rem);
-  flex-wrap: nowrap;
+  margin-top: 0;
+  column-gap: 0.375em;
+  row-gap: 0.125em;
+  flex-wrap: wrap;
 
   & span {
     white-space: nowrap;
   }
 
   & span + span {
-    padding-left: clamp(0.0625rem, 0.75cqw, 0.1875rem);
+    padding-left: 0.375em;
     border-left: 1px solid var(--proof-foreground);
   }
 }
 
 .profileDescription {
-  align-self: end;
-  margin: 0;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.profileLastLine {
   display: flex;
-  align-items: flex-end;
-  gap: clamp(0.125rem, 0.75cqw, 0.25rem);
-}
-
-.socialLinks {
-  --social-icon-size: clamp(0.625rem, 5.333cqw, 1rem);
-
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: clamp(0.0625rem, 0.5cqw, 0.125rem);
-}
-
-.socialLink {
-  display: grid;
-  width: calc(var(--social-icon-size) + 0.125rem);
-  height: var(--social-icon-size);
-  border: 0;
-  place-items: center;
-  background-color: transparent;
-  color: var(--proof-foreground);
-  transition:
-    opacity 120ms ease,
-    transform 120ms ease;
-
-  @media (hover: hover) {
-    &:hover {
-      transform: translateY(-1px);
-      opacity: 0.78;
-    }
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--proof-foreground);
-    outline-offset: 2px;
-  }
-
-  & svg {
-    width: var(--social-icon-size);
-    height: var(--social-icon-size);
-  }
+  flex-direction: column;
+  justify-content: space-between;
+  align-self: stretch;
+  margin: 0;
+  line-height: 1.35;
+  white-space: nowrap;
 }
 
 .customerLogos {
@@ -370,8 +340,18 @@
   align-self: end;
   align-items: end;
   justify-content: start;
-  gap: clamp(0.5rem, 4cqw, 1rem);
-  grid-template-columns: repeat(3, max-content);
+  column-gap: 0.625em;
+  row-gap: 0.1875em;
+  grid-template-columns: repeat(3, minmax(max-content, 1fr));
+}
+
+.clientsLabel {
+  position: relative;
+  top: -1px;
+  grid-column: 1 / -1;
+  color: var(--proof-foreground);
+  font-size: max(0.375rem, 0.5em);
+  line-height: 1;
 }
 
 .customer {
@@ -379,13 +359,13 @@
   min-width: 0;
   align-content: end;
   justify-items: start;
-  gap: clamp(0.0625rem, 0.75cqw, 0.1875rem);
+  gap: 0.125em;
   grid-template-rows: auto max-content;
 }
 
 .customerLogo {
-  width: clamp(0.875rem, 7cqw, 1.5rem);
-  height: clamp(0.875rem, 7cqw, 1.5rem);
+  width: 1.25em;
+  height: 1.25em;
   background-color: var(--proof-foreground);
   mask: var(--logo-image) left center / contain no-repeat;
 }
@@ -397,7 +377,7 @@
   justify-content: flex-start;
   color: var(--proof-foreground);
   overflow: hidden;
-  font-size: clamp(0.4375rem, 3cqw, 0.75rem);
+  font-size: max(0.5rem, 0.625em);
   line-height: 1.2;
   text-align: left;
   white-space: nowrap;
@@ -409,20 +389,40 @@
   }
 }
 
-@media (min-width: 48em) and (max-width: 64em) {
-  .proofCard {
-    --proof-card-height: clamp(7rem, 11.6667vw, 8.75rem);
-    --proof-padding-block: clamp(0.375rem, 0.8333vw, 0.625rem);
-    --proof-padding-right: 0.125rem;
-    --proof-column-gap: 0.5rem;
-    --proof-media-size: clamp(3.125rem, calc(7.03125vw - 0.25rem), 4.25rem);
+/* One shared unit scales the square, text, logos and spacing together. */
+@media (min-width: 48em) {
+  @container social-proof (max-width: 75rem) {
+    .experiencePage > .proofCard:not([data-compact]) {
+      font-size: clamp(0.75rem, 1.583333cqw, 1.1875rem);
+    }
+  }
+
+  .founderProfile .proofCard {
+    font-size: var(--founder-profile-font-size, 1.25rem);
   }
 }
 
-@media (min-width: 36.0625em) and (max-width: 41.25em) {
-  .proofCard {
-    --proof-padding-right: 0.5rem;
-    --proof-column-gap: 0.5rem;
+@media (max-width: 47.9375em) {
+  .customerLogos {
+    grid-template-columns: repeat(3, max-content);
+  }
+
+  .proofCard:not([data-compact]) {
+    font-size: clamp(1rem, 2.5cqw, 1.25rem);
+  }
+
+  .experiencePage > .proofCard {
+    font-size: clamp(0.95rem, 2.375cqw, 1.1875rem);
+  }
+}
+
+@media (max-width: 36em) {
+  .proofCard:not([data-compact]) {
+    font-size: clamp(1rem, 5cqw, 1.25rem);
+  }
+
+  .experiencePage > .proofCard {
+    font-size: clamp(0.95rem, 4.25cqw, 1.0625rem);
   }
 }
 
@@ -432,51 +432,21 @@
     padding: var(--site-page-padding);
     gap: var(--site-page-padding);
   }
+}
 
-  .proofCard {
-    --proof-card-height: clamp(6.25rem, calc(4.344rem + 9.52vw), 6.875rem);
-    --proof-padding-block: clamp(
-      0.1875rem,
-      calc(-0.1935rem + 1.905vw),
-      0.3125rem
-    );
-    --proof-padding-right: 0.25rem;
-    --proof-column-gap: 0.375rem;
-    --proof-media-size: clamp(
-      3.5rem,
-      calc(1.786rem + 8.57vw),
-      4.0625rem
-    );
+@media (max-width: 47.9375em) {
+  .section[data-flush-carousel] .experiencePage {
+    padding-block: 0;
   }
 
-  .proofTitle {
-    font-size: clamp(0.6875rem, 5.55cqw, 1.0625rem);
-  }
-
-  .experienceContext,
-  .profileRole,
-  .profileDescription {
-    font-size: clamp(0.4375rem, 2.65cqw, 0.59375rem);
-    line-height: 1.15;
-  }
-
-  .customerLogo {
-    width: clamp(0.6875rem, 4.8cqw, 1rem);
-    height: clamp(0.6875rem, 4.8cqw, 1rem);
-  }
-
-  .customerName {
-    font-size: clamp(0.4375rem, 2.15cqw, 0.53125rem);
-  }
-
-  .socialLinks {
-    --social-icon-size: clamp(0.46875rem, 3.75cqw, 0.71875rem);
+  .section[data-flush-carousel] .proofCard {
+    --proof-card-height: var(--proof-media-size);
+    --proof-padding-block: 0;
   }
 }
 
 @media (forced-colors: active) {
-  .mediaSquare,
-  .socialLink:focus-visible {
+  .mediaSquare {
     border-color: CanvasText;
   }
 }
