@@ -1,19 +1,20 @@
-import { MantineProvider } from "@mantine/core";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import RootLayout from "../layout";
 import BrandPage from "./page";
 
 describe("brand asset preview descriptions", () => {
   it("distinguishes the asset variant from the color of its mark", () => {
     const html = renderToStaticMarkup(
-      <MantineProvider>
+      <RootLayout>
         <BrandPage />
-      </MantineProvider>,
+      </RootLayout>,
     );
 
-    expect(html).not.toMatch(
-      /<header|data-site-cta|aria-label="Quantile home"/,
-    );
+    expect(html).toContain("<header");
+    expect(html).toContain("<footer");
+    expect(html.match(/data-site-cta="booking"/g)).toHaveLength(1);
+    expect(html.match(/aria-label="Quantile home"/g)).toHaveLength(2);
     expect(html).toContain("Select a display theme");
     expect(html).not.toContain("Back to home");
     expect(html.match(/download=""/g)).toHaveLength(10);

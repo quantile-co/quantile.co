@@ -25,7 +25,9 @@ async function render(allowedDomains = domains) {
   await act(() =>
     root.render(
       <StrictMode>
-        <FathomAnalytics siteId="TESTSITE" domains={allowedDomains} />
+        <FathomAnalytics
+          settings={{ siteId: "TESTSITE", domains: allowedDomains }}
+        />
       </StrictMode>,
     ),
   );
@@ -64,10 +66,17 @@ afterEach(async () => {
 });
 
 describe("FathomAnalytics", () => {
+  it("does not load or track when configuration is disabled", async () => {
+    await act(() => root.render(<FathomAnalytics settings={null} />));
+    expect(document.querySelector("#fathom-script")).toBeNull();
+    expect(window.__fathomClientQueue).toEqual([]);
+    expect(trackPageview).not.toHaveBeenCalled();
+  });
+
   it("does not load or track during server rendering", () => {
     expect(
       renderToStaticMarkup(
-        <FathomAnalytics siteId="TESTSITE" domains={domains} />,
+        <FathomAnalytics settings={{ siteId: "TESTSITE", domains }} />,
       ),
     ).toBe("");
     expect(document.querySelector("#fathom-script")).toBeNull();

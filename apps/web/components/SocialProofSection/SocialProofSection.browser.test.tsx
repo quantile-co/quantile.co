@@ -2,7 +2,7 @@ import { MantineProvider } from "@mantine/core";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { page, userEvent } from "vitest/browser";
-import { FounderProfile, SocialProofSection } from "./SocialProofSection";
+import { SocialProofSection } from "./SocialProofSection";
 import classes from "./SocialProofSection.module.css";
 
 let container: HTMLDivElement;
@@ -18,7 +18,7 @@ afterEach(async () => {
   await page.viewport(initialViewport.width, initialViewport.height);
 });
 
-it("cycles through all four cards with only the active card accessible", async () => {
+it("cycles through all three company cards with only the active card accessible", async () => {
   await page.viewport(390, 844);
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -26,7 +26,6 @@ it("cycles through all four cards with only the active card accessible", async (
   root.render(
     <MantineProvider>
       <SocialProofSection ariaLabel="Experience" />
-      <FounderProfile />
     </MantineProvider>,
   );
   await vi.waitFor(() =>
@@ -35,14 +34,12 @@ it("cycles through all four cards with only the active card accessible", async (
     ).not.toBeNull(),
   );
   // Keep the pointer outside the carousel so hover does not pause rotation.
-  await userEvent.hover(
-    container.querySelector(`.${classes.founderProfile}`) as HTMLElement,
-  );
+  await userEvent.hover(document.body);
   const proof = container.querySelector(
     'section[aria-label="Experience"]',
   ) as HTMLElement;
   const seen = new Set<string>();
-  for (let index = 0; index < 4; index++) {
+  for (let index = 0; index < 3; index++) {
     const title = await vi.waitFor(
       () => {
         const active = proof.querySelectorAll("article:not([aria-hidden])");
@@ -56,10 +53,5 @@ it("cycles through all four cards with only the active card accessible", async (
     );
     seen.add(title);
   }
-  expect([...seen].sort()).toEqual([
-    "AJ Welch",
-    "Chartio",
-    "CompilerWorks",
-    "Google",
-  ]);
+  expect([...seen].sort()).toEqual(["Chartio", "CompilerWorks", "Google"]);
 }, 20000);

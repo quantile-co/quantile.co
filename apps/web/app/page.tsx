@@ -1,12 +1,7 @@
-import { Button } from "@mantine/core";
-import { IconArrowUpRight } from "@tabler/icons-react";
+import { IconVideo } from "@tabler/icons-react";
 import type { Metadata } from "next";
-import { SkipLink } from "@/components/SkipLink/SkipLink";
-import {
-  FounderProfile,
-  SocialProofSection,
-} from "@/components/SocialProofSection/SocialProofSection";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
+import { CTAButton } from "@/components/CTAButton/CTAButton";
+import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
 
 import classes from "./page.module.css";
 
@@ -46,97 +41,96 @@ const organizationStructuredData = {
   },
 };
 
-function ContactActions({ className = "" }: { className?: string }) {
-  return (
-    <div className={`${classes.contactActions} ${className}`}>
-      <Button
-        aria-label="Book a call"
-        autoContrast
-        className={classes.callToAction}
-        classNames={{ section: classes.callToActionSection }}
-        component="a"
-        data-site-cta="letter"
-        href="https://cal.com/aj-welch/book-a-call"
-        target="_blank"
-        rel="noopener noreferrer"
-        rightSection={<IconArrowUpRight aria-hidden="true" size={24} />}
-        size="xl"
-        variant="filled"
-      >
-        Book a call
-      </Button>
-      <p className={classes.email}>
-        <a href="mailto:aj@quantile.co">aj@quantile.co</a>
-      </p>
-    </div>
-  );
-}
-
 export default function Home() {
   return (
     <>
       <div className={classes.page} id="top">
-        <SkipLink href="#main-content">Skip to content</SkipLink>
-        <main id="main-content" tabIndex={-1}>
+        <main className={classes.main} id="main-content" tabIndex={-1}>
           <div className={classes.intro}>
             <h1 className={classes.title} id="founder-letter-title">
-              <span className={classes.titleTransform}>Transform</span>{" "}
-              <span className={classes.titleTeam}>
-                your
-                <br className={classes.desktopBreak} /> data team
+              <span className={classes.titleSetup}>
+                AI is transformational.
               </span>{" "}
-              <span className={classes.titleAI}>with AI.</span>
+              <span>
+                So why is your data team still fighting the same fires?
+              </span>
             </h1>
-            <div className={classes.proof}>
-              <SocialProofSection ariaLabel="AJ Welch's experience and client work" />
-            </div>
-            <div className={classes.headingContact}>
-              <ContactActions />
-            </div>
+            <section
+              aria-label="Video introduction"
+              className={classes.videoPlaceholder}
+            >
+              <IconVideo aria-hidden="true" size={40} stroke={1.5} />
+              <p>Video coming soon</p>
+            </section>
           </div>
           <article
             aria-labelledby="founder-letter-title"
             className={classes.letter}
           >
-            {/* Placeholder letter copy pending review. */}
-            <p>Hey, I’m AJ.</p>
             <p>
-              You have a product to build. But somewhere along the way, the data
-              work became a job of its own.
+              Hi, I’m AJ, and I’ve been a data engineer for over 15 years at:
+            </p>
+            <div className={classes.proof}>
+              <SocialProofSection ariaLabel="Company experience and client work" />
+            </div>
+            <p>
+              Over the years, I’ve watched the modern data stack change many
+              times. On-prem became cloud. ETL became ELT. Batch became
+              streaming. Warehouses became lakehouses. The only constant was
+              change.
+            </p>
+            <p>And every change promised to be transformational.</p>
+            <p>
+              Yet the more things changed, the more they stayed the same. Teams
+              faced the same data quality and reliability issues, the same cost
+              and performance nightmares, and the same endless stream of ad hoc
+              requests and fire drills.
+            </p>
+            <p>It’s a tale as old as time, and it’s happening again with AI.</p>
+            <p>
+              Most data engineers already use AI every day. They use it to write
+              a query, debug a DAG, or explain someone else’s code. But it
+              usually stops there. The pipelines, models, and workflows stay the
+              same.
             </p>
             <p>
-              Pipelines. Infrastructure. Analytics. AI. Getting it all working
-              together takes time away from the thing you set out to build.
+              It’s not for lack of interest. Your team is in a bind. Fix today’s
+              broken pipeline the way you know works, or stop and try something
+              new? If the experiment fails, you fall further behind on a backlog
+              that’s already too long. So the team keeps firefighting while the
+              tools change under its feet.
             </p>
             <p>
-              That’s where I come in. I’m a data and AI engineer with 15+ years
-              of experience at Google, CompilerWorks, and Chartio. Quantile is
-              how I bring that experience to your team, without another
-              full-time hire.
+              Everyone knows this can’t last. AI is on every data roadmap. But
+              it’s nobody’s full-time job, so it never gets built.
             </p>
             <p>
-              We’ll figure out what matters, roll up our sleeves, and build it.
-              You work directly with me—from the first conversation to the code
-              that ships.
+              That’s where I come in. I join your team, find where AI pays off
+              in your stack, and build it with you. That might mean agents that
+              triage pipeline failures before stakeholders notice, AI-assisted
+              dbt development and review, or a way for people to explore company
+              data without filing another request.
             </p>
             <p>
-              A little help getting unstuck. An experienced pair of hands for
-              something new. Someone who cares about the details, so you can
-              focus on your product.
+              I don’t hand you a strategy deck. I write the code alongside your
+              team, then make sure they can run it without me.
             </p>
             <p>
-              If that sounds useful, we can start at{" "}
-              <span className={classes.price}>$6k · 40hrs / month.</span>
+              You work directly with me. Retainers start at{" "}
+              <span className={classes.price}>$7k for 40 hours per month.</span>
             </p>
+            <p>[Closing invitation]</p>
+            <div className={classes.letterClosing}>
+              <p className={classes.signature}>
+                <span>AJ</span>
+                <a href="mailto:aj@quantile.co">aj@quantile.co</a>
+              </p>
+              <div className={classes.letterAction}>
+                <CTAButton />
+              </div>
+            </div>
           </article>
         </main>
-        <footer className={classes.footer}>
-          <div className={classes.founderProfile}>
-            <FounderProfile />
-          </div>
-          <ContactActions className={classes.contact} />
-          <ThemeSwitcher />
-        </footer>
       </div>
       <script type="application/ld+json">
         {JSON.stringify(organizationStructuredData).replace(/</g, "\\u003c")}

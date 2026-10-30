@@ -1,8 +1,6 @@
 import { Container, Text, Title } from "@mantine/core";
 import type { Metadata } from "next";
 import Image from "next/image";
-import { SkipLink } from "@/components/SkipLink/SkipLink";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
 import classes from "./page.module.css";
 
 const brandDescription =
@@ -171,87 +169,83 @@ const groups = [
 
 export default function BrandPage() {
   return (
-    <div>
-      <SkipLink href="#main-content">Skip to content</SkipLink>
-      <main className={classes.main} id="main-content" tabIndex={-1}>
-        <Container className={classes.container} size="xl">
-          <div className={classes.intro}>
-            <Title className={classes.title} order={1}>
-              Brand assets
-            </Title>
-            <Text className={classes.lede}>
-              Download the Quantile logo, wordmark, and social banners.
-            </Text>
-          </div>
-          <section aria-label="Brand assets">
-            {groups.map((group, groupIndex) => {
-              const headingId = `brand-${group.title.toLowerCase().replaceAll(" ", "-")}`;
+    <main className={classes.main} id="main-content" tabIndex={-1}>
+      <Container className={classes.container} size="xl">
+        <div className={classes.intro}>
+          <Title className={classes.title} order={1}>
+            Brand assets
+          </Title>
+          <Text className={classes.lede}>
+            Download the Quantile logo, wordmark, and social banners.
+          </Text>
+        </div>
+        <section aria-label="Brand assets">
+          {groups.map((group, groupIndex) => {
+            const headingId = `brand-${group.title.toLowerCase().replaceAll(" ", "-")}`;
 
-              return (
-                <section
-                  aria-labelledby={headingId}
-                  className={classes.group}
-                  key={group.title}
+            return (
+              <section
+                aria-labelledby={headingId}
+                className={classes.group}
+                key={group.title}
+              >
+                <Title
+                  className={classes.sectionTitle}
+                  id={headingId}
+                  order={2}
                 >
-                  <Title
-                    className={classes.sectionTitle}
-                    id={headingId}
-                    order={2}
-                  >
-                    {group.title}
-                  </Title>
+                  {group.title}
+                </Title>
 
-                  <div className={classes.assetGrid}>
-                    {group.assets.map((asset, assetIndex) => (
-                      <article className={classes.assetCard} key={asset.name}>
-                        <div
-                          className={classes.preview}
-                          data-kind={group.kind}
-                          data-tone={asset.preview.tone}
-                        >
-                          <Image
-                            alt={asset.alt}
-                            className={classes.previewImage}
-                            height={asset.preview.height}
-                            loading={
-                              groupIndex === 0 && assetIndex === 0
-                                ? "eager"
-                                : undefined
-                            }
-                            src={asset.preview.src}
-                            width={asset.preview.width}
-                          />
+                <div className={classes.assetGrid}>
+                  {group.assets.map((asset, assetIndex) => (
+                    <article className={classes.assetCard} key={asset.name}>
+                      <div
+                        className={classes.preview}
+                        data-kind={group.kind}
+                        data-tone={asset.preview.tone}
+                      >
+                        <Image
+                          alt={asset.alt}
+                          className={classes.previewImage}
+                          height={asset.preview.height}
+                          loading={
+                            groupIndex === 0 && assetIndex === 0
+                              ? "eager"
+                              : undefined
+                          }
+                          src={asset.preview.src}
+                          width={asset.preview.width}
+                        />
+                      </div>
+                      <div className={classes.assetBody}>
+                        <Title className={classes.assetTitle} order={3}>
+                          {asset.name}
+                        </Title>
+                        <div className={classes.downloads}>
+                          {asset.files.map((file) => (
+                            <a
+                              className={classes.download}
+                              download
+                              href={file.href}
+                              key={file.href}
+                            >
+                              <span>{file.format}</span>
+                              <span className={classes.downloadDetails}>
+                                {file.details}
+                              </span>
+                            </a>
+                          ))}
                         </div>
-                        <div className={classes.assetBody}>
-                          <Title className={classes.assetTitle} order={3}>
-                            {asset.name}
-                          </Title>
-                          <div className={classes.downloads}>
-                            {asset.files.map((file) => (
-                              <a
-                                className={classes.download}
-                                download
-                                href={file.href}
-                                key={file.href}
-                              >
-                                <span>{file.format}</span>
-                                <span className={classes.downloadDetails}>
-                                  {file.details}
-                                </span>
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-              );
-            })}
-          </section>
-        </Container>
-      </main>
-      <ThemeSwitcher />
-    </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </section>
+      </Container>
+    </main>
   );
 }

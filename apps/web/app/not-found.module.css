@@ -1,9 +1,3 @@
-.page {
-  display: flex;
-  min-height: 100svh;
-  flex-direction: column;
-}
-
 .main {
   display: grid;
   flex: 1;

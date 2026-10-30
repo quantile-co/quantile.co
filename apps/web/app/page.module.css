@@ -1,51 +1,34 @@
 .page {
-  --letter-content-width: 60rem;
-  /* Keep both lines intact, with room for the desktop contact block. */
+  --letter-content-width: min(61rem, calc(100vw * 695 / 1024));
   --title-font-size: clamp(
-    4.5rem,
-    calc((100vw - 2 * var(--site-page-padding)) / 9.7),
-    6.125rem
+    1.75rem,
+    calc(var(--letter-content-width) * 64 / 976),
+    4rem
   );
-  --letter-font-size: clamp(1.25rem, 4vw, 2.375rem);
+  --letter-font-size: clamp(1rem, calc(100vw / 45), 2rem);
   --section-gap: clamp(2rem, 6vw, 4rem);
   --page-edge-space: clamp(1.5rem, 4vw, 3rem);
-  --title-line-height: 1.05;
-  /* Outfit's tallest desktop line includes the descender in “your”. */
-  --letter-contact-font-size: min(
-    clamp(1.0125rem, 1.84vw, 1.2375rem),
-    calc(var(--title-font-size) * 0.93 / (3.25 + 0.45 + 1.5 * 7 / 11))
-  );
-  --letter-cta-height: calc(var(--letter-contact-font-size) * 3.25);
-  --letter-email-size: calc(var(--letter-contact-font-size) * 7 / 11);
-  --letter-contact-gap: calc(var(--letter-contact-font-size) * 0.45);
+  --title-line-height: 1.1;
 
-  padding-top: var(--page-edge-space);
+  container-type: inline-size;
+  padding-block: var(--page-edge-space) var(--section-gap);
 }
 
-.footer {
-  display: flex;
-  width: 100%;
-  max-width: calc(var(--letter-content-width) + (2 * var(--site-page-padding)));
-  padding: var(--section-gap) var(--site-page-padding) var(--page-edge-space);
+.main {
+  width: var(--letter-content-width);
   margin-inline: auto;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--mantine-spacing-xl);
 }
 
 .proof {
-  --site-content-width: var(--letter-content-width);
   --site-page-padding: 0px;
 
-  grid-area: 2 / 1;
   min-width: 0;
-  margin-top: var(--section-gap);
+  margin-bottom: 1em;
 }
 
 .letter {
   width: 100%;
-  max-width: calc(var(--letter-content-width) + (2 * var(--site-page-padding)));
-  padding: var(--section-gap) var(--site-page-padding) 0;
+  padding-top: var(--section-gap);
   margin-inline: auto;
   color: var(--site-text-primary);
   font-family: var(--mantine-font-family-headings);
@@ -57,240 +40,126 @@
 }
 
 .intro {
-  display: grid;
   width: 100%;
-  max-width: calc(var(--letter-content-width) + (2 * var(--site-page-padding)));
-  padding-inline: var(--site-page-padding);
   margin: 0 auto;
 }
 
 .title {
-  /* Align Outfit's visible glyphs rather than their side bearings. */
-  position: relative;
-  inset-inline-start: -0.02em;
-  grid-area: 1 / 1;
   margin: 0;
-  color: var(--site-text-primary);
+  color: var(--site-text-secondary);
   font-family: var(--mantine-font-family-headings);
   font-size: var(--title-font-size);
-  font-weight: 600;
-  letter-spacing: -0.04em;
+  font-weight: 500;
+  letter-spacing: -0.045em;
   line-height: var(--title-line-height);
-  white-space: nowrap;
-  text-box-edge: cap alphabetic;
-  text-box-trim: trim-both;
+  text-align: justify;
+  text-align-last: justify;
+  text-wrap: balance;
 }
 
-.headingContact {
-  --contact-font-size: min(
-    var(--letter-contact-font-size),
-    max(1rem, calc(var(--letter-contact-font-size) * 0.85))
-  );
-
-  grid-area: 1 / 1;
-  align-self: start;
-  justify-self: end;
+.titleSetup {
+  color: var(--site-text-primary);
 }
 
-.letter p {
+.videoPlaceholder {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  align-content: center;
+  justify-items: center;
+  margin-top: 2.25rem;
+  border: 1px solid var(--site-surface-outline);
+  border-radius: var(--mantine-radius-sm);
+  background: var(--site-surface-raised-hover);
+  color: var(--site-text-secondary);
+  gap: 0.75rem;
+}
+
+.videoPlaceholder p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.letter > p {
   margin: 0 0 1em;
   text-box-edge: cap alphabetic;
 }
 
-.letter p:first-child {
+.letter > p:first-child {
   text-box-trim: trim-start;
-}
-
-.letter p:last-child {
-  /* Leave room for price glyphs that descend below the trimmed baseline. */
-  padding-bottom: 0.12em;
-  margin-bottom: 0;
-  text-box-trim: trim-end;
 }
 
 .price {
   font-weight: 500;
 }
 
-.founderProfile {
-  /* Match the contact block, inset 4px for the email's lower line-box space. */
-  --founder-profile-font-size: calc(
-    (
-      var(--letter-cta-height) +
-      var(--letter-contact-gap) +
-      var(--letter-email-size) *
-      1.5 -
-      0.25rem
-    ) /
-    5.5
-  );
-
-  min-width: 0;
-  max-width: 100%;
+.letterClosing {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-.contactActions {
+.letter .signature {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  font-size: var(--contact-font-size, var(--letter-contact-font-size));
-  gap: 0.45em;
-}
-
-.contactActions .callToAction {
-  border-radius: calc(var(--mantine-radius-sm) + 2px);
-  min-width: 9.5em;
-  height: 3.25em;
-  padding-inline: 1.25em;
-  font-size: inherit;
-  font-weight: 650;
-}
-
-.callToActionSection {
-  margin-inline-start: 0.5em;
-}
-
-.callToAction svg {
-  width: 1.1em;
-  height: 1.1em;
-}
-
-.email {
-  align-self: stretch;
+  gap: 0.125em;
   margin: 0;
-  text-align: right;
-  color: var(--site-text-secondary);
-  font-size: calc(1em * 7 / 11);
-  letter-spacing: normal;
-  line-height: 1.5;
+  line-height: 1.2;
 }
 
-.email a {
+.signature a {
   color: inherit;
-  text-decoration-line: underline;
+  font-size: 0.5em;
+  line-height: 1.5;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.15em;
 }
 
-@media (min-width: 48em) {
-  .footer {
-    align-items: flex-start;
+.letterAction {
+  display: flex;
+}
+
+.letterAction > a {
+  min-width: calc(var(--letter-font-size) * 5.2);
+  height: auto;
+  min-height: 32px;
+  padding-inline: 1.25em;
+  font-size: max(0.8125rem, calc(var(--letter-font-size) * 0.625));
+}
+
+@media (max-width: 48em) {
+  .page {
+    --letter-content-width: calc(100cqw - 66px);
+  }
+
+  .videoPlaceholder {
+    margin-top: 1.75rem;
   }
 }
 
-@media (max-width: 47.9375em) {
+@media (max-width: 36em) {
   .page {
-    --title-team-scale: 0.85;
-    /* Keep the middle line fitted while adjusting the outer-line contrast. */
-    --title-font-size: calc(
-      (100cqw - 2 * var(--site-page-padding)) /
-      6.5625 /
-      var(--title-team-scale)
+    --title-font-size: clamp(
+      1.4375rem,
+      calc(var(--letter-content-width) / 10.75),
+      2rem
     );
-    --letter-font-size: clamp(
-      1rem,
-      calc((100vw - 2 * var(--site-page-padding)) / 17.85),
-      calc(12rem / 7)
-    );
-    /* Keep horizontal room for readable text while capping both row heights. */
-    --support-unit: min(
-      0.875rem,
-      calc((100cqw - 2 * var(--site-page-padding)) / 29.4)
-    );
-    --support-row-height: 5.5em;
-
-    container-type: inline-size;
-  }
-
-  .intro,
-  .footer {
-    display: grid;
-    grid-template-columns:
-      calc(var(--support-unit) * 19.2)
-      calc(var(--support-unit) * 10.2)
-      minmax(0, 1fr);
-    /* 0.79em stays within the tallest mobile line's visible Outfit glyphs. */
-    font-size: min(0.8125rem, calc(var(--title-font-size) * 0.79 / 5.5));
-    align-items: start;
-    column-gap: 0;
-  }
-
-  .intro {
-    row-gap: var(--section-gap);
   }
 
   .title {
-    inset-inline-start: 0;
-    grid-area: 1 / 1 / 2 / -1;
-    text-box-trim: none;
+    text-align: start;
+    text-align-last: auto;
   }
+}
 
-  .title > span {
-    display: block;
-  }
-
-  .desktopBreak {
-    display: none;
-  }
-
-  .titleTransform {
-    position: relative;
-    inset-inline-start: -0.02em;
-    text-box-edge: cap alphabetic;
-    text-box-trim: trim-start;
-  }
-
-  .titleTeam {
-    font-size: calc(1em * var(--title-team-scale));
-    letter-spacing: -0.04em;
-  }
-
-  .titleAI {
-    text-box-edge: cap alphabetic;
-    text-box-trim: trim-end;
-  }
-
-  .proof {
-    margin-top: 0;
-  }
-
-  .headingContact {
-    grid-area: 2 / 2;
-    align-self: start;
-    justify-self: start;
-    margin-left: calc(var(--support-unit) * 0.6);
-  }
-
-  .founderProfile {
-    grid-area: 1 / 1;
-  }
-
-  .footer > .contact {
-    grid-area: 1 / 2;
-    margin-left: calc(var(--support-unit) * 0.6);
-  }
-
-  .contactActions {
-    display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
-    width: calc(var(--support-unit) * 9.6);
-    height: var(--support-row-height);
-    align-items: stretch;
-    font-size: inherit;
-    gap: 0.25em;
-  }
-
-  .contactActions .callToAction {
-    width: 100%;
-    min-width: 0;
-    height: 100%;
-    min-height: 1.5rem;
-    padding-inline: 0.4em;
-    font-size: min(calc(var(--support-unit) * 1.25), 1.7em);
-  }
-
-  .email {
-    font-size: 1.2em;
-    line-height: 1.25;
+@media (max-width: 26.5625em) {
+  @supports (text-justify: inter-character) {
+    .title {
+      text-align: justify;
+      text-align-last: justify;
+      text-justify: inter-character;
+    }
   }
 }

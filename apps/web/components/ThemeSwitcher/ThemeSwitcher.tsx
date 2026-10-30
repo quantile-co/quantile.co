@@ -6,7 +6,7 @@ import {
   VisuallyHidden,
 } from "@mantine/core";
 import { IconDeviceDesktop, IconMoon, IconSun } from "@tabler/icons-react";
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 import classes from "./ThemeSwitcher.module.css";
 
 const options = [
@@ -21,29 +21,10 @@ const options = [
 
 export function ThemeSwitcher() {
   const id = useId();
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    let timeout: number | undefined;
-    const reveal = () => {
-      window.clearTimeout(timeout);
-      setVisible(true);
-      timeout = window.setTimeout(() => setVisible(false), 1000);
-    };
-
-    window.addEventListener("scroll", reveal, { passive: true });
-    // A tap also reveals the control on short, non-scrolling pages.
-    window.addEventListener("pointerdown", reveal, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", reveal);
-      window.removeEventListener("pointerdown", reveal);
-      window.clearTimeout(timeout);
-    };
-  }, []);
   const { colorScheme, setColorScheme } = useMantineColorScheme();
 
   return (
-    <fieldset className={classes.root} data-visible={visible || undefined}>
+    <fieldset className={classes.root}>
       <VisuallyHidden component="legend">Select a display theme</VisuallyHidden>
       {options.map((option) => {
         const optionId = `${id}-${option.value}`;

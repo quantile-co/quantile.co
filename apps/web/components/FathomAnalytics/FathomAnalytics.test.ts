@@ -1,5 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { readFathomSettings } from "./settings";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { FathomAnalytics, readFathomSettings } from "./FathomAnalytics";
+
+afterEach(() => vi.unstubAllEnvs());
 
 describe("Fathom build settings", () => {
   const configured = {
@@ -52,6 +56,17 @@ describe("Fathom build settings", () => {
         NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS: domains,
       }),
     ).toThrow("Invalid Fathom configuration.");
+  });
+
+  it("reads its own public settings without loading during server rendering", () => {
+    for (const [key, value] of Object.entries(configured)) {
+      vi.stubEnv(key, value);
+    }
+    expect(renderToStaticMarkup(createElement(FathomAnalytics))).toBe("");
+    vi.stubEnv("NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS", "https://example.test");
+    expect(() => renderToStaticMarkup(createElement(FathomAnalytics))).toThrow(
+      "Invalid Fathom configuration.",
+    );
   });
 
   it("rejects a malformed site ID without exposing the supplied value", () => {

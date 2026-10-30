@@ -1,43 +1,23 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import RootLayout from "./layout";
 
 vi.mock("@/components/FathomAnalytics/FathomAnalytics", () => ({
-  FathomAnalytics: ({
-    siteId,
-    domains,
-  }: {
-    siteId: string;
-    domains: string[];
-  }) => (
-    <span
-      data-analytics-site={siteId}
-      data-analytics-domains={domains.join(",")}
-    />
-  ),
+  FathomAnalytics: () => <span data-analytics-integration="" />,
 }));
 
-afterEach(() => vi.unstubAllEnvs());
-
-describe("root analytics composition", () => {
-  it("passes only explicit public build settings to the client integration", () => {
-    vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("NEXT_PUBLIC_FATHOM_SITE_ID", "TESTSITE");
-    vi.stubEnv("NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS", "example.test");
+describe("shared root layout", () => {
+  it("owns the shared chrome, theme controls and optional analytics integration", () => {
     const html = renderToStaticMarkup(<RootLayout>Content</RootLayout>);
-    expect(html).toContain('data-analytics-site="TESTSITE"');
-    expect(html).toContain('data-analytics-domains="example.test"');
     expect(html).toContain("Content");
+    expect(html.match(/<header/g)).toHaveLength(1);
+    expect(html.match(/<footer/g)).toHaveLength(1);
+    expect(html.match(/aria-label="Quantile home"/g)).toHaveLength(2);
+    expect(html.match(/data-site-cta="booking"/g)).toHaveLength(1);
+    expect(html).toContain('href="https://cal.com/aj-welch/book-a-call"');
+    expect(html).toContain('href="#main-content"');
+    expect(html).toContain("Select a display theme");
+    expect(html).toContain(`© ${new Date().getFullYear()} Quantile LLC`);
+    expect(html).toContain("data-analytics-integration");
   });
-
-  it.each(["production", "development"])(
-    "omits analytics when unconfigured in %s",
-    (mode) => {
-      vi.stubEnv("NODE_ENV", mode);
-      vi.stubEnv("NEXT_PUBLIC_FATHOM_SITE_ID", undefined);
-      vi.stubEnv("NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS", undefined);
-      const html = renderToStaticMarkup(<RootLayout>Content</RootLayout>);
-      expect(html).not.toContain("data-analytics-site");
-    },
-  );
 });

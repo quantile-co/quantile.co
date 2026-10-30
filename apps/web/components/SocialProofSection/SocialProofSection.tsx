@@ -5,7 +5,6 @@ import { useMediaQuery, useReducedMotion } from "@mantine/hooks";
 import { IconBrandGoogleFilled } from "@tabler/icons-react";
 import { AnimatePresence, domAnimation, LazyMotion, m } from "motion/react";
 import { type CSSProperties, useEffect, useState } from "react";
-import { ProfileCard } from "./ProfileCard";
 import classes from "./SocialProofSection.module.css";
 
 const experience = [
@@ -65,7 +64,7 @@ const experience = [
   },
 ] as const;
 
-const proofCardCount = experience.length + 1;
+const proofCardCount = experience.length;
 
 type ExperienceItem = (typeof experience)[number];
 
@@ -142,14 +141,6 @@ function CompanyCard({
   );
 }
 
-export function FounderProfile() {
-  return (
-    <div className={`${classes.section} ${classes.founderProfile}`}>
-      <ProfileCard />
-    </div>
-  );
-}
-
 export function SocialProofSection({
   ariaLabel = "Experience",
 }: {
@@ -221,13 +212,11 @@ export function SocialProofSection({
   const pageCards = cardIndexes.map((cardIndex, offset) => {
     const inactive = isCarousel && offset >= cardsPerPage;
 
-    return cardIndex === 0 ? (
-      <ProfileCard inactive={inactive} key="profile" />
-    ) : (
+    return (
       <CompanyCard
         inactive={inactive}
-        item={experience[cardIndex - 1]}
-        key={experience[cardIndex - 1].company}
+        item={experience[cardIndex]}
+        key={experience[cardIndex].company}
       />
     );
   });

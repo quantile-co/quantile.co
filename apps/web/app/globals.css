@@ -16,7 +16,14 @@
   --site-zinc-800: #27272a;
   --site-zinc-900: #18181b;
   --site-zinc-950: #09090b;
+  --site-header-height: 64px;
   --site-content-width: 75rem;
+  --site-divider-color: #e4e4e7;
+  --site-lower-background: color-mix(
+    in srgb,
+    var(--site-zinc-50) 85%,
+    var(--site-zinc-100)
+  );
   --site-page-padding: 24px;
   --site-focus-ring: var(--site-zinc-950);
   --site-surface-outline: var(--site-zinc-300);
@@ -24,6 +31,10 @@
   --site-surface-raised-hover: var(--site-zinc-100);
   --site-text-primary: var(--site-zinc-950);
   --site-text-secondary: var(--site-zinc-800);
+}
+
+html {
+  scroll-padding-top: calc(var(--site-header-height) + 1rem);
 }
 
 body {
@@ -49,6 +60,12 @@ body {
   --mantine-color-dimmed: var(--site-text-secondary);
   --mantine-color-text: var(--site-text-primary);
   --site-focus-ring: var(--site-zinc-50);
+  --site-divider-color: var(--site-zinc-800);
+  --site-lower-background: color-mix(
+    in srgb,
+    var(--site-zinc-950) 85%,
+    var(--site-zinc-900)
+  );
   --site-surface-outline: var(--site-zinc-700);
   --site-surface-raised: var(--site-zinc-950);
   --site-surface-raised-hover: var(--site-zinc-900);

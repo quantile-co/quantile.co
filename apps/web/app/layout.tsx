@@ -7,8 +7,11 @@ import {
 } from "@mantine/core";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { CTAButton } from "@/components/CTAButton/CTAButton";
 import { FathomAnalytics } from "@/components/FathomAnalytics/FathomAnalytics";
-import { readFathomSettings } from "@/components/FathomAnalytics/settings";
+import { SkipLink } from "@/components/SkipLink/SkipLink";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
+import classes from "./layout.module.css";
 import { theme } from "./theme";
 
 export const metadata: Metadata = {
@@ -16,14 +19,15 @@ export const metadata: Metadata = {
   title: "Quantile",
 };
 
+function HomeLink() {
+  return (
+    <a aria-label="Quantile home" className={classes.homeLink} href="/">
+      <span aria-label="Quantile" className={classes.wordmark} role="img" />
+    </a>
+  );
+}
+
 export default function RootLayout({ children }: { children: ReactNode }) {
-  // Explicit property access lets Next inline deployment-owned build settings.
-  const fathom = readFathomSettings({
-    NODE_ENV: process.env.NODE_ENV,
-    NEXT_PUBLIC_FATHOM_SITE_ID: process.env.NEXT_PUBLIC_FATHOM_SITE_ID,
-    NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS:
-      process.env.NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS,
-  });
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
@@ -31,9 +35,36 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         <MantineProvider defaultColorScheme="auto" theme={theme}>
-          {children}
+          <div className={classes.page}>
+            <SkipLink href="#main-content">Skip to content</SkipLink>
+            <header className={classes.header}>
+              <div className={classes.headerInner}>
+                <HomeLink />
+                <CTAButton />
+              </div>
+            </header>
+            <div className={classes.content}>{children}</div>
+            <footer className={classes.footer}>
+              <div aria-hidden="true" className={classes.divider}>
+                <span className={classes.outerLeft} />
+                <span className={classes.slopeLeft} />
+                <span className={classes.innerLine} />
+                <span className={classes.slopeRight} />
+                <span className={classes.outerRight} />
+              </div>
+              <div className={classes.footerInner}>
+                <HomeLink />
+                <p className={classes.copyright}>
+                  © {new Date().getFullYear()} Quantile LLC
+                </p>
+                <div className={classes.theme}>
+                  <ThemeSwitcher />
+                </div>
+              </div>
+            </footer>
+          </div>
         </MantineProvider>
-        {fathom && <FathomAnalytics {...fathom} />}
+        <FathomAnalytics />
       </body>
     </html>
   );
