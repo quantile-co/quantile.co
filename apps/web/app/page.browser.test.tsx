@@ -72,6 +72,15 @@ describe("Founder-letter responsive layout", () => {
           'section[aria-label="Video introduction"]',
         ) as HTMLElement;
         const videoBox = video.getBoundingClientRect();
+        if (width >= 768) {
+          const range = document.createRange();
+          range.selectNodeContents(heading);
+          const lines = [...range.getClientRects()];
+          expect(lines).toHaveLength(2);
+          for (const line of lines) {
+            expect(Math.abs(line.width - videoBox.width)).toBeLessThan(1);
+          }
+        }
         expect(getComputedStyle(video).backgroundColor).toBe("rgb(0, 0, 0)");
         expect(getComputedStyle(video).color).toBe("rgb(255, 255, 255)");
         expect(
