@@ -1,4 +1,4 @@
-import { IconVideo } from "@tabler/icons-react";
+import { IconPlayerPlayFilled } from "@tabler/icons-react";
 import type { Metadata } from "next";
 import { CTAButton } from "@/components/CTAButton/CTAButton";
 import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
@@ -48,18 +48,16 @@ export default function Home() {
         <main className={classes.main} id="main-content" tabIndex={-1}>
           <div className={classes.intro}>
             <h1 className={classes.title} id="founder-letter-title">
-              <span className={classes.titleSetup}>
-                AI is transformational.
-              </span>{" "}
-              <span>
-                So why is your data team still fighting the same fires?
-              </span>
+              AI is transformational. So why is your data team still fighting
+              the same fires?
             </h1>
             <section
               aria-label="Video introduction"
               className={classes.videoPlaceholder}
             >
-              <IconVideo aria-hidden="true" size={40} stroke={1.5} />
+              <span aria-hidden="true" className={classes.videoPlay}>
+                <IconPlayerPlayFilled size={28} />
+              </span>
               <p>Video coming soon</p>
             </section>
           </div>

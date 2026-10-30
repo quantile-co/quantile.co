@@ -12,6 +12,8 @@
   --site-zinc-50: #fafafa;
   --site-zinc-100: #f4f4f5;
   --site-zinc-300: #d4d4d8;
+  --site-zinc-400: #a1a1aa;
+  --site-zinc-600: #52525b;
   --site-zinc-700: #3f3f46;
   --site-zinc-800: #27272a;
   --site-zinc-900: #18181b;
@@ -30,7 +32,7 @@
   --site-surface-raised: var(--site-zinc-50);
   --site-surface-raised-hover: var(--site-zinc-100);
   --site-text-primary: var(--site-zinc-950);
-  --site-text-secondary: var(--site-zinc-800);
+  --site-text-secondary: var(--site-zinc-600);
 }
 
 html {
@@ -70,7 +72,7 @@ body {
   --site-surface-raised: var(--site-zinc-950);
   --site-surface-raised-hover: var(--site-zinc-900);
   --site-text-primary: var(--site-zinc-50);
-  --site-text-secondary: var(--site-zinc-300);
+  --site-text-secondary: var(--site-zinc-400);
 }
 
 ::selection {

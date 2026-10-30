@@ -59,24 +59,21 @@ describe("Founder-letter responsive layout", () => {
             getComputedStyle(heading).getPropertyValue("text-justify"),
           ).toBe("inter-character");
         }
-        const [setup, question] = heading.querySelectorAll(":scope > span");
-        expect(heading.querySelector("br")).toBeNull();
-        expect(getComputedStyle(setup).display).toBe("inline");
-        expect(getComputedStyle(question).display).toBe("inline");
-        expect(getComputedStyle(setup).fontFamily).toBe(
+        expect(heading.querySelector("br, span")).toBeNull();
+        expect(getComputedStyle(heading).fontFamily).toBe(
           getComputedStyle(document.body).fontFamily,
         );
-        expect(getComputedStyle(question).fontSize).toBe(
-          getComputedStyle(setup).fontSize,
+        expect(getComputedStyle(heading).fontStyle).toBe("normal");
+        expect(getComputedStyle(heading).color).toBe(
+          getComputedStyle(document.body).color,
         );
-        expect(getComputedStyle(question).fontFamily).toBe(
-          getComputedStyle(document.body).fontFamily,
-        );
-        expect(getComputedStyle(question).fontStyle).toBe("normal");
+        expect(getComputedStyle(heading).backgroundImage).toBe("none");
         const video = container.querySelector(
           'section[aria-label="Video introduction"]',
         ) as HTMLElement;
         const videoBox = video.getBoundingClientRect();
+        expect(getComputedStyle(video).backgroundColor).toBe("rgb(0, 0, 0)");
+        expect(getComputedStyle(video).color).toBe("rgb(255, 255, 255)");
         expect(
           Math.abs(videoBox.width / videoBox.height - 16 / 9),
         ).toBeLessThan(0.01);

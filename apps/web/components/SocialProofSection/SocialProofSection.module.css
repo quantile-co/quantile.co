@@ -1,5 +1,5 @@
 .section {
-  --proof-foreground: var(--site-text-secondary);
+  --proof-foreground: var(--site-text-primary);
 
   position: relative;
   overflow: hidden;

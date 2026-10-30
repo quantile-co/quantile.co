@@ -46,7 +46,7 @@
 
 .title {
   margin: 0;
-  color: var(--site-text-secondary);
+  color: var(--site-text-primary);
   font-family: var(--mantine-font-family-headings);
   font-size: var(--title-font-size);
   font-weight: 500;
@@ -55,10 +55,6 @@
   text-align: justify;
   text-align-last: justify;
   text-wrap: balance;
-}
-
-.titleSetup {
-  color: var(--site-text-primary);
 }
 
 .videoPlaceholder {
@@ -70,9 +66,23 @@
   margin-top: 2.25rem;
   border: 1px solid var(--site-surface-outline);
   border-radius: var(--mantine-radius-sm);
-  background: var(--site-surface-raised-hover);
-  color: var(--site-text-secondary);
+  background: #000;
+  color: #fff;
   gap: 0.75rem;
+}
+
+.videoPlay {
+  display: grid;
+  width: clamp(3rem, 6vw, 4.5rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff;
+  color: #000;
+  place-items: center;
+}
+
+.videoPlay svg {
+  translate: 2px 0;
 }
 
 .videoPlaceholder p {
