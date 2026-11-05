@@ -1,3 +1,15 @@
+.sidebar {
+  --profile-detail-font-size: clamp(
+    0.875rem,
+    calc(var(--letter-intro-font-size) * 0.65),
+    1.125rem
+  );
+}
+
+.sidebarSignup input {
+  font-size: var(--profile-detail-font-size);
+}
+
 .profile {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -24,8 +36,9 @@
   object-fit: cover;
 }
 
-.name {
-  font-size: clamp(1.625rem, 2.5vw, 2rem);
+.name,
+.subscribePrompt {
+  font-size: var(--letter-intro-font-size);
   font-weight: 400;
   letter-spacing: -0.025em;
   line-height: 1.2;
@@ -34,7 +47,7 @@
 .experience {
   max-width: 25ch;
   color: var(--site-text-secondary);
-  font-size: clamp(0.875rem, 1.25vw, 1rem);
+  font-size: var(--profile-detail-font-size);
   line-height: 1.5;
   text-wrap: pretty;
 }
@@ -42,7 +55,7 @@
 .email {
   width: fit-content;
   color: var(--site-text-secondary);
-  font-size: var(--mantine-font-size-md);
+  font-size: var(--profile-detail-font-size);
   line-height: 1.25;
   text-decoration: none;
   border-radius: var(--mantine-radius-xs);
@@ -91,7 +104,6 @@
   }
 
   .name {
-    font-size: clamp(1.375rem, 6vw, 1.625rem);
     line-height: 1.1;
   }
 

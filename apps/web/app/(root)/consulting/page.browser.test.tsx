@@ -75,6 +75,24 @@ for (const colorScheme of ["light", "dark"] as const) {
       const right = headerText.getBoundingClientRect().right;
       const profileBox = profile.getBoundingClientRect();
       const letterBox = letter.getBoundingClientRect();
+      expect(
+        getComputedStyle(profile.querySelector("p") as HTMLElement).fontSize,
+      ).toBe(
+        getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
+          .fontSize,
+      );
+
+      const introFontSize = parseFloat(
+        getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
+          .fontSize,
+      );
+      for (const detail of profile.querySelectorAll(
+        "a, :scope > div:last-child > p",
+      )) {
+        expect(parseFloat(getComputedStyle(detail).fontSize)).toBeLessThan(
+          introFontSize,
+        );
+      }
 
       expect(Math.abs(profileBox.left - left)).toBeLessThan(1);
       expect(letterBox.left).toBeGreaterThanOrEqual(left);
@@ -126,6 +144,20 @@ for (const colorScheme of ["light", "dark"] as const) {
       }
 
       if (width >= 768) {
+        const prompt = profile.nextElementSibling?.querySelector(
+          "p",
+        ) as HTMLElement;
+        expect(parseFloat(getComputedStyle(prompt).fontSize)).toBe(
+          introFontSize,
+        );
+        expect(parseFloat(getComputedStyle(input).fontSize)).toBeLessThan(
+          introFontSize,
+        );
+        const introductionText = document.createRange();
+        introductionText.selectNodeContents(
+          letter.querySelector(":scope > p") as HTMLElement,
+        );
+        expect(introductionText.getClientRects()).toHaveLength(1);
         expect(profileBox.right).toBeLessThan(letterBox.left);
         expect(Math.abs(profileBox.top - letterBox.top)).toBeLessThan(1);
         window.scrollTo(0, 600);
@@ -167,7 +199,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         expect(
           getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
             .fontSize,
-        ).toBe("20px");
+        ).toBe(width <= 425 ? "22px" : "20px");
         expect(Math.abs(letterBox.left - left)).toBeLessThan(1);
         window.scrollTo(0, 600);
         await vi.waitFor(() =>

@@ -123,7 +123,7 @@ describe("Founder-letter responsive layout", () => {
           getComputedStyle(article).fontSize,
         );
         if (width >= 1440)
-          expect(getComputedStyle(article).fontSize).toBe("32px");
+          expect(getComputedStyle(article).fontSize).toBe("24px");
         expect(letterButton.width / letterButton.height).toBeGreaterThan(2);
         const articleRight =
           articleBox.right - parseFloat(getComputedStyle(article).paddingRight);

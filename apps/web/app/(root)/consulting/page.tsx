@@ -23,7 +23,7 @@ export default function ConsultingPage() {
       <LandingPage
         showVideo={false}
         sidebar={
-          <Stack gap="xl">
+          <Stack gap="xl" className={classes.sidebar}>
             <aside aria-label="About AJ Welch" className={classes.profile}>
               <div className={classes.portraitFrame}>
                 <Image
@@ -46,8 +46,11 @@ export default function ConsultingPage() {
                 </Text>
               </div>
             </aside>
-            <Stack gap="md" visibleFrom="sm">
-              <Text size="lg" c="var(--site-text-primary)">
+            <Stack gap="md" visibleFrom="sm" className={classes.sidebarSignup}>
+              <Text
+                className={classes.subscribePrompt}
+                c="var(--site-text-primary)"
+              >
                 Subscribe to the AI newsletter for data leaders.
               </Text>
               <NewsletterSubscribeForm layout="compact" />
