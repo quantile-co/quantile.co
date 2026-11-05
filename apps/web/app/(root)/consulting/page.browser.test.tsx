@@ -80,39 +80,22 @@ for (const colorScheme of ["light", "dark"] as const) {
       await vi.waitFor(() =>
         expect(
           proof.querySelectorAll("article:not([aria-hidden])"),
-        ).toHaveLength(width < 576 ? 1 : 3),
+        ).toHaveLength(3),
       );
-      expect(
-        proof.querySelector('[aria-roledescription="carousel"]') !== null,
-      ).toBe(width < 576);
       const headerBox = header.getBoundingClientRect();
       const headerStyle = getComputedStyle(header);
-      // Stable root gutters reduce viewport units by the reserved scrollbar width.
-      const layoutWidth =
-        document.documentElement.getBoundingClientRect().width;
-      const extraPadding =
-        width < 576
-          ? Math.max(0, ((layoutWidth - 320) * 72) / 256)
-          : width < 768
-            ? Math.max(0, ((layoutWidth - 576) * 32) / 192)
-            : 0;
       const mainStyle = getComputedStyle(
         container.querySelector("main") as HTMLElement,
       );
       for (const side of ["paddingLeft", "paddingRight"] as const) {
         expect(
-          Math.abs(
-            parseFloat(mainStyle[side]) -
-              parseFloat(headerStyle[side]) -
-              extraPadding,
-          ),
+          Math.abs(parseFloat(mainStyle[side]) - parseFloat(headerStyle[side])),
         ).toBeLessThan(0.01);
       }
-      const left =
-        headerBox.left + parseFloat(headerStyle.paddingLeft) + extraPadding;
+      const left = headerBox.left + parseFloat(headerStyle.paddingLeft);
       const headerText = document.createRange();
       headerText.selectNodeContents(header.querySelector("nav a") as Element);
-      const right = headerText.getBoundingClientRect().right - extraPadding;
+      const right = headerText.getBoundingClientRect().right;
       const profileBox = profile.getBoundingClientRect();
       const letterBox = letter.getBoundingClientRect();
       expect(
@@ -336,11 +319,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         const introduction = (
           letter.querySelector(":scope > p") as HTMLElement
         ).getBoundingClientRect();
-        const companySquare = (
-          letter.querySelector("[data-company] > [data-company]") as HTMLElement
-        ).getBoundingClientRect();
-        expect(portrait.width).toBeGreaterThanOrEqual(40);
-        expect(portrait.width).toBeLessThanOrEqual(56);
+        const proofBox = proof.getBoundingClientRect();
         expect(Math.abs(portrait.width - portrait.height)).toBeLessThan(1);
         const caption = introPortrait.nextElementSibling as HTMLElement;
         expect(caption.textContent).toBe("AJ Welch");
@@ -350,11 +329,13 @@ for (const colorScheme of ["light", "dark"] as const) {
         expect(email.getAttribute("href")).toBe("mailto:aj@quantile.co");
         const emailBox = email.getBoundingClientRect();
         expect(emailBox.top).toBeGreaterThanOrEqual(captionBox.bottom);
-        expect(Math.abs(emailBox.right - portrait.right)).toBeLessThan(1);
+        expect(Math.abs(emailBox.left - portrait.left)).toBeLessThan(1);
         expect(emailBox.bottom).toBeLessThanOrEqual(introduction.bottom);
         const emailText = document.createRange();
         emailText.selectNodeContents(email);
-        expect(emailText.getClientRects()).toHaveLength(1);
+        expect(
+          Math.abs(emailText.getBoundingClientRect().right - portrait.right),
+        ).toBeLessThan(1);
         expect(captionBox.top).toBeGreaterThan(portrait.bottom);
         expect(
           Math.abs(
@@ -371,30 +352,34 @@ for (const colorScheme of ["light", "dark"] as const) {
         expect(captionBox.width).toBeLessThanOrEqual(portrait.width);
         const captionText = document.createRange();
         captionText.selectNodeContents(caption);
-        expect(captionText.getClientRects()).toHaveLength(1);
+        expect(
+          Math.abs(captionText.getBoundingClientRect().right - portrait.right),
+        ).toBeLessThan(1);
         expect(captionText.getBoundingClientRect().left).toBeGreaterThanOrEqual(
           portrait.left,
         );
         expect(
-          Math.abs(captionText.getBoundingClientRect().right - portrait.right),
+          Math.abs(captionText.getBoundingClientRect().left - portrait.left),
         ).toBeLessThan(1);
         expect(portrait.bottom).toBeLessThanOrEqual(introduction.bottom);
-        expect(Math.abs(companySquare.left - left)).toBeLessThan(1);
-        expect(companySquare.width).toBeGreaterThan(0);
-        expect(
-          Math.abs(companySquare.top - introduction.bottom - 20),
-        ).toBeLessThan(1);
+        expect(Math.abs(proofBox.left - left)).toBeLessThan(1);
+        expect(Math.abs(proofBox.top - introduction.bottom - 12)).toBeLessThan(
+          1,
+        );
         const introductionText = document.createRange();
         introductionText.selectNodeContents(
           letter.querySelector(":scope > p > span:last-child") as HTMLElement,
         );
         expect(introductionText.getClientRects().length).toBeLessThanOrEqual(3);
-        expect(emailText.getBoundingClientRect().bottom).toBeLessThanOrEqual(
-          introductionText.getBoundingClientRect().bottom,
-        );
+        expect(
+          Math.abs(
+            introductionText.getBoundingClientRect().bottom -
+              emailText.getBoundingClientRect().bottom,
+          ),
+        ).toBeLessThan(3);
         for (const line of introductionText.getClientRects()) {
           if (line.bottom > emailBox.top && line.top < emailBox.bottom) {
-            expect(line.right).toBeLessThan(emailBox.left);
+            expect(line.left).toBeGreaterThan(emailBox.right);
           }
         }
         const portraitGroup = (
@@ -403,13 +388,15 @@ for (const colorScheme of ["light", "dark"] as const) {
         const copyBox = (
           letter.querySelector(":scope > p > span:last-child") as HTMLElement
         ).getBoundingClientRect();
-        expect(Math.abs(portraitGroup.right - right)).toBeLessThan(1);
-        expect(Math.abs(portrait.right - right)).toBeLessThan(1);
-        expect(portrait.top).toBeLessThanOrEqual(copyBox.top);
-        expect(portraitGroup.height).toBeLessThanOrEqual(
-          introductionText.getBoundingClientRect().height,
+        expect(Math.abs(portraitGroup.left - left)).toBeLessThan(1);
+        expect(Math.abs(portrait.left - left)).toBeLessThan(1);
+        expect(Math.abs(copyBox.left - portraitGroup.right - 16)).toBeLessThan(
+          1,
         );
-        expect(introFontSize).toBeGreaterThanOrEqual(20);
+        expect(Math.abs(portrait.top - copyBox.top)).toBeLessThan(1);
+        expect(copyBox.height).toBeGreaterThanOrEqual(portraitGroup.height);
+        expect(copyBox.height - portraitGroup.height).toBeLessThan(3);
+        expect(introFontSize).toBeGreaterThanOrEqual(19.5);
         expect(introFontSize).toBeLessThanOrEqual(24);
         expect(Math.abs(letterBox.left - left)).toBeLessThan(1);
         const visiblePortraits = [

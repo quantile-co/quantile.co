@@ -31,11 +31,7 @@ export function LandingPage({
       <Container
         component="main"
         size="xl"
-        px={
-          sidebar
-            ? "calc(var(--site-page-padding) + var(--landing-extra-padding, 0px))"
-            : 0
-        }
+        px={sidebar ? "var(--site-page-padding)" : 0}
         className={classes.main}
         data-with-sidebar={sidebar ? true : undefined}
         id="main-content"

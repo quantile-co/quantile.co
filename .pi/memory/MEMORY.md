@@ -78,12 +78,14 @@ articles emit BlogPosting JSON-LD without author fields or bylines. Ordinary
 pagination stays self-canonical; alternative archive sorting is noindex. Sitemaps
 exclude placeholders, campaigns and query variants, without synthetic update dates.
 
-`/consulting` uses the letter layout without a visible headline or video. Its base
-page gutters match the header. Below 768px, an additional symmetric inset tapers
-from 32px to zero approaching 576px; below 576px it resets to 72px and tapers to
-zero at 320px. Header/footer gutters remain unchanged. Mantine’s `xs` breakpoint (576px) controls the
-consulting layout: below it, the portrait, name and email sit at the upper right of
-the introduction; from it upward, the profile and signup occupy the left sidebar.
+`/consulting` uses the letter layout without a visible headline or video. Its
+content gutters match the header at every viewport; there is no extra mobile or
+tablet inset. Mantine’s `xs` breakpoint (576px) controls the consulting layout:
+below it, the portrait/name/email form the left column of a top-aligned row with
+the introduction on the right, separated by a consistent 16px gap. Their heights
+closely match. Mobile sizing is CSS-only and fluid, without narrower layout
+breakpoints or JavaScript measurement. From 576px upward, the profile/signup use
+the left sidebar.
 There is no intermediate profile-above-letter layout. The profile scrolls in normal
 document flow; it is not sticky. The letter body currently uses lorem ipsum:
 a full-width paragraph, two bullet lists, then another full-width paragraph.
@@ -100,10 +102,13 @@ Consulting copy is intentionally separate from `/lp/data-quality` so the two can
 do not extract a shared consulting-letter content component.
 
 The letter uses an external booking link and a mailto link, not an embedded
-calendar or local form. Social proof contains Google, CompilerWorks and Chartio;
-below 576px it becomes a one-card carousel and stays static under reduced motion.
-From 576px all three companies are shown; cards place their logo above their details
-when the available proof column is narrow.
+calendar or local form. Social proof shows Google, CompilerWorks and Chartio in
+three static columns at every viewport down to 320px. Company names stay beside
+their square marks. Full, unwrapped bylines and “· Clients:” share a left-aligned
+line below. CompilerWorks has a wider column so its name stays on one line.
+Smaller client logos use evenly spaced slots within each company column, with
+left-aligned names underneath. Fluid sizing replaces carousel state and
+social-proof layout breakpoints.
 The signature and closing CTA share a row. The reusable landing component owns
 the responsive letter styles; brand markup/styles remain alongside its route.
 

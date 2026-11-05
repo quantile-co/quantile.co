@@ -94,25 +94,9 @@
   }
 }
 
-@media (min-width: 36em) and (width < 48em) {
-  .page {
-    /* Extra inset tapers from 32px near 768px to zero at 576px. */
-    --landing-extra-padding: clamp(0px, calc((100vw - 36rem) / 6), 2rem);
-  }
-}
-
 @media (width < 36em) {
-  .page {
-    /* Reset to 72px below 576px, then taper to zero at 320px. */
-    --landing-extra-padding: clamp(
-      0px,
-      calc((100vw - 20rem) * 0.28125),
-      4.5rem
-    );
-  }
-
   .page main[data-with-sidebar] {
-    --letter-intro-font-size: clamp(1.25rem, calc(4vw + 0.45rem), 1.5rem);
+    --letter-intro-font-size: clamp(1.21875rem, calc(4vw + 0.4rem), 1.5rem);
     display: block;
   }
 
@@ -121,55 +105,65 @@
   }
 
   .introPortrait {
-    --intro-portrait-size: calc(var(--letter-intro-font-size) * 3 - 1rem);
     display: block;
-    float: right;
-    /* Match the visible top of Outfit’s opening letters. */
-    position: relative;
-    top: -1px;
-    width: var(--intro-portrait-size);
-    margin-inline-start: 0.75rem;
+    flex: none;
+    /* The 2:3 profile is approximately as tall as three intro lines. */
+    width: calc(var(--letter-intro-font-size) * 2.45);
+  }
+
+  .introProfile {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    container-type: inline-size;
   }
 
   .introPortrait img {
     display: block;
-    width: var(--intro-portrait-size);
+    width: 100%;
     height: auto;
-    margin-inline: auto;
+  }
+
+  .introPortraitName,
+  .introPortraitEmail {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-weight: 400;
+    line-height: 1.1;
+    white-space: nowrap;
   }
 
   .introCopy {
     display: block;
+    flex: 1;
+    min-width: 0;
     max-width: 20rem;
     line-height: 1.35;
+    text-box-trim: trim-start;
+    text-box-edge: cap alphabetic;
   }
 
   .introPortrait .introPortraitEmail,
   .introPortrait .introPortraitEmail:hover {
-    float: right;
-    width: max-content;
-    font-size: 0.75rem;
+    display: block;
+    font-size: 15.5cqw;
     font-weight: 400;
-    line-height: 1.1;
+    letter-spacing: 0;
+    text-rendering: geometricPrecision;
     color: color-mix(
       in srgb,
       var(--site-text-primary) 75%,
       var(--site-text-secondary)
     );
-    white-space: nowrap;
     border-radius: var(--mantine-radius-xs);
   }
 
   .introPortraitName {
-    display: block;
-    width: var(--intro-portrait-size);
-    margin: 3px auto 0;
-    font-size: min(0.75rem, calc(var(--intro-portrait-size) * 0.25));
-    font-weight: 400;
-    letter-spacing: -0.025em;
-    line-height: 1.1;
-    text-align: right;
-    white-space: nowrap;
+    /* Portrait + gap + the two 1.1-height text lines fill the 2:3 frame. */
+    margin: 5.45cqw 0 0;
+    font-size: 25cqw;
+    letter-spacing: 0;
   }
 }
 

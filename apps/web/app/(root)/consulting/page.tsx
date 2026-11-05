@@ -59,21 +59,26 @@ export default function ConsultingPage() {
         introduction={
           <>
             <span className={classes.introPortrait}>
-              <Image
-                src="/images/aj-welch.webp"
-                alt="Portrait of AJ Welch"
-                width={128}
-                height={128}
-                sizes="64px"
-                className={classes.portrait}
-              />
-              <span className={classes.introPortraitName}>AJ Welch</span>
-              <a
-                href="mailto:aj@quantile.co"
-                className={classes.introPortraitEmail}
-              >
-                aj@quantile.co
-              </a>
+              <span className={classes.introProfile}>
+                <Image
+                  src="/images/aj-welch.webp"
+                  alt="Portrait of AJ Welch"
+                  width={128}
+                  height={128}
+                  sizes="72px"
+                  className={classes.portrait}
+                />
+                <span className={classes.introPortraitName}>
+                  <span>AJ</span> <span>Welch</span>
+                </span>
+                <a
+                  href="mailto:aj@quantile.co"
+                  aria-label="aj@quantile.co"
+                  className={classes.introPortraitEmail}
+                >
+                  aj@quantile.co
+                </a>
+              </span>
             </span>
             <span className={classes.introCopy}>
               Hi, I’m AJ, and I’ve been a software engineer for over 15 years

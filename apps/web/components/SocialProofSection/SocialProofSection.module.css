@@ -1,8 +1,7 @@
 .section {
   --proof-foreground: var(--site-text-primary);
-
-  position: relative;
-  overflow: hidden;
+  container-type: inline-size;
+  color: var(--proof-foreground);
 }
 
 .wrapper {
@@ -11,45 +10,35 @@
 }
 
 .experienceGrid {
-  overflow: hidden;
-  container: social-proof / inline-size;
-}
-
-.experiencePage {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.inactiveCard {
-  visibility: hidden;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: clamp(0.25rem, 1cqw, 1rem);
 }
 
 .proofCard {
-  --proof-media-size: 5.5em;
+  --company-logo-size: clamp(1.5rem, 5cqw, 3rem);
 
   display: grid;
   min-width: 0;
-  height: var(--proof-media-size);
-  padding-right: 0.5em;
-  column-gap: 0.5em;
-  grid-template-columns: var(--proof-media-size) minmax(0, 1fr);
-  background-color: var(--mantine-color-body);
-  font-size: clamp(0.625rem, 1.94cqw, 1.1875rem);
+  grid-template-rows: 1fr auto;
+  gap: 0.5rem;
+  font-size: clamp(0.75rem, 2.1cqw, 1.125rem);
 }
 
-.proofCard:last-child {
-  padding-right: 0;
+.companyHeader {
+  display: grid;
+  grid-template-columns: var(--company-logo-size) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.125rem clamp(0.1875rem, 0.75cqw, 0.5rem);
 }
 
 .mediaSquare {
   display: grid;
-  width: var(--proof-media-size);
-  height: var(--proof-media-size);
-  overflow: hidden;
-  border: 2px solid var(--proof-foreground);
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid var(--proof-foreground);
   border-radius: var(--mantine-radius-sm);
   place-items: center;
-  background: var(--mantine-color-body);
 }
 
 .googleMark {
@@ -65,147 +54,61 @@
   mask: var(--logo-image) center / contain no-repeat;
 }
 
-.proofContent {
-  display: grid;
-  min-width: 0;
-  height: var(--proof-media-size);
-  grid-template-rows: auto auto minmax(0, 1fr);
-  row-gap: 0.1875em;
-  text-align: left;
-}
-
 .proofTitle {
-  min-width: 0;
-  overflow: hidden;
   margin: 0;
-  color: var(--proof-foreground);
-  font-size: 1.25em;
+  font-size: clamp(0.625rem, 3.8cqw, 1.25rem);
+  white-space: nowrap;
   font-weight: 500;
   letter-spacing: -0.025em;
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.15;
 }
 
 .experienceContext {
-  display: flex;
-  min-width: 0;
-  min-height: 1.2em;
-  align-content: flex-start;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  column-gap: 0.375em;
-  row-gap: 0.125em;
   color: var(--proof-foreground);
-  font-size: max(0.5rem, 0.65625em);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-
-  & span {
-    white-space: nowrap;
-  }
-
-  & span + span {
-    padding-left: 0.375em;
-    border-left: 1px solid var(--proof-foreground);
-  }
+  font-size: min(1.9cqw, 0.75rem);
+  letter-spacing: -0.05em;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 .customerLogos {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   width: 100%;
-  min-width: 0;
-  align-self: end;
-  align-items: end;
-  row-gap: 0.1875em;
+  gap: 0.1875rem;
 }
 
 .customers {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   width: 100%;
-  min-width: 0;
-  align-items: end;
-  column-gap: 0.625em;
-  grid-template-columns: repeat(3, minmax(max-content, 1fr));
 }
 
-.clientsLabel {
-  grid-column: 1 / -1;
-  color: var(--proof-foreground);
-  font-size: max(0.375rem, 0.5em);
-  line-height: 1;
+.proofCard[data-company="Chartio"] .customers {
+  grid-template-columns: 1.1fr 1.1fr 0.8fr;
 }
 
 .customer {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   min-width: 0;
-  align-content: end;
-  justify-items: start;
-  gap: 0.125em;
-  grid-template-rows: auto max-content;
-}
-
-.customerLogo {
-  width: 1.25em;
-  height: 1.25em;
-  background-color: var(--proof-foreground);
-  mask: var(--logo-image) left center / contain no-repeat;
+  gap: 0.125rem;
 }
 
 .customerName {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--proof-foreground);
-  font-size: max(0.5rem, 0.625em);
+  font-size: clamp(0.45rem, 1cqw, 0.75rem);
   line-height: 1.2;
   white-space: nowrap;
 }
 
-/* Mantine xs: show all three companies from 576px. */
-@media (min-width: 36em) {
-  @container social-proof (width < 30.75rem) {
-    .proofCard {
-      height: auto;
-      grid-template-columns: minmax(0, 1fr);
-      row-gap: 0.5em;
-    }
-  }
+.customerLogo {
+  width: min(1rem, calc(var(--company-logo-size) * 0.55));
+  height: min(1rem, calc(var(--company-logo-size) * 0.55));
+  background-color: var(--proof-foreground);
+  mask: var(--logo-image) left center / contain no-repeat;
 }
 
-@media (width < 36em) {
-  .experiencePage {
-    grid-template-columns: none;
-    grid-auto-columns: 100%;
-    grid-auto-flow: column;
-    overflow: clip;
-    touch-action: pan-y;
-  }
-
-  .proofCard {
-    padding-right: 0;
-    column-gap: 0.7em;
-    font-size: clamp(0.75rem, 4.5cqw, 1rem);
-  }
-
-  .experienceContext {
-    font-size: 0.875em;
-  }
-
-  .customers {
-    width: max-content;
-    column-gap: 0.5em;
-  }
-
-  .customerLogo {
-    width: 1.1em;
-    height: 1.1em;
-  }
-
-  .customerName {
-    font-size: 0.875em;
-  }
-}
 
 @media (forced-colors: active) {
   .mediaSquare {

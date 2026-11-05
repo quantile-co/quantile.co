@@ -48,7 +48,7 @@ describe("Founder-letter responsive layout", () => {
         await vi.waitFor(() =>
           expect(
             proof.querySelectorAll("article:not([aria-hidden])"),
-          ).toHaveLength(width < 576 ? 1 : 3),
+          ).toHaveLength(3),
         );
         expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
         expect(heading.scrollWidth).toBeLessThanOrEqual(heading.clientWidth);

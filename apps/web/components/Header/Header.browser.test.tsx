@@ -1,11 +1,18 @@
 import "@fontsource-variable/outfit";
+// biome-ignore lint/style/noRestrictedImports: This browser fixture needs the site's actual global layout styles.
 import "@/app/globals.css";
-import { Container, MantineProvider } from "@mantine/core";
+import { MantineProvider } from "@mantine/core";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterAll, afterEach, expect, it, vi } from "vitest";
 import { page } from "vitest/browser";
+// biome-ignore lint/style/noRestrictedImports: Exercise the header under the site's actual theme.
 import { theme } from "@/app/theme";
-import headerClasses from "@/components/Header/Header.module.css";
+import { Header } from "./Header";
+
+vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+// Next Link reads build-time environment flags outside the Next bundler.
+vi.hoisted(() => vi.stubGlobal("process", { env: {} }));
+afterAll(() => vi.unstubAllGlobals());
 
 let container: HTMLDivElement;
 let root: Root;
@@ -27,25 +34,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     root = createRoot(container);
     root.render(
       <MantineProvider forceColorScheme={colorScheme} theme={theme}>
-        <header className={headerClasses.header}>
-          <Container
-            size="xl"
-            px="var(--site-page-padding)"
-            className={headerClasses.inner}
-          >
-            <a href="/" className={headerClasses.homeLink}>
-              <span className={headerClasses.wordmark} />
-            </a>
-            <nav>
-              <a href="/newsletter" className={headerClasses.link}>
-                Newsletter
-              </a>
-              <a href="/consulting" className={headerClasses.link}>
-                Consulting
-              </a>
-            </nav>
-          </Container>
-        </header>
+        <Header />
         <main style={{ height: 100 }} />
       </MantineProvider>,
     );
