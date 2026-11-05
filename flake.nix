@@ -72,7 +72,7 @@
                 factory.resend-cli.package
                 agents.herdr
                 agents.amp
-                agents.gemini-cli
+                agents.antigravity-cli
                 agents.hunk
                 pkgs.clickhouse
                 pkgs.tailscale
