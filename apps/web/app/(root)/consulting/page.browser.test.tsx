@@ -179,8 +179,27 @@ for (const colorScheme of ["light", "dark"] as const) {
           "p",
         ) as HTMLElement;
         expect(prompt.querySelector("br")).not.toBeNull();
+        const promptText = document.createRange();
+        promptText.selectNodeContents(prompt);
+        const promptLines = [...promptText.getClientRects()].filter(
+          (line) => line.width > 0,
+        );
+        expect(new Set(promptLines.map((line) => line.top)).size).toBe(2);
         const profileEmail = profile.querySelector("a") as HTMLElement;
         const promptBox = prompt.getBoundingClientRect();
+        const portraitBox = (
+          profile.querySelector("img") as HTMLElement
+        ).getBoundingClientRect();
+        for (const line of promptLines) {
+          expect(line.left).toBeGreaterThanOrEqual(portraitBox.left);
+          expect(line.right).toBeLessThanOrEqual(portraitBox.right);
+        }
+        for (const block of [profileEmail, prompt, input]) {
+          const box = block.getBoundingClientRect();
+          expect(box.left).toBeGreaterThanOrEqual(portraitBox.left);
+          expect(box.right).toBeLessThanOrEqual(portraitBox.right);
+        }
+        expect(Math.abs(inputBox.width - portraitBox.width)).toBeLessThan(1);
         const gapAbovePrompt =
           promptBox.top - profileEmail.getBoundingClientRect().bottom;
         const gapBelowPrompt = inputBox.top - promptBox.bottom;
