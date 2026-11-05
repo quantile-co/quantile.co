@@ -22,7 +22,7 @@ afterEach(async () => {
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  it(`aligns the consulting layout and keeps only the desktop profile sticky in ${colorScheme} mode`, async () => {
+  it(`aligns the consulting layout and keeps the profile in normal document flow in ${colorScheme} mode`, async () => {
     initialViewport = { width: window.innerWidth, height: window.innerHeight };
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -55,8 +55,12 @@ for (const colorScheme of ["light", "dark"] as const) {
       container.querySelector('[aria-label="Video introduction"]'),
     ).toBeNull();
 
+    expect(container.textContent).not.toContain(
+      "15+ years experience at Google, CompilerWorks, and Chartio.",
+    );
+
     for (const width of [
-      320, 375, 390, 425, 426, 576, 767, 768, 1024, 1440, 1920,
+      320, 375, 390, 425, 426, 435, 436, 576, 767, 768, 1024, 1440, 1920,
     ]) {
       await page.viewport(width, 900);
       window.scrollTo(0, 0);
@@ -93,9 +97,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
           .fontSize,
       );
-      for (const detail of profile.querySelectorAll(
-        "a, :scope > div:last-child > p",
-      )) {
+      for (const detail of profile.querySelectorAll("a")) {
         expect(parseFloat(getComputedStyle(detail).fontSize)).toBeLessThan(
           introFontSize,
         );
@@ -104,7 +106,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       const introPortrait = letter.querySelector(
         ":scope > p img",
       ) as HTMLElement;
-      if (width > 425) {
+      if (width > 435) {
         expect(Math.abs(profileBox.left - left)).toBeLessThan(1);
         expect(introPortrait.getClientRects()).toHaveLength(0);
       } else {
@@ -177,18 +179,14 @@ for (const colorScheme of ["light", "dark"] as const) {
           "p",
         ) as HTMLElement;
         expect(prompt.querySelector("br")).not.toBeNull();
-        const experience = profile.querySelector(
-          ":scope > div:last-child > p",
-        ) as HTMLElement;
+        const profileEmail = profile.querySelector("a") as HTMLElement;
         const promptBox = prompt.getBoundingClientRect();
         const gapAbovePrompt =
-          promptBox.top - experience.getBoundingClientRect().bottom;
+          promptBox.top - profileEmail.getBoundingClientRect().bottom;
         const gapBelowPrompt = inputBox.top - promptBox.bottom;
         expect(Math.abs(gapAbovePrompt - gapBelowPrompt)).toBeLessThan(1);
         const promptFontSize = parseFloat(getComputedStyle(prompt).fontSize);
-        for (const detail of profile.querySelectorAll(
-          "a, :scope > div:last-child > p",
-        )) {
+        for (const detail of profile.querySelectorAll("a")) {
           expect(promptFontSize).toBe(
             parseFloat(getComputedStyle(detail).fontSize),
           );
@@ -203,13 +201,18 @@ for (const colorScheme of ["light", "dark"] as const) {
         expect(introductionText.getClientRects()).toHaveLength(1);
         expect(profileBox.right).toBeLessThan(letterBox.left);
         expect(Math.abs(profileBox.top - letterBox.top)).toBeLessThan(1);
+        const sidebar = profile.parentElement?.parentElement as HTMLElement;
+        expect(getComputedStyle(sidebar).position).toBe("static");
         window.scrollTo(0, 600);
         await vi.waitFor(() =>
           expect(
-            Math.abs(profile.getBoundingClientRect().top - profileBox.top),
-          ).toBeLessThan(2),
+            Math.abs(
+              profile.getBoundingClientRect().top -
+                (profileBox.top - window.scrollY),
+            ),
+          ).toBeLessThan(1),
         );
-      } else if (width <= 425) {
+      } else if (width <= 435) {
         const portrait = introPortrait.getBoundingClientRect();
         const introduction = (
           letter.querySelector(":scope > p") as HTMLElement
@@ -223,6 +226,16 @@ for (const colorScheme of ["light", "dark"] as const) {
         const caption = introPortrait.nextElementSibling as HTMLElement;
         expect(caption.textContent).toBe("AJ Welch");
         const captionBox = caption.getBoundingClientRect();
+        const email = caption.nextElementSibling as HTMLAnchorElement;
+        expect(email.textContent?.trim()).toBe("aj@quantile.co");
+        expect(email.getAttribute("href")).toBe("mailto:aj@quantile.co");
+        const emailBox = email.getBoundingClientRect();
+        expect(emailBox.top).toBeGreaterThanOrEqual(captionBox.bottom);
+        expect(Math.abs(emailBox.right - portrait.right)).toBeLessThan(1);
+        expect(emailBox.bottom).toBeLessThanOrEqual(introduction.bottom);
+        const emailText = document.createRange();
+        emailText.selectNodeContents(email);
+        expect(emailText.getClientRects()).toHaveLength(1);
         expect(captionBox.top).toBeGreaterThan(portrait.bottom);
         expect(
           Math.abs(
@@ -243,9 +256,9 @@ for (const colorScheme of ["light", "dark"] as const) {
         expect(captionText.getBoundingClientRect().left).toBeGreaterThanOrEqual(
           portrait.left,
         );
-        expect(captionText.getBoundingClientRect().right).toBeLessThanOrEqual(
-          portrait.right,
-        );
+        expect(
+          Math.abs(captionText.getBoundingClientRect().right - portrait.right),
+        ).toBeLessThan(1);
         expect(portrait.bottom).toBeLessThanOrEqual(introduction.bottom);
         expect(Math.abs(companySquare.left - left)).toBeLessThan(1);
         expect(companySquare.width).toBeGreaterThan(0);
@@ -257,6 +270,14 @@ for (const colorScheme of ["light", "dark"] as const) {
           letter.querySelector(":scope > p > span:last-child") as HTMLElement,
         );
         expect(introductionText.getClientRects().length).toBeLessThanOrEqual(3);
+        expect(emailText.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+          introductionText.getBoundingClientRect().bottom,
+        );
+        for (const line of introductionText.getClientRects()) {
+          if (line.bottom > emailBox.top && line.top < emailBox.bottom) {
+            expect(line.right).toBeLessThan(emailBox.left);
+          }
+        }
         const portraitGroup = (
           introPortrait.parentElement as HTMLElement
         ).getBoundingClientRect();
@@ -269,8 +290,8 @@ for (const colorScheme of ["light", "dark"] as const) {
         expect(portraitGroup.height).toBeLessThanOrEqual(
           introductionText.getBoundingClientRect().height,
         );
-        expect(introFontSize).toBeGreaterThanOrEqual(18);
-        expect(introFontSize).toBeLessThanOrEqual(22);
+        expect(introFontSize).toBeGreaterThanOrEqual(20);
+        expect(introFontSize).toBeLessThanOrEqual(24);
         expect(Math.abs(letterBox.left - left)).toBeLessThan(1);
         const visiblePortraits = [
           ...container.querySelectorAll('img[alt="Portrait of AJ Welch"]'),
@@ -299,10 +320,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         const introduction = (
           letter.querySelector(":scope > p") as HTMLElement
         ).getBoundingClientRect();
-        const experience = (
-          profile.querySelector(":scope > div:last-child > p") as HTMLElement
-        ).getBoundingClientRect();
-        const gapAbove = introduction.top - experience.bottom;
+        const gapAbove = introduction.top - profileBox.bottom;
         const gapBelow = companySquare.top - introduction.bottom;
         expect(Math.abs(gapAbove - 20)).toBeLessThan(1);
         expect(Math.abs(gapAbove - gapBelow)).toBeLessThan(1);
@@ -312,9 +330,15 @@ for (const colorScheme of ["light", "dark"] as const) {
         ).toBe("20px");
         expect(Math.abs(letterBox.left - left)).toBeLessThan(1);
         window.scrollTo(0, 600);
-        await vi.waitFor(() =>
-          expect(profile.getBoundingClientRect().bottom).toBeLessThan(0),
-        );
+        await vi.waitFor(() => {
+          expect(window.scrollY).toBeGreaterThan(0);
+          expect(
+            Math.abs(
+              profile.getBoundingClientRect().top -
+                (profileBox.top - window.scrollY),
+            ),
+          ).toBeLessThan(1);
+        });
       }
     }
   });

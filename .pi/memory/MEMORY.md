@@ -19,7 +19,7 @@ consulting and campaign letters, brand downloads and a minimal 404, with optiona
 Fathom analytics. Checkout, webhooks, welcome email, database access, provider
 integration tooling and Storybook are removed. This source state is not evidence
 of a deployed rollout or external-resource retirement. Preserve approved copy;
-the letter's closing invitation and video remain placeholders.
+the campaign letter's closing invitation and video remain placeholders.
 
 Preserve the current responsive design, light/dark themes, keyboard access,
 reduced-motion behavior and semantic structure. Components receive siblings
@@ -79,10 +79,12 @@ pagination stays self-canonical; alternative archive sorting is noindex. Sitemap
 exclude placeholders, campaigns and query variants, without synthetic update dates.
 
 `/consulting` uses the letter layout without a visible headline or video. Its outer
-content edges match the header. At 768px and above, AJ’s profile occupies a sticky
-left sidebar below the header, with the letter to its right; below 768px the profile
-sits above the letter in normal flow, with its portrait beside the profile text.
-The route supplies the profile through the landing component’s sidebar slot.
+content edges match the header. At 768px and above, AJ’s profile occupies a
+left sidebar with the letter to its right. At 436–767px the profile sits above the
+letter, with its portrait beside the name and email. At 435px and below, the portrait,
+name and email sit at the upper right of the introduction instead. The profile
+scrolls in normal document flow at every viewport; it is not sticky.
+The route supplies the wider-layout profile through the landing component’s sidebar slot.
 The compact newsletter signup follows that profile on tablet/desktop; the letter’s text P.S.
 points to the sidebar. On mobile the signup remains beneath the letter’s P.S.; only
 one form is visible at either breakpoint. Compact submit controls share the input’s

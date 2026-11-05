@@ -42,9 +42,6 @@ export default function ConsultingPage() {
                     aj@quantile.co
                   </a>
                 </div>
-                <Text className={classes.experience}>
-                  15+ years experience at Google, CompilerWorks, and Chartio.
-                </Text>
               </div>
             </aside>
             <Stack gap="md" visibleFrom="sm" className={classes.sidebarSignup}>
@@ -71,6 +68,12 @@ export default function ConsultingPage() {
                 className={classes.portrait}
               />
               <span className={classes.introPortraitName}>AJ Welch</span>
+              <a
+                href="mailto:aj@quantile.co"
+                className={classes.introPortraitEmail}
+              >
+                aj@quantile.co
+              </a>
             </span>
             <span className={classes.introCopy}>
               Hi, I’m AJ, and I’ve been a software engineer for over 15 years
@@ -124,38 +127,6 @@ export default function ConsultingPage() {
           <li>Limited time and resources for new capabilities</li>
         </ul>
         <p>It’s a tale as old as time, and it’s happening again with AI.</p>
-        <p>
-          Most data engineers already use AI every day. They use it to write a
-          query, debug a DAG, or explain someone else’s code. But it usually
-          stops there. The pipelines, models, and workflows stay the same.
-        </p>
-        <p>
-          It’s not for lack of interest. Your team is in a bind. Fix today’s
-          broken pipeline the way you know works, or stop and try something new?
-          If the experiment fails, you fall further behind on a backlog that’s
-          already too long. So the team keeps firefighting while the tools
-          change under its feet.
-        </p>
-        <p>
-          Everyone knows this can’t last. AI is on every data roadmap. But it’s
-          nobody’s full-time job, so it never gets built.
-        </p>
-        <p>
-          That’s where I come in. I join your team, find where AI pays off in
-          your stack, and build it with you. That might mean agents that triage
-          pipeline failures before stakeholders notice, AI-assisted dbt
-          development and review, or a way for people to explore company data
-          without filing another request.
-        </p>
-        <p>
-          I don’t hand you a strategy deck. I write the code alongside your
-          team, then make sure they can run it without me.
-        </p>
-        <p>
-          You work directly with me. Retainers start at{" "}
-          <strong>$7k for 40 hours per month.</strong>
-        </p>
-        <p>[Closing invitation]</p>
       </LandingPage>
       <script type="application/ld+json">
         {JSON.stringify(organization).replace(/</g, "\\u003c")}

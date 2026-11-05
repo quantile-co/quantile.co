@@ -31,6 +31,10 @@
   gap: var(--mantine-spacing-xs);
 }
 
+.identity {
+  gap: 0.125rem;
+}
+
 .portraitFrame {
   position: relative;
   width: 100%;
@@ -56,14 +60,6 @@
   font-size: var(--profile-detail-font-size);
 }
 
-.experience {
-  max-width: 25ch;
-  color: var(--site-text-secondary);
-  font-size: var(--profile-detail-font-size);
-  line-height: 1.5;
-  text-wrap: pretty;
-}
-
 .email {
   width: fit-content;
   color: var(--site-text-secondary);
@@ -73,9 +69,9 @@
   border-radius: var(--mantine-radius-xs);
 }
 
-@media (max-width: 26.5625em) {
+@media (max-width: 27.1875em) {
   .page main[data-with-sidebar] {
-    --letter-intro-font-size: clamp(1.125rem, calc(4vw + 0.325rem), 1.375rem);
+    --letter-intro-font-size: clamp(1.25rem, calc(4vw + 0.45rem), 1.5rem);
     display: block;
   }
 
@@ -84,7 +80,7 @@
   }
 
   .introPortrait {
-    --intro-portrait-size: calc(var(--letter-intro-font-size) * 2 + 0.75rem);
+    --intro-portrait-size: calc(var(--letter-intro-font-size) * 3 - 1rem);
     display: block;
     float: right;
     /* Match the visible top of Outfit’s opening letters. */
@@ -103,18 +99,34 @@
 
   .introCopy {
     display: block;
-    line-height: 1.25;
+    line-height: 1.35;
+  }
+
+  .introPortrait .introPortraitEmail,
+  .introPortrait .introPortraitEmail:hover {
+    float: right;
+    width: max-content;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.1;
+    color: color-mix(
+      in srgb,
+      var(--site-text-primary) 75%,
+      var(--site-text-secondary)
+    );
+    white-space: nowrap;
+    border-radius: var(--mantine-radius-xs);
   }
 
   .introPortraitName {
     display: block;
     width: var(--intro-portrait-size);
     margin: 3px auto 0;
-    font-size: 0.75rem;
+    font-size: min(0.75rem, calc(var(--intro-portrait-size) * 0.25));
     font-weight: 400;
     letter-spacing: -0.025em;
     line-height: 1.1;
-    text-align: center;
+    text-align: right;
     white-space: nowrap;
   }
 }
@@ -148,7 +160,7 @@
 
   .profileText {
     align-self: stretch;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 0.25rem;
   }
 
@@ -163,11 +175,5 @@
 
   .name {
     line-height: 1.1;
-  }
-
-  .experience {
-    max-width: 28ch;
-    font-size: clamp(0.75rem, 3.5vw, 0.9375rem);
-    line-height: 1.3;
   }
 }
