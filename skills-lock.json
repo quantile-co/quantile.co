@@ -17,6 +17,30 @@
       "computedHash": "ca00ef2671d65a7442bc796e8744cd3d759f92c01640f2fbcab638889c494424",
       "via": "@quantile-co/factory-pi"
     },
+    "blog-editor": {
+      "source": "danielabar/meblog",
+      "ref": "f86502e54e4e87835149369538f57181a454b644",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/blog-editor/SKILL.md",
+      "computedHash": "403ac8b004e6b729868b5a849037e104e36b6bc75eaf394f9a1d9bddcf49a5a4",
+      "via": "."
+    },
+    "blog-writing-guide": {
+      "source": "getsentry/skills",
+      "ref": "e94f22214528d69899d09c627b3315ddc3544816",
+      "sourceType": "github",
+      "skillPath": "skills/blog-writing-guide/SKILL.md",
+      "computedHash": "f885b9890d8a1c43e8ed0386e2ef2c17e941a403aa354513d6b844e99229ffb7",
+      "via": "."
+    },
+    "copy-editing": {
+      "source": "coreyhaines31/marketingskills",
+      "ref": "6b9e9387265d9e3049258f7eae3f746d3c3ddf87",
+      "sourceType": "github",
+      "skillPath": "skills/copy-editing/SKILL.md",
+      "computedHash": "d755d5546c8ccd2b6a77695230a1d54869635cbd52e53545b0ce5bd367850432",
+      "via": "."
+    },
     "core-web-vitals": {
       "source": "addyosmani/web-quality-skills",
       "ref": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",

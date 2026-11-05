@@ -18,8 +18,31 @@
     "github:build": "tsx apps/github/cli.ts build",
     "github:plan": "tsx apps/github/cli.ts plan",
     "github:apply": "tsx apps/github/cli.ts apply",
-    "skills:sync": "skills experimental_sync --agent pi --copy --yes --include @quantile-co/factory-pi#deploy @quantile-co/factory-pi#day-zero-deploy @quantile-co/factory-pi#seo-audit @quantile-co/factory-pi#web-design-guidelines @quantile-co/factory-pi#web-perf @quantile-co/factory-pi#web-quality-audit @quantile-co/factory-pi#webapp-testing @quantile-co/factory-pi#performance @quantile-co/factory-pi#core-web-vitals @quantile-co/factory-pi#accessibility @quantile-co/factory-pi#seo @quantile-co/factory-pi#best-practices"
+    "skills:sync": "skills experimental_sync --agent pi --copy --yes --include @quantile-co/factory-pi#deploy @quantile-co/factory-pi#day-zero-deploy @quantile-co/factory-pi#seo-audit @quantile-co/factory-pi#web-design-guidelines @quantile-co/factory-pi#web-perf @quantile-co/factory-pi#web-quality-audit @quantile-co/factory-pi#webapp-testing @quantile-co/factory-pi#performance @quantile-co/factory-pi#core-web-vitals @quantile-co/factory-pi#accessibility @quantile-co/factory-pi#seo @quantile-co/factory-pi#best-practices .#copy-editing .#blog-editor .#blog-writing-guide"
   },
+  "skills": [
+    {
+      "source": "coreyhaines31/marketingskills/skills/copy-editing",
+      "ref": "6b9e9387265d9e3049258f7eae3f746d3c3ddf87",
+      "skills": [
+        "copy-editing"
+      ]
+    },
+    {
+      "source": "danielabar/meblog/.claude/skills/blog-editor",
+      "ref": "f86502e54e4e87835149369538f57181a454b644",
+      "skills": [
+        "blog-editor"
+      ]
+    },
+    {
+      "source": "getsentry/skills/skills/blog-writing-guide",
+      "ref": "e94f22214528d69899d09c627b3315ddc3544816",
+      "skills": [
+        "blog-writing-guide"
+      ]
+    }
+  ],
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@quantile-co/factory-pi": "0.1.0",

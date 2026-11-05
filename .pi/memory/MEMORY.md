@@ -69,6 +69,16 @@ and excluded from the sitemap. Replace their content and remove `placeholder: tr
 when publishing real articles. The subscription form has no provider integration
 and only previews form interactions; it does not collect or send addresses.
 
+Newsletter editorial skills are selected by the root package's native `skills`
+declarations and installed explicitly with `pnpm run skills:sync`: `copy-editing`
+(Corey Haines), `blog-editor` (Daniela Baron), and `blog-writing-guide` (Sentry).
+The direct full-commit pins work independently of Factory's published catalog.
+The blog editor uses its self-contained revision before the additional `clarity`
+dependency. Use these for specific, justified rewrites and technical review;
+preserve the author's meaning and verify claims rather than inventing evidence.
+Sentry's company voice, mandatory bylines and SEO prescriptions are not Quantile
+publication requirements. Keep this site's frontmatter schema and no-byline policy.
+
 `lib/metadata.ts` supplies shared metadata defaults; routes retain their own copy
 and canonical URLs. Homepage positioning covers newsletter and consulting. Open
 Graph and Twitter share explicit images; placeholders use the branded PNG fallback,
