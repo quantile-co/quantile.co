@@ -32,13 +32,7 @@ export function Header() {
           <Link
             className={classes.link}
             href="/newsletter"
-            aria-current={
-              pathname === "/newsletter"
-                ? "page"
-                : pathname?.startsWith("/newsletter/")
-                  ? "location"
-                  : undefined
-            }
+            aria-current={pathname === "/newsletter" ? "page" : undefined}
           >
             Newsletter
           </Link>

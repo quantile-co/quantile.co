@@ -9,7 +9,7 @@ vi.mock("next/navigation", () => ({ usePathname: vi.fn() }));
 it.each([
   ["/", "/"],
   ["/newsletter", "/newsletter"],
-  ["/newsletter/placeholder-01", "/newsletter"],
+  ["/newsletter/placeholder-01", null],
   ["/consulting", "/consulting"],
   ["/brand", null],
   ["/newsletter-other", null],
