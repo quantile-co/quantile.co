@@ -95,10 +95,23 @@ describe("Founder-letter responsive layout", () => {
         const signature = email.parentElement as HTMLElement;
         const letterButton = buttons[0].getBoundingClientRect();
         const signatureBox = signature.getBoundingClientRect();
+        const signatureText = [...signature.children].map((line) => {
+          const range = document.createRange();
+          range.selectNodeContents(line);
+          return range.getBoundingClientRect();
+        });
+        const signatureTextHeight =
+          Math.max(...signatureText.map((line) => line.bottom)) -
+          Math.min(...signatureText.map((line) => line.top));
+        expect(letterButton.height).toBeLessThanOrEqual(signatureTextHeight);
         expect(
-          Math.abs(letterButton.height - signatureBox.height),
+          Math.abs(
+            letterButton.top +
+              letterButton.height / 2 -
+              signatureBox.top -
+              signatureBox.height / 2,
+          ),
         ).toBeLessThan(1);
-        expect(Math.abs(letterButton.top - signatureBox.top)).toBeLessThan(1);
         expect(signatureBox.right).toBeLessThan(letterButton.left);
         expect(
           parseFloat(getComputedStyle(email).fontSize),

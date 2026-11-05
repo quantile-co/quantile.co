@@ -55,7 +55,9 @@ for (const colorScheme of ["light", "dark"] as const) {
       container.querySelector('[aria-label="Video introduction"]'),
     ).toBeNull();
 
-    for (const width of [320, 390, 425, 576, 767, 768, 1024, 1440, 1920]) {
+    for (const width of [
+      320, 375, 390, 425, 426, 576, 767, 768, 1024, 1440, 1920,
+    ]) {
       await page.viewport(width, 900);
       window.scrollTo(0, 0);
       const header = container.querySelector(
@@ -82,6 +84,11 @@ for (const colorScheme of ["light", "dark"] as const) {
           .fontSize,
       );
 
+      expect(
+        getComputedStyle(
+          letter.querySelector(":scope > p > span:last-child") as HTMLElement,
+        ).fontWeight,
+      ).toBe("500");
       const introFontSize = parseFloat(
         getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
           .fontSize,
@@ -94,12 +101,34 @@ for (const colorScheme of ["light", "dark"] as const) {
         );
       }
 
-      expect(Math.abs(profileBox.left - left)).toBeLessThan(1);
+      const introPortrait = letter.querySelector(
+        ":scope > p img",
+      ) as HTMLElement;
+      if (width > 425) {
+        expect(Math.abs(profileBox.left - left)).toBeLessThan(1);
+        expect(introPortrait.getClientRects()).toHaveLength(0);
+      } else {
+        expect(profile.getClientRects()).toHaveLength(0);
+      }
       expect(letterBox.left).toBeGreaterThanOrEqual(left);
       expect(Math.abs(letterBox.right - right)).toBeLessThan(1);
       const booking = letter.querySelector(
         '[data-site-cta="booking"]',
       ) as HTMLElement;
+      const signature = booking.parentElement
+        ?.previousElementSibling as HTMLElement;
+      const signatureText = [...signature.children].map((line) => {
+        const range = document.createRange();
+        range.selectNodeContents(line);
+        return range.getBoundingClientRect();
+      });
+      const signatureTextHeight =
+        Math.max(...signatureText.map((line) => line.bottom)) -
+        Math.min(...signatureText.map((line) => line.top));
+      expect(booking.getBoundingClientRect().height).toBeLessThanOrEqual(
+        signatureTextHeight,
+      );
+      expect(booking.getBoundingClientRect().height).toBeGreaterThanOrEqual(32);
       expect(booking.getBoundingClientRect().right).toBeLessThanOrEqual(
         right + 0.5,
       );
@@ -147,15 +176,29 @@ for (const colorScheme of ["light", "dark"] as const) {
         const prompt = profile.nextElementSibling?.querySelector(
           "p",
         ) as HTMLElement;
-        expect(parseFloat(getComputedStyle(prompt).fontSize)).toBe(
-          introFontSize,
-        );
+        expect(prompt.querySelector("br")).not.toBeNull();
+        const experience = profile.querySelector(
+          ":scope > div:last-child > p",
+        ) as HTMLElement;
+        const promptBox = prompt.getBoundingClientRect();
+        const gapAbovePrompt =
+          promptBox.top - experience.getBoundingClientRect().bottom;
+        const gapBelowPrompt = inputBox.top - promptBox.bottom;
+        expect(Math.abs(gapAbovePrompt - gapBelowPrompt)).toBeLessThan(1);
+        const promptFontSize = parseFloat(getComputedStyle(prompt).fontSize);
+        for (const detail of profile.querySelectorAll(
+          "a, :scope > div:last-child > p",
+        )) {
+          expect(promptFontSize).toBe(
+            parseFloat(getComputedStyle(detail).fontSize),
+          );
+        }
         expect(parseFloat(getComputedStyle(input).fontSize)).toBeLessThan(
-          introFontSize,
+          promptFontSize,
         );
         const introductionText = document.createRange();
         introductionText.selectNodeContents(
-          letter.querySelector(":scope > p") as HTMLElement,
+          letter.querySelector(":scope > p > span:last-child") as HTMLElement,
         );
         expect(introductionText.getClientRects()).toHaveLength(1);
         expect(profileBox.right).toBeLessThan(letterBox.left);
@@ -166,6 +209,73 @@ for (const colorScheme of ["light", "dark"] as const) {
             Math.abs(profile.getBoundingClientRect().top - profileBox.top),
           ).toBeLessThan(2),
         );
+      } else if (width <= 425) {
+        const portrait = introPortrait.getBoundingClientRect();
+        const introduction = (
+          letter.querySelector(":scope > p") as HTMLElement
+        ).getBoundingClientRect();
+        const companySquare = (
+          letter.querySelector("[data-company] > [data-company]") as HTMLElement
+        ).getBoundingClientRect();
+        expect(portrait.width).toBeGreaterThanOrEqual(40);
+        expect(portrait.width).toBeLessThanOrEqual(56);
+        expect(Math.abs(portrait.width - portrait.height)).toBeLessThan(1);
+        const caption = introPortrait.nextElementSibling as HTMLElement;
+        expect(caption.textContent).toBe("AJ Welch");
+        const captionBox = caption.getBoundingClientRect();
+        expect(captionBox.top).toBeGreaterThan(portrait.bottom);
+        expect(
+          Math.abs(
+            captionBox.left +
+              captionBox.width / 2 -
+              portrait.left -
+              portrait.width / 2,
+          ),
+        ).toBeLessThan(1);
+        expect(captionBox.bottom).toBeLessThanOrEqual(introduction.bottom);
+        expect(
+          parseFloat(getComputedStyle(introPortrait).borderRadius),
+        ).toBeLessThan(10);
+        expect(captionBox.width).toBeLessThanOrEqual(portrait.width);
+        const captionText = document.createRange();
+        captionText.selectNodeContents(caption);
+        expect(captionText.getClientRects()).toHaveLength(1);
+        expect(captionText.getBoundingClientRect().left).toBeGreaterThanOrEqual(
+          portrait.left,
+        );
+        expect(captionText.getBoundingClientRect().right).toBeLessThanOrEqual(
+          portrait.right,
+        );
+        expect(portrait.bottom).toBeLessThanOrEqual(introduction.bottom);
+        expect(Math.abs(companySquare.left - left)).toBeLessThan(1);
+        expect(companySquare.width).toBeGreaterThan(0);
+        expect(
+          Math.abs(companySquare.top - introduction.bottom - 20),
+        ).toBeLessThan(1);
+        const introductionText = document.createRange();
+        introductionText.selectNodeContents(
+          letter.querySelector(":scope > p > span:last-child") as HTMLElement,
+        );
+        expect(introductionText.getClientRects().length).toBeLessThanOrEqual(3);
+        const portraitGroup = (
+          introPortrait.parentElement as HTMLElement
+        ).getBoundingClientRect();
+        const copyBox = (
+          letter.querySelector(":scope > p > span:last-child") as HTMLElement
+        ).getBoundingClientRect();
+        expect(Math.abs(portraitGroup.right - right)).toBeLessThan(1);
+        expect(Math.abs(portrait.right - right)).toBeLessThan(1);
+        expect(portrait.top).toBeLessThanOrEqual(copyBox.top);
+        expect(portraitGroup.height).toBeLessThanOrEqual(
+          introductionText.getBoundingClientRect().height,
+        );
+        expect(introFontSize).toBeGreaterThanOrEqual(18);
+        expect(introFontSize).toBeLessThanOrEqual(22);
+        expect(Math.abs(letterBox.left - left)).toBeLessThan(1);
+        const visiblePortraits = [
+          ...container.querySelectorAll('img[alt="Portrait of AJ Welch"]'),
+        ].filter((image) => image.getClientRects().length > 0);
+        expect(visiblePortraits).toHaveLength(1);
       } else {
         const portrait = (
           profile.querySelector("img") as HTMLElement
@@ -199,7 +309,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         expect(
           getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
             .fontSize,
-        ).toBe(width <= 425 ? "22px" : "20px");
+        ).toBe("20px");
         expect(Math.abs(letterBox.left - left)).toBeLessThan(1);
         window.scrollTo(0, 600);
         await vi.waitFor(() =>

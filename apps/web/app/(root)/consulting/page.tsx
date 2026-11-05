@@ -21,9 +21,10 @@ export default function ConsultingPage() {
   return (
     <>
       <LandingPage
+        className={classes.page}
         showVideo={false}
         sidebar={
-          <Stack gap="xl" className={classes.sidebar}>
+          <Stack gap="md" className={classes.sidebar}>
             <aside aria-label="About AJ Welch" className={classes.profile}>
               <div className={classes.portraitFrame}>
                 <Image
@@ -51,13 +52,32 @@ export default function ConsultingPage() {
                 className={classes.subscribePrompt}
                 c="var(--site-text-primary)"
               >
-                Subscribe to the AI newsletter for data leaders.
+                Subscribe to the <br />
+                AI newsletter for data leaders.
               </Text>
               <NewsletterSubscribeForm layout="compact" />
             </Stack>
           </Stack>
         }
-        introduction="Hi, I’m AJ, and I’ve been a software engineer for over 15 years at:"
+        introduction={
+          <>
+            <span className={classes.introPortrait}>
+              <Image
+                src="/images/aj-welch.webp"
+                alt="Portrait of AJ Welch"
+                width={128}
+                height={128}
+                sizes="64px"
+                className={classes.portrait}
+              />
+              <span className={classes.introPortraitName}>AJ Welch</span>
+            </span>
+            <span className={classes.introCopy}>
+              Hi, I’m AJ, and I’ve been a software engineer for over 15 years
+              at:
+            </span>
+          </>
+        }
         proof={
           <SocialProofSection ariaLabel="Company experience and client work" />
         }

@@ -213,7 +213,8 @@
 .letterAction > a {
   min-width: calc(var(--letter-font-size) * 5.2);
   height: auto;
-  min-height: 48px;
+  min-height: 32px;
+  margin-block: 2px;
   padding-inline: 1em;
   font-size: max(1rem, calc(var(--letter-font-size) * 0.875));
 }
@@ -287,6 +288,7 @@
   }
 
   .main[data-with-sidebar] .letter > p:first-child {
+    display: flow-root;
     margin-bottom: 1.25rem;
   }
 

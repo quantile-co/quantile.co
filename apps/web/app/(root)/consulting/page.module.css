@@ -1,13 +1,21 @@
 .sidebar {
   --profile-detail-font-size: clamp(
-    0.875rem,
+    0.8125rem,
     calc(var(--letter-intro-font-size) * 0.65),
     1.125rem
   );
 }
 
+.introPortrait {
+  display: none;
+}
+
+.introCopy {
+  font-weight: 500;
+}
+
 .sidebarSignup input {
-  font-size: var(--profile-detail-font-size);
+  font-size: calc(var(--profile-detail-font-size) - 0.0625rem);
 }
 
 .profile {
@@ -44,6 +52,10 @@
   line-height: 1.2;
 }
 
+.subscribePrompt {
+  font-size: var(--profile-detail-font-size);
+}
+
 .experience {
   max-width: 25ch;
   color: var(--site-text-secondary);
@@ -59,6 +71,52 @@
   line-height: 1.25;
   text-decoration: none;
   border-radius: var(--mantine-radius-xs);
+}
+
+@media (max-width: 26.5625em) {
+  .page main[data-with-sidebar] {
+    --letter-intro-font-size: clamp(1.125rem, calc(4vw + 0.325rem), 1.375rem);
+    display: block;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .introPortrait {
+    --intro-portrait-size: calc(var(--letter-intro-font-size) * 2 + 0.75rem);
+    display: block;
+    float: right;
+    /* Match the visible top of Outfit’s opening letters. */
+    position: relative;
+    top: -1px;
+    width: var(--intro-portrait-size);
+    margin-inline-start: 0.75rem;
+  }
+
+  .introPortrait img {
+    display: block;
+    width: var(--intro-portrait-size);
+    height: auto;
+    margin-inline: auto;
+  }
+
+  .introCopy {
+    display: block;
+    line-height: 1.25;
+  }
+
+  .introPortraitName {
+    display: block;
+    width: var(--intro-portrait-size);
+    margin: 3px auto 0;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    text-align: center;
+    white-space: nowrap;
+  }
 }
 
 @media (hover: hover) {
