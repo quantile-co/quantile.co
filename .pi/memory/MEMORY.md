@@ -85,7 +85,9 @@ below it, the portrait/name/email form the left column of a top-aligned row with
 the introduction on the right, separated by a consistent 16px gap. Their heights
 closely match. Mobile sizing is CSS-only and fluid, without narrower layout
 breakpoints or JavaScript measurement. From 576px upward, the profile/signup use
-the left sidebar.
+the left sidebar. Between 576px and 768px its width scales from approximately
+96px to 144px; supporting text and signup controls scale with the sidebar container.
+The sidebar name scales independently of the larger letter introduction.
 There is no intermediate profile-above-letter layout. The profile scrolls in normal
 document flow; it is not sticky. The letter body currently uses lorem ipsum:
 a full-width paragraph, two bullet lists, then another full-width paragraph.

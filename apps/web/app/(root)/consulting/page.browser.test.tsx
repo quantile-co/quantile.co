@@ -99,10 +99,14 @@ for (const colorScheme of ["light", "dark"] as const) {
       const profileBox = profile.getBoundingClientRect();
       const letterBox = letter.getBoundingClientRect();
       expect(
-        getComputedStyle(profile.querySelector("p") as HTMLElement).fontSize,
-      ).toBe(
-        getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
-          .fontSize,
+        parseFloat(
+          getComputedStyle(profile.querySelector("p") as HTMLElement).fontSize,
+        ),
+      ).toBeLessThanOrEqual(
+        parseFloat(
+          getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
+            .fontSize,
+        ),
       );
 
       expect(
@@ -285,7 +289,7 @@ for (const colorScheme of ["light", "dark"] as const) {
           letter.querySelector(":scope > p > span:last-child") as HTMLElement,
         );
         expect(introductionText.getClientRects().length).toBeLessThanOrEqual(
-          width >= 768 ? 1 : 2,
+          width >= 992 ? 1 : 2,
         );
         expect(
           getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
