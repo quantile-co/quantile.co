@@ -31,7 +31,7 @@ export default function ConsultingPage() {
                   src="/images/aj-welch.webp"
                   alt="Portrait of AJ Welch"
                   fill
-                  sizes="(max-width: 47.9375em) 88px, (max-width: 75em) 22vw, 224px"
+                  sizes="(max-width: 48em) 170px, (max-width: 75em) 22vw, 224px"
                   className={classes.portrait}
                 />
               </div>
@@ -44,7 +44,7 @@ export default function ConsultingPage() {
                 </div>
               </div>
             </aside>
-            <Stack gap="md" visibleFrom="sm" className={classes.sidebarSignup}>
+            <Stack gap="md" visibleFrom="xs" className={classes.sidebarSignup}>
               <Text
                 className={classes.subscribePrompt}
                 c="var(--site-text-primary)"
@@ -86,16 +86,16 @@ export default function ConsultingPage() {
         }
         action={<CTAButton />}
         newsletterForm={
-          <Flex hiddenFrom="sm" w="80%" maw="35ch" justify="center">
+          <Flex hiddenFrom="xs" w="80%" maw="35ch" justify="center">
             <NewsletterSubscribeForm layout="compact" />
           </Flex>
         }
         postscript={
           <>
-            <Box component="span" hiddenFrom="sm">
+            <Box component="span" hiddenFrom="xs">
               P.S. Subscribe to the AI newsletter for data leaders below.
             </Box>
-            <Box component="span" visibleFrom="sm">
+            <Box component="span" visibleFrom="xs">
               P.S. Subscribe to the AI newsletter for data leaders in the
               sidebar or{" "}
               <a
@@ -109,24 +109,32 @@ export default function ConsultingPage() {
           </>
         }
       >
-        <p>I’ve watched the modern data stack change many times:</p>
-        <ul>
-          <li>On-prem became cloud</li>
-          <li>ETL became ELT</li>
-          <li>Batch became streaming</li>
-          <li>Warehouses became lakehouses</li>
-          <li>Business logic became the semantic layer</li>
-        </ul>
-        <p>Each change promised to be transformational.</p>
-        <p>Yet the data team was always left with the same challenges:</p>
-        <ul>
-          <li>Poor data quality and unreliable pipelines</li>
-          <li>Failed self-serve tools and endless ad hoc requests</li>
-          <li>Growing governance and security requirements</li>
-          <li>Rising platform costs and suboptimal performance</li>
-          <li>Limited time and resources for new capabilities</li>
-        </ul>
-        <p>It’s a tale as old as time, and it’s happening again with AI.</p>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        </p>
+        <div className={classes.bulletColumns}>
+          <ul>
+            <li>Lorem ipsum dolor sit amet</li>
+            <li>Consectetur adipiscing elit</li>
+            <li>Sed do eiusmod tempor incididunt</li>
+            <li>Ut labore et dolore magna aliqua</li>
+            <li>Ut enim ad minim veniam</li>
+          </ul>
+          <ul>
+            <li>Quis nostrud exercitation ullamco</li>
+            <li>Laboris nisi ut aliquip ex ea commodo</li>
+            <li>Duis aute irure dolor in reprehenderit</li>
+            <li>Voluptate velit esse cillum dolore</li>
+            <li>Excepteur sint occaecat cupidatat</li>
+          </ul>
+        </div>
+        <p>
+          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+          nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+          pariatur.
+        </p>
       </LandingPage>
       <script type="application/ld+json">
         {JSON.stringify(organization).replace(/</g, "\\u003c")}

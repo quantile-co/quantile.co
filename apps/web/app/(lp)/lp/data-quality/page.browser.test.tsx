@@ -39,7 +39,7 @@ describe("Founder-letter responsive layout", () => {
   for (const colorScheme of ["light", "dark"] as const) {
     it(`keeps the letter and video unclipped in ${colorScheme} mode`, async () => {
       await renderPage(colorScheme);
-      for (const width of [320, 425, 768, 1024, 1440, 1920]) {
+      for (const width of [320, 425, 575, 576, 768, 1024, 1440, 1920]) {
         await page.viewport(width, 900);
         const heading = container.querySelector("h1") as HTMLElement;
         const proof = container.querySelector(
@@ -48,7 +48,7 @@ describe("Founder-letter responsive layout", () => {
         await vi.waitFor(() =>
           expect(
             proof.querySelectorAll("article:not([aria-hidden])"),
-          ).toHaveLength(width < 768 ? 1 : 3),
+          ).toHaveLength(width < 576 ? 1 : 3),
         );
         expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
         expect(heading.scrollWidth).toBeLessThanOrEqual(heading.clientWidth);

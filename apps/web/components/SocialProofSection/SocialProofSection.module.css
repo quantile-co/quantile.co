@@ -162,7 +162,18 @@
   white-space: nowrap;
 }
 
-@media (max-width: 47.9375em) {
+/* Mantine xs: show all three companies from 576px. */
+@media (min-width: 36em) {
+  @container social-proof (width < 30.75rem) {
+    .proofCard {
+      height: auto;
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 0.5em;
+    }
+  }
+}
+
+@media (width < 36em) {
   .experiencePage {
     grid-template-columns: none;
     grid-auto-columns: 100%;

@@ -78,12 +78,17 @@ articles emit BlogPosting JSON-LD without author fields or bylines. Ordinary
 pagination stays self-canonical; alternative archive sorting is noindex. Sitemaps
 exclude placeholders, campaigns and query variants, without synthetic update dates.
 
-`/consulting` uses the letter layout without a visible headline or video. Its outer
-content edges match the header. At 768px and above, AJ’s profile occupies a
-left sidebar with the letter to its right. At 436–767px the profile sits above the
-letter, with its portrait beside the name and email. At 435px and below, the portrait,
-name and email sit at the upper right of the introduction instead. The profile
-scrolls in normal document flow at every viewport; it is not sticky.
+`/consulting` uses the letter layout without a visible headline or video. Its base
+page gutters match the header. Below 768px, an additional symmetric inset tapers
+from 32px to zero approaching 576px; below 576px it resets to 72px and tapers to
+zero at 320px. Header/footer gutters remain unchanged. Mantine’s `xs` breakpoint (576px) controls the
+consulting layout: below it, the portrait, name and email sit at the upper right of
+the introduction; from it upward, the profile and signup occupy the left sidebar.
+There is no intermediate profile-above-letter layout. The profile scrolls in normal
+document flow; it is not sticky. The letter body currently uses lorem ipsum:
+a full-width paragraph, two bullet lists, then another full-width paragraph.
+The lists form two columns without a divider from 576px and stack below it.
+The introduction, company proof, signature/CTA and P.S. remain separate.
 The route supplies the wider-layout profile through the landing component’s sidebar slot.
 The compact newsletter signup follows that profile on tablet/desktop; the letter’s text P.S.
 points to the sidebar. On mobile the signup remains beneath the letter’s P.S.; only
@@ -96,7 +101,9 @@ do not extract a shared consulting-letter content component.
 
 The letter uses an external booking link and a mailto link, not an embedded
 calendar or local form. Social proof contains Google, CompilerWorks and Chartio;
-below 768px it becomes a one-card carousel and stays static under reduced motion.
+below 576px it becomes a one-card carousel and stays static under reduced motion.
+From 576px all three companies are shown; cards place their logo above their details
+when the available proof column is narrow.
 The signature and closing CTA share a row. The reusable landing component owns
 the responsive letter styles; brand markup/styles remain alongside its route.
 

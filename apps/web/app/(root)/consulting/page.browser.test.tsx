@@ -33,7 +33,7 @@ for (const colorScheme of ["light", "dark"] as const) {
           component="header"
           size="xl"
           px="var(--site-page-padding)"
-          className={headerClasses.inner}
+          className={`${headerClasses.inner} ${headerClasses.header}`}
         >
           <span>Quantile</span>
           <nav>
@@ -60,7 +60,8 @@ for (const colorScheme of ["light", "dark"] as const) {
     );
 
     for (const width of [
-      320, 375, 390, 425, 426, 435, 436, 576, 767, 768, 1024, 1440, 1920,
+      320, 321, 375, 425, 435, 500, 575, 576, 577, 660, 720, 767, 768, 769, 992,
+      1024, 1200, 1440, 1920,
     ]) {
       await page.viewport(width, 900);
       window.scrollTo(0, 0);
@@ -73,12 +74,42 @@ for (const colorScheme of ["light", "dark"] as const) {
       const letter = container.querySelector(
         'article[aria-labelledby="founder-letter-title"]',
       ) as HTMLElement;
+      const proof = letter.querySelector(
+        'section[aria-label="Company experience and client work"]',
+      ) as HTMLElement;
+      await vi.waitFor(() =>
+        expect(
+          proof.querySelectorAll("article:not([aria-hidden])"),
+        ).toHaveLength(width < 576 ? 1 : 3),
+      );
+      expect(
+        proof.querySelector('[aria-roledescription="carousel"]') !== null,
+      ).toBe(width < 576);
       const headerBox = header.getBoundingClientRect();
       const headerStyle = getComputedStyle(header);
-      const left = headerBox.left + parseFloat(headerStyle.paddingLeft);
+      const extraPadding =
+        width < 576
+          ? Math.max(0, ((width - 320) * 72) / 256)
+          : width < 768
+            ? ((width - 576) * 32) / 192
+            : 0;
+      const mainStyle = getComputedStyle(
+        container.querySelector("main") as HTMLElement,
+      );
+      for (const side of ["paddingLeft", "paddingRight"] as const) {
+        expect(
+          Math.abs(
+            parseFloat(mainStyle[side]) -
+              parseFloat(headerStyle[side]) -
+              extraPadding,
+          ),
+        ).toBeLessThan(0.01);
+      }
+      const left =
+        headerBox.left + parseFloat(headerStyle.paddingLeft) + extraPadding;
       const headerText = document.createRange();
       headerText.selectNodeContents(header.querySelector("nav a") as Element);
-      const right = headerText.getBoundingClientRect().right;
+      const right = headerText.getBoundingClientRect().right - extraPadding;
       const profileBox = profile.getBoundingClientRect();
       const letterBox = letter.getBoundingClientRect();
       expect(
@@ -106,7 +137,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       const introPortrait = letter.querySelector(
         ":scope > p img",
       ) as HTMLElement;
-      if (width > 435) {
+      if (width >= 576) {
         expect(Math.abs(profileBox.left - left)).toBeLessThan(1);
         expect(introPortrait.getClientRects()).toHaveLength(0);
       } else {
@@ -143,7 +174,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         ...container.querySelectorAll<HTMLFormElement>("form"),
       ].filter((form) => form.getClientRects().length > 0);
       expect(forms).toHaveLength(1);
-      expect(letter.contains(forms[0])).toBe(width < 768);
+      expect(letter.contains(forms[0])).toBe(width < 576);
       const input = forms[0].querySelector("input") as HTMLElement;
       const submit = forms[0].querySelector("button") as HTMLElement;
       const inputBox = input.getBoundingClientRect();
@@ -158,7 +189,7 @@ for (const colorScheme of ["light", "dark"] as const) {
             inputBox.height / 2,
         ),
       ).toBeLessThan(1);
-      if (width < 768) {
+      if (width < 576) {
         const postscript = letter.querySelector(
           ":scope > div:last-child > p",
         ) as HTMLElement;
@@ -174,7 +205,57 @@ for (const colorScheme of ["light", "dark"] as const) {
         ).toBeLessThan(1);
       }
 
-      if (width >= 768) {
+      const columns = [
+        ...letter.querySelectorAll<HTMLUListElement>(":scope > div > ul"),
+      ];
+      expect(columns).toHaveLength(2);
+      const bulletColumns = columns[0].parentElement as HTMLElement;
+      const opening = bulletColumns.previousElementSibling as HTMLElement;
+      const closing = bulletColumns.nextElementSibling as HTMLElement;
+      expect(opening.tagName).toBe("P");
+      expect(closing.tagName).toBe("P");
+      expect(opening.textContent).toMatch(/^Lorem ipsum/);
+      expect(closing.textContent).toMatch(/^Ut enim/);
+      expect(letter.querySelectorAll(":scope > p")).toHaveLength(3);
+      for (const paragraph of [opening, closing]) {
+        const box = paragraph.getBoundingClientRect();
+        expect(Math.abs(box.left - letterBox.left)).toBeLessThan(1);
+        expect(Math.abs(box.right - letterBox.right)).toBeLessThan(1);
+      }
+      expect(closing.nextElementSibling?.contains(booking)).toBe(true);
+      const [firstColumn, secondColumn] = columns.map((column) =>
+        column.getBoundingClientRect(),
+      );
+      for (const column of columns) expect(column.children).toHaveLength(5);
+      expect(opening.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+        firstColumn.top,
+      );
+      expect(closing.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+        Math.max(firstColumn.bottom, secondColumn.bottom),
+      );
+      expect(booking.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+        closing.getBoundingClientRect().bottom,
+      );
+      expect(
+        parseFloat(getComputedStyle(columns[0]).fontSize),
+      ).toBeLessThanOrEqual(parseFloat(getComputedStyle(letter).fontSize));
+      if (width >= 576) {
+        expect(Math.abs(firstColumn.top - secondColumn.top)).toBeLessThan(1);
+        expect(firstColumn.right).toBeLessThanOrEqual(secondColumn.left);
+        expect(getComputedStyle(bulletColumns, "::before").content).toBe(
+          "none",
+        );
+        expect(getComputedStyle(columns[1]).borderInlineStartWidth).toBe("0px");
+        expect(
+          Math.abs(
+            secondColumn.left -
+              firstColumn.right -
+              parseFloat(getComputedStyle(bulletColumns).columnGap),
+          ),
+        ).toBeLessThan(0.1);
+        expect(Math.abs(firstColumn.width - secondColumn.width)).toBeLessThan(
+          0.1,
+        );
         const prompt = profile.nextElementSibling?.querySelector(
           "p",
         ) as HTMLElement;
@@ -217,8 +298,19 @@ for (const colorScheme of ["light", "dark"] as const) {
         introductionText.selectNodeContents(
           letter.querySelector(":scope > p > span:last-child") as HTMLElement,
         );
-        expect(introductionText.getClientRects()).toHaveLength(1);
+        expect(introductionText.getClientRects().length).toBeLessThanOrEqual(
+          width >= 768 ? 1 : 2,
+        );
+        expect(
+          getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
+            .textWrap,
+        ).toBe("balance");
         expect(profileBox.right).toBeLessThan(letterBox.left);
+        expect(
+          Math.abs(
+            letterBox.left - profileBox.right - parseFloat(mainStyle.columnGap),
+          ),
+        ).toBeLessThan(1);
         expect(Math.abs(profileBox.top - letterBox.top)).toBeLessThan(1);
         const sidebar = profile.parentElement?.parentElement as HTMLElement;
         expect(getComputedStyle(sidebar).position).toBe("static");
@@ -231,7 +323,12 @@ for (const colorScheme of ["light", "dark"] as const) {
             ),
           ).toBeLessThan(1),
         );
-      } else if (width <= 435) {
+      } else {
+        expect(secondColumn.top).toBeGreaterThanOrEqual(firstColumn.bottom);
+        expect(
+          getComputedStyle(columns[0].parentElement as HTMLElement, "::before")
+            .content,
+        ).toBe("none");
         const portrait = introPortrait.getBoundingClientRect();
         const introduction = (
           letter.querySelector(":scope > p") as HTMLElement
@@ -316,48 +413,6 @@ for (const colorScheme of ["light", "dark"] as const) {
           ...container.querySelectorAll('img[alt="Portrait of AJ Welch"]'),
         ].filter((image) => image.getClientRects().length > 0);
         expect(visiblePortraits).toHaveLength(1);
-      } else {
-        const portrait = (
-          profile.querySelector("img") as HTMLElement
-        ).getBoundingClientRect();
-        const text = (
-          profile.querySelector(":scope > div:last-child") as HTMLElement
-        ).getBoundingClientRect();
-        expect(portrait.right).toBeLessThan(text.left);
-        expect(Math.abs(portrait.width - portrait.height)).toBeLessThan(1);
-        const companySquare = (
-          letter.querySelector("[data-company] > [data-company]") as HTMLElement
-        ).getBoundingClientRect();
-        expect(Math.abs(portrait.width - companySquare.width)).toBeLessThan(1);
-        expect(
-          Math.abs(
-            text.top + text.height / 2 - portrait.top - portrait.height / 2,
-          ),
-        ).toBeLessThan(1);
-        const email = profile.querySelector<HTMLAnchorElement>("a");
-        expect(email?.getAttribute("href")).toBe("mailto:aj@quantile.co");
-        const introduction = (
-          letter.querySelector(":scope > p") as HTMLElement
-        ).getBoundingClientRect();
-        const gapAbove = introduction.top - profileBox.bottom;
-        const gapBelow = companySquare.top - introduction.bottom;
-        expect(Math.abs(gapAbove - 20)).toBeLessThan(1);
-        expect(Math.abs(gapAbove - gapBelow)).toBeLessThan(1);
-        expect(
-          getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
-            .fontSize,
-        ).toBe("20px");
-        expect(Math.abs(letterBox.left - left)).toBeLessThan(1);
-        window.scrollTo(0, 600);
-        await vi.waitFor(() => {
-          expect(window.scrollY).toBeGreaterThan(0);
-          expect(
-            Math.abs(
-              profile.getBoundingClientRect().top -
-                (profileBox.top - window.scrollY),
-            ),
-          ).toBeLessThan(1);
-        });
       }
     }
   });

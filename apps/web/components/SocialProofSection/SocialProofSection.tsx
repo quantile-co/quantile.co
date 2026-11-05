@@ -146,7 +146,7 @@ export function SocialProofSection({
 }: {
   ariaLabel?: string;
 }) {
-  const isCarousel = useMediaQuery("(max-width: 47.9375em)");
+  const isCarousel = useMediaQuery("(width < 36em)");
   const canHover = useMediaQuery("(hover: hover)");
   const reducedMotion = useReducedMotion();
   const cardsPerPage = isCarousel ? 1 : proofCardCount;

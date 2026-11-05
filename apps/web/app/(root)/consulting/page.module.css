@@ -70,13 +70,51 @@
   border-radius: var(--mantine-radius-xs);
 }
 
-@media (min-width: 48em) {
+.bulletColumns > ul {
+  margin: 0 0 1em;
+  padding-inline-start: 1.1em;
+}
+
+/* Mantine xs: 576px. */
+@media (min-width: 36em) {
   .sidebar {
     max-width: 14rem;
   }
+
+  .bulletColumns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1em clamp(1.5rem, 3vw, 3rem);
+    margin-bottom: var(--letter-font-size);
+    font-size: clamp(0.875rem, 1.5vw, 1.25rem);
+  }
+
+  .bulletColumns > ul {
+    margin: 0;
+  }
 }
 
-@media (max-width: 27.1875em) {
+@media (min-width: 36em) and (width < 48em) {
+  .page {
+    /* Extra inset tapers from 32px near 768px to zero at 576px. */
+    --landing-extra-padding: clamp(0px, calc((100vw - 36rem) / 6), 2rem);
+  }
+
+  .sidebar {
+    --profile-detail-font-size: clamp(0.75rem, 1.65vw, 0.8125rem);
+  }
+}
+
+@media (width < 36em) {
+  .page {
+    /* Reset to 72px below 576px, then taper to zero at 320px. */
+    --landing-extra-padding: clamp(
+      0px,
+      calc((100vw - 20rem) * 0.28125),
+      4.5rem
+    );
+  }
+
   .page main[data-with-sidebar] {
     --letter-intro-font-size: clamp(1.25rem, calc(4vw + 0.45rem), 1.5rem);
     display: block;
@@ -106,6 +144,7 @@
 
   .introCopy {
     display: block;
+    max-width: 20rem;
     line-height: 1.35;
   }
 
@@ -147,40 +186,5 @@
 @media (forced-colors: active) {
   .portrait {
     border-color: CanvasText;
-  }
-}
-
-@media (max-width: 47.9375em) {
-  .profile {
-    display: grid;
-    container-type: inline-size;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-
-  .portraitFrame {
-    /* Match the company square: 5.5 × clamp(0.75rem, 4.5cqw, 1rem). */
-    width: clamp(4.125rem, 24.75cqw, 5.5rem);
-    align-self: center;
-  }
-
-  .profileText {
-    align-self: stretch;
-    justify-content: center;
-    gap: 0.25rem;
-  }
-
-  .identity {
-    gap: 0;
-  }
-
-  .email {
-    font-size: clamp(0.875rem, 3.6vw, 1rem);
-    line-height: 1.15;
-  }
-
-  .name {
-    line-height: 1.1;
   }
 }
