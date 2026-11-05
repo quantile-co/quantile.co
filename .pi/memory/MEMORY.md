@@ -114,17 +114,18 @@ locally by default; checks, fixes and tests always execute.
 Local caching remains the default. CI persists .turbo/cache on the existing
 Restricted Namespace volume and may use remote team main in this repository's
 workspace. Use one expiring, cache-only read/write TURBO_TOKEN organization
-secret restricted to selected repositories, without repository or environment
-shadowing copies. As with Cachix, authorized repository workflow writers are
-trusted across the shared remote cache. Main-only publication is workflow policy,
+secret with GitHub visibility `all`, covering every current and future repository
+in this organization, without repository or environment shadowing copies.
+As with Cachix, authorized repository workflow writers are trusted across the
+shared remote cache. Main-only publication is workflow policy,
 not a secret-release boundary. Check uses remote:r; trusted main Test/Build may
 use remote:rw. External/fork PRs receive no remote token; developers use user-bound,
 server-scoped readers. Keep prod/provider protections and platform-enforced
 main-only volume snapshot publication unchanged. Checks/tests/fixes and Plan/Apply
-remain uncached. Credential changes require separate approval and live verification;
-this policy does not establish that the bindings have been migrated.
-The original 2026-10-25 setup installed CI readers and cache-only prod writers;
-rotate its 90-day credentials before 2027-01-23.
+remain uncached. Credential changes require separate approval and live verification.
+The current organization CI writer expires on 2027-02-03. The original 2026-10-25
+qualification used CI readers and cache-only prod writers with a 2027-01-23 expiry;
+those prod overrides are no longer used by CI.
 On 2026-10-25, population run 40190338612 and verification run 40191374711
 qualified all four cache layers on quantile-4x8: Turbo local-only and remote-only
 hits, changed-input misses, Nix store reuse with builds/substitutions disabled,
