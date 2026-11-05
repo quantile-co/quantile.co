@@ -5,7 +5,7 @@ import classes from "./page.module.css";
 
 const brandDescription =
   "Download the Quantile logo, wordmark, and social banners.";
-const brandTitle = "Quantile brand assets";
+const brandTitle = "Brand Assets | Quantile";
 export const metadata: Metadata = {
   title: brandTitle,
   description: brandDescription,

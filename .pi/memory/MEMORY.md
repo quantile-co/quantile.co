@@ -27,8 +27,10 @@ through props; avoid service locators and unnecessary abstractions. Keep focused
 tests for current behavior rather than retaining coverage for deleted features.
 
 Landing pages use explicit `app/(lp)/lp/<slug>/page.tsx` routes, starting with
-`/lp/data-quality`. The `(lp)` layout supplies noindex defaults; campaign pages
-are omitted from the sitemap and navigation. Each route owns its copy and
+`/lp/data-quality`. Campaign routes are temporarily disabled: the `(lp)` layout
+calls `notFound()` before rendering its children, producing HTTP 404 responses.
+Their page components, copy and tests remain intact. Restore the layout’s children
+passthrough to re-enable them; retain noindex and sitemap/navigation exclusions. Each route owns its copy and
 metadata and composes `components/LandingPage` with social proof and a booking
 action through props. Its newsletter P.S. is part of the letter after the signature/booking row;
 routes inject `newsletterForm` with `NewsletterSubscribeForm`. That form supports
@@ -66,6 +68,15 @@ on the server; no content API or registry is needed. Article filenames define
 and excluded from the sitemap. Replace their content and remove `placeholder: true`
 when publishing real articles. The subscription form has no provider integration
 and only previews form interactions; it does not collect or send addresses.
+
+`lib/metadata.ts` supplies shared metadata defaults; routes retain their own copy
+and canonical URLs. Homepage positioning covers newsletter and consulting. Open
+Graph and Twitter share explicit images; placeholders use the branded PNG fallback,
+while published articles use their cover. Brand keeps its route-specific file-based
+social images. The homepage emits Organization and WebSite JSON-LD; published
+articles emit BlogPosting JSON-LD without author fields or bylines. Ordinary
+pagination stays self-canonical; alternative archive sorting is noindex. Sitemaps
+exclude placeholders, campaigns and query variants, without synthetic update dates.
 
 `/consulting` uses the letter layout without a visible headline or video. Its outer
 content edges match the header. At 768px and above, AJ’s profile occupies a sticky

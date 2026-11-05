@@ -1,47 +1,21 @@
 import { Box, Flex, Stack, Text } from "@mantine/core";
-import type { Metadata } from "next";
 import Image from "next/image";
 import { CTAButton } from "@/components/CTAButton/CTAButton";
 import { LandingPage } from "@/components/LandingPage/LandingPage";
 import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
 import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
+import { createPageMetadata, organization } from "@/lib/metadata";
 import classes from "./page.module.css";
 
-const pageTitle = "Quantile | Fractional data and AI engineering";
+const pageTitle = "Data & AI Engineering Consulting";
 const heroDescription =
   "Fast, flexible, senior data + AI engineering capacity without expensive hires or agency headaches.";
 
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
   title: pageTitle,
   description: heroDescription,
-  alternates: { canonical: "/consulting" },
-  openGraph: {
-    title: pageTitle,
-    description: heroDescription,
-    siteName: "Quantile",
-    type: "website",
-    url: "/consulting",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: pageTitle,
-    description: heroDescription,
-  },
-};
-
-const organizationStructuredData = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Quantile",
-  url: "https://quantile.co",
-  logo: "https://quantile.co/apple-icon.png",
-  description: heroDescription,
-  founder: {
-    "@type": "Person",
-    name: "AJ Welch",
-    sameAs: ["https://www.linkedin.com/in/ajwelch4/", "https://x.com/AJWelch"],
-  },
-};
+  pathname: "/consulting",
+});
 
 export default function ConsultingPage() {
   return (
@@ -161,7 +135,7 @@ export default function ConsultingPage() {
         <p>[Closing invitation]</p>
       </LandingPage>
       <script type="application/ld+json">
-        {JSON.stringify(organizationStructuredData).replace(/</g, "\\u003c")}
+        {JSON.stringify(organization).replace(/</g, "\\u003c")}
       </script>
     </>
   );

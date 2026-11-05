@@ -8,12 +8,14 @@ vi.mock("@/components/FathomAnalytics/FathomAnalytics", () => ({
   FathomAnalytics: () => null,
 }));
 
-it("composes the letter, proof and booking action without a site header", () => {
+it("keeps campaign routes disabled through the group layout", () => {
+  expect(() => LandingLayout()).toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
+});
+
+it("preserves the dormant letter, proof and booking action without a site header", () => {
   const html = renderToStaticMarkup(
     <RootLayout>
-      <LandingLayout>
-        <DataQualityPage />
-      </LandingLayout>
+      <DataQualityPage />
     </RootLayout>,
   );
 

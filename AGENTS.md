@@ -9,7 +9,8 @@ authoritative, not historical guides or generated prompt excerpts.
 Keep this root index; do not recreate nested `AGENTS.md` files.
 
 The application has a newsletter homepage/archive, Markdown article pages,
-a consulting letter, campaign landing pages, `/brand` downloads and a minimal 404.
+a consulting letter, retained campaign pages (currently disabled), `/brand`
+downloads and a minimal 404.
 Newsletter content lives in `apps/web/content/newsletter/`; its server-only
 loader is `apps/web/lib/newsletter.ts`. Subscription is not connected to a
 provider. There is no Checkout, webhook, transactional email, welcome route or

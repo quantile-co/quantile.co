@@ -6,17 +6,13 @@ import { NewsletterArticleListItem } from "@/components/NewsletterArticleListIte
 import { NewsletterHero } from "@/components/NewsletterHero/NewsletterHero";
 import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
 import { PaginationControls } from "@/components/PaginationControls/PaginationControls";
+import { createPageMetadata } from "@/lib/metadata";
 import { getNewsletterPage } from "@/lib/newsletter";
 import listingClasses from "../newsletter.module.css";
 import classes from "./page.module.css";
 
 // Reserve one item per page for the consulting preview.
 const articlesPerPage = 10 - 1;
-
-const pageMetadata: Metadata = {
-  title: "Newsletter | Quantile",
-  description: "The AI newsletter for data leaders.",
-};
 
 export async function generateMetadata({
   searchParams,
@@ -28,10 +24,12 @@ export async function generateMetadata({
   const query = new URLSearchParams();
   if (sort === "oldest") query.set("sort", "oldest");
   if (currentPage > 1) query.set("page", String(currentPage));
-  return {
-    ...pageMetadata,
-    alternates: { canonical: `/newsletter${query.size ? `?${query}` : ""}` },
-  };
+  return createPageMetadata({
+    title: "AI Newsletter for Data Leaders",
+    description: "The AI newsletter for data leaders.",
+    pathname: `/newsletter${query.size ? `?${query}` : ""}`,
+    noindex: sort === "oldest",
+  });
 }
 
 export default async function Newsletter({

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default function LandingLayout({ children }: { children: ReactNode }) {
-  return children;
+export default function LandingLayout() {
+  // Campaigns are paused. Restore the children passthrough to enable them.
+  notFound();
 }

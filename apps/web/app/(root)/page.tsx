@@ -6,16 +6,17 @@ import { NewsletterArticleListItem } from "@/components/NewsletterArticleListIte
 import { NewsletterHero } from "@/components/NewsletterHero/NewsletterHero";
 import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
 import { PaginationControls } from "@/components/PaginationControls/PaginationControls";
+import {
+  createPageMetadata,
+  organization,
+  site,
+  website,
+} from "@/lib/metadata";
 import { getNewsletterPage } from "@/lib/newsletter";
 import listingClasses from "./newsletter.module.css";
 
 // Reserve one item per page for the consulting preview.
 const articlesPerPage = 12 - 1;
-
-const pageMetadata: Metadata = {
-  title: "The AI newsletter for data leaders | Quantile",
-  description: "The AI newsletter for data leaders.",
-};
 
 export async function generateMetadata({
   searchParams,
@@ -24,12 +25,11 @@ export async function generateMetadata({
     page: (await searchParams).page,
     perPage: articlesPerPage,
   });
-  return {
-    ...pageMetadata,
-    alternates: {
-      canonical: currentPage === 1 ? "/" : `/?page=${currentPage}`,
-    },
-  };
+  return createPageMetadata({
+    title: "AI Newsletter & Consulting for Data Leaders",
+    description: site.description,
+    pathname: currentPage === 1 ? "/" : `/?page=${currentPage}`,
+  });
 }
 
 export default async function Home({
@@ -43,6 +43,11 @@ export default async function Home({
   });
   return (
     <main id="main-content" tabIndex={-1}>
+      {currentPage === 1 && (
+        <script type="application/ld+json">
+          {JSON.stringify([organization, website]).replace(/</g, "\\u003c")}
+        </script>
+      )}
       <Container size="xl" px="var(--site-page-padding)" pb="xl">
         <NewsletterHero>
           <NewsletterSubscribeForm

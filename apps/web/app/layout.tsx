@@ -11,12 +11,13 @@ import type { ReactNode } from "react";
 import { FathomAnalytics } from "@/components/FathomAnalytics/FathomAnalytics";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
+import { site } from "@/lib/metadata";
 import classes from "./layout.module.css";
 import { theme } from "./theme";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://quantile.co"),
-  title: "Quantile",
+  metadataBase: new URL(site.url),
+  title: site.name,
 };
 
 function HomeLink() {
