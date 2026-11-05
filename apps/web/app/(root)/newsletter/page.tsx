@@ -47,7 +47,10 @@ export default async function Newsletter({
     <main id="main-content" tabIndex={-1}>
       <Container size="xl" px="var(--site-page-padding)" pb="xl">
         <NewsletterHero>
-          <NewsletterSubscribeForm />
+          <NewsletterSubscribeForm
+            layout="compact"
+            buttonProps={{ children: "Subscribe" }}
+          />
         </NewsletterHero>
         <Container size="sm" px={0} id="articles">
           <Group

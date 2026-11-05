@@ -33,6 +33,14 @@
   transition: color 150ms ease;
 }
 
+.link:last-child {
+  padding-inline-end: 0;
+}
+
+.link[aria-current] {
+  color: var(--site-text-primary);
+}
+
 @media (hover: hover) {
   .link:hover {
     color: var(--site-text-primary);
@@ -42,6 +50,13 @@
 @media (prefers-reduced-motion: reduce) {
   .link {
     transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .link[aria-current] {
+    outline: 1px solid Highlight;
+    outline-offset: -2px;
   }
 }
 

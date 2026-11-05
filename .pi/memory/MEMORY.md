@@ -32,7 +32,8 @@ are omitted from the sitemap and navigation. Each route owns its copy and
 metadata and composes `components/LandingPage` with social proof and a booking
 action through props. Its newsletter P.S. is part of the letter after the signature/booking row;
 routes inject `newsletterForm` with `NewsletterSubscribeForm`. That form supports
-stacked/inline layout and presentation-only button props. The submit button is enabled
+stacked/inline layouts, a compact input with an inset arrow submit control, and
+presentation-only button props. The submit button is enabled
 for interaction preview, with native email validation and prevented submission. No dynamic registry or CMS is needed.
 
 The `(root)` layout adds `components/Header` to normal site pages. The header
@@ -44,7 +45,8 @@ reading layouts remain narrower. Campaign landing pages
 have no header; header visibility is structural, not pathname-based.
 
 The homepage and newsletter archive share `NewsletterHero` with the title
-"The AI newsletter for data leaders." and an injected `NewsletterSubscribeForm`.
+"The AI newsletter for data leaders." and an injected `NewsletterSubscribeForm`
+with a compact, labeled “Subscribe →” control.
 The homepage displays up to twelve items in a responsive 1/2/3-column grid,
 without dates: eleven articles and one consulting preview. The archive displays
 up to ten horizontal items with dates and Newest/Oldest sorting: nine articles
@@ -65,8 +67,18 @@ and excluded from the sitemap. Replace their content and remove `placeholder: tr
 when publishing real articles. The subscription form has no provider integration
 and only previews form interactions; it does not collect or send addresses.
 
-`/consulting` uses the letter layout without its visible headline. Its copy is
-intentionally separate from `/lp/data-quality` so the two can evolve independently;
+`/consulting` uses the letter layout without a visible headline or video. Its outer
+content edges match the header. At 768px and above, AJ’s profile occupies a sticky
+left sidebar below the header, with the letter to its right; below 768px the profile
+sits above the letter in normal flow, with its portrait beside the profile text.
+The route supplies the profile through the landing component’s sidebar slot.
+The compact newsletter signup follows that profile on tablet/desktop; the letter’s text P.S.
+points to the sidebar. On mobile the signup remains beneath the letter’s P.S.; only
+one form is visible at either breakpoint. Compact submit controls share the input’s
+outer border with a left divider, without a separate button outline or filled hover.
+Input hover and focus share a subtle border; filled/autofilled fields retain the empty
+background. The campaign retains its headline and video.
+Consulting copy is intentionally separate from `/lp/data-quality` so the two can evolve independently;
 do not extract a shared consulting-letter content component.
 
 The letter uses an external booking link and a mailto link, not an embedded

@@ -1,4 +1,6 @@
+import { Box, Flex, Stack, Text } from "@mantine/core";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { CTAButton } from "@/components/CTAButton/CTAButton";
 import { LandingPage } from "@/components/LandingPage/LandingPage";
 import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
@@ -45,16 +47,66 @@ export default function ConsultingPage() {
   return (
     <>
       <LandingPage
-        className={classes.page}
-        introduction="Hi, I’m AJ, and I’ve been a data engineer for over 15 years at:"
+        showVideo={false}
+        sidebar={
+          <Stack gap="xl">
+            <aside aria-label="About AJ Welch" className={classes.profile}>
+              <div className={classes.portraitFrame}>
+                <Image
+                  src="/images/aj-welch.webp"
+                  alt="Portrait of AJ Welch"
+                  fill
+                  sizes="(max-width: 47.9375em) 88px, (max-width: 75em) 22vw, 224px"
+                  className={classes.portrait}
+                />
+              </div>
+              <div className={classes.profileText}>
+                <div className={classes.identity}>
+                  <Text className={classes.name}>AJ Welch</Text>
+                  <a href="mailto:aj@quantile.co" className={classes.email}>
+                    aj@quantile.co
+                  </a>
+                </div>
+                <Text className={classes.experience}>
+                  15+ years experience at Google, CompilerWorks, and Chartio.
+                </Text>
+              </div>
+            </aside>
+            <Stack gap="md" visibleFrom="sm">
+              <Text size="lg" c="var(--site-text-primary)">
+                Subscribe to the AI newsletter for data leaders.
+              </Text>
+              <NewsletterSubscribeForm layout="compact" />
+            </Stack>
+          </Stack>
+        }
+        introduction="Hi, I’m AJ, and I’ve been a software engineer for over 15 years at:"
         proof={
           <SocialProofSection ariaLabel="Company experience and client work" />
         }
         action={<CTAButton />}
         newsletterForm={
-          <NewsletterSubscribeForm
-            buttonProps={{ variant: "default", children: "Subscribe" }}
-          />
+          <Flex hiddenFrom="sm" w="80%" maw="35ch" justify="center">
+            <NewsletterSubscribeForm layout="compact" />
+          </Flex>
+        }
+        postscript={
+          <>
+            <Box component="span" hiddenFrom="sm">
+              P.S. Subscribe to the AI newsletter for data leaders below.
+            </Box>
+            <Box component="span" visibleFrom="sm">
+              P.S. Subscribe to the AI newsletter for data leaders in the
+              sidebar or{" "}
+              <a
+                href="/newsletter"
+                aria-label="Subscribe to the newsletter here"
+              >
+                here
+              </a>
+              .
+            </Box>
+          </>
         }
       >
         <p>I’ve watched the modern data stack change many times:</p>

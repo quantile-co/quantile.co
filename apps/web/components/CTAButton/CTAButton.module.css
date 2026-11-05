@@ -1,4 +1,6 @@
 .button {
+  --site-control-shadow: none;
+
   height: 32px;
   padding-inline: 14px;
   border-radius: 999px;

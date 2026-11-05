@@ -22,6 +22,40 @@
   margin-inline: auto;
 }
 
+.main[data-with-sidebar] {
+  display: grid;
+  width: 100%;
+  gap: clamp(2rem, 5vw, 5rem);
+}
+
+.sidebar,
+.content {
+  min-width: 0;
+}
+
+@media (min-width: 48em) {
+  .main[data-with-sidebar] {
+    grid-template-columns: clamp(10rem, 22vw, 16rem) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(1.5rem, 2.5vw, 2.5rem);
+  }
+
+  .sidebar {
+    position: sticky;
+    top: calc(var(--site-header-height) + var(--page-edge-space));
+  }
+
+  .main[data-with-sidebar] .postscript {
+    align-items: stretch;
+    text-align: left;
+  }
+
+  .main[data-with-sidebar] .postscript > p {
+    max-width: none;
+    text-wrap: pretty;
+  }
+}
+
 .proof {
   --site-page-padding: 0px;
 
@@ -31,7 +65,6 @@
 
 .letter {
   width: 100%;
-  padding-top: var(--section-gap);
   margin-inline: auto;
   color: var(--site-text-primary);
   font-family: var(--mantine-font-family-headings);
@@ -40,6 +73,10 @@
   letter-spacing: -0.025em;
   line-height: 1.4;
   overflow-wrap: break-word;
+}
+
+.letter[data-with-video] {
+  padding-top: var(--section-gap);
 }
 
 .intro {
@@ -115,6 +152,13 @@
   font-weight: 500;
 }
 
+.letter :where(p:not(.signature), li) a {
+  color: var(--site-text-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
 .letterClosing {
   display: flex;
   align-items: stretch;
@@ -131,7 +175,7 @@
 }
 
 .signature a {
-  font-size: 0.5em;
+  font-size: max(1rem, 0.9375em);
   line-height: 1.5;
   width: fit-content;
   border-radius: var(--mantine-radius-xs);
@@ -141,12 +185,17 @@
 }
 
 @media (hover: hover) {
+  .letter :where(p:not(.signature), li) a:hover {
+    color: var(--site-text-secondary);
+  }
+
   .signature a:hover {
     color: var(--site-text-primary);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .letter :where(p:not(.signature), li) a,
   .signature a {
     transition: none;
   }
@@ -159,9 +208,9 @@
 .letterAction > a {
   min-width: calc(var(--letter-font-size) * 5.2);
   height: auto;
-  min-height: 32px;
-  padding-inline: 1.25em;
-  font-size: max(0.8125rem, calc(var(--letter-font-size) * 0.625));
+  min-height: 48px;
+  padding-inline: 1em;
+  font-size: max(1rem, calc(var(--letter-font-size) * 0.875));
 }
 
 .postscript {
@@ -169,8 +218,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--mantine-spacing-lg);
-  margin-top: calc(var(--section-gap) * 1.5);
-  padding-bottom: calc(var(--section-gap) * 0.5);
+  margin-top: 1em;
   text-align: center;
 }
 
@@ -179,6 +227,28 @@
   margin: 0;
   font-style: italic;
   text-wrap: balance;
+}
+
+@media (max-width: 47.9375em) {
+  .letterClosing {
+    gap: 0.25rem;
+  }
+
+  .main[data-with-sidebar] {
+    gap: 1.25rem;
+  }
+
+  .main[data-with-sidebar] .letter > p:first-child {
+    font-size: 1.25rem;
+  }
+
+  .postscript {
+    width: 100%;
+    max-width: 20rem;
+    margin-inline: auto;
+    margin-top: calc(var(--section-gap) * 1.5);
+    padding-bottom: calc(var(--section-gap) * 0.5);
+  }
 }
 
 @media (max-width: 48em) {

@@ -94,7 +94,7 @@
   align-content: flex-start;
   align-items: flex-start;
   flex-wrap: wrap;
-  column-gap: 0.1875em;
+  column-gap: 0.375em;
   row-gap: 0.125em;
   color: var(--proof-foreground);
   font-size: max(0.5rem, 0.65625em);
@@ -107,7 +107,7 @@
   }
 
   & span + span {
-    padding-left: 0.1875em;
+    padding-left: 0.375em;
     border-left: 1px solid var(--proof-foreground);
   }
 }
@@ -184,10 +184,6 @@
   .customers {
     width: max-content;
     column-gap: 0.5em;
-  }
-
-  .clientsLabel {
-    display: none;
   }
 
   .customerLogo {

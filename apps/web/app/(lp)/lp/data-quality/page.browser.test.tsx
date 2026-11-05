@@ -100,9 +100,9 @@ describe("Founder-letter responsive layout", () => {
         ).toBeLessThan(1);
         expect(Math.abs(letterButton.top - signatureBox.top)).toBeLessThan(1);
         expect(signatureBox.right).toBeLessThan(letterButton.left);
-        expect(parseFloat(getComputedStyle(email).fontSize)).toBeLessThan(
-          parseFloat(getComputedStyle(signature).fontSize),
-        );
+        expect(
+          parseFloat(getComputedStyle(email).fontSize),
+        ).toBeGreaterThanOrEqual(16);
         const article = container.querySelector(
           'article[aria-labelledby="founder-letter-title"]',
         ) as HTMLElement;

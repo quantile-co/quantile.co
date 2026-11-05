@@ -1,8 +1,13 @@
+"use client";
+
 import { Container, Group } from "@mantine/core";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import classes from "./Header.module.css";
 
 export function Header() {
+  const pathname = usePathname();
+
   return (
     <header className={classes.header}>
       <Container
@@ -10,7 +15,12 @@ export function Header() {
         px="var(--site-page-padding)"
         className={classes.inner}
       >
-        <Link aria-label="Quantile home" className={classes.homeLink} href="/">
+        <Link
+          aria-label="Quantile home"
+          aria-current={pathname === "/" ? "page" : undefined}
+          className={classes.homeLink}
+          href="/"
+        >
           <span aria-label="Quantile" className={classes.wordmark} role="img" />
         </Link>
         <Group
@@ -19,10 +29,24 @@ export function Header() {
           gap={4}
           wrap="nowrap"
         >
-          <Link className={classes.link} href="/newsletter">
+          <Link
+            className={classes.link}
+            href="/newsletter"
+            aria-current={
+              pathname === "/newsletter"
+                ? "page"
+                : pathname?.startsWith("/newsletter/")
+                  ? "location"
+                  : undefined
+            }
+          >
             Newsletter
           </Link>
-          <Link className={classes.link} href="/consulting">
+          <Link
+            className={classes.link}
+            href="/consulting"
+            aria-current={pathname === "/consulting" ? "page" : undefined}
+          >
             Consulting
           </Link>
         </Group>
