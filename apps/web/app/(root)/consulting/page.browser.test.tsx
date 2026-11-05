@@ -289,7 +289,7 @@ for (const colorScheme of ["light", "dark"] as const) {
           letter.querySelector(":scope > p > span:last-child") as HTMLElement,
         );
         expect(introductionText.getClientRects().length).toBeLessThanOrEqual(
-          width >= 992 ? 1 : 2,
+          width >= 1440 ? 1 : 2,
         );
         expect(
           getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)

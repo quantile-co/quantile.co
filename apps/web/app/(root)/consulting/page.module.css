@@ -126,6 +126,12 @@
   }
 }
 
+@media (min-width: 62em) {
+  .page main[data-with-sidebar] {
+    --letter-intro-font-size: clamp(1.875rem, calc(3vw - 0.1875rem), 2.25rem);
+  }
+}
+
 @media (width < 36em) {
   .page main[data-with-sidebar] {
     --letter-intro-font-size: clamp(1.21875rem, calc(4vw + 0.4rem), 1.5rem);
