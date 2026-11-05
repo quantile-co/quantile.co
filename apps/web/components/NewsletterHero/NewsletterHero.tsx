@@ -4,7 +4,7 @@ import classes from "./NewsletterHero.module.css";
 
 export function NewsletterHero({ children }: { children: ReactNode }) {
   return (
-    <Stack component="section" align="center" gap="xl" className={classes.hero}>
+    <Stack component="section" align="center" gap="md" className={classes.hero}>
       <Title order={1} className={classes.title}>
         The AI newsletter for data leaders.
       </Title>
