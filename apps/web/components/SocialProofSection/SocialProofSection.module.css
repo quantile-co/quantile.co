@@ -6,7 +6,6 @@
 }
 
 .wrapper {
-  max-width: calc(var(--site-content-width) + (2 * var(--site-page-padding)));
   padding-block: 0;
   padding-inline: var(--site-page-padding);
 }

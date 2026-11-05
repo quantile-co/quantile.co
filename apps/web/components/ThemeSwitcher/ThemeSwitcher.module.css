@@ -5,8 +5,9 @@
   height: 32px;
   padding: 0;
   margin: 0;
-  border: 1px solid var(--site-surface-outline);
+  border: 1px solid var(--site-divider-color);
   border-radius: 999px;
+  background: var(--site-surface-raised);
 }
 
 .option {
@@ -31,13 +32,10 @@
   height: 30px;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: var(--mantine-radius-xs);
   color: var(--site-text-secondary);
   cursor: pointer;
-  transition:
-    color 120ms ease,
-    background-color 120ms ease,
-    box-shadow 120ms ease;
+  transition: color 120ms ease;
 
   @mixin hover {
     color: var(--site-text-primary);
@@ -46,7 +44,10 @@
 
 .input:checked + .label {
   color: var(--site-text-primary);
-  background: var(--site-surface-raised-hover);
+}
+
+.input:checked + .label svg {
+  stroke-width: 2;
 }
 
 .input:focus-visible {
@@ -55,6 +56,12 @@
 
 .input:focus-visible + .label {
   box-shadow: inset 0 0 0 2px var(--site-focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .label {
+    transition: none;
+  }
 }
 
 @media (forced-colors: active) {

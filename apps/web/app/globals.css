@@ -7,6 +7,13 @@
 @import "@mantine/core/styles/Container.css";
 @import "@mantine/core/styles/Text.css";
 @import "@mantine/core/styles/Title.css";
+@import "@mantine/core/styles/Anchor.css";
+@import "@mantine/core/styles/Group.css";
+@import "@mantine/core/styles/Stack.css";
+@import "@mantine/core/styles/SimpleGrid.css";
+@import "@mantine/core/styles/Input.css";
+@import "@mantine/core/styles/Pagination.css";
+@import "@mantine/core/styles/Typography.css";
 
 :root {
   --site-zinc-50: #fafafa;
@@ -19,7 +26,6 @@
   --site-zinc-900: #18181b;
   --site-zinc-950: #09090b;
   --site-header-height: 64px;
-  --site-content-width: 75rem;
   --site-divider-color: #e4e4e7;
   --site-lower-background: color-mix(
     in srgb,
@@ -27,12 +33,14 @@
     var(--site-zinc-100)
   );
   --site-page-padding: 24px;
+  --site-control-shadow: 0 1px 2px
+    color-mix(in srgb, var(--site-text-primary) 8%, transparent);
   --site-focus-ring: var(--site-zinc-950);
   --site-surface-outline: var(--site-zinc-300);
   --site-surface-raised: var(--site-zinc-50);
   --site-surface-raised-hover: var(--site-zinc-100);
-  --site-text-primary: var(--site-zinc-950);
-  --site-text-secondary: var(--site-zinc-600);
+  --site-text-primary: var(--mantine-color-primary-6);
+  --site-text-secondary: var(--mantine-color-secondary-6);
 }
 
 html {
@@ -71,8 +79,10 @@ body {
   --site-surface-outline: var(--site-zinc-700);
   --site-surface-raised: var(--site-zinc-950);
   --site-surface-raised-hover: var(--site-zinc-900);
-  --site-text-primary: var(--site-zinc-50);
-  --site-text-secondary: var(--site-zinc-400);
+}
+
+a {
+  text-decoration: none;
 }
 
 ::selection {
@@ -92,22 +102,5 @@ body {
 @media (forced-colors: active) {
   :focus-visible {
     outline-color: Highlight;
-  }
-}
-
-.mantine-Button-root[data-variant="filled"] {
-  transition:
-    color 150ms ease,
-    background-color 150ms ease;
-}
-
-@media (hover: hover) {
-  .mantine-Button-root[data-variant="filled"]:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--site-text-primary) 84%,
-      var(--mantine-color-body)
-    );
-    color: var(--mantine-color-body);
   }
 }

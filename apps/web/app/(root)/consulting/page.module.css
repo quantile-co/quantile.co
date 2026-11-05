@@ -1,0 +1,3 @@
+.page {
+  --landing-content-width: min(68rem, 75vw);
+}

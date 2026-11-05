@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <title>Newsletter image placeholder 11</title>
+  <rect width="1200" height="675" fill="#d4d4d8"/>
+  <path d="M0 540H1200M0 405H1200M0 270H1200M0 135H1200M240 0V675M480 0V675M720 0V675M960 0V675" stroke="#a1a1aa" stroke-width="1"/>
+  <rect x="340" y="77" width="520" height="520" rx="260" fill="#fafafa"/>
+  <text x="600" y="370" text-anchor="middle" font-family="sans-serif" font-size="108" fill="#27272a">11</text>
+  <text x="600" y="444" text-anchor="middle" font-family="sans-serif" font-size="20" letter-spacing="4" fill="#52525b">PLACEHOLDER</text>
+</svg>

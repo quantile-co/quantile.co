@@ -32,6 +32,7 @@ export default defineConfig({
           include: [
             "app/**/*.test.{ts,tsx}",
             "components/**/*.test.{ts,tsx}",
+            "lib/**/*.test.ts",
             "*.test.ts",
           ],
           exclude: ["**/*.browser.test.{ts,tsx}"],

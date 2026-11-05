@@ -1,0 +1,32 @@
+.form {
+  display: grid;
+  width: 100%;
+  max-width: 360px;
+  gap: var(--mantine-spacing-md);
+}
+
+.form > button {
+  justify-self: center;
+}
+
+.form[data-layout="inline"] {
+  max-width: 32rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--mantine-spacing-sm);
+  align-items: center;
+}
+
+@media (max-width: $mantine-breakpoint-xs) {
+  .form {
+    max-width: 18rem;
+  }
+
+  .form[data-layout="inline"] {
+    max-width: 18rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .form[data-layout="inline"] > button {
+    justify-self: start;
+  }
+}

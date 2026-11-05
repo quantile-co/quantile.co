@@ -252,14 +252,14 @@ async function buildAssets() {
     ["app/opengraph-image.alt.txt", Buffer.from("Quantile wordmark\n")],
     ["app/twitter-image.png", openGraph],
     ["app/twitter-image.alt.txt", Buffer.from("Quantile wordmark\n")],
-    ["app/brand/opengraph-image.png", brandOpenGraph],
+    ["app/(root)/brand/opengraph-image.png", brandOpenGraph],
     [
-      "app/brand/opengraph-image.alt.txt",
+      "app/(root)/brand/opengraph-image.alt.txt",
       Buffer.from("Quantile wordmark above Brand assets\n"),
     ],
-    ["app/brand/twitter-image.png", brandOpenGraph],
+    ["app/(root)/brand/twitter-image.png", brandOpenGraph],
     [
-      "app/brand/twitter-image.alt.txt",
+      "app/(root)/brand/twitter-image.alt.txt",
       Buffer.from("Quantile wordmark above Brand assets\n"),
     ],
     ["public/images/brand/wordmark-dark.svg", Buffer.from(darkWordmark)],

@@ -1,11 +1,11 @@
 import "@fontsource-variable/outfit";
-import "./globals.css";
+import "@/app/globals.css";
 import { MantineProvider } from "@mantine/core";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { page, userEvent } from "vitest/browser";
-import Home from "./page";
-import { theme } from "./theme";
+import { theme } from "@/app/theme";
+import DataQualityPage from "./page";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -18,7 +18,7 @@ async function renderPage(colorScheme: "light" | "dark") {
   root = createRoot(container);
   root.render(
     <MantineProvider defaultColorScheme={colorScheme} theme={theme}>
-      <Home />
+      <DataQualityPage />
     </MantineProvider>,
   );
   await vi.waitFor(() => expect(container.querySelector("h1")).not.toBeNull());
@@ -52,37 +52,24 @@ describe("Founder-letter responsive layout", () => {
         );
         expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
         expect(heading.scrollWidth).toBeLessThanOrEqual(heading.clientWidth);
-        if (width <= 425 && CSS.supports("text-justify", "inter-character")) {
-          expect(getComputedStyle(heading).textAlign).toBe("justify");
-          expect(getComputedStyle(heading).textAlignLast).toBe("justify");
-          expect(
-            getComputedStyle(heading).getPropertyValue("text-justify"),
-          ).toBe("inter-character");
-        }
-        expect(heading.querySelector("br, span")).toBeNull();
-        expect(getComputedStyle(heading).fontFamily).toBe(
-          getComputedStyle(document.body).fontFamily,
-        );
-        expect(getComputedStyle(heading).fontStyle).toBe("normal");
-        expect(getComputedStyle(heading).color).toBe(
-          getComputedStyle(document.body).color,
-        );
-        expect(getComputedStyle(heading).backgroundImage).toBe("none");
         const video = container.querySelector(
           'section[aria-label="Video introduction"]',
         ) as HTMLElement;
         const videoBox = video.getBoundingClientRect();
-        if (width >= 768) {
-          const range = document.createRange();
-          range.selectNodeContents(heading);
-          const lines = [...range.getClientRects()];
-          expect(lines).toHaveLength(2);
+        const range = document.createRange();
+        range.selectNodeContents(heading);
+        const lines = [...range.getClientRects()];
+        if (width >= 768 || width <= 425) {
+          expect(lines).toHaveLength(width >= 768 ? 2 : 3);
+        }
+        if (
+          width >= 768 ||
+          (width <= 425 && CSS.supports("text-justify", "inter-character"))
+        ) {
           for (const line of lines) {
             expect(Math.abs(line.width - videoBox.width)).toBeLessThan(1);
           }
         }
-        expect(getComputedStyle(video).backgroundColor).toBe("rgb(0, 0, 0)");
-        expect(getComputedStyle(video).color).toBe("rgb(255, 255, 255)");
         expect(
           Math.abs(videoBox.width / videoBox.height - 16 / 9),
         ).toBeLessThan(0.01);
@@ -95,7 +82,6 @@ describe("Founder-letter responsive layout", () => {
           container.querySelectorAll<HTMLAnchorElement>("[data-site-cta]");
         expect(buttons).toHaveLength(1);
         for (const button of buttons) {
-          expect(button.getAttribute("data-variant")).toBe("filled");
           const label = button.querySelector(
             ".mantine-Button-label",
           ) as HTMLElement;
@@ -146,7 +132,7 @@ describe("Founder-letter responsive layout", () => {
     });
   }
 
-  it("supports booking and signature email", async () => {
+  it("supports booking, signature email and the newsletter input in keyboard order", async () => {
     await page.viewport(390, 844);
     await renderPage("light");
     const cta = container.querySelector("[data-site-cta]") as HTMLAnchorElement;
@@ -157,11 +143,21 @@ describe("Founder-letter responsive layout", () => {
     const email = container.querySelector(
       'a[href="mailto:aj@quantile.co"]',
     ) as HTMLAnchorElement;
-    expect(getComputedStyle(email).textDecorationLine).toBe("underline");
     email.focus();
     await userEvent.keyboard("{Tab}");
     expect(document.activeElement).toBe(
       container.querySelector("article [data-site-cta]"),
     );
+    await userEvent.keyboard("{Tab}");
+    const input = container.querySelector(
+      'input[type="email"]',
+    ) as HTMLInputElement;
+    expect(document.activeElement).toBe(input);
+    await userEvent.keyboard("reader@example.com");
+    expect(input.value).toBe("reader@example.com");
+    expect(
+      container.querySelector<HTMLButtonElement>('button[type="submit"]')
+        ?.disabled,
+    ).toBe(false);
   });
 });

@@ -9,7 +9,6 @@
 }
 
 .container {
-  max-width: calc(var(--site-content-width) + (2 * var(--site-page-padding)));
   padding: clamp(3rem, 6vw, 5rem) var(--site-page-padding)
     clamp(4rem, 8vw, 7rem);
 }
@@ -71,11 +70,11 @@
 }
 
 .preview[data-tone="dark"] {
-  background: #09090b;
+  background: var(--site-zinc-950);
 }
 
 .preview[data-tone="light"] {
-  background: #fafafa;
+  background: var(--site-zinc-50);
 }
 
 .previewImage {

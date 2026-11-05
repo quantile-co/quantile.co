@@ -1,19 +1,22 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import RootLayout from "../layout";
+import RootLayout from "../../layout";
+import SiteLayout from "../layout";
 import BrandPage from "./page";
 
 describe("brand asset preview descriptions", () => {
   it("distinguishes the asset variant from the color of its mark", () => {
     const html = renderToStaticMarkup(
       <RootLayout>
-        <BrandPage />
+        <SiteLayout>
+          <BrandPage />
+        </SiteLayout>
       </RootLayout>,
     );
 
     expect(html).toContain("<header");
     expect(html).toContain("<footer");
-    expect(html.match(/data-site-cta="booking"/g)).toHaveLength(1);
+    expect(html).not.toContain('data-site-cta="booking"');
     expect(html.match(/aria-label="Quantile home"/g)).toHaveLength(2);
     expect(html).toContain("Select a display theme");
     expect(html).not.toContain("Back to home");

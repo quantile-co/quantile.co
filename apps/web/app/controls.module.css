@@ -1,0 +1,108 @@
+.button {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.button[data-variant="filled"]:not(:disabled, [data-disabled]) {
+  box-shadow: var(--site-control-shadow);
+}
+
+.button:disabled,
+.button[data-disabled] {
+  cursor: default;
+  border-color: var(--site-divider-color);
+  background: var(--site-surface-raised);
+  color: var(--site-text-secondary);
+  box-shadow: none;
+}
+
+.input {
+  border-color: var(--site-surface-outline);
+  background: var(--mantine-color-body);
+  color: var(--site-text-primary);
+  box-shadow: var(--site-control-shadow);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.input:disabled,
+.pagination:disabled,
+.pagination[data-disabled] {
+  cursor: default;
+}
+
+.input::placeholder {
+  color: var(--site-text-secondary);
+}
+
+.input:focus {
+  border-color: var(--site-text-secondary);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--site-text-primary) 8%, transparent);
+}
+
+.pagination {
+  border-color: transparent;
+  border-radius: var(--mantine-radius-xs);
+  background: transparent;
+  color: var(--site-text-secondary);
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  transition: color 150ms ease;
+}
+
+.pagination[data-active] {
+  border-color: transparent;
+  background: transparent;
+  color: var(--site-text-primary);
+  font-weight: 700;
+}
+
+@media (hover: hover) {
+  .button[data-variant="filled"]:hover:not(:disabled, [data-disabled]) {
+    background: color-mix(
+      in srgb,
+      var(--site-text-primary) 84%,
+      var(--mantine-color-body)
+    );
+    color: var(--mantine-color-body);
+  }
+
+  .input:hover:not(:focus, :disabled) {
+    border-color: var(--site-text-secondary);
+  }
+
+  .pagination:hover:not([data-active], :disabled, [data-disabled]) {
+    background: transparent;
+    color: var(--site-text-primary);
+  }
+
+  .pagination[data-active]:hover {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .input,
+  .pagination {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .input:focus {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  .pagination[data-active] {
+    outline: 1px solid Highlight;
+    outline-offset: -2px;
+  }
+}

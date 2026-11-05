@@ -2,12 +2,12 @@ import "@fontsource-variable/outfit";
 import "./globals.css";
 import {
   ColorSchemeScript,
+  Container,
   MantineProvider,
   mantineHtmlProps,
 } from "@mantine/core";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { CTAButton } from "@/components/CTAButton/CTAButton";
 import { FathomAnalytics } from "@/components/FathomAnalytics/FathomAnalytics";
 import { SkipLink } from "@/components/SkipLink/SkipLink";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
@@ -37,14 +37,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <MantineProvider defaultColorScheme="auto" theme={theme}>
           <div className={classes.page}>
             <SkipLink href="#main-content">Skip to content</SkipLink>
-            <header className={classes.header}>
-              <div className={classes.headerInner}>
-                <HomeLink />
-                <CTAButton />
-              </div>
-            </header>
             <div className={classes.content}>{children}</div>
-            <footer className={classes.footer}>
+            <Container
+              component="footer"
+              fluid
+              px={0}
+              className={classes.footer}
+            >
               <div aria-hidden="true" className={classes.divider}>
                 <span className={classes.outerLeft} />
                 <span className={classes.slopeLeft} />
@@ -52,7 +51,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <span className={classes.slopeRight} />
                 <span className={classes.outerRight} />
               </div>
-              <div className={classes.footerInner}>
+              <Container
+                size="xl"
+                px="var(--site-page-padding)"
+                className={classes.footerInner}
+              >
                 <HomeLink />
                 <p className={classes.copyright}>
                   © {new Date().getFullYear()} Quantile LLC
@@ -60,8 +63,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <div className={classes.theme}>
                   <ThemeSwitcher />
                 </div>
-              </div>
-            </footer>
+              </Container>
+            </Container>
           </div>
         </MantineProvider>
         <FathomAnalytics />

@@ -14,31 +14,67 @@ related changes without recurring note-only validation cycles.
 
 ## Application and UI
 
-This branch contains only the founder-letter landing page, brand downloads and
-a minimal 404, with optional Fathom analytics. Checkout, webhooks, welcome email,
-database access, provider integration tooling and Storybook are removed.
-This source state is not evidence of a deployed rollout or external-resource
-retirement. The letter is still placeholder copy pending separate review.
+This branch contains a newsletter homepage/archive, Markdown articles,
+consulting and campaign letters, brand downloads and a minimal 404, with optional
+Fathom analytics. Checkout, webhooks, welcome email, database access, provider
+integration tooling and Storybook are removed. This source state is not evidence
+of a deployed rollout or external-resource retirement. Preserve approved copy;
+the letter's closing invitation and video remain placeholders.
 
 Preserve the current responsive design, light/dark themes, keyboard access,
 reduced-motion behavior and semantic structure. Components receive siblings
 through props; avoid service locators and unnecessary abstractions. Keep focused
 tests for current behavior rather than retaining coverage for deleted features.
 
-The landing page uses an external booking link and a mailto link; no embedded
-calendar or local form is needed. The top social proof switches to a carousel
-below 768px. With reduced motion enabled, it intentionally stays static
-(initially showing AJ), without manual navigation. The standalone founder card
-aligns optically with the CTA/email
-block on larger viewports. Homepage and brand markup/styles live alongside their
-routes, not in single-use section components. The shared fixed bottom-right
-`ThemeSwitcher` reveals on scroll, pointer interaction, hover or keyboard focus
-on all pages and hides after inactivity.
+Landing pages use explicit `app/(lp)/lp/<slug>/page.tsx` routes, starting with
+`/lp/data-quality`. The `(lp)` layout supplies noindex defaults; campaign pages
+are omitted from the sitemap and navigation. Each route owns its copy and
+metadata and composes `components/LandingPage` with social proof and a booking
+action through props. Its newsletter P.S. is part of the letter after the signature/booking row;
+routes inject `newsletterForm` with `NewsletterSubscribeForm`. That form supports
+stacked/inline layout and presentation-only button props. The submit button is enabled
+for interaction preview, with native email validation and prevented submission. No dynamic registry or CMS is needed.
 
-Keep `/brand`, its downloads, sitemap entry and generated assets. Brand and 404
-have no header or booking CTA; the 404 retains its central home button. Neither
-page includes legacy marketing navigation, Checkout, billing or old funnel
-content. README edits require explicit approval.
+The `(root)` layout adds `components/Header` to normal site pages. The header
+links to `/newsletter` and `/consulting`, with no booking CTA. The root 404 includes
+the same header explicitly. The top-level layout owns providers, analytics and
+the shared footer with its always-visible theme control. Header, footer and widest
+page content use Mantine `xl` containers with matching horizontal padding;
+reading layouts remain narrower. Campaign landing pages
+have no header; header visibility is structural, not pathname-based.
+
+The homepage and newsletter archive share `NewsletterHero` with the title
+"The AI newsletter for data leaders." and an injected `NewsletterSubscribeForm`.
+The homepage displays up to twelve items in a responsive 1/2/3-column grid,
+without dates: eleven articles and one consulting preview. The archive displays
+up to ten horizontal items with dates and Newest/Oldest sorting: nine articles
+and one consulting preview. Both use URL-based pagination and place the consulting
+preview as close to the midpoint of each page as possible, including partial pages.
+Its Quantile wordmark and unboxed layout match the homepage grid or archive row. Components stay
+in flat, per-component directories; newsletter components use the `Newsletter` prefix.
+
+`lib/newsletter.ts` reads Markdown/frontmatter from `content/newsletter/*.md`
+on the server; no content API or registry is needed. Article filenames define
+`/newsletter/<slug>` routes, statically generated from those files. The initial
+14 articles/images are explicitly marked placeholders, noindexed on detail pages
+and excluded from the sitemap. Replace their content and remove `placeholder: true`
+when publishing real articles. The subscription form has no provider integration
+and only previews form interactions; it does not collect or send addresses.
+
+`/consulting` uses the letter layout without its visible headline. Its copy is
+intentionally separate from `/lp/data-quality` so the two can evolve independently;
+do not extract a shared consulting-letter content component.
+
+The letter uses an external booking link and a mailto link, not an embedded
+calendar or local form. Social proof contains Google, CompilerWorks and Chartio;
+below 768px it becomes a one-card carousel and stays static under reduced motion.
+The signature and closing CTA share a row. The reusable landing component owns
+the responsive letter styles; brand markup/styles remain alongside its route.
+
+Keep `/brand`, its downloads, sitemap entry and generated assets. Its source and
+generated social images live under `app/(root)/brand`; `packages/brand/assets.ts`
+owns those output paths. The 404 retains its central home button. README edits
+require explicit approval.
 
 ## Factory and workspace tooling
 
@@ -54,7 +90,7 @@ orchestrate pnpm/Turbo workspaces. Keep app semantics and approved copy unchange
 Apps consume it as a workspace dependency. The CLI writes/checks the calling
 app directory; library functions accept an explicit output directory.
 `packages/testing` exports the Next Image browser-test stub; it is not production
-UI. Both packages stay flat. The web app has no generic `lib/` directory.
+UI. Both packages stay flat. The web app's `lib/` holds server-side content loading.
 The root AGENTS index remains canonical. Next's documented `agentRules: false`
 prevents `next dev` from creating a nested guide after relocation; agents still
 read version-matched documentation from the web workspace's installed Next package.
