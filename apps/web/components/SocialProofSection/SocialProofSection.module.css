@@ -116,6 +116,12 @@
   }
 }
 
+@media (min-width: 75em) {
+  .section {
+    --proof-scale: 1.2;
+  }
+}
+
 @media (forced-colors: active) {
   .mediaSquare {
     border-color: CanvasText;
