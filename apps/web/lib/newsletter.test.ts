@@ -13,7 +13,7 @@ vi.mock("node:fs/promises", () => ({
     return `---
 title: "Issue ${number}"
 date: "2026-10-${number}"
-preview: "A short preview"
+subtitle: "A short subtitle"
 image: "/cover.svg"
 imageAlt: "Cover"
 ---

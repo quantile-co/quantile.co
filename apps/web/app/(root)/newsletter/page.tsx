@@ -1,12 +1,13 @@
 import { Anchor, Container, Group, Stack } from "@mantine/core";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Fragment } from "react";
-import { NewsletterArticlePagination } from "@/components/NewsletterArticlePagination/NewsletterArticlePagination";
-import { NewsletterArticlePreview } from "@/components/NewsletterArticlePreview/NewsletterArticlePreview";
-import { NewsletterConsultingCTA } from "@/components/NewsletterConsultingCTA/NewsletterConsultingCTA";
+import { NewsletterArticleListItem } from "@/components/NewsletterArticleListItem/NewsletterArticleListItem";
 import { NewsletterHero } from "@/components/NewsletterHero/NewsletterHero";
 import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
+import { PaginationControls } from "@/components/PaginationControls/PaginationControls";
 import { getNewsletterPage } from "@/lib/newsletter";
+import listingClasses from "../newsletter.module.css";
 import classes from "./page.module.css";
 
 // Reserve one item per page for the consulting preview.
@@ -74,18 +75,50 @@ export default async function Newsletter({
           <Stack component="section" aria-label="Newsletter articles" gap={0}>
             {result.articles.map((article, index) => (
               <Fragment key={article.slug}>
-                <NewsletterArticlePreview {...article} variant="list" />
+                <NewsletterArticleListItem
+                  href={`/newsletter/${article.slug}`}
+                  title={article.title}
+                  subtitle={article.subtitle}
+                  date={article.date}
+                  variant="list"
+                  image={
+                    <Image
+                      src={article.image}
+                      alt={article.imageAlt}
+                      fill
+                      sizes="(max-width: 48em) 96px, 160px"
+                    />
+                  }
+                />
                 {index + 1 === Math.ceil(result.articles.length / 2) && (
-                  <NewsletterConsultingCTA variant="list" />
+                  <NewsletterArticleListItem
+                    component="aside"
+                    href="/consulting"
+                    label="Consulting"
+                    title="Data and AI consulting"
+                    subtitle="Senior data and AI engineering, working alongside your team."
+                    variant="list"
+                    image={
+                      <div className={listingClasses.consultingImage}>
+                        <span
+                          className={listingClasses.wordmark}
+                          role="img"
+                          aria-label="Quantile"
+                        />
+                      </div>
+                    }
+                  />
                 )}
               </Fragment>
             ))}
           </Stack>
-          <NewsletterArticlePagination
+          <PaginationControls
             page={result.currentPage}
             total={result.totalPages}
             pathname="/newsletter"
-            sort={result.sort}
+            query={result.sort === "oldest" ? { sort: "oldest" } : undefined}
+            anchor="articles"
+            label="Article pages"
           />
         </Container>
       </Container>

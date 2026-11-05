@@ -29,13 +29,13 @@ export async function generateMetadata({
   if (!article) notFound();
   return {
     title: `${article.title} | Quantile`,
-    description: article.preview,
+    description: article.subtitle,
     alternates: { canonical: `/newsletter/${article.slug}` },
     robots: article.placeholder ? { index: false, follow: true } : undefined,
     openGraph: {
       type: "article",
       title: article.title,
-      description: article.preview,
+      description: article.subtitle,
       url: `/newsletter/${article.slug}`,
       publishedTime: article.date,
       images: [{ url: article.image, alt: article.imageAlt }],

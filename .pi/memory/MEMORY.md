@@ -50,8 +50,12 @@ without dates: eleven articles and one consulting preview. The archive displays
 up to ten horizontal items with dates and Newest/Oldest sorting: nine articles
 and one consulting preview. Both use URL-based pagination and place the consulting
 preview as close to the midpoint of each page as possible, including partial pages.
-Its Quantile wordmark and unboxed layout match the homepage grid or archive row. Components stay
-in flat, per-component directories; newsletter components use the `Newsletter` prefix.
+Articles and the consulting item share `NewsletterArticleListItem`; routes supply
+links, titles, subtitles, image/wordmark slots and optional dates or labels.
+`PaginationControls` contains only generic pagination controls, not the collection;
+routes supply its pathname, optional query parameters, anchor and accessible label.
+Components stay in flat, per-component directories; newsletter components use the
+`Newsletter` prefix.
 
 `lib/newsletter.ts` reads Markdown/frontmatter from `content/newsletter/*.md`
 on the server; no content API or registry is needed. Article filenames define

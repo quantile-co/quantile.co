@@ -3,28 +3,32 @@
 import { Group, Pagination } from "@mantine/core";
 import Link from "next/link";
 
-export function NewsletterArticlePagination({
+export function PaginationControls({
   page,
   total,
   pathname,
-  sort = "newest",
+  query,
+  anchor,
+  label = "Pagination",
 }: {
   page: number;
   total: number;
-  pathname: "/" | "/newsletter";
-  sort?: string;
+  pathname: string;
+  query?: Record<string, string>;
+  anchor?: string;
+  label?: string;
 }) {
   if (total <= 1) return null;
 
   function href(target: number) {
-    const params = new URLSearchParams();
-    if (sort === "oldest") params.set("sort", "oldest");
+    const params = new URLSearchParams(query);
     if (target > 1) params.set("page", String(target));
-    return `${pathname}${params.size ? `?${params}` : ""}#articles`;
+    else params.delete("page");
+    return `${pathname}${params.size ? `?${params}` : ""}${anchor ? `#${encodeURIComponent(anchor)}` : ""}`;
   }
 
   return (
-    <Group component="nav" aria-label="Article pages" justify="center" py="xl">
+    <Group component="nav" aria-label={label} justify="center" py="xl">
       <Pagination
         value={page}
         total={total}

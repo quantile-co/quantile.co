@@ -1,4 +1,4 @@
-.root {
+.article {
   min-width: 0;
 }
 
@@ -11,19 +11,15 @@
 }
 
 .image {
-  display: grid;
+  position: relative;
   overflow: hidden;
   aspect-ratio: 16 / 9;
   border-radius: var(--mantine-radius-sm);
-  background: var(--site-surface-raised-hover);
-  place-items: center;
+  background: var(--site-surface-raised);
 }
 
-.wordmark {
-  width: 65%;
-  aspect-ratio: 102 / 35;
-  background: var(--site-text-primary);
-  mask: url("/images/brand/wordmark-dark.svg") center / contain no-repeat;
+.image > * {
+  object-fit: cover;
   transition: transform 200ms ease;
 }
 
@@ -40,57 +36,57 @@
   text-wrap: balance;
 }
 
-.preview {
+.subtitle {
   line-height: 1.5;
   text-wrap: pretty;
 }
 
-.root[data-layout="grid"] .title {
+.article[data-layout="grid"] .title {
   font-size: clamp(1.5rem, 1.8vw, 1.75rem);
 }
 
-.root[data-layout="grid"] .preview {
+.article[data-layout="grid"] .subtitle {
   font-size: var(--mantine-font-size-lg);
 }
 
-.root[data-layout="list"] {
+.article[data-layout="list"] {
   padding-block: var(--mantine-spacing-lg);
   border-bottom: 1px solid var(--site-divider-color);
 }
 
-.root[data-layout="list"]:last-child {
+.article[data-layout="list"]:last-child {
   border-bottom: 0;
 }
 
-.root[data-layout="list"] .link {
+.article[data-layout="list"] .link {
   flex-direction: row;
   align-items: flex-start;
 }
 
-.root[data-layout="list"] .image {
+.article[data-layout="list"] .image {
   width: 160px;
   aspect-ratio: 1;
   flex-shrink: 0;
 }
 
 @media (max-width: $mantine-breakpoint-sm) {
-  .root[data-layout="list"] .image {
+  .article[data-layout="list"] .image {
     width: 96px;
   }
 }
 
 @media (hover: hover) {
-  .link:hover .wordmark {
+  .link:hover .image > * {
     transform: scale(1.025);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wordmark {
+  .image > * {
     transition: none;
   }
 
-  .link:hover .wordmark {
+  .link:hover .image > * {
     transform: none;
   }
 }

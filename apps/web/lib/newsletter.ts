@@ -8,7 +8,7 @@ type NewsletterArticle = {
   slug: string;
   title: string;
   date: string;
-  preview: string;
+  subtitle: string;
   image: string;
   imageAlt: string;
   placeholder: boolean;
@@ -27,7 +27,13 @@ export const getNewsletterArticles = cache(
         const { data, content } = matter(
           await readFile(path.join(directory, file), "utf8"),
         );
-        for (const field of ["title", "date", "preview", "image", "imageAlt"]) {
+        for (const field of [
+          "title",
+          "date",
+          "subtitle",
+          "image",
+          "imageAlt",
+        ]) {
           if (typeof data[field] !== "string" || !data[field].trim()) {
             throw new Error(`Missing newsletter ${field} in ${file}`);
           }
@@ -42,7 +48,7 @@ export const getNewsletterArticles = cache(
           slug: file.slice(0, -3),
           title: data.title,
           date: data.date,
-          preview: data.preview,
+          subtitle: data.subtitle,
           image: data.image,
           imageAlt: data.imageAlt,
           placeholder: data.placeholder === true,

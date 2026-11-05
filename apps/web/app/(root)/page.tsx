@@ -1,12 +1,13 @@
 import { Container, SimpleGrid } from "@mantine/core";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Fragment } from "react";
-import { NewsletterArticlePagination } from "@/components/NewsletterArticlePagination/NewsletterArticlePagination";
-import { NewsletterArticlePreview } from "@/components/NewsletterArticlePreview/NewsletterArticlePreview";
-import { NewsletterConsultingCTA } from "@/components/NewsletterConsultingCTA/NewsletterConsultingCTA";
+import { NewsletterArticleListItem } from "@/components/NewsletterArticleListItem/NewsletterArticleListItem";
 import { NewsletterHero } from "@/components/NewsletterHero/NewsletterHero";
 import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
+import { PaginationControls } from "@/components/PaginationControls/PaginationControls";
 import { getNewsletterPage } from "@/lib/newsletter";
+import listingClasses from "./newsletter.module.css";
 
 // Reserve one item per page for the consulting preview.
 const articlesPerPage = 12 - 1;
@@ -56,17 +57,46 @@ export default async function Home({
         >
           {articles.map((article, index) => (
             <Fragment key={article.slug}>
-              <NewsletterArticlePreview {...article} />
+              <NewsletterArticleListItem
+                href={`/newsletter/${article.slug}`}
+                title={article.title}
+                subtitle={article.subtitle}
+                image={
+                  <Image
+                    src={article.image}
+                    alt={article.imageAlt}
+                    fill
+                    sizes="(max-width: 48em) 100vw, (max-width: 62em) 50vw, 33vw"
+                  />
+                }
+              />
               {index + 1 === Math.ceil(articles.length / 2) && (
-                <NewsletterConsultingCTA />
+                <NewsletterArticleListItem
+                  component="aside"
+                  href="/consulting"
+                  label="Consulting"
+                  title="Data and AI consulting"
+                  subtitle="Senior data and AI engineering, working alongside your team."
+                  image={
+                    <div className={listingClasses.consultingImage}>
+                      <span
+                        className={listingClasses.wordmark}
+                        role="img"
+                        aria-label="Quantile"
+                      />
+                    </div>
+                  }
+                />
               )}
             </Fragment>
           ))}
         </SimpleGrid>
-        <NewsletterArticlePagination
+        <PaginationControls
           page={currentPage}
           total={totalPages}
           pathname="/"
+          anchor="articles"
+          label="Article pages"
         />
       </Container>
     </main>
