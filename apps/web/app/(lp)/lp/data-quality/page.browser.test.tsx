@@ -59,8 +59,12 @@ describe("Founder-letter responsive layout", () => {
         const range = document.createRange();
         range.selectNodeContents(heading);
         const lines = [...range.getClientRects()];
-        if (width >= 768 || width <= 425) {
-          expect(lines).toHaveLength(width >= 768 ? 2 : 3);
+        if (width >= 768) {
+          // Reserving the scrollbar gutter can move a word onto a third line.
+          expect(lines.length).toBeGreaterThanOrEqual(2);
+          expect(lines.length).toBeLessThanOrEqual(3);
+        } else if (width <= 425) {
+          expect(lines).toHaveLength(3);
         }
         if (
           width >= 768 ||
@@ -129,7 +133,15 @@ describe("Founder-letter responsive layout", () => {
           ).toBeLessThan(1);
         } else {
           expect(
-            Math.abs(articleBox.width - Math.min(976, (width * 695) / 1024)),
+            Math.abs(
+              articleBox.width -
+                Math.min(
+                  976,
+                  (document.documentElement.getBoundingClientRect().width *
+                    695) /
+                    1024,
+                ),
+            ),
           ).toBeLessThan(1);
         }
         expect(getComputedStyle(signature).fontSize).toBe(

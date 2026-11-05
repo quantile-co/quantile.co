@@ -1,6 +1,6 @@
 .sidebar {
   --profile-detail-font-size: clamp(
-    0.8125rem,
+    clamp(0.75rem, 1.65vw, 0.8125rem),
     calc(var(--letter-intro-font-size) * 0.65),
     1.0625rem
   );
@@ -98,10 +98,6 @@
   .page {
     /* Extra inset tapers from 32px near 768px to zero at 576px. */
     --landing-extra-padding: clamp(0px, calc((100vw - 36rem) / 6), 2rem);
-  }
-
-  .sidebar {
-    --profile-detail-font-size: clamp(0.75rem, 1.65vw, 0.8125rem);
   }
 }
 

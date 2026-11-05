@@ -87,11 +87,14 @@ for (const colorScheme of ["light", "dark"] as const) {
       ).toBe(width < 576);
       const headerBox = header.getBoundingClientRect();
       const headerStyle = getComputedStyle(header);
+      // Stable root gutters reduce viewport units by the reserved scrollbar width.
+      const layoutWidth =
+        document.documentElement.getBoundingClientRect().width;
       const extraPadding =
         width < 576
-          ? Math.max(0, ((width - 320) * 72) / 256)
+          ? Math.max(0, ((layoutWidth - 320) * 72) / 256)
           : width < 768
-            ? ((width - 576) * 32) / 192
+            ? Math.max(0, ((layoutWidth - 576) * 32) / 192)
             : 0;
       const mainStyle = getComputedStyle(
         container.querySelector("main") as HTMLElement,

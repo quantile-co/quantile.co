@@ -51,6 +51,7 @@
 }
 
 html {
+  scrollbar-gutter: stable;
   scroll-padding-top: calc(var(--site-header-height) + 1rem);
 }
 
