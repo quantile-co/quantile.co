@@ -10,7 +10,7 @@ import {
   Pagination,
   virtualColor,
 } from "@mantine/core";
-import controls from "./controls.module.css";
+import classes from "./theme.module.css";
 
 const fontFamily =
   '"Outfit Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -40,15 +40,15 @@ export const theme = createTheme({
     Anchor: Anchor.extend({ defaultProps: { underline: "never" } }),
     Button: Button.extend({
       defaultProps: { radius: "xl" },
-      classNames: { root: controls.button },
+      classNames: { root: classes.button },
     }),
     Input: Input.extend({
       defaultProps: { radius: "md" },
-      classNames: { input: controls.input },
+      classNames: { input: classes.input },
     }),
     Pagination: Pagination.extend({
       defaultProps: { size: "lg" },
-      classNames: { control: controls.pagination },
+      classNames: { control: classes.pagination },
     }),
   },
 });
