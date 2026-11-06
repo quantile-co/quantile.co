@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import Markdown from "react-markdown";
 import { NewsletterArticleByline } from "@/components/NewsletterArticleByline/NewsletterArticleByline";
+import { NewsletterSubscribeFooter } from "@/components/NewsletterSubscribeFooter/NewsletterSubscribeFooter";
 import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
 import { createPageMetadata, organization, site } from "@/lib/metadata";
 import { getNewsletterArticle, getNewsletterArticles } from "@/lib/newsletter";
@@ -128,27 +129,15 @@ export default async function NewsletterArticle({
           <Typography fz={{ base: "lg", sm: "xl" }} lh="md">
             <Markdown>{article.content}</Markdown>
           </Typography>
-          <Stack
-            component="footer"
-            align="center"
-            gap="lg"
-            aria-labelledby="article-subscribe-title"
-            className={classes.subscribe}
-          >
-            <Title
-              order={2}
-              id="article-subscribe-title"
-              className={classes.subscribeTitle}
-            >
-              The AI newsletter for data leaders.
-            </Title>
-            <div className={classes.subscribeForm}>
+          <NewsletterSubscribeFooter
+            titleId="article-subscribe-title"
+            form={
               <NewsletterSubscribeForm
                 layout="compact"
                 buttonProps={{ children: "Subscribe" }}
               />
-            </div>
-          </Stack>
+            }
+          />
         </Stack>
       </Container>
     </main>

@@ -1,28 +1,32 @@
-import { Container, VisuallyHidden } from "@mantine/core";
+import { Container, type ContainerProps, VisuallyHidden } from "@mantine/core";
 import { IconPlayerPlayFilled } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import classes from "./LandingPage.module.css";
 
 export function LandingPage({
   className,
+  containerProps,
   headline,
-  sidebar,
+  heading,
   showVideo = true,
   introduction,
   proof,
   action,
   newsletterForm,
+  newsletterFooter,
   postscript = "P.S. Subscribe to the AI newsletter for data leaders below.",
   children,
 }: {
   className?: string;
+  containerProps?: Pick<ContainerProps, "size" | "px">;
   headline?: string;
-  sidebar?: ReactNode;
+  heading?: ReactNode;
   showVideo?: boolean;
   introduction: ReactNode;
   proof: ReactNode;
   action: ReactNode;
-  newsletterForm: ReactNode;
+  newsletterForm?: ReactNode;
+  newsletterFooter?: ReactNode;
   postscript?: ReactNode;
   children: ReactNode;
 }) {
@@ -31,29 +35,29 @@ export function LandingPage({
       <Container
         component="main"
         size="xl"
-        px={sidebar ? "var(--site-page-padding)" : 0}
+        px={0}
+        {...containerProps}
         className={classes.main}
-        data-with-sidebar={sidebar ? true : undefined}
         id="main-content"
         tabIndex={-1}
       >
-        {sidebar && <div className={classes.sidebar}>{sidebar}</div>}
         <div className={classes.content}>
           <div className={classes.intro}>
-            {headline ? (
-              <h1 className={classes.title} id="founder-letter-title">
-                {headline}
-              </h1>
-            ) : (
-              <VisuallyHidden component="h1" id="founder-letter-title">
-                Consulting
-              </VisuallyHidden>
-            )}
+            {heading ??
+              (headline ? (
+                <h1 className={classes.title} id="founder-letter-title">
+                  {headline}
+                </h1>
+              ) : (
+                <VisuallyHidden component="h1" id="founder-letter-title">
+                  Consulting
+                </VisuallyHidden>
+              ))}
             {showVideo && (
               <section
                 aria-label="Video introduction"
                 className={classes.videoPlaceholder}
-                data-with-title={headline ? true : undefined}
+                data-with-title={headline || heading ? true : undefined}
               >
                 <span aria-hidden="true" className={classes.videoPlay}>
                   <IconPlayerPlayFilled size={28} />
@@ -77,10 +81,12 @@ export function LandingPage({
               </p>
               <div className={classes.letterAction}>{action}</div>
             </div>
-            <div className={classes.postscript}>
-              <p>{postscript}</p>
-              {newsletterForm}
-            </div>
+            {newsletterFooter ?? (
+              <div className={classes.postscript}>
+                <p>{postscript}</p>
+                {newsletterForm}
+              </div>
+            )}
           </article>
         </div>
       </Container>

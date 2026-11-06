@@ -1,7 +1,8 @@
-import { Box, Flex, Stack, Text } from "@mantine/core";
+import { Title } from "@mantine/core";
 import Image from "next/image";
 import { CTAButton } from "@/components/CTAButton/CTAButton";
 import { LandingPage } from "@/components/LandingPage/LandingPage";
+import { NewsletterSubscribeFooter } from "@/components/NewsletterSubscribeFooter/NewsletterSubscribeFooter";
 import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
 import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
 import { createPageMetadata, organization } from "@/lib/metadata";
@@ -22,96 +23,40 @@ export default function ConsultingPage() {
     <>
       <LandingPage
         className={classes.page}
+        containerProps={{ size: 800, px: "var(--site-page-padding)" }}
         showVideo={false}
-        sidebar={
-          <Stack gap="md" className={classes.sidebar}>
-            <aside aria-label="About AJ Welch" className={classes.profile}>
-              <div className={classes.portraitFrame}>
-                <Image
-                  src="/images/contributors/aj-welch.webp"
-                  alt="Portrait of AJ Welch"
-                  fill
-                  sizes="(max-width: 48em) 170px, (max-width: 75em) 22vw, 224px"
-                  className={classes.portrait}
-                />
-              </div>
-              <div className={classes.profileText}>
-                <div className={classes.identity}>
-                  <Text className={classes.name}>AJ Welch</Text>
-                  <a href="mailto:aj@quantile.co" className={classes.email}>
-                    aj@quantile.co
-                  </a>
-                </div>
-              </div>
-            </aside>
-            <Stack gap="md" visibleFrom="xs" className={classes.sidebarSignup}>
-              <Text
-                className={classes.subscribePrompt}
-                c="var(--site-text-primary)"
-              >
-                Subscribe to the <br />
-                AI newsletter for data leaders.
-              </Text>
-              <NewsletterSubscribeForm layout="compact" />
-            </Stack>
-          </Stack>
-        }
-        introduction={
-          <>
-            <span className={classes.introPortrait}>
-              <span className={classes.introProfile}>
-                <Image
-                  src="/images/contributors/aj-welch.webp"
-                  alt="Portrait of AJ Welch"
-                  width={128}
-                  height={128}
-                  sizes="72px"
-                  className={classes.portrait}
-                />
-                <span className={classes.introPortraitName}>
-                  <span>AJ</span> <span>Welch</span>
-                </span>
-                <a
-                  href="mailto:aj@quantile.co"
-                  aria-label="aj@quantile.co"
-                  className={classes.introPortraitEmail}
-                >
-                  aj@quantile.co
-                </a>
-              </span>
+        heading={
+          <header className={classes.heading}>
+            <span className={classes.portraitRow}>
+              <Image
+                src="/images/contributors/aj-welch.webp"
+                alt="Portrait of AJ Welch"
+                width={128}
+                height={128}
+                sizes="(max-width: 50em) 64px, (max-width: 75em) 8vw, 96px"
+                className={classes.portrait}
+              />
             </span>
-            <span className={classes.introCopy}>
-              Hi, I’m AJ, and I’ve been a software engineer for over 15 years
-              at:
-            </span>
-          </>
+            <Title order={1} id="founder-letter-title">
+              Hi, I’m AJ.
+            </Title>
+          </header>
         }
+        introduction="I’ve been a software engineer for over 15 years at:"
         proof={
           <SocialProofSection ariaLabel="Company experience and client work" />
         }
         action={<CTAButton />}
-        newsletterForm={
-          <Flex hiddenFrom="xs" w="80%" maw="35ch" justify="center">
-            <NewsletterSubscribeForm layout="compact" />
-          </Flex>
-        }
-        postscript={
-          <>
-            <Box component="span" hiddenFrom="xs">
-              P.S. Subscribe to the AI newsletter for data leaders below.
-            </Box>
-            <Box component="span" visibleFrom="xs">
-              P.S. Subscribe to the AI newsletter for data leaders in the
-              sidebar or{" "}
-              <a
-                href="/newsletter"
-                aria-label="Subscribe to the newsletter here"
-              >
-                here
-              </a>
-              .
-            </Box>
-          </>
+        newsletterFooter={
+          <NewsletterSubscribeFooter
+            titleId="consulting-subscribe-title"
+            form={
+              <NewsletterSubscribeForm
+                layout="compact"
+                buttonProps={{ children: "Subscribe" }}
+              />
+            }
+          />
         }
       >
         <p>

@@ -1,0 +1,21 @@
+.subscribe {
+  margin-top: var(--mantine-spacing-xl);
+  padding-block: calc(var(--mantine-spacing-xl) * 2) var(--mantine-spacing-md);
+  border-top: 1px solid var(--site-divider-color);
+  text-align: center;
+}
+
+.title {
+  max-width: 24ch;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.form {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 360px;
+}

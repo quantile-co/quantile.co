@@ -119,36 +119,35 @@ the contributor using the standard SEO `authors` and Schema.org `author` fields.
 Ordinary pagination stays self-canonical; alternative archive sorting is noindex. Sitemaps
 exclude placeholders, campaigns and query variants, without synthetic update dates.
 
-`/consulting` uses the letter layout without a visible headline or video. Its
-content gutters match the header at every viewport; there is no extra mobile or
-tablet inset. Mantine’s `xs` breakpoint (576px) controls the consulting layout:
-below it, the portrait/name/email form the left column of a top-aligned row with
-the introduction on the right, separated by a consistent 16px gap. Their heights
-closely match. Mobile sizing is CSS-only and fluid, without narrower layout
-breakpoints or JavaScript measurement. From 576px upward, the profile/signup use
-the left sidebar. Between 576px and 768px its width scales from approximately
-96px to 144px; supporting text and signup controls scale with the sidebar container.
-The sidebar name scales independently of the larger letter introduction.
-There is no intermediate profile-above-letter layout. The profile scrolls in normal
-document flow; it is not sticky. The letter body currently uses lorem ipsum:
-a full-width paragraph, two bullet lists, then another full-width paragraph.
-The lists form two columns without a divider from 576px and stack below it.
-The introduction, company proof, signature/CTA and P.S. remain separate.
-The route supplies the wider-layout profile through the landing component’s sidebar slot.
-The compact newsletter signup follows that profile on tablet/desktop; the letter’s text P.S.
-points to the sidebar. On mobile the signup remains beneath the letter’s P.S.; only
-one form is visible at either breakpoint. Compact submit controls share the input’s
-outer border with a left divider, without a separate button outline or filled hover.
-Input hover and focus share a subtle border; filled/autofilled fields retain the empty
-background. The campaign retains its headline and video.
-Consulting copy is intentionally separate from `/lp/data-quality` so the two can evolve independently;
-do not extract a shared consulting-letter content component.
+`/consulting` uses the letter layout without video or sidebar. At every viewport,
+a single portrait sits above “Hi, I’m AJ.”, without a name/email caption and with
+a shared left edge. Its size is twice the responsive title font size (64–96px).
+Portrait-to-title and title-to-opening gaps are both 20px. The H1 matches newsletter article title
+typography, with cap-height trimming. “I’ve been a software engineer for over
+15 years at:” starts the full-width letter below that heading in ordinary body text.
+Consulting and articles use the same 800px container and responsive page padding,
+retaining 752px of desktop content width. Both use 64px of outer top spacing below the site header. The portrait row
+preserves article-title font leading and aligns the image to its cap height,
+so the portrait matches the article’s visible title top rather than its line-box top. Body text is 18px below `sm`, 20px from `sm`, with 1.55 line-height
+and normal tracking. Consulting bullets use 18px, forming two columns from
+576px and stacking below it. The body remains placeholder lorem ipsum.
+
+Consulting and articles share `NewsletterSubscribeFooter`: a divider, centered
+newsletter title and compact signup form, injected through props. Consulting
+has one form below the letter and no P.S.; its closing signature/email and booking
+CTA remain. Article forwarded signup is unchanged. Shared compact controls retain
+their border/focus behavior and preview-only submission.
+`LandingPage` accepts container sizing/padding and composed heading/footer slots;
+the obsolete sidebar API/styles are removed. The retained campaign keeps its
+existing headline, video, P.S. and signup styling. Consulting copy remains
+independent of `/lp/data-quality`; do not extract a shared letter-content component.
 
 The letter uses an external booking link and a mailto link, not an embedded
 calendar or local form. Social proof shows Google, CompilerWorks and Chartio in
 three static columns at every viewport down to 320px. Company names stay beside
 their square marks. Full, unwrapped bylines and “· Clients:” share a left-aligned
-line below. CompilerWorks has a wider column so its name stays on one line.
+line below. A shared 3px gap separates the company header, byline and client-logo
+row. CompilerWorks has a wider column so its name stays on one line.
 Smaller client logos use evenly spaced slots within each company column, with
 left-aligned names underneath. Fluid sizing replaces carousel state and
 social-proof layout breakpoints.

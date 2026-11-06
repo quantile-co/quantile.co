@@ -3,10 +3,30 @@ import "@/app/globals.css";
 import { Container, MantineProvider } from "@mantine/core";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
-import { page } from "vitest/browser";
+import { page, userEvent } from "vitest/browser";
 import { theme } from "@/app/theme";
 import headerClasses from "@/components/Header/Header.module.css";
+import Article from "../newsletter/[slug]/page";
 import ConsultingPage from "./page";
+
+vi.mock("next/navigation", () => ({ notFound: vi.fn() }));
+vi.mock("@/lib/newsletter", () => ({
+  getNewsletterArticle: async () => ({
+    slug: "example",
+    title: "Article title reference",
+    subtitle: "Practical engineering notes for data leaders.",
+    date: "2026-10-01",
+    contributor: {
+      name: "AJ Welch",
+      image: "/images/contributors/aj-welch.webp",
+    },
+    image: "/images/newsletter/placeholder-01.svg",
+    imageAlt: "Example cover",
+    placeholder: true,
+    content: "Article content.",
+  }),
+  getNewsletterArticles: async () => [],
+}));
 
 let container: HTMLDivElement;
 let root: Root;
@@ -22,7 +42,7 @@ afterEach(async () => {
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  it(`aligns the consulting layout and keeps the profile in normal document flow in ${colorScheme} mode`, async () => {
+  it(`unifies consulting with article widths and signup styling in ${colorScheme} mode`, async () => {
     initialViewport = { width: window.innerWidth, height: window.innerHeight };
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -42,370 +62,255 @@ for (const colorScheme of ["light", "dark"] as const) {
             </a>
           </nav>
         </Container>
-        <ConsultingPage />
+        <div data-consulting>
+          <ConsultingPage />
+        </div>
+        <div
+          data-article-reference
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: 0,
+            overflow: "hidden",
+            visibility: "hidden",
+          }}
+        >
+          {await Article({ params: Promise.resolve({ slug: "example" }) })}
+        </div>
       </MantineProvider>,
     );
     await vi.waitFor(() =>
       expect(
-        container.querySelector('aside[aria-label="About AJ Welch"]'),
+        container.querySelector("[data-consulting] footer"),
       ).not.toBeNull(),
     );
     await document.fonts.ready;
-    expect(
-      container.querySelector('[aria-label="Video introduction"]'),
-    ).toBeNull();
+    const consulting = container.querySelector(
+      "[data-consulting]",
+    ) as HTMLElement;
+    const reference = container.querySelector(
+      "[data-article-reference]",
+    ) as HTMLElement;
+    const main = consulting.querySelector("main") as HTMLElement;
+    const letter = main.querySelector(
+      "article[aria-labelledby]",
+    ) as HTMLElement;
+    const title = main.querySelector("h1") as HTMLElement;
+    const heading = title.parentElement as HTMLElement;
+    const portrait = heading.querySelector("img") as HTMLImageElement;
+    const opening = letter.querySelector(":scope > p") as HTMLElement;
+    const footer = letter.querySelector("footer") as HTMLElement;
+    const form = footer.querySelector("form") as HTMLFormElement;
+    const input = form.querySelector("input") as HTMLInputElement;
+    const button = form.querySelector("button") as HTMLButtonElement;
+    const referenceArticle = reference.querySelector("article") as HTMLElement;
+    const referenceTitle = reference.querySelector("h1") as HTMLElement;
+    const referenceFooter = reference.querySelector("footer") as HTMLElement;
+    const referenceInput = referenceFooter.querySelector(
+      "input",
+    ) as HTMLInputElement;
+    const booking = letter.querySelector(
+      '[data-site-cta="booking"]',
+    ) as HTMLElement;
 
-    expect(container.textContent).not.toContain(
-      "15+ years experience at Google, CompilerWorks, and Chartio.",
+    expect(consulting.querySelector("aside")).toBeNull();
+    expect(
+      consulting.querySelector('[aria-label="Video introduction"]'),
+    ).toBeNull();
+    expect(consulting.textContent).not.toMatch(/P\.S\.|sidebar/);
+    expect(heading.textContent).toBe("Hi, I’m AJ.");
+    expect(heading.querySelector("a")).toBeNull();
+    expect(
+      consulting.querySelectorAll('img[alt="Portrait of AJ Welch"]'),
+    ).toHaveLength(1);
+    expect(consulting.querySelectorAll("form")).toHaveLength(1);
+    expect(footer.querySelector("h2")?.textContent).toBe(
+      "The AI newsletter for data leaders.",
     );
+    expect(opening.textContent).toBe(
+      "I’ve been a software engineer for over 15 years at:",
+    );
+    expect(
+      consulting.querySelectorAll('a[href="mailto:aj@quantile.co"]'),
+    ).toHaveLength(1);
 
     for (const width of [
-      320, 321, 375, 425, 435, 500, 575, 576, 577, 660, 720, 767, 768, 769, 992,
-      1024, 1200, 1440, 1920,
+      320, 321, 375, 390, 425, 500, 575, 576, 577, 660, 720, 767, 768, 769, 800,
+      992, 1024, 1200, 1440, 1920,
     ]) {
       await page.viewport(width, 900);
       window.scrollTo(0, 0);
-      const header = container.querySelector(
-        "header.mantine-Container-root",
-      ) as HTMLElement;
-      const profile = container.querySelector(
-        'aside[aria-label="About AJ Welch"]',
-      ) as HTMLElement;
-      const letter = container.querySelector(
-        'article[aria-labelledby="founder-letter-title"]',
-      ) as HTMLElement;
+      const letterBox = letter.getBoundingClientRect();
+      const referenceBox = referenceArticle.getBoundingClientRect();
+      const headingBox = heading.getBoundingClientRect();
+      const portraitBox = portrait.getBoundingClientRect();
+      const titleBox = title.getBoundingClientRect();
+      const siteHeaderBox = (
+        container.querySelector("header.mantine-Container-root") as HTMLElement
+      ).getBoundingClientRect();
+      for (const edge of ["left", "right", "width"] as const) {
+        expect(letterBox[edge]).toBeCloseTo(referenceBox[edge], 1);
+        expect(headingBox[edge]).toBeCloseTo(letterBox[edge], 1);
+        expect(footer.getBoundingClientRect()[edge]).toBeCloseTo(
+          letterBox[edge],
+          1,
+        );
+      }
+      expect(main.getBoundingClientRect().width).toBeLessThanOrEqual(800);
+      if (width >= 992) expect(letterBox.width).toBe(752);
+      const referenceTopGap =
+        referenceTitle.getBoundingClientRect().top -
+        (reference.querySelector("main") as HTMLElement).getBoundingClientRect()
+          .top;
+      expect(headingBox.top - siteHeaderBox.bottom).toBe(referenceTopGap);
+      expect(referenceTopGap).toBe(64);
+      const referenceText = document.createRange();
+      referenceText.selectNodeContents(referenceTitle);
+      const canvas = document.createElement("canvas").getContext("2d");
+      if (!canvas) throw new Error("Canvas metrics unavailable");
+      const referenceStyle = getComputedStyle(referenceTitle);
+      canvas.font = `${referenceStyle.fontWeight} ${referenceStyle.fontSize} ${referenceStyle.fontFamily}`;
+      const metrics = canvas.measureText("H");
+      const referenceInkTop =
+        referenceText.getClientRects()[0].top +
+        metrics.fontBoundingBoxAscent -
+        metrics.actualBoundingBoxAscent;
+      const referenceMainTop = (
+        reference.querySelector("main") as HTMLElement
+      ).getBoundingClientRect().top;
+      expect(
+        Math.abs(
+          portraitBox.top -
+            siteHeaderBox.bottom -
+            (referenceInkTop - referenceMainTop),
+        ),
+      ).toBeLessThan(1.5);
+      const titleSize = parseFloat(getComputedStyle(title).fontSize);
+      expect(portraitBox.width).toBeCloseTo(titleSize * 2, 1);
+      expect(portraitBox.height).toBeCloseTo(titleSize * 2, 1);
+      expect(portraitBox.left).toBe(letterBox.left);
+      expect(titleBox.left).toBe(portraitBox.left);
+      expect(titleBox.top - portraitBox.bottom).toBeCloseTo(20, 1);
+      expect(opening.getBoundingClientRect().top - titleBox.bottom).toBeCloseTo(
+        20,
+        1,
+      );
+      expect(titleBox.right).toBeLessThanOrEqual(letterBox.right);
+      expect(getComputedStyle(title).textBoxTrim).toBe("trim-start");
+      expect(getComputedStyle(title).textBoxEdge).toBe("cap alphabetic");
+      for (const property of [
+        "fontFamily",
+        "fontSize",
+        "fontWeight",
+        "lineHeight",
+        "letterSpacing",
+        "textWrap",
+        "color",
+      ] as const) {
+        expect(getComputedStyle(title)[property]).toBe(
+          getComputedStyle(referenceTitle)[property],
+        );
+      }
+      const bodySize = width >= 768 ? 20 : 18;
+      expect(getComputedStyle(opening).fontSize).toBe(`${bodySize}px`);
+      expect(getComputedStyle(opening).fontWeight).toBe("400");
+      expect(parseFloat(getComputedStyle(opening).lineHeight)).toBeCloseTo(
+        bodySize * 1.55,
+      );
+      expect(getComputedStyle(opening).letterSpacing).toBe("normal");
+      expect(opening.getBoundingClientRect().top).toBeGreaterThan(
+        headingBox.bottom,
+      );
+      expect(opening.getBoundingClientRect().left).toBe(letterBox.left);
+      expect(opening.getBoundingClientRect().width).toBe(letterBox.width);
       const proof = letter.querySelector(
         'section[aria-label="Company experience and client work"]',
       ) as HTMLElement;
-      await vi.waitFor(() =>
-        expect(
-          proof.querySelectorAll("article:not([aria-hidden])"),
-        ).toHaveLength(3),
+      expect(proof.querySelectorAll("article:not([aria-hidden])")).toHaveLength(
+        3,
       );
-      const headerBox = header.getBoundingClientRect();
-      const headerStyle = getComputedStyle(header);
-      const mainStyle = getComputedStyle(
-        container.querySelector("main") as HTMLElement,
-      );
-      for (const side of ["paddingLeft", "paddingRight"] as const) {
-        expect(
-          Math.abs(parseFloat(mainStyle[side]) - parseFloat(headerStyle[side])),
-        ).toBeLessThan(0.01);
+      for (const card of proof.querySelectorAll("[data-company]")) {
+        const [companyHeader, details] = card.children;
+        const [byline, clients] = details.children;
+        const above =
+          byline.getBoundingClientRect().top -
+          companyHeader.getBoundingClientRect().bottom;
+        const below =
+          clients.getBoundingClientRect().top -
+          byline.getBoundingClientRect().bottom;
+        expect(above).toBeCloseTo(3, 1);
+        expect(below).toBeCloseTo(above, 1);
       }
-      const left = headerBox.left + parseFloat(headerStyle.paddingLeft);
-      const headerText = document.createRange();
-      headerText.selectNodeContents(header.querySelector("nav a") as Element);
-      const right = headerText.getBoundingClientRect().right;
-      const profileBox = profile.getBoundingClientRect();
-      const letterBox = letter.getBoundingClientRect();
-      expect(
-        parseFloat(
-          getComputedStyle(profile.querySelector("p") as HTMLElement).fontSize,
-        ),
-      ).toBeLessThanOrEqual(
-        parseFloat(
-          getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
-            .fontSize,
-        ),
+      expect(proof.getBoundingClientRect().top).toBeGreaterThan(
+        opening.getBoundingClientRect().bottom,
       );
-
-      expect(
-        getComputedStyle(
-          letter.querySelector(":scope > p > span:last-child") as HTMLElement,
-        ).fontWeight,
-      ).toBe("500");
-      const introFontSize = parseFloat(
-        getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
-          .fontSize,
-      );
-      for (const detail of profile.querySelectorAll("a")) {
-        expect(parseFloat(getComputedStyle(detail).fontSize)).toBeLessThan(
-          introFontSize,
-        );
-      }
-
-      const introPortrait = letter.querySelector(
-        ":scope > p img",
-      ) as HTMLElement;
-      if (width >= 576) {
-        expect(Math.abs(profileBox.left - left)).toBeLessThan(1);
-        expect(introPortrait.getClientRects()).toHaveLength(0);
-      } else {
-        expect(profile.getClientRects()).toHaveLength(0);
-      }
-      expect(letterBox.left).toBeGreaterThanOrEqual(left);
-      expect(Math.abs(letterBox.right - right)).toBeLessThan(1);
-      const booking = letter.querySelector(
-        '[data-site-cta="booking"]',
-      ) as HTMLElement;
-      const signature = booking.parentElement
-        ?.previousElementSibling as HTMLElement;
-      const signatureText = [...signature.children].map((line) => {
-        const range = document.createRange();
-        range.selectNodeContents(line);
-        return range.getBoundingClientRect();
-      });
-      const signatureTextHeight =
-        Math.max(...signatureText.map((line) => line.bottom)) -
-        Math.min(...signatureText.map((line) => line.top));
-      expect(booking.getBoundingClientRect().height).toBeLessThanOrEqual(
-        signatureTextHeight,
-      );
-      expect(booking.getBoundingClientRect().height).toBeGreaterThanOrEqual(32);
-      expect(booking.getBoundingClientRect().right).toBeLessThanOrEqual(
-        right + 0.5,
-      );
-      expect(booking.getBoundingClientRect().left).toBeGreaterThanOrEqual(left);
-      for (const block of letter.querySelectorAll(":scope > p, :scope > ul")) {
-        expect(block.getBoundingClientRect().left).toBeGreaterThanOrEqual(left);
-      }
-      expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
-      const forms = [
-        ...container.querySelectorAll<HTMLFormElement>("form"),
-      ].filter((form) => form.getClientRects().length > 0);
-      expect(forms).toHaveLength(1);
-      expect(letter.contains(forms[0])).toBe(width < 576);
-      const input = forms[0].querySelector("input") as HTMLElement;
-      const submit = forms[0].querySelector("button") as HTMLElement;
-      const inputBox = input.getBoundingClientRect();
-      const submitBox = submit.getBoundingClientRect();
-      expect(submitBox.left).toBeGreaterThan(inputBox.left);
-      expect(submitBox.right).toBeLessThan(inputBox.right);
-      expect(
-        Math.abs(
-          submitBox.top +
-            submitBox.height / 2 -
-            inputBox.top -
-            inputBox.height / 2,
-        ),
-      ).toBeLessThan(1);
-      if (width < 576) {
-        const postscript = letter.querySelector(
-          ":scope > div:last-child > p",
-        ) as HTMLElement;
-        const postscriptBox = postscript.getBoundingClientRect();
-        expect(inputBox.width).toBeLessThan(postscriptBox.width);
-        expect(
-          Math.abs(
-            inputBox.left +
-              inputBox.width / 2 -
-              postscriptBox.left -
-              postscriptBox.width / 2,
-          ),
-        ).toBeLessThan(1);
-      }
-
       const columns = [
         ...letter.querySelectorAll<HTMLUListElement>(":scope > div > ul"),
       ];
       expect(columns).toHaveLength(2);
-      const bulletColumns = columns[0].parentElement as HTMLElement;
-      const opening = bulletColumns.previousElementSibling as HTMLElement;
-      const closing = bulletColumns.nextElementSibling as HTMLElement;
-      expect(opening.tagName).toBe("P");
-      expect(closing.tagName).toBe("P");
-      expect(opening.textContent).toMatch(/^Lorem ipsum/);
-      expect(closing.textContent).toMatch(/^Ut enim/);
-      expect(letter.querySelectorAll(":scope > p")).toHaveLength(3);
-      for (const paragraph of [opening, closing]) {
-        const box = paragraph.getBoundingClientRect();
-        expect(Math.abs(box.left - letterBox.left)).toBeLessThan(1);
-        expect(Math.abs(box.right - letterBox.right)).toBeLessThan(1);
+      for (const column of columns) {
+        expect(column.children).toHaveLength(5);
+        expect(getComputedStyle(column).fontSize).toBe("18px");
       }
-      expect(closing.nextElementSibling?.contains(booking)).toBe(true);
-      const [firstColumn, secondColumn] = columns.map((column) =>
+      const [first, second] = columns.map((column) =>
         column.getBoundingClientRect(),
       );
-      for (const column of columns) expect(column.children).toHaveLength(5);
-      expect(opening.getBoundingClientRect().bottom).toBeLessThanOrEqual(
-        firstColumn.top,
-      );
-      expect(closing.getBoundingClientRect().top).toBeGreaterThanOrEqual(
-        Math.max(firstColumn.bottom, secondColumn.bottom),
-      );
-      expect(booking.getBoundingClientRect().top).toBeGreaterThanOrEqual(
-        closing.getBoundingClientRect().bottom,
-      );
-      expect(
-        parseFloat(getComputedStyle(columns[0]).fontSize),
-      ).toBeLessThanOrEqual(parseFloat(getComputedStyle(letter).fontSize));
       if (width >= 576) {
-        expect(Math.abs(firstColumn.top - secondColumn.top)).toBeLessThan(1);
-        expect(firstColumn.right).toBeLessThanOrEqual(secondColumn.left);
-        expect(getComputedStyle(bulletColumns, "::before").content).toBe(
-          "none",
-        );
-        expect(getComputedStyle(columns[1]).borderInlineStartWidth).toBe("0px");
-        expect(
-          Math.abs(
-            secondColumn.left -
-              firstColumn.right -
-              parseFloat(getComputedStyle(bulletColumns).columnGap),
-          ),
-        ).toBeLessThan(0.1);
-        expect(Math.abs(firstColumn.width - secondColumn.width)).toBeLessThan(
-          0.1,
-        );
-        const prompt = profile.nextElementSibling?.querySelector(
-          "p",
-        ) as HTMLElement;
-        expect(prompt.querySelector("br")).not.toBeNull();
-        const promptText = document.createRange();
-        promptText.selectNodeContents(prompt);
-        const promptLines = [...promptText.getClientRects()].filter(
-          (line) => line.width > 0,
-        );
-        expect(new Set(promptLines.map((line) => line.top)).size).toBe(2);
-        const profileEmail = profile.querySelector("a") as HTMLElement;
-        const promptBox = prompt.getBoundingClientRect();
-        const portraitBox = (
-          profile.querySelector("img") as HTMLElement
-        ).getBoundingClientRect();
-        for (const line of promptLines) {
-          expect(line.left).toBeGreaterThanOrEqual(portraitBox.left);
-          expect(line.right).toBeLessThanOrEqual(portraitBox.right);
-        }
-        for (const block of [profileEmail, prompt, input]) {
-          const box = block.getBoundingClientRect();
-          expect(box.left).toBeGreaterThanOrEqual(portraitBox.left);
-          expect(box.right).toBeLessThanOrEqual(portraitBox.right);
-        }
-        expect(Math.abs(inputBox.width - portraitBox.width)).toBeLessThan(1);
-        const gapAbovePrompt =
-          promptBox.top - profileEmail.getBoundingClientRect().bottom;
-        const gapBelowPrompt = inputBox.top - promptBox.bottom;
-        expect(Math.abs(gapAbovePrompt - gapBelowPrompt)).toBeLessThan(1);
-        const promptFontSize = parseFloat(getComputedStyle(prompt).fontSize);
-        for (const detail of profile.querySelectorAll("a")) {
-          expect(promptFontSize).toBe(
-            parseFloat(getComputedStyle(detail).fontSize),
-          );
-        }
-        expect(parseFloat(getComputedStyle(input).fontSize)).toBeLessThan(
-          promptFontSize,
-        );
-        const introductionText = document.createRange();
-        introductionText.selectNodeContents(
-          letter.querySelector(":scope > p > span:last-child") as HTMLElement,
-        );
-        expect(introductionText.getClientRects().length).toBeLessThanOrEqual(2);
-        expect(
-          getComputedStyle(letter.querySelector(":scope > p") as HTMLElement)
-            .textWrap,
-        ).toBe("balance");
-        expect(profileBox.right).toBeLessThan(letterBox.left);
-        expect(
-          Math.abs(
-            letterBox.left - profileBox.right - parseFloat(mainStyle.columnGap),
-          ),
-        ).toBeLessThan(1);
-        expect(Math.abs(profileBox.top - letterBox.top)).toBeLessThan(1);
-        const sidebar = profile.parentElement?.parentElement as HTMLElement;
-        expect(getComputedStyle(sidebar).position).toBe("static");
-        window.scrollTo(0, 600);
-        await vi.waitFor(() =>
-          expect(
-            Math.abs(
-              profile.getBoundingClientRect().top -
-                (profileBox.top - window.scrollY),
-            ),
-          ).toBeLessThan(1),
-        );
+        expect(first.top).toBe(second.top);
+        expect(first.right).toBeLessThan(second.left);
       } else {
-        expect(secondColumn.top).toBeGreaterThanOrEqual(firstColumn.bottom);
-        expect(
-          getComputedStyle(columns[0].parentElement as HTMLElement, "::before")
-            .content,
-        ).toBe("none");
-        const portrait = introPortrait.getBoundingClientRect();
-        const introduction = (
-          letter.querySelector(":scope > p") as HTMLElement
-        ).getBoundingClientRect();
-        const proofBox = proof.getBoundingClientRect();
-        expect(Math.abs(portrait.width - portrait.height)).toBeLessThan(1);
-        const caption = introPortrait.nextElementSibling as HTMLElement;
-        expect(caption.textContent).toBe("AJ Welch");
-        const captionBox = caption.getBoundingClientRect();
-        const email = caption.nextElementSibling as HTMLAnchorElement;
-        expect(email.textContent?.trim()).toBe("aj@quantile.co");
-        expect(email.getAttribute("href")).toBe("mailto:aj@quantile.co");
-        const emailBox = email.getBoundingClientRect();
-        expect(emailBox.top).toBeGreaterThanOrEqual(captionBox.bottom);
-        expect(Math.abs(emailBox.left - portrait.left)).toBeLessThan(1);
-        expect(emailBox.bottom).toBeLessThanOrEqual(introduction.bottom);
-        const emailText = document.createRange();
-        emailText.selectNodeContents(email);
-        expect(
-          Math.abs(emailText.getBoundingClientRect().right - portrait.right),
-        ).toBeLessThan(1);
-        expect(captionBox.top).toBeGreaterThan(portrait.bottom);
-        expect(
-          Math.abs(
-            captionBox.left +
-              captionBox.width / 2 -
-              portrait.left -
-              portrait.width / 2,
-          ),
-        ).toBeLessThan(1);
-        expect(captionBox.bottom).toBeLessThanOrEqual(introduction.bottom);
-        expect(
-          parseFloat(getComputedStyle(introPortrait).borderRadius),
-        ).toBeLessThan(10);
-        expect(captionBox.width).toBeLessThanOrEqual(portrait.width);
-        const captionText = document.createRange();
-        captionText.selectNodeContents(caption);
-        expect(
-          Math.abs(captionText.getBoundingClientRect().right - portrait.right),
-        ).toBeLessThan(1);
-        expect(captionText.getBoundingClientRect().left).toBeGreaterThanOrEqual(
-          portrait.left,
-        );
-        expect(
-          Math.abs(captionText.getBoundingClientRect().left - portrait.left),
-        ).toBeLessThan(1);
-        expect(portrait.bottom).toBeLessThanOrEqual(introduction.bottom);
-        expect(Math.abs(proofBox.left - left)).toBeLessThan(1);
-        expect(Math.abs(proofBox.top - introduction.bottom - 12)).toBeLessThan(
-          1,
-        );
-        const introductionText = document.createRange();
-        introductionText.selectNodeContents(
-          letter.querySelector(":scope > p > span:last-child") as HTMLElement,
-        );
-        expect(introductionText.getClientRects().length).toBeLessThanOrEqual(3);
-        expect(
-          Math.abs(
-            introductionText.getBoundingClientRect().bottom -
-              emailText.getBoundingClientRect().bottom,
-          ),
-        ).toBeLessThan(3);
-        for (const line of introductionText.getClientRects()) {
-          if (line.bottom > emailBox.top && line.top < emailBox.bottom) {
-            expect(line.left).toBeGreaterThan(emailBox.right);
-          }
-        }
-        const portraitGroup = (
-          introPortrait.parentElement as HTMLElement
-        ).getBoundingClientRect();
-        const copyBox = (
-          letter.querySelector(":scope > p > span:last-child") as HTMLElement
-        ).getBoundingClientRect();
-        expect(Math.abs(portraitGroup.left - left)).toBeLessThan(1);
-        expect(Math.abs(portrait.left - left)).toBeLessThan(1);
-        expect(Math.abs(copyBox.left - portraitGroup.right - 16)).toBeLessThan(
-          1,
-        );
-        expect(Math.abs(portrait.top - copyBox.top)).toBeLessThan(1);
-        expect(copyBox.height).toBeGreaterThanOrEqual(portraitGroup.height);
-        expect(copyBox.height - portraitGroup.height).toBeLessThan(3);
-        expect(introFontSize).toBeGreaterThanOrEqual(19.5);
-        expect(introFontSize).toBeLessThanOrEqual(24);
-        expect(Math.abs(letterBox.left - left)).toBeLessThan(1);
-        const visiblePortraits = [
-          ...container.querySelectorAll('img[alt="Portrait of AJ Welch"]'),
-        ].filter((image) => image.getClientRects().length > 0);
-        expect(visiblePortraits).toHaveLength(1);
+        expect(second.top).toBeGreaterThanOrEqual(first.bottom);
       }
+      expect(booking.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+        Math.max(first.bottom, second.bottom),
+      );
+      expect(booking.getBoundingClientRect().right).toBeCloseTo(
+        letterBox.right,
+        1,
+      );
+      expect(footer.getBoundingClientRect().top).toBeGreaterThan(
+        booking.getBoundingClientRect().bottom,
+      );
+      for (const property of [
+        "paddingTop",
+        "paddingBottom",
+        "borderTopWidth",
+        "borderTopStyle",
+        "borderTopColor",
+        "textAlign",
+      ] as const) {
+        expect(getComputedStyle(footer)[property]).toBe(
+          getComputedStyle(referenceFooter)[property],
+        );
+      }
+      expect(getComputedStyle(footer).borderTopWidth).toBe("1px");
+      const inputBox = input.getBoundingClientRect();
+      expect(inputBox.width).toBe(referenceInput.getBoundingClientRect().width);
+      expect(inputBox.height).toBe(42);
+      expect(
+        Math.abs(
+          inputBox.left +
+            inputBox.width / 2 -
+            letterBox.left -
+            letterBox.width / 2,
+        ),
+      ).toBeLessThan(1);
+      expect(button.getBoundingClientRect().right).toBeLessThan(inputBox.right);
+      expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
     }
+    expect(input.type).toBe("email");
+    expect(input.required).toBe(true);
+    input.focus();
+    await userEvent.tab();
+    expect(document.activeElement).toBe(button);
+    expect(input.checkValidity()).toBe(false);
+    await userEvent.fill(input, "reader@example.com");
+    expect(input.checkValidity()).toBe(true);
+    const submit = new Event("submit", { bubbles: true, cancelable: true });
+    form.dispatchEvent(submit);
+    expect(submit.defaultPrevented).toBe(true);
   });
 }

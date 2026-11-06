@@ -1,99 +1,60 @@
-.sidebar {
-  container-type: inline-size;
-  --profile-detail-font-size: min(8cqw, 1.0625rem);
+.page {
+  /* Match the article container's and article's combined vertical padding. */
+  padding-block: calc(var(--mantine-spacing-xl) * 2)
+    calc(var(--mantine-spacing-xl) + var(--mantine-spacing-md));
 }
 
-.introPortrait {
-  display: none;
+.page main {
+  --letter-font-size: var(--mantine-font-size-lg);
+  --letter-line-height: var(--mantine-line-height-md);
+  --letter-tracking: normal;
+
+  width: 100%;
 }
 
-.introCopy {
-  font-weight: 500;
-}
+.heading {
+  --consulting-title-size: clamp(2rem, 4vw, 3rem);
 
-.sidebarSignup {
-  --sidebar-control-height: clamp(1.75rem, 25cqw, 2.625rem);
-  --sidebar-submit-width: clamp(1.5rem, 22cqw, 2.75rem);
-}
-
-.sidebarSignup input {
-  --input-height: var(--sidebar-control-height);
-  --input-size: var(--sidebar-control-height);
-  --input-line-height: calc(var(--sidebar-control-height) - 2px);
-
-  padding-inline-start: clamp(0.375rem, 6cqw, 0.875rem);
-  padding-inline-end: calc(var(--sidebar-submit-width) + 0.25rem);
-  font-size: calc(var(--profile-detail-font-size) - 0.0625rem);
-}
-
-.sidebarSignup [data-position="right"] {
-  width: var(--sidebar-submit-width);
-}
-
-.sidebarSignup button {
-  min-width: 0;
-  min-height: 0;
-}
-
-.sidebarSignup button svg {
-  width: clamp(0.75rem, 12cqw, 1.125rem);
-  height: clamp(0.75rem, 12cqw, 1.125rem);
-}
-
-.profile {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--mantine-spacing-lg);
-}
-
-.profileText,
-.identity {
   display: flex;
   flex-direction: column;
-  gap: var(--mantine-spacing-xs);
+  align-items: flex-start;
+  gap: var(--mantine-spacing-lg);
+  margin-bottom: var(--mantine-spacing-lg);
 }
 
-.identity {
-  gap: 0.125rem;
+.page h1 {
+  min-width: 0;
+  text-box-trim: trim-start;
+  text-box-edge: cap alphabetic;
+  font-size: var(--consulting-title-size);
+  font-weight: var(--mantine-h1-font-weight);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  text-align: start;
+  text-align-last: auto;
+  text-wrap: balance;
 }
 
-.portraitFrame {
-  position: relative;
-  width: 100%;
-  max-width: 14rem;
-  aspect-ratio: 1;
+.portraitRow {
+  font-family: var(--mantine-font-family-headings);
+  font-size: var(--consulting-title-size);
+  font-weight: var(--mantine-h1-font-weight);
+  line-height: 1.15;
 }
 
 .portrait {
+  display: inline-block;
+  /* Preserve the article title’s leading; align the image top to its cap height. */
+  vertical-align: calc(1cap - var(--consulting-title-size) * 2);
+  width: calc(var(--consulting-title-size) * 2);
+  height: calc(var(--consulting-title-size) * 2);
   border: 2px solid var(--site-text-primary);
   border-radius: var(--mantine-radius-sm);
   object-fit: cover;
 }
 
-.name {
-  font-size: clamp(1.125rem, calc(3vw - 0.375rem), 2.1875rem);
-}
-
-.name,
-.subscribePrompt {
-  font-weight: 400;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
-}
-
-.subscribePrompt {
-  font-size: var(--profile-detail-font-size);
-  letter-spacing: -0.04em;
-  text-rendering: geometricPrecision;
-}
-
-.email {
-  width: fit-content;
-  color: var(--site-text-secondary);
-  font-size: var(--profile-detail-font-size);
-  line-height: 1.25;
-  text-decoration: none;
-  border-radius: var(--mantine-radius-xs);
+.bulletColumns {
+  font-size: var(--mantine-font-size-lg);
 }
 
 .bulletColumns > ul {
@@ -101,18 +62,18 @@
   padding-inline-start: 1.1em;
 }
 
+.page footer {
+  /* Article Stack gap plus the shared subscription footer's top margin. */
+  margin-top: calc(var(--mantine-spacing-xl) * 2);
+}
+
 /* Mantine xs: 576px. */
 @media (min-width: 36em) {
-  .sidebar {
-    max-width: 14rem;
-  }
-
   .bulletColumns {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1em clamp(1.5rem, 3vw, 3rem);
     margin-bottom: var(--letter-font-size);
-    font-size: clamp(0.875rem, 1.5vw, 1.25rem);
   }
 
   .bulletColumns > ul {
@@ -120,100 +81,10 @@
   }
 }
 
+/* Mantine sm: 768px. */
 @media (min-width: 48em) {
-  .page main[data-with-sidebar] {
-    --letter-intro-font-size: clamp(1.625rem, calc(3vw - 0.375rem), 2.1875rem);
-  }
-}
-
-@media (min-width: 62em) {
-  .page main[data-with-sidebar] {
-    --letter-intro-font-size: clamp(1.875rem, calc(3vw - 0.1875rem), 2.25rem);
-  }
-}
-
-@media (min-width: 75em) {
-  .page main[data-with-sidebar] {
-    --letter-intro-font-size: clamp(2.125rem, 3vw, 2.5rem);
-  }
-}
-
-@media (width < 36em) {
-  .page main[data-with-sidebar] {
-    --letter-intro-font-size: clamp(1.21875rem, calc(4vw + 0.4rem), 1.5rem);
-    display: block;
-  }
-
-  .sidebar {
-    display: none;
-  }
-
-  .introPortrait {
-    display: block;
-    flex: none;
-    /* The 2:3 profile is approximately as tall as three intro lines. */
-    width: calc(var(--letter-intro-font-size) * 2.45);
-  }
-
-  .introProfile {
-    display: block;
-    width: 100%;
-    aspect-ratio: 2 / 3;
-    container-type: inline-size;
-  }
-
-  .introPortrait img {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
-  .introPortraitName,
-  .introPortraitEmail {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    font-weight: 400;
-    line-height: 1.1;
-    white-space: nowrap;
-  }
-
-  .introCopy {
-    display: block;
-    flex: 1;
-    min-width: 0;
-    max-width: 20rem;
-    line-height: 1.35;
-    text-box-trim: trim-start;
-    text-box-edge: cap alphabetic;
-  }
-
-  .introPortrait .introPortraitEmail,
-  .introPortrait .introPortraitEmail:hover {
-    display: block;
-    font-size: 15.5cqw;
-    font-weight: 400;
-    letter-spacing: 0;
-    text-rendering: geometricPrecision;
-    color: color-mix(
-      in srgb,
-      var(--site-text-primary) 75%,
-      var(--site-text-secondary)
-    );
-    border-radius: var(--mantine-radius-xs);
-  }
-
-  .introPortraitName {
-    /* Portrait + gap + the two 1.1-height text lines fill the 2:3 frame. */
-    margin: 5.45cqw 0 0;
-    font-size: 25cqw;
-    letter-spacing: 0;
-  }
-}
-
-@media (hover: hover) {
-  .email:hover {
-    color: var(--site-text-primary);
+  .page main {
+    --letter-font-size: var(--mantine-font-size-xl);
   }
 }
 
