@@ -1,6 +1,7 @@
 ---
 title: "What happens after the proof of concept works?"
 date: "2026-10-04"
+contributor: aj-welch
 subtitle: "A working demo is only the beginning. Ownership, evaluation, and maintenance matter when a prototype becomes part of the team's daily work."
 image: "/images/newsletter/placeholder-04.svg"
 imageAlt: "Placeholder cover for newsletter article 04"
@@ -12,4 +13,4 @@ The title, date, subtitle, cover image, and article body will be replaced with t
 
 ## Article content
 
-This space is reserved for the newsletter. No author profile or additional publishing features are needed for the initial version.
+This space is reserved for the newsletter.

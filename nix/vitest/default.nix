@@ -52,7 +52,7 @@
               extends: true,
               resolve: { alias: { "next/image": fileURLToPath(import.meta.resolve("@quantile-co/quantile.co-testing/next-image")) } },
               optimizeDeps: {
-                include: ["@mantine/hooks", "@tabler/icons-react", "fathom-client", "next/navigation", "react-dom", "react-dom/client"],
+                include: ["@mantine/hooks", "@tabler/icons-react", "fathom-client", "next/navigation", "react-dom", "react-dom/client", "react-markdown", "gray-matter", "server-only"],
               },
               test: {
                 name: "browser",

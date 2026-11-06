@@ -1,6 +1,7 @@
 ---
 title: "Start smaller"
 date: "2026-10-09"
+contributor: aj-welch
 subtitle: "One workflow. One clear owner. One way to tell whether the change helped."
 image: "/images/newsletter/placeholder-09.svg"
 imageAlt: "Placeholder cover for newsletter article 09"
@@ -12,4 +13,4 @@ The title, date, subtitle, cover image, and article body will be replaced with t
 
 ## Article content
 
-This space is reserved for the newsletter. No author profile or additional publishing features are needed for the initial version.
+This space is reserved for the newsletter.

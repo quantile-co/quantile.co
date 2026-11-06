@@ -6,15 +6,18 @@ import {
   Button,
   type ButtonProps,
   TextInput,
+  type TextInputProps,
 } from "@mantine/core";
 import { IconArrowRight } from "@tabler/icons-react";
 import classes from "./NewsletterSubscribeForm.module.css";
 
 export function NewsletterSubscribeForm({
   layout = "stacked",
+  inputSize = "md",
   buttonProps,
 }: {
   layout?: "stacked" | "inline" | "compact";
+  inputSize?: TextInputProps["size"];
   buttonProps?: Pick<ButtonProps, "children" | "variant" | "size" | "radius">;
 }) {
   return (
@@ -32,7 +35,7 @@ export function NewsletterSubscribeForm({
         name="email"
         autoComplete="email"
         placeholder="Email address..."
-        size="md"
+        size={inputSize}
         rightSectionWidth={
           layout === "compact" ? (buttonProps?.children ? 104 : 44) : undefined
         }

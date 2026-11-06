@@ -17,7 +17,7 @@ function structuredData(html: string) {
   ].flatMap((match) => JSON.parse(match[1]));
 }
 
-it("describes both homepage offerings and renders the shared site identity without authors", async () => {
+it("renders article bylines and keeps the shared site identity organization-only", async () => {
   const metadata = await generateMetadata({
     params: Promise.resolve({}),
     searchParams: Promise.resolve({}),
@@ -41,6 +41,19 @@ it("describes both homepage offerings and renders the shared site identity witho
   expect(data.every((entry) => entry.name === "Quantile")).toBe(true);
   expect(JSON.stringify(data)).not.toMatch(/AJ Welch|"author"|"Person"/);
   expect(html).toContain("The AI newsletter for data leaders.");
+  expect(html.match(/>AJ Welch<\/span>/g)).toHaveLength(11);
+  expect(html).not.toContain("By AJ Welch");
+  expect(html).not.toContain("<time");
+  const articles = [...html.matchAll(/<article\b[\s\S]*?<\/article>/g)];
+  expect(articles).toHaveLength(11);
+  for (const [article] of articles) {
+    expect(article).toMatch(
+      /<h2\b[\s\S]*?<\/h2><p\b[\s\S]*?<\/p>[\s\S]*?>AJ Welch<\/span>/,
+    );
+  }
+  expect(html).toContain(
+    encodeURIComponent("/images/contributors/aj-welch.webp"),
+  );
 });
 
 it("keeps homepage pagination self-canonical without tracking parameters", async () => {

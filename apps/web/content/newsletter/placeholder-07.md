@@ -1,6 +1,7 @@
 ---
 title: "Your semantic layer is also an interface for AI"
 date: "2026-10-07"
+contributor: aj-welch
 subtitle: "Definitions that help people understand the business can also help tools ask better questions. The hard part is deciding what those definitions should be."
 image: "/images/newsletter/placeholder-07.svg"
 imageAlt: "Placeholder cover for newsletter article 07"
@@ -12,4 +13,4 @@ The title, date, subtitle, cover image, and article body will be replaced with t
 
 ## Article content
 
-This space is reserved for the newsletter. No author profile or additional publishing features are needed for the initial version.
+This space is reserved for the newsletter.

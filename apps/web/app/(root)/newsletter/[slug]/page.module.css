@@ -1,5 +1,14 @@
 .article {
-  padding-block: var(--mantine-spacing-xl);
+  container: newsletter-article / inline-size;
+  padding-block: var(--mantine-spacing-xl) var(--mantine-spacing-md);
+}
+
+.bylineRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-md);
 }
 
 .title {
@@ -16,33 +25,79 @@
   transition: color 150ms ease;
 }
 
-.backLink {
-  display: inline-flex;
-  width: fit-content;
-  min-height: 36px;
-  align-items: center;
-  gap: var(--mantine-spacing-xs);
-  border-radius: var(--mantine-radius-xs);
-  color: var(--site-text-secondary);
-  font-size: var(--mantine-font-size-sm);
-  transition: color 150ms ease;
-}
-
 @media (hover: hover) {
-  .backLink:hover {
-    color: var(--site-text-primary);
-  }
-
   .article :where(p, li) a:hover {
     color: var(--site-text-secondary);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .backLink,
   .article :where(p, li) a {
     transition: none;
   }
+}
+
+.forwarded {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) minmax(13rem, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  margin-block: calc(var(--mantine-spacing-sm) - var(--mantine-spacing-xl));
+  padding-block: var(--mantine-spacing-lg);
+  border-block: 1px solid var(--site-divider-color);
+}
+
+.forwardedPrompt {
+  min-width: 0;
+  text-wrap: balance;
+}
+
+.forwardedPrompt > span {
+  display: block;
+}
+
+.forwardedForm {
+  min-width: 0;
+}
+
+.forwardedForm > form {
+  max-width: none;
+}
+
+@container newsletter-article (min-width: 43rem) {
+  .forwardedPrompt > span {
+    display: inline;
+  }
+}
+
+@container newsletter-article (max-width: 28rem) {
+  .forwarded {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .forwardedPrompt > span {
+    display: block;
+  }
+}
+
+.subscribe {
+  margin-top: var(--mantine-spacing-xl);
+  padding-block: calc(var(--mantine-spacing-xl) * 2) var(--mantine-spacing-md);
+  border-top: 1px solid var(--site-divider-color);
+  text-align: center;
+}
+
+.subscribeTitle {
+  max-width: 24ch;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.subscribeForm {
+  width: 100%;
+  max-width: 360px;
 }
 
 .image {

@@ -4,10 +4,24 @@ import path from "node:path";
 import matter from "gray-matter";
 import { cache } from "react";
 
+type NewsletterContributor = {
+  name: string;
+  image: string;
+};
+
+const newsletterContributors: Readonly<Record<string, NewsletterContributor>> =
+  {
+    "aj-welch": {
+      name: "AJ Welch",
+      image: "/images/contributors/aj-welch.webp",
+    },
+  };
+
 type NewsletterArticle = {
   slug: string;
   title: string;
   date: string;
+  contributor: NewsletterContributor;
   subtitle: string;
   image: string;
   imageAlt: string;
@@ -30,6 +44,7 @@ export const getNewsletterArticles = cache(
         for (const field of [
           "title",
           "date",
+          "contributor",
           "subtitle",
           "image",
           "imageAlt",
@@ -44,10 +59,22 @@ export const getNewsletterArticles = cache(
         ) {
           throw new Error(`Invalid newsletter date in ${file}`);
         }
+        const contributor = Object.hasOwn(
+          newsletterContributors,
+          data.contributor,
+        )
+          ? newsletterContributors[data.contributor]
+          : undefined;
+        if (!contributor) {
+          throw new Error(
+            `Unknown newsletter contributor "${data.contributor}" in ${file}`,
+          );
+        }
         return {
           slug: file.slice(0, -3),
           title: data.title,
           date: data.date,
+          contributor,
           subtitle: data.subtitle,
           image: data.image,
           imageAlt: data.imageAlt,

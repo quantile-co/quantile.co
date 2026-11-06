@@ -1,5 +1,10 @@
+import { readFile } from "node:fs/promises";
 import { expect, it, vi } from "vitest";
-import { getNewsletterArticle, getNewsletterPage } from "./newsletter";
+import {
+  getNewsletterArticle,
+  getNewsletterArticles,
+  getNewsletterPage,
+} from "./newsletter";
 
 vi.mock("server-only", () => ({}));
 vi.mock("node:fs/promises", () => ({
@@ -8,19 +13,56 @@ vi.mock("node:fs/promises", () => ({
       { length: 14 },
       (_, i) => `issue-${String(i + 1).padStart(2, "0")}.md`,
     ),
-  readFile: async (file: string) => {
+  readFile: vi.fn(async (file: string) => {
     const number = file.match(/issue-(\d+)\.md$/)?.[1];
     return `---
 title: "Issue ${number}"
 date: "2026-10-${number}"
+contributor: aj-welch
 subtitle: "A short subtitle"
 image: "/cover.svg"
 imageAlt: "Cover"
 ---
 Article body ${number}.
 `;
-  },
+  }),
 }));
+
+it("resolves the article's contributor from the local contributor map", async () => {
+  const articles = await getNewsletterArticles();
+  expect(articles).toHaveLength(14);
+  for (const article of articles) {
+    expect(article.contributor).toEqual({
+      name: "AJ Welch",
+      image: "/images/contributors/aj-welch.webp",
+    });
+  }
+});
+
+it.each([
+  "",
+  "contributor: unknown",
+  "contributor: toString",
+  "contributor: __proto__",
+  "contributor: [aj-welch]",
+])(
+  "rejects missing, invalid or unknown contributors (%s)",
+  async (frontmatter) => {
+    vi.mocked(readFile).mockResolvedValueOnce(`---
+title: "Example"
+date: "2026-10-01"
+${frontmatter}
+subtitle: "Example subtitle"
+image: "/cover.svg"
+imageAlt: "Cover"
+---
+Body.
+`);
+    await expect(getNewsletterArticles()).rejects.toThrow(
+      /newsletter contributor/,
+    );
+  },
+);
 
 it("sorts before paging, with no repeated or missing articles across either page size", async () => {
   for (const perPage of [11, 9]) {

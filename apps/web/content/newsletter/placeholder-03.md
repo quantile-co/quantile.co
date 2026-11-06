@@ -1,6 +1,7 @@
 ---
 title: "Less firefighting"
 date: "2026-10-03"
+contributor: aj-welch
 subtitle: "Making room for the work that keeps getting pushed to next quarter."
 image: "/images/newsletter/placeholder-03.svg"
 imageAlt: "Placeholder cover for newsletter article 03"
@@ -12,4 +13,4 @@ The title, date, subtitle, cover image, and article body will be replaced with t
 
 ## Article content
 
-This space is reserved for the newsletter. No author profile or additional publishing features are needed for the initial version.
+This space is reserved for the newsletter.

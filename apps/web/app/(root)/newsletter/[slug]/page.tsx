@@ -1,16 +1,10 @@
-import {
-  Anchor,
-  Container,
-  Stack,
-  Text,
-  Title,
-  Typography,
-} from "@mantine/core";
-import { IconArrowLeft } from "@tabler/icons-react";
+import { Container, Stack, Text, Title, Typography } from "@mantine/core";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import Markdown from "react-markdown";
+import { NewsletterArticleByline } from "@/components/NewsletterArticleByline/NewsletterArticleByline";
+import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
 import { createPageMetadata, organization, site } from "@/lib/metadata";
 import { getNewsletterArticle, getNewsletterArticles } from "@/lib/newsletter";
 import classes from "./page.module.css";
@@ -28,16 +22,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const article = await getNewsletterArticle((await params).slug);
   if (!article) notFound();
-  return createPageMetadata({
-    title: article.title,
-    description: article.subtitle,
-    pathname: `/newsletter/${article.slug}`,
-    noindex: article.placeholder,
-    publishedTime: article.date,
-    image: article.placeholder
-      ? undefined
-      : { url: article.image, alt: article.imageAlt },
-  });
+  return {
+    ...createPageMetadata({
+      title: article.title,
+      description: article.subtitle,
+      pathname: `/newsletter/${article.slug}`,
+      noindex: article.placeholder,
+      publishedTime: article.date,
+      image: article.placeholder
+        ? undefined
+        : { url: article.image, alt: article.imageAlt },
+    }),
+    authors: [{ name: article.contributor.name }],
+  };
 }
 
 export default async function NewsletterArticle({
@@ -61,6 +58,11 @@ export default async function NewsletterArticle({
             description: article.subtitle,
             image: new URL(article.image, site.url).href,
             datePublished: article.date,
+            author: {
+              "@type": "Person",
+              name: article.contributor.name,
+              image: new URL(article.contributor.image, site.url).href,
+            },
             publisher: {
               "@type": "Organization",
               "@id": organization["@id"],
@@ -73,23 +75,43 @@ export default async function NewsletterArticle({
       )}
       <Container size={800} px="var(--site-page-padding)" py="xl">
         <Stack component="article" gap="xl" className={classes.article}>
-          <Anchor href="/newsletter" className={classes.backLink}>
-            <IconArrowLeft size={14} aria-hidden="true" />
-            All articles
-          </Anchor>
-          <Stack gap="sm">
-            <Text component="time" dateTime={article.date} size="sm" c="dimmed">
-              {new Intl.DateTimeFormat("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-                timeZone: "UTC",
-              }).format(new Date(article.date))}
-            </Text>
+          <Stack component="header" gap="sm">
             <Title order={1} className={classes.title}>
               {article.title}
             </Title>
+            <Text component="p" size="lg" c="dimmed" lh={1.5}>
+              {article.subtitle}
+            </Text>
+            <div className={classes.bylineRow}>
+              <NewsletterArticleByline
+                contributor={article.contributor}
+                date={article.date}
+              />
+            </div>
           </Stack>
+          <section
+            aria-labelledby="article-forwarded-title"
+            className={classes.forwarded}
+          >
+            <Text
+              component="p"
+              size="lg"
+              c="dimmed"
+              lh={1.5}
+              id="article-forwarded-title"
+              className={classes.forwardedPrompt}
+            >
+              <span>Was this forwarded to you?</span>{" "}
+              <span>Get it straight to your inbox:</span>
+            </Text>
+            <div className={classes.forwardedForm}>
+              <NewsletterSubscribeForm
+                layout="compact"
+                inputSize="sm"
+                buttonProps={{ children: "Subscribe" }}
+              />
+            </div>
+          </section>
           <Image
             className={classes.image}
             src={article.image}
@@ -101,6 +123,27 @@ export default async function NewsletterArticle({
           <Typography>
             <Markdown>{article.content}</Markdown>
           </Typography>
+          <Stack
+            component="footer"
+            align="center"
+            gap="lg"
+            aria-labelledby="article-subscribe-title"
+            className={classes.subscribe}
+          >
+            <Title
+              order={2}
+              id="article-subscribe-title"
+              className={classes.subscribeTitle}
+            >
+              The AI newsletter for data leaders.
+            </Title>
+            <div className={classes.subscribeForm}>
+              <NewsletterSubscribeForm
+                layout="compact"
+                buttonProps={{ children: "Subscribe" }}
+              />
+            </div>
+          </Stack>
         </Stack>
       </Container>
     </main>

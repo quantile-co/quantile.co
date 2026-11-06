@@ -50,24 +50,47 @@ The homepage and newsletter archive share `NewsletterHero` with the title
 "The AI newsletter for data leaders." and an injected `NewsletterSubscribeForm`
 with a compact, labeled “Subscribe →” control.
 The homepage displays up to twelve items in a responsive 1/2/3-column grid,
-without dates: eleven articles and one consulting preview. The archive displays
-up to ten horizontal items with dates and Newest/Oldest sorting: nine articles
+without dates: eleven articles and one consulting preview. Article cards show title,
+summary, then contributor portrait/name without “By”. The archive displays
+up to ten horizontal items with Newest/Oldest sorting: nine articles
 and one consulting preview. Both use URL-based pagination and place the consulting
 preview as close to the midpoint of each page as possible, including partial pages.
 Articles and the consulting item share `NewsletterArticleListItem`; routes supply
-links, titles, subtitles, image/wordmark slots and optional dates or labels.
+links, titles, subtitles, image/wordmark slots and optional dates, byline slots or labels.
+Archive articles show date, title, summary, then contributor portrait/name without “By”.
 `PaginationControls` contains only generic pagination controls, not the collection;
 routes supply its pathname, optional query parameters, anchor and accessible label.
 Components stay in flat, per-component directories; newsletter components use the
 `Newsletter` prefix.
 
 `lib/newsletter.ts` reads Markdown/frontmatter from `content/newsletter/*.md`
-on the server; no content API or registry is needed. Article filenames define
+on the server; no content API or CMS is needed. Article filenames define
 `/newsletter/<slug>` routes, statically generated from those files. The initial
 14 articles/images are explicitly marked placeholders, noindexed on detail pages
 and excluded from the sitemap. Replace their content and remove `placeholder: true`
 when publishing real articles. The subscription form has no provider integration
 and only previews form interactions; it does not collect or send addresses.
+Each article requires a `contributor` ID in frontmatter, resolved through the small
+typed map in `lib/newsletter.ts`; missing or unknown IDs fail loading.
+AJ Welch (`aj-welch`) is the current contributor. The shared portrait lives at
+`public/images/contributors/aj-welch.webp` and is also used by consulting.
+`NewsletterArticleByline` receives a contributor and optional date through props and renders the
+portrait and name, without “By” on any page. Article pages include the semantic
+publication date within a horizontal byline, ordered contributor then date. The article header keeps
+that row close beneath the summary, with space for future right-aligned sharing
+controls. Archive dates sit above their titles, and homepage cards omit dates.
+Article pages reuse the existing subscription form in two places: a forwarded-newsletter
+prompt between the byline and cover, bounded by horizontal rules, and the footer.
+The forwarded prompt stays left-aligned. Article-width container queries keep it
+on one line when wide and split its two sentences into a content-sized column at
+intermediate widths. The adjacent input fills remaining width with an 8px gap.
+At article widths of 28rem or less, each prompt sentence gets its own line with
+balanced wrapping, and the input stacks below at full width. Keep this CSS-only; there is no
+inline form sizing, text measurement or resize observer.
+Balanced text alone does not shrink its containing box; do not compensate by
+right-aligning it.
+There are no contributor profile routes, multi-contributor arrays, share controls
+or additional publishing dependencies.
 
 Newsletter editorial skills are selected by the root package's native `skills`
 declarations and installed explicitly with `pnpm run skills:sync`: `copy-editing`
@@ -75,17 +98,18 @@ declarations and installed explicitly with `pnpm run skills:sync`: `copy-editing
 The direct full-commit pins work independently of Factory's published catalog.
 The blog editor uses its self-contained revision before the additional `clarity`
 dependency. Use these for specific, justified rewrites and technical review;
-preserve the author's meaning and verify claims rather than inventing evidence.
-Sentry's company voice, mandatory bylines and SEO prescriptions are not Quantile
-publication requirements. Keep this site's frontmatter schema and no-byline policy.
+preserve the contributor's meaning and verify claims rather than inventing evidence.
+Sentry's company voice and SEO prescriptions are not Quantile publication
+requirements. Keep this site's frontmatter schema and shared contributor/byline components.
 
 `lib/metadata.ts` supplies shared metadata defaults; routes retain their own copy
 and canonical URLs. Homepage positioning covers newsletter and consulting. Open
 Graph and Twitter share explicit images; placeholders use the branded PNG fallback,
 while published articles use their cover. Brand keeps its route-specific file-based
 social images. The homepage emits Organization and WebSite JSON-LD; published
-articles emit BlogPosting JSON-LD without author fields or bylines. Ordinary
-pagination stays self-canonical; alternative archive sorting is noindex. Sitemaps
+articles emit BlogPosting JSON-LD with a Person author; article metadata also names
+the contributor using the standard SEO `authors` and Schema.org `author` fields.
+Ordinary pagination stays self-canonical; alternative archive sorting is noindex. Sitemaps
 exclude placeholders, campaigns and query variants, without synthetic update dates.
 
 `/consulting` uses the letter layout without a visible headline or video. Its

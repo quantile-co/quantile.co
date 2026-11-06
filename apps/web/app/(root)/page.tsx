@@ -2,6 +2,7 @@ import { Container, SimpleGrid } from "@mantine/core";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Fragment } from "react";
+import { NewsletterArticleByline } from "@/components/NewsletterArticleByline/NewsletterArticleByline";
 import { NewsletterArticleListItem } from "@/components/NewsletterArticleListItem/NewsletterArticleListItem";
 import { NewsletterHero } from "@/components/NewsletterHero/NewsletterHero";
 import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
@@ -69,6 +70,9 @@ export default async function Home({
                 href={`/newsletter/${article.slug}`}
                 title={article.title}
                 subtitle={article.subtitle}
+                byline={
+                  <NewsletterArticleByline contributor={article.contributor} />
+                }
                 image={
                   <Image
                     src={article.image}

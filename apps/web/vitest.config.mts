@@ -57,6 +57,9 @@ export default defineConfig({
             "next/navigation",
             "react-dom",
             "react-dom/client",
+            "react-markdown",
+            "gray-matter",
+            "server-only",
           ],
         },
         test: {

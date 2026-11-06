@@ -1,0 +1,29 @@
+.byline {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--mantine-spacing-xs) * 0.75);
+  min-width: 0;
+  font-size: var(--mantine-font-size-xs);
+  line-height: 1.4;
+}
+
+.portrait {
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.details {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: calc(var(--mantine-spacing-xs) * 0.75);
+  min-width: 0;
+  color: var(--site-text-secondary);
+}
+
+.contributor {
+  color: var(--site-text-primary);
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+}

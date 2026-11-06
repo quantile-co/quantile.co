@@ -9,6 +9,7 @@ export function NewsletterArticleListItem({
   subtitle,
   image,
   date,
+  byline,
   label,
   component = "article",
   variant = "grid",
@@ -18,6 +19,7 @@ export function NewsletterArticleListItem({
   subtitle: string;
   image: ReactNode;
   date?: string;
+  byline?: ReactNode;
   label?: string;
   component?: "article" | "aside";
   variant?: "grid" | "list";
@@ -32,7 +34,7 @@ export function NewsletterArticleListItem({
       <Link href={href} className={classes.link}>
         <div className={classes.image}>{image}</div>
         <Stack gap="xs" className={classes.content}>
-          {variant === "list" && date && (
+          {date && (
             <Text component="time" dateTime={date} size="xs" c="dimmed">
               {new Intl.DateTimeFormat("en-US", {
                 month: "short",
@@ -53,6 +55,7 @@ export function NewsletterArticleListItem({
           <Text c="dimmed" className={classes.subtitle}>
             {subtitle}
           </Text>
+          {byline}
         </Stack>
       </Link>
     </Box>

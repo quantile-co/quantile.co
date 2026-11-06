@@ -2,6 +2,7 @@ import { Anchor, Container, Group, Stack } from "@mantine/core";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Fragment } from "react";
+import { NewsletterArticleByline } from "@/components/NewsletterArticleByline/NewsletterArticleByline";
 import { NewsletterArticleListItem } from "@/components/NewsletterArticleListItem/NewsletterArticleListItem";
 import { NewsletterHero } from "@/components/NewsletterHero/NewsletterHero";
 import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
@@ -81,6 +82,11 @@ export default async function Newsletter({
                   title={article.title}
                   subtitle={article.subtitle}
                   date={article.date}
+                  byline={
+                    <NewsletterArticleByline
+                      contributor={article.contributor}
+                    />
+                  }
                   variant="list"
                   image={
                     <Image

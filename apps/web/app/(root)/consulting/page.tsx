@@ -28,7 +28,7 @@ export default function ConsultingPage() {
             <aside aria-label="About AJ Welch" className={classes.profile}>
               <div className={classes.portraitFrame}>
                 <Image
-                  src="/images/aj-welch.webp"
+                  src="/images/contributors/aj-welch.webp"
                   alt="Portrait of AJ Welch"
                   fill
                   sizes="(max-width: 48em) 170px, (max-width: 75em) 22vw, 224px"
@@ -61,7 +61,7 @@ export default function ConsultingPage() {
             <span className={classes.introPortrait}>
               <span className={classes.introProfile}>
                 <Image
-                  src="/images/aj-welch.webp"
+                  src="/images/contributors/aj-welch.webp"
                   alt="Portrait of AJ Welch"
                   width={128}
                   height={128}
