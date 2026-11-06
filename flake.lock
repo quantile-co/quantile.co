@@ -45,11 +45,11 @@
         "semgrep-rules": "semgrep-rules"
       },
       "locked": {
-        "lastModified": 1792926761,
-        "narHash": "sha256-rVOK87FppzfjoeGx2tnxQyMrkvtrRc0OW/oJgiV1FvU=",
+        "lastModified": 1793207276,
+        "narHash": "sha256-y24eV3eYuq6V7ZVHZmWNTrf8sovzPBArx9SiXhTYS7E=",
         "owner": "quantile-co",
         "repo": "factory",
-        "rev": "143cd6f316b026ce1f67915cb21ec6cd0f972d43",
+        "rev": "3044e4179471d64336f11ee80545d6c8d35ce84b",
         "type": "github"
       },
       "original": {
@@ -122,11 +122,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1791734076,
-        "narHash": "sha256-i5qk1kLiit98rRbh1AXmWBNT9QXC/y4l5Wk/u5EdpDQ=",
+        "lastModified": 1792094642,
+        "narHash": "sha256-zp8ToDMnqZcu4o4IH9pdwXFXGp7yLm/M0dEnNWnyd7I=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "7fd4004d0511991fff3a0524856a9be09e28c5f0",
+        "rev": "fe13242281a67641c0102cdb1087f0ebe586c7df",
         "type": "github"
       },
       "original": {
