@@ -23,7 +23,7 @@ vi.mock("@/lib/newsletter", () => ({
     image: "/images/newsletter/placeholder-01.svg",
     imageAlt: "Example cover",
     placeholder: true,
-    content: "Article content.",
+    content: "Article content.\n\n## Section heading\n\n- A list item.",
   }),
   getNewsletterArticles: async () => [],
 }));
@@ -65,6 +65,12 @@ for (const colorScheme of ["light", "dark"] as const) {
     const summary = container.querySelector(
       "article header > p",
     ) as HTMLElement;
+    const prose = container.querySelector(
+      ".mantine-Typography-root",
+    ) as HTMLElement;
+    const paragraph = prose.querySelector("p") as HTMLParagraphElement;
+    const listItem = prose.querySelector("li") as HTMLLIElement;
+    const sectionHeading = prose.querySelector("h2") as HTMLHeadingElement;
     const cover = container.querySelector("article > img") as HTMLImageElement;
     const forwarded = container.querySelector(
       'section[aria-labelledby="article-forwarded-title"]',
@@ -97,10 +103,30 @@ for (const colorScheme of ["light", "dark"] as const) {
 
     for (const width of [
       320, 375, 480, 503, 504, 505, 512, 513, 520, 540, 576, 577, 660, 720, 744,
-      768, 1024, 1440,
+      767, 768, 769, 1024, 1440,
     ]) {
       await page.viewport(width, 900);
       expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
+      const bodySize = width >= 768 ? 20 : 18;
+      for (const element of [paragraph, listItem, summary, forwardedPrompt]) {
+        expect(getComputedStyle(element).fontSize).toBe(`${bodySize}px`);
+        expect(
+          Number.parseFloat(getComputedStyle(element).lineHeight),
+        ).toBeCloseTo(bodySize * 1.55);
+      }
+      expect(getComputedStyle(sectionHeading).fontSize).toBe("26px");
+      expect(prose.getBoundingClientRect().width).toBe(
+        cover.getBoundingClientRect().width,
+      );
+      if (width >= 1024) {
+        expect(prose.getBoundingClientRect().width).toBe(752);
+      }
+      if (width === 1440) {
+        expect(
+          getComputedStyle(container.querySelector("h1") as HTMLElement)
+            .fontSize,
+        ).toBe("48px");
+      }
       for (const element of [
         byline,
         forwarded,
@@ -160,8 +186,9 @@ for (const colorScheme of ["light", "dark"] as const) {
         const lineHeight = Number.parseFloat(
           getComputedStyle(forwardedPrompt).lineHeight,
         );
-        expect(promptBox.height).toBe(
+        expect(promptBox.height).toBeCloseTo(
           availableWidth >= 688 ? lineHeight : lineHeight * 2,
+          1,
         );
       } else {
         expect(getComputedStyle(forwardedPrompt).textWrap).toBe("balance");
@@ -174,7 +201,19 @@ for (const colorScheme of ["light", "dark"] as const) {
         expect(inputBox.right).toBe(forwarded.getBoundingClientRect().right);
         expect(inputBox.width).toBe(availableWidth);
       }
-      expect(input.getBoundingClientRect().height).toBe(42);
+      const footerInputBox = input.getBoundingClientRect();
+      const footerTitleBox = (
+        footer.querySelector("#article-subscribe-title") as HTMLElement
+      ).getBoundingClientRect();
+      expect(
+        Math.abs(
+          footerInputBox.left +
+            footerInputBox.width / 2 -
+            footerTitleBox.left -
+            footerTitleBox.width / 2,
+        ),
+      ).toBeLessThan(1);
+      expect(footerInputBox.height).toBe(42);
       expect(
         footer.getBoundingClientRect().bottom -
           input.getBoundingClientRect().bottom,

@@ -17,8 +17,15 @@ it.each(["newest", "oldest"])(
         {await Newsletter({ searchParams: Promise.resolve({ sort }) })}
       </RootLayout>,
     );
-    expect(html.match(/>AJ Welch<\/span>/g)).toHaveLength(9);
+    expect(html.match(/>AJ Welch<\/span>/g)).toHaveLength(10);
     expect(html).not.toContain("By AJ Welch");
+    const consulting = html.match(/<aside\b[\s\S]*?<\/aside>/)?.[0];
+    expect(consulting).toContain("Data and AI consulting");
+    expect(consulting).toContain(">AJ Welch</span>");
+    expect(consulting).toContain(
+      encodeURIComponent("/images/contributors/aj-welch.webp"),
+    );
+    expect(consulting).not.toContain("<time");
     expect(html.match(/<time\b[^>]*dateTime=/g)).toHaveLength(9);
     const articles = [...html.matchAll(/<article\b[\s\S]*?<\/article>/g)];
     expect(articles).toHaveLength(9);

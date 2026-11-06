@@ -55,6 +55,9 @@ summary, then contributor portrait/name without “By”. The archive displays
 up to ten horizontal items with Newest/Oldest sorting: nine articles
 and one consulting preview. Both use URL-based pagination and place the consulting
 preview as close to the midpoint of each page as possible, including partial pages.
+Consulting previews also show AJ Welch's contributor byline, without a date.
+Their wordmark tiles invert the surrounding theme: light-on-dark in light mode,
+dark-on-light in dark mode.
 Articles and the consulting item share `NewsletterArticleListItem`; routes supply
 links, titles, subtitles, image/wordmark slots and optional dates, byline slots or labels.
 Archive articles show date, title, summary, then contributor portrait/name without “By”.
@@ -79,6 +82,10 @@ portrait and name, without “By” on any page. Article pages include the seman
 publication date within a horizontal byline, ordered contributor then date. The article header keeps
 that row close beneath the summary, with space for future right-aligned sharing
 controls. Archive dates sit above their titles, and homepage cards omit dates.
+Article prose, summary and forwarded-newsletter prompt use Mantine `lg` (18px)
+below `sm` (768px) and `xl` (20px) from `sm`, with the standard `md` line-height
+(1.55). The 800px outer container
+retains 752px of desktop reading width; title and Markdown heading sizes are unchanged.
 Article pages reuse the existing subscription form in two places: a forwarded-newsletter
 prompt between the byline and cover, bounded by horizontal rules, and the footer.
 The forwarded prompt stays left-aligned. Article-width container queries keep it

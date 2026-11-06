@@ -9,13 +9,14 @@ type NewsletterContributor = {
   image: string;
 };
 
-const newsletterContributors: Readonly<Record<string, NewsletterContributor>> =
-  {
-    "aj-welch": {
-      name: "AJ Welch",
-      image: "/images/contributors/aj-welch.webp",
-    },
-  };
+export const newsletterContributors: Readonly<
+  Record<string, NewsletterContributor>
+> = {
+  "aj-welch": {
+    name: "AJ Welch",
+    image: "/images/contributors/aj-welch.webp",
+  },
+};
 
 type NewsletterArticle = {
   slug: string;

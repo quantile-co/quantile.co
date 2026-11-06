@@ -41,8 +41,15 @@ it("renders article bylines and keeps the shared site identity organization-only
   expect(data.every((entry) => entry.name === "Quantile")).toBe(true);
   expect(JSON.stringify(data)).not.toMatch(/AJ Welch|"author"|"Person"/);
   expect(html).toContain("The AI newsletter for data leaders.");
-  expect(html.match(/>AJ Welch<\/span>/g)).toHaveLength(11);
+  expect(html.match(/>AJ Welch<\/span>/g)).toHaveLength(12);
   expect(html).not.toContain("By AJ Welch");
+  const consulting = html.match(/<aside\b[\s\S]*?<\/aside>/)?.[0];
+  expect(consulting).toContain("Data and AI consulting");
+  expect(consulting).toContain(">AJ Welch</span>");
+  expect(consulting).toContain(
+    encodeURIComponent("/images/contributors/aj-welch.webp"),
+  );
+  expect(consulting).not.toContain("<time");
   expect(html).not.toContain("<time");
   const articles = [...html.matchAll(/<article\b[\s\S]*?<\/article>/g)];
   expect(articles).toHaveLength(11);

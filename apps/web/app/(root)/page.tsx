@@ -13,7 +13,7 @@ import {
   site,
   website,
 } from "@/lib/metadata";
-import { getNewsletterPage } from "@/lib/newsletter";
+import { getNewsletterPage, newsletterContributors } from "@/lib/newsletter";
 import listingClasses from "./newsletter.module.css";
 
 // Reserve one item per page for the consulting preview.
@@ -88,6 +88,11 @@ export default async function Home({
                   href="/consulting"
                   label="Consulting"
                   title="Data and AI consulting"
+                  byline={
+                    <NewsletterArticleByline
+                      contributor={newsletterContributors["aj-welch"]}
+                    />
+                  }
                   subtitle="Senior data and AI engineering, working alongside your team."
                   image={
                     <div className={listingClasses.consultingImage}>

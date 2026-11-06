@@ -50,7 +50,10 @@ it.each([false, true])(
     const html = renderToStaticMarkup(
       <RootLayout>{await Article(props)}</RootLayout>,
     );
-    expect(html).toMatch(/<\/h1><p\b[^>]*>Practical engineering notes\.<\/p>/);
+    // Mantine responsive props insert style tags between rendered elements.
+    expect(html.replace(/<style\b[^>]*>[\s\S]*?<\/style>/g, "")).toMatch(
+      /<\/h1><p\b[^>]*>Practical engineering notes\.<\/p>/,
+    );
     expect(html).toContain("AJ Welch");
     expect(html).not.toContain("By AJ Welch");
     expect(html).toMatch(/<time dateTime="2026-10-01">Oct 1, 2026<\/time>/);

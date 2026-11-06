@@ -79,7 +79,12 @@ export default async function NewsletterArticle({
             <Title order={1} className={classes.title}>
               {article.title}
             </Title>
-            <Text component="p" size="lg" c="dimmed" lh={1.5}>
+            <Text
+              component="p"
+              fz={{ base: "lg", sm: "xl" }}
+              c="dimmed"
+              lh="md"
+            >
               {article.subtitle}
             </Text>
             <div className={classes.bylineRow}>
@@ -95,9 +100,9 @@ export default async function NewsletterArticle({
           >
             <Text
               component="p"
-              size="lg"
+              fz={{ base: "lg", sm: "xl" }}
               c="dimmed"
-              lh={1.5}
+              lh="md"
               id="article-forwarded-title"
               className={classes.forwardedPrompt}
             >
@@ -120,7 +125,7 @@ export default async function NewsletterArticle({
             height={675}
             sizes="(max-width: 50em) 100vw, 800px"
           />
-          <Typography>
+          <Typography fz={{ base: "lg", sm: "xl" }} lh="md">
             <Markdown>{article.content}</Markdown>
           </Typography>
           <Stack

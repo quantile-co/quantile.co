@@ -8,7 +8,7 @@ import { NewsletterHero } from "@/components/NewsletterHero/NewsletterHero";
 import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
 import { PaginationControls } from "@/components/PaginationControls/PaginationControls";
 import { createPageMetadata } from "@/lib/metadata";
-import { getNewsletterPage } from "@/lib/newsletter";
+import { getNewsletterPage, newsletterContributors } from "@/lib/newsletter";
 import listingClasses from "../newsletter.module.css";
 import classes from "./page.module.css";
 
@@ -103,6 +103,11 @@ export default async function Newsletter({
                     href="/consulting"
                     label="Consulting"
                     title="Data and AI consulting"
+                    byline={
+                      <NewsletterArticleByline
+                        contributor={newsletterContributors["aj-welch"]}
+                      />
+                    }
                     subtitle="Senior data and AI engineering, working alongside your team."
                     variant="list"
                     image={

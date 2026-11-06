@@ -124,6 +124,20 @@ describe("Founder-letter responsive layout", () => {
           'article[aria-labelledby="founder-letter-title"]',
         ) as HTMLElement;
         const articleBox = article.getBoundingClientRect();
+        const signupInput = article.querySelector("input") as HTMLElement;
+        const signupPrompt = article.querySelector(
+          ":scope > div:last-child > p",
+        ) as HTMLElement;
+        const inputBox = signupInput.getBoundingClientRect();
+        const promptBox = signupPrompt.getBoundingClientRect();
+        expect(
+          Math.abs(
+            inputBox.left +
+              inputBox.width / 2 -
+              promptBox.left -
+              promptBox.width / 2,
+          ),
+        ).toBeLessThan(1);
         if (width <= 768) {
           expect(Math.abs(articleBox.left - 33)).toBeLessThan(1);
           expect(
