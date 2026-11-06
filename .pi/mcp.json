@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "pangram": {
+      "url": "https://www.pangram.com/mcp",
+      "description": "Analyze text for AI writing and similarity, including matched passages and source URLs."
+    },
+    "copyleaks_app": {
+      "url": "https://extensions.copyleaks.com/mcp",
+      "description": "Run AI detection and plagiarism scans and retrieve scan results from Copyleaks."
+    }
+  }
+}

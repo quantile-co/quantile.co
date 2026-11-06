@@ -32,6 +32,33 @@ Human setup: [README.md](README.md). Development: `pnpm dev`.
 Checks and tests: `pnpm test`. Build: `pnpm run build`.
 Brand asset generation: `pnpm run build:assets`.
 
+## Writing audit MCP servers
+
+[.pi/mcp.json](.pi/mcp.json) shares the official hosted Pangram and Copyleaks
+servers with every checkout. Use Pi's built-in MCP support; no extra extension,
+skill, API key or server installation is needed. Start Pi from the repository
+root in the pinned development shell and approve project trust when prompted.
+Each developer then signs in with their own accounts on the machine running Pi:
+
+```sh
+pi mcp login pangram
+pi mcp login copyleaks_app
+pi mcp list
+```
+
+OAuth credentials stay outside the repository in `~/.pi/agent/mcp-auth.json`
+(or the configured Pi agent directory). Do not commit or share them. In an
+existing session, run `/reload`, then `/mcp` to inspect connections or sign in.
+Herdr sessions use the same project configuration when launched from this checkout.
+A personal MCP adapter that replaces `/mcp` must be disabled to use native support.
+
+[Pangram](https://www.pangram.com/solutions/mcp) uses developer API credits, not
+dashboard scans. [Copyleaks](https://docs.copyleaks.com/mcp/overview) requires an
+active paid balance. Configuration does not authenticate accounts or run scans.
+Only submit explicitly requested content for audits: scans send text to external
+services and may consume credits. Never upload secrets or customer payloads.
+Do not add scans to shell hooks, checks or CI.
+
 ## Repository map
 
 - [flake.nix](flake.nix) and [nix/](nix/): Factory tooling and managed-file sources.

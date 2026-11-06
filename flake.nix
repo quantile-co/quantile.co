@@ -69,6 +69,7 @@
                   .devDependencies.playwright)
                 agents.herdr
                 agents.amp
+                agents.antigravity-cli
                 agents.hunk
                 factory.langfuse.package
                 factory.pi.package
