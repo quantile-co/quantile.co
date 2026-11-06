@@ -6,6 +6,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { page, userEvent } from "vitest/browser";
 import { theme } from "@/app/theme";
 import headerClasses from "@/components/Header/Header.module.css";
+import proofClasses from "@/components/SocialProofSection/SocialProofSection.module.css";
 import Article from "../newsletter/[slug]/page";
 import ConsultingPage from "./page";
 
@@ -108,6 +109,9 @@ for (const colorScheme of ["light", "dark"] as const) {
     const button = form.querySelector("button") as HTMLButtonElement;
     const referenceArticle = reference.querySelector("article") as HTMLElement;
     const referenceTitle = reference.querySelector("h1") as HTMLElement;
+    const referenceProse = reference.querySelector(
+      ".mantine-Typography-root p",
+    ) as HTMLElement;
     const referenceFooter = reference.querySelector("footer") as HTMLElement;
     const referenceInput = referenceFooter.querySelector(
       "input",
@@ -229,6 +233,25 @@ for (const colorScheme of ["light", "dark"] as const) {
       const proof = letter.querySelector(
         'section[aria-label="Company experience and client work"]',
       ) as HTMLElement;
+      const articleTextColor = getComputedStyle(referenceProse).color;
+      for (const text of letter.querySelectorAll(
+        ":scope > p:not(:has(a)), :scope > div > ul > li",
+      )) {
+        expect(getComputedStyle(text).color).toBe(articleTextColor);
+      }
+      for (const element of proof.querySelectorAll("*")) {
+        expect(getComputedStyle(element).color).toBe(articleTextColor);
+      }
+      for (const logo of proof.querySelectorAll(
+        `.${proofClasses.companyMarkImage}, .${proofClasses.customerLogo}`,
+      )) {
+        expect(getComputedStyle(logo).backgroundColor).toBe(articleTextColor);
+      }
+      for (const frame of proof.querySelectorAll(
+        `.${proofClasses.mediaSquare}`,
+      )) {
+        expect(getComputedStyle(frame).borderTopColor).toBe(articleTextColor);
+      }
       expect(proof.querySelectorAll("article:not([aria-hidden])")).toHaveLength(
         3,
       );

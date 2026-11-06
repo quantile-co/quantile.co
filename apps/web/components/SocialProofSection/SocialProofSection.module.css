@@ -1,9 +1,9 @@
 .section {
-  --proof-foreground: var(--site-text-primary);
+  --proof-foreground: currentColor;
   --proof-scale: 1;
   --proof-row-gap: 0.1875rem;
   container-type: inline-size;
-  color: var(--proof-foreground);
+  color: inherit;
 }
 
 .wrapper {
