@@ -211,7 +211,6 @@ for (const colorScheme of ["light", "dark"] as const) {
         "fontWeight",
         "lineHeight",
         "letterSpacing",
-        "textWrap",
         "color",
       ] as const) {
         expect(getComputedStyle(title)[property]).toBe(

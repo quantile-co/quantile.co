@@ -106,6 +106,9 @@ for (const colorScheme of ["light", "dark"] as const) {
       767, 768, 769, 1024, 1440,
     ]) {
       await page.viewport(width, 900);
+      expect(
+        getComputedStyle(container.querySelector("h1") as HTMLElement).textWrap,
+      ).toBe("pretty");
       expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
       const bodySize = width >= 768 ? 20 : 18;
       for (const element of [paragraph, listItem, summary, forwardedPrompt]) {
@@ -191,11 +194,10 @@ for (const colorScheme of ["light", "dark"] as const) {
           1,
         );
       } else {
-        expect(getComputedStyle(forwardedPrompt).textWrap).toBe("balance");
-        const sentences = forwardedPrompt.querySelectorAll("span");
-        expect(sentences[1].getBoundingClientRect().top).toBeGreaterThanOrEqual(
-          sentences[0].getBoundingClientRect().bottom,
-        );
+        expect(getComputedStyle(forwardedPrompt).textWrap).toBe("pretty");
+        for (const sentence of forwardedPrompt.querySelectorAll("span")) {
+          expect(getComputedStyle(sentence).display).toBe("inline");
+        }
         expect(inputBox.top - promptBox.bottom).toBe(8);
         expect(inputBox.left).toBe(forwarded.getBoundingClientRect().left);
         expect(inputBox.right).toBe(forwarded.getBoundingClientRect().right);
