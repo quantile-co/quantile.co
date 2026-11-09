@@ -4,16 +4,19 @@ import { CTAButton } from "@/components/CTAButton/CTAButton";
 import { LandingPage } from "@/components/LandingPage/LandingPage";
 import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
-import { createPageMetadata, organization, website } from "@/lib/metadata";
+import {
+  createPageMetadata,
+  organization,
+  site,
+  website,
+} from "@/lib/metadata";
 import classes from "./page.module.css";
 
-const pageTitle = "Data & AI Engineering Consulting";
-const heroDescription =
-  "Fast, flexible, senior data + AI engineering capacity without expensive hires or agency headaches.";
+const pageTitle = "Data and AI Engineering";
 
 export const metadata = createPageMetadata({
   title: pageTitle,
-  description: heroDescription,
+  description: site.description,
   pathname: "/",
 });
 
