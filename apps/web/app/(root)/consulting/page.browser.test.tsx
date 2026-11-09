@@ -125,8 +125,24 @@ for (const colorScheme of ["light", "dark"] as const) {
       consulting.querySelector('[aria-label="Video introduction"]'),
     ).toBeNull();
     expect(consulting.textContent).not.toMatch(/P\.S\.|sidebar/);
-    expect(heading.textContent).toBe("Hi, I’m AJ.");
+    expect(heading.textContent).toBe("Hi, I'm AJ.");
     expect(heading.querySelector("a")).toBeNull();
+    expect(letter.querySelector("table")).toBeNull();
+    expect(letter.textContent).not.toMatch(/Lorem ipsum|Ut enim/);
+    const paragraphs = letter.querySelectorAll(":scope > p");
+    expect(
+      [...paragraphs[1].querySelectorAll("a")].map((link) => [
+        link.textContent,
+        link.href,
+      ]),
+    ).toEqual([
+      ["DSPy", "https://dspy.ai/"],
+      ["GEPA", "https://gepa-ai.github.io/gepa/"],
+    ]);
+    for (const link of paragraphs[1].querySelectorAll("a")) {
+      expect(link.target).toBe("_blank");
+      expect(link.relList.contains("noopener")).toBe(true);
+    }
     expect(
       consulting.querySelectorAll('img[alt="Portrait of AJ Welch"]'),
     ).toHaveLength(1);
@@ -135,7 +151,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       "The AI newsletter for data leaders.",
     );
     expect(opening.textContent).toBe(
-      "I’ve been a software engineer for over 15 years at:",
+      "I've been a software and data engineer for over 15 years at:",
     );
     expect(
       consulting.querySelectorAll('a[href="mailto:aj@quantile.co"]'),
@@ -234,7 +250,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       ) as HTMLElement;
       const articleTextColor = getComputedStyle(referenceProse).color;
       for (const text of letter.querySelectorAll(
-        ":scope > p:not(:has(a)), :scope > div > ul > li",
+        ":scope > p:not(:has(a)), :scope > div > section > ul > li",
       )) {
         expect(getComputedStyle(text).color).toBe(articleTextColor);
       }
@@ -270,12 +286,23 @@ for (const colorScheme of ["light", "dark"] as const) {
         opening.getBoundingClientRect().bottom,
       );
       const columns = [
-        ...letter.querySelectorAll<HTMLUListElement>(":scope > div > ul"),
+        ...letter.querySelectorAll<HTMLElement>(
+          ":scope > div > section[aria-labelledby]",
+        ),
       ];
       expect(columns).toHaveLength(2);
+      expect(
+        columns.map((column) => column.querySelector("h2")?.textContent),
+      ).toEqual(["AI", "Data"]);
       for (const column of columns) {
-        expect(column.children).toHaveLength(5);
-        expect(getComputedStyle(column).fontSize).toBe("18px");
+        const list = column.querySelector("ul") as HTMLElement;
+        const columnHeading = column.querySelector("h2") as HTMLElement;
+        expect(column.getAttribute("aria-labelledby")).toBe(columnHeading.id);
+        expect(list.children).toHaveLength(5);
+        expect(getComputedStyle(list).fontSize).toBe("18px");
+        expect(columnHeading.getBoundingClientRect().bottom).toBeLessThan(
+          list.getBoundingClientRect().top,
+        );
       }
       const [first, second] = columns.map((column) =>
         column.getBoundingClientRect(),

@@ -38,11 +38,11 @@ export default function ConsultingPage() {
               />
             </span>
             <Title order={1} id="founder-letter-title">
-              Hi, I’m AJ.
+              Hi, I'm AJ.
             </Title>
           </header>
         }
-        introduction="I’ve been a software engineer for over 15 years at:"
+        introduction="I've been a software and data engineer for over 15 years at:"
         proof={
           <SocialProofSection ariaLabel="Company experience and client work" />
         }
@@ -60,30 +60,47 @@ export default function ConsultingPage() {
         }
       >
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          Nowadays, I work with small data teams at companies under 500 people.
+          In particular, I've been helping teams use{" "}
+          <a href="https://dspy.ai/" target="_blank" rel="noopener noreferrer">
+            DSPy
+          </a>{" "}
+          and{" "}
+          <a
+            href="https://gepa-ai.github.io/gepa/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GEPA
+          </a>{" "}
+          to optimize both the AI layer and the data platform beneath it.
         </p>
+        <p>More broadly, I focus on:</p>
         <div className={classes.bulletColumns}>
-          <ul>
-            <li>Lorem ipsum dolor sit amet</li>
-            <li>Consectetur adipiscing elit</li>
-            <li>Sed do eiusmod tempor incididunt</li>
-            <li>Ut labore et dolore magna aliqua</li>
-            <li>Ut enim ad minim veniam</li>
-          </ul>
-          <ul>
-            <li>Quis nostrud exercitation ullamco</li>
-            <li>Laboris nisi ut aliquip ex ea commodo</li>
-            <li>Duis aute irure dolor in reprehenderit</li>
-            <li>Voluptate velit esse cillum dolore</li>
-            <li>Excepteur sint occaecat cupidatat</li>
-          </ul>
+          <section aria-labelledby="ai-services-title">
+            <h2 id="ai-services-title">AI</h2>
+            <ul>
+              <li>Agents, workflows and automation</li>
+              <li>Context engineering and RAG</li>
+              <li>Optimization and fine-tuning</li>
+              <li>Evals and dataset engineering</li>
+              <li>Observability, guardrails and cost control</li>
+            </ul>
+          </section>
+          <section aria-labelledby="data-services-title">
+            <h2 id="data-services-title">Data</h2>
+            <ul>
+              <li>Semantic layer modeling and analytics</li>
+              <li>Pipeline orchestration and ELT/ETL</li>
+              <li>Ingestion, integration and streaming</li>
+              <li>Performance and cost optimization</li>
+              <li>Observability, quality and governance</li>
+            </ul>
+          </section>
         </div>
         <p>
-          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-          nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur.
+          If you're interested in working together, please feel free to email me
+          or book a call. Retainers start at $15k for 80 hours a month.
         </p>
       </LandingPage>
       <script type="application/ld+json">
