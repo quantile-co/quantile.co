@@ -299,7 +299,8 @@ for (const colorScheme of ["light", "dark"] as const) {
         const columnHeading = column.querySelector("h2") as HTMLElement;
         expect(column.getAttribute("aria-labelledby")).toBe(columnHeading.id);
         expect(list.children).toHaveLength(5);
-        expect(getComputedStyle(list).fontSize).toBe("18px");
+        expect(getComputedStyle(list).fontSize).toBe(`${bodySize}px`);
+        expect(getComputedStyle(columnHeading).fontSize).toBe(`${bodySize}px`);
         expect(columnHeading.getBoundingClientRect().bottom).toBeLessThan(
           list.getBoundingClientRect().top,
         );

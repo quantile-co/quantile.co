@@ -58,7 +58,6 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 1em clamp(1.5rem, 3vw, 3rem);
   margin-bottom: var(--letter-font-size);
-  font-size: var(--mantine-font-size-lg);
 }
 
 .bulletColumns h2 {

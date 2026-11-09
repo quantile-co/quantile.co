@@ -73,7 +73,7 @@ export default function ConsultingPage() {
           >
             GEPA
           </a>{" "}
-          to optimize both the AI layer and the data platform beneath it.
+          to optimize both the AI and data platform layers of their stack.
         </p>
         <p>More broadly, I focus on:</p>
         <div className={classes.bulletColumns}>
@@ -90,11 +90,11 @@ export default function ConsultingPage() {
           <section aria-labelledby="data-services-title">
             <h2 id="data-services-title">Data</h2>
             <ul>
-              <li>Semantic layer modeling and analytics</li>
+              <li>Semantic layer models and analytics</li>
               <li>Pipeline orchestration and ELT/ETL</li>
               <li>Ingestion, integration and streaming</li>
               <li>Performance and cost optimization</li>
-              <li>Observability, quality and governance</li>
+              <li>Observability, data quality and governance</li>
             </ul>
           </section>
         </div>
