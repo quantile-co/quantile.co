@@ -12,94 +12,93 @@ check counts and investigation transcripts. Never retain credentials, customer
 payloads, state, saved plans or live Checkout URLs. Commit sanitized notes with
 related changes without recurring note-only validation cycles.
 
-## Application boundaries
+## Application and UI
 
-- HTTP routes are explicit composition roots; use ordinary typed dependency
-  injection, not service locators, dispatch frameworks or duplicate DTO layers.
-- `apps/web/lib/env/env.ts` owns staged environment parsing. Validate verification inputs
-  first and other secrets only when needed. Module import and ignored/replayed
-  events must not require unrelated sender credentials. Domain helpers receive
-  explicit values rather than rereading ambient environment.
-- Billing environment is independent of `NODE_ENV`. Keep development/production
-  terminology internally and provider test/live terms at API boundaries. Reject
-  live billing with an emulator. App identity remains stable across releases;
-  test-operation/lifecycle identifiers are not extra configured instances.
-- Preserve unchanged-byte signature checks, bounded bodies, invoice eligibility,
-  complete pagination, safe errors and explicit ownership. Only Stripe initiates
-  welcome operations; verified Resend callbacks reconcile existing requests.
-- Welcome completion requires an immutable persisted request, provider acceptance
-  and a durable receipt before completed HTTP 200. An ignored 200 is not delivery.
-  Replays reuse the stored request and idempotency key. Preserve the first accepted
-  ID, use receipt CAS/readback and never send email inside a database transaction.
-  Timeouts can leave successful writes or sends; do not erase pending records.
-- Recovery audits start from the eligible invoice population, not only failed
-  webhooks. Distinguish accepted, pending, absent and conflicting records. Prefer
-  callback reconciliation for known acceptance; a late retry beyond provider
-  idempotency retention can duplicate email. Do not claim lifetime exactly-once
-  delivery or infer nonacceptance from missing old logs.
-- The official Firestore SDK belongs in the shared client factory; domain stores
-  own persistence semantics. Emulator tests do not prove cloud IAM or routing.
-  Integration cleanup must verify exact ownership, never broadly delete endpoints
-  or terminate another owner's processes.
+This branch contains a consulting letter at `/`, `/brand` downloads and a minimal
+404, with optional Fathom analytics. Newsletter, archive, Markdown article,
+subscription and campaign UI/routes are removed. `/consulting`, `/newsletter`
+and `/lp/*` now return 404 rather than redirects. Checkout, webhooks, welcome
+email, database access, provider integration tooling and Storybook remain absent.
+This source state is not evidence of a deployed rollout or external-resource
+retirement. Preserve the approved letter copy: software and data engineering
+experience, small data teams at companies under 500 people, DSPy and GEPA across
+AI and data platforms, AI/Data service lists, and an email/booking invitation.
+The approved offer is “Retainers start at $15k for 80 hours a month.” Do not infer
+additional availability, rollover, support, refund or billing policies.
 
-## Approved UI and copy decisions
+Preserve responsive design, light/dark themes, keyboard access, reduced-motion
+behavior and semantic structure. Components receive behavior and siblings through
+props; avoid service locators and unnecessary abstractions. Keep focused tests
+for current behavior rather than retaining coverage for deleted features.
 
-Preserve approved marketing copy; README changes require explicit approval.
-Capacity means concurrent in-progress issues, not monthly throughput, hours or
-PR counts. Do not invent turnaround, support, refund, banked-time or legal policies,
-or change the offer to conceal an unimplemented billing capability. Social proof
-must reflect actual experience, not invented customers or endorsements.
+The homepage lives directly in `app/page.tsx` and has no header or full site
+footer. Its bottom controls are a centered stack of copyright then theme switcher,
+with auto top margin to stay at the bottom on tall viewports and no wordmark or
+divider.
+The top-level layout owns providers, analytics and the skip link. Shared
+`app/(root)/layout.tsx` composes the header and footer only for brand and is also
+used explicitly by 404, without a separate chrome wrapper file. The header pairs the home wordmark
+with the shared arrow-free “Book a call” CTA injected through props. Its 32px CTA
+is vertically centered within the 35px wordmark box. The footer retains its theme
+control; the homepage uses its own compact theme control and the same saved or
+system theme.
 
-Colocate component regression tests with their component, not directly under
-`apps/web/app/`.
+The consulting homepage uses `components/LandingPage` without video, sidebar,
+newsletter form or P.S. A single portrait sits above “Hi, I’m AJ.” without a
+name/email caption, sharing the letter's left edge. Its size is twice the
+responsive title font size (64–96px). Portrait-to-title and title-to-opening gaps
+are both 20px. The portrait row preserves title leading and aligns the image to
+its cap height. The 800px container retains 752px of desktop reading width,
+with 64px of outer top spacing. Body text is 18px below 768px and 20px from
+768px, with 1.55 line-height and normal tracking. Bullets remain 18px, grouped into semantic sections with “AI” and “Data” H2
+headings, forming two columns from 576px and stacking below it; never use a table. The shared portrait lives at
+`public/images/contributors/aj-welch.webp`.
 
-Components remain standalone and receive behavior/siblings through props. Keep
-shared layout tokens, light/dark themes, keyboard access, reduced motion and
-semantic structure. Page and Storybook composition must agree. Layout changes
-need responsive inspection, not merely a passing build.
+The letter uses an external booking link and a mailto link, not an embedded
+calendar or local form. Signature and booking CTA share a row. Social proof shows
+Google, CompilerWorks and Chartio in three static columns down to 320px. Company
+names stay beside their square marks. Full, unwrapped bylines and “Clients:”
+share a left-aligned line below, with periods rather than middle-dot separators.
+A shared 3px gap separates company header, byline
+and client logos. CompilerWorks has a wider column. Smaller client logos use
+evenly spaced slots with left-aligned names underneath. Banner text, logos and
+borders inherit the letter color through `currentColor`.
 
-The hosted Portal link is footer-only, labeled “Billing” after FAQ, not a header
-or magic-link URL. Checkout lets Stripe select eligible enabled payment methods;
-exact HTTPS-origin checks permit only approved hosts. FAQ examples prioritize
-GCP, AWS, Snowflake and Databricks; Azure needs a new copy decision. Approved hero
-animation titles are retained in the [copy decisions](daily/2026-10-12.md), not as
-an implementation-status record. Current source holds the authoritative copy.
+`lib/metadata.ts` supplies consulting-focused shared metadata; routes retain
+their own canonical URLs. The homepage emits Organization and WebSite JSON-LD.
+The sitemap lists only `/` and `/brand`, without synthetic update dates.
+
+Keep `/brand`, its downloads, sitemap entry and generated assets. Its source and
+generated social images live under `app/(root)/brand`; `packages/brand/assets.ts`
+owns those output paths. The 404 retains its central home button. Header, footer
+and widest page content use Mantine `xl` containers with matching horizontal
+padding; the letter remains narrower. README edits require explicit approval.
 
 ## Factory and workspace tooling
 
-JS/TS app names use `@quantile-co/quantile.co-<app>`, adding `-cli` for CLI apps.
-The root remains `@quantile-co/quantile.co`.
+JS/TS workspace names include organization and repository:
+`@quantile-co/quantile.co-<name>`, adding `-cli` for CLI apps.
+This applies to `packages/` as well as `apps/`. The root remains
+`@quantile-co/quantile.co`.
 
-The application lives in `apps/web/`, including Next, Storybook, site-native
-configuration, tests and brand assets. Its build is `next build`; root commands
+The application lives in `apps/web/`, including Next, site-native configuration,
+tests and brand assets. Its build is `next build`; root commands
 orchestrate pnpm/Turbo workspaces. Keep app semantics and approved copy unchanged.
-There is no shared package until actual shared behavior warrants one.
+`packages/brand` owns the shared generator and `quantile-brand-assets` CLI.
+Apps consume it as a workspace dependency. The CLI writes/checks the calling
+app directory; library functions accept an explicit output directory.
+`packages/testing` exports the Next Image browser-test stub; it is not production
+UI. Both packages stay flat. The web app's `lib/` holds shared page metadata.
 The root AGENTS index remains canonical. Next's documented `agentRules: false`
 prevents `next dev` from creating a nested guide after relocation; agents still
 read version-matched documentation from the web workspace's installed Next package.
 
-`apps/repo/` owns repository checks/fixes and dispatches site dev/assets commands.
-Site launchers retain native Node 24 TypeScript execution and explicit
-child-credential isolation. Ordinary tests own an isolated demo emulator and run
-unit, browser and Storybook projects; provider-backed integration stays separate.
-Integration browsers honor the pinned Chromium path and use tool-scoped credentials.
-Keep heavy webhook-module initialization outside timed tests and preserve the
-module cache; cold dependency transformation is not handler behavior.
-
-Provider-backed development reuses a dedicated background Tailscale Funnel on
-HTTPS 8443, mounted at `/api/resend/webhook/` to `http://127.0.0.1:4318`.
-Machine setup owns it; the launcher only reads its configuration and never
-publishes, resets or stops a Funnel. The fixed Resend listener port admits one
-integrated run per laptop, including worktrees. Other laptops remain independent.
-Stripe keeps its independent CLI forwarding connection. Each run journals its
-unique Resend URL before registration and verifies exact registration cleanup.
-After a launcher crash, stop its orphaned provider CLIs before
-`pnpm dev --cleanup-integration`; cleanup never kills a journal PID.
-Keep app/operation identity, signature checks and child-credential isolation.
-Integration tests distinguish provider acceptance (two minutes) from verified
-callbacks (ten minutes for provider retries); keep the same listener alive rather
-than resending email or accepting API-only proof. Ordinary development and tests
-do not contact the daemon. See README for the one-time Funnel prerequisite.
+`apps/repo/` owns repository checks/fixes. Development runs native `next dev`;
+ordinary tests run Vitest unit/browser projects directly, with no emulator,
+provider credentials or tunnel. Direct TypeScript scripts and the asset CLI run
+through `tsx`; repository and release CLIs have no bundle-build step. Blog-specific
+skills and article/form/pagination configuration are removed; copy-editing remains
+available for the consulting letter.
 
 Factory is composed through explicit `lib.evalModules`, package/file selections,
 and Files then Pi shell hooks. `.envrc` sources optional ignored `.envrc.local`
@@ -161,9 +160,10 @@ or release manifest. Commit the complete root pnpm workspace/lock/Turbo configur
 and app-native files so source builds require no Nix materialization. Firebase App
 Hosting supports the Turborepo workspace with archive `rootDirectory: apps/web`;
 the web build remains `next build`, not a custom Docker/image build. Keep private
-runtime configuration out of public source. `apps/web/firebase.json` supplies
-Next's security-header policy. Deny-all Rules retain their exact established bytes
-at `apps/web/firestore.rules`.
+runtime configuration out of public source. `apps/web/next.config.ts` owns
+security/cache headers through its `nix/next/default.nix` source. Source releases no longer require Firebase Hosting
+configuration or Firestore Rules files; deployment consumers must use the matching
+landing-page-only archive contract.
 
 The single `tf/` root owns repository/state infrastructure, not application
 deployment or a reusable Stripe catalog. Keep the existing bucket, resource
@@ -183,8 +183,8 @@ Plan/Apply run locked `tsx` directly, outside Turbo and without a tooling-build
 prerequisite. Frozen installation immediately precedes each workflow task.
 Plan stores saved bytes and private diagnostics in GCS. Apply consumes the exact
 operator-selected `GH_PLAN_REF` generation without replanning. No GitHub plan
-artifact or receipt is produced. Build/publication, Plan, Apply, provider-backed
-testing, state migration and credential changes each require separate authorization.
+artifact or receipt is produced. Build/publication, Plan, Apply,
+state migration and credential changes each require separate authorization.
 
 ## Completed public rollouts
 
@@ -217,6 +217,4 @@ testing, state migration and credential changes each require separate authorizat
   another production phase.
 
 These were source/repository-infrastructure rollouts, not site deployments or
-provider-backed application tests. They do not establish present Checkout,
-Billing TLS, webhook, inbox-delivery or refund behavior. The historical missing
-Link-option report was resolved; do not reopen it from stale notes.
+external-resource retirement. They do not authorize another production phase.

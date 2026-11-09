@@ -1,0 +1,28 @@
+.button {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.button[data-variant="filled"]:not(:disabled, [data-disabled]) {
+  box-shadow: var(--site-control-shadow);
+}
+
+@media (hover: hover) {
+  .button[data-variant="filled"]:hover:not(:disabled, [data-disabled]) {
+    background: color-mix(
+      in srgb,
+      var(--site-text-primary) 84%,
+      var(--mantine-color-body)
+    );
+    color: var(--mantine-color-body);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}

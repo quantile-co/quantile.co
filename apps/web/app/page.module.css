@@ -1,0 +1,112 @@
+.page {
+  /* Preserve the consulting letter's spacing without site chrome. */
+  padding-block: calc(var(--mantine-spacing-xl) * 2)
+    calc(var(--mantine-spacing-xl) + var(--mantine-spacing-md));
+}
+
+.page main {
+  --letter-font-size: var(--mantine-font-size-lg);
+  --letter-line-height: var(--mantine-line-height-md);
+  --letter-tracking: normal;
+
+  width: 100%;
+}
+
+.heading {
+  --consulting-title-size: clamp(2rem, 4vw, 3rem);
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--mantine-spacing-lg);
+  margin-bottom: var(--mantine-spacing-lg);
+}
+
+.page h1 {
+  min-width: 0;
+  text-box-trim: trim-start;
+  text-box-edge: cap alphabetic;
+  font-size: var(--consulting-title-size);
+  font-weight: var(--mantine-h1-font-weight);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  text-align: start;
+  text-align-last: auto;
+  text-wrap: balance;
+}
+
+.portraitRow {
+  font-family: var(--mantine-font-family-headings);
+  font-size: var(--consulting-title-size);
+  font-weight: var(--mantine-h1-font-weight);
+  line-height: 1.15;
+}
+
+.portrait {
+  display: inline-block;
+  /* Preserve title leading and align the image top to its cap height. */
+  vertical-align: calc(1cap - var(--consulting-title-size) * 2);
+  width: calc(var(--consulting-title-size) * 2);
+  height: calc(var(--consulting-title-size) * 2);
+  border: 2px solid var(--site-text-primary);
+  border-radius: var(--mantine-radius-sm);
+  object-fit: cover;
+}
+
+.bulletColumns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1em clamp(1.5rem, 3vw, 3rem);
+  margin-bottom: var(--letter-font-size);
+  font-size: var(--mantine-font-size-lg);
+}
+
+.bulletColumns h2 {
+  margin: 0 0 0.35em;
+  font-size: inherit;
+  font-weight: 600;
+  line-height: inherit;
+}
+
+.bulletColumns ul {
+  margin: 0;
+  padding-inline-start: 1.1em;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  margin-top: auto;
+  padding: var(--mantine-spacing-xl) var(--site-page-padding);
+}
+
+.footer p {
+  margin: 0;
+  color: var(--site-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+}
+
+/* Mantine xs: 576px. */
+@media (min-width: 36em) {
+  .bulletColumns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Mantine sm: 768px. */
+@media (min-width: 48em) {
+  .page main {
+    --letter-font-size: var(--mantine-font-size-xl);
+  }
+}
+
+@media (forced-colors: active) {
+  .portrait {
+    border-color: CanvasText;
+  }
+}

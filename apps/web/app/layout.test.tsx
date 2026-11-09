@@ -1,64 +1,30 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import firebaseConfig from "../firebase.json";
+import { expect, it, vi } from "vitest";
 import RootLayout from "./layout";
+import Home from "./page";
 
 vi.mock("@/components/FathomAnalytics/FathomAnalytics", () => ({
-  FathomAnalytics: ({
-    siteId,
-    domains,
-  }: {
-    siteId: string;
-    domains: string[];
-  }) => (
-    <span
-      data-analytics-site={siteId}
-      data-analytics-domains={domains.join(",")}
-    />
-  ),
+  FathomAnalytics: () => <span data-analytics-integration="" />,
 }));
 
-afterEach(() => vi.unstubAllEnvs());
-
-describe("root analytics composition", () => {
-  it("passes only explicit public build settings to the client integration", () => {
-    vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("NEXT_PUBLIC_FATHOM_SITE_ID", "TESTSITE");
-    vi.stubEnv("NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS", "example.test");
-    const html = renderToStaticMarkup(<RootLayout>Content</RootLayout>);
-    expect(html).toContain('data-analytics-site="TESTSITE"');
-    expect(html).toContain('data-analytics-domains="example.test"');
-    expect(html).toContain("Content");
-  });
-
-  it.each(["production", "development"])(
-    "omits analytics when unconfigured in %s",
-    (mode) => {
-      vi.stubEnv("NODE_ENV", mode);
-      vi.stubEnv("NEXT_PUBLIC_FATHOM_SITE_ID", undefined);
-      vi.stubEnv("NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS", undefined);
-      const html = renderToStaticMarkup(<RootLayout>Content</RootLayout>);
-      expect(html).not.toContain("data-analytics-site");
-    },
+it("composes the consulting homepage with only compact copyright and theme controls", () => {
+  const html = renderToStaticMarkup(
+    <RootLayout>
+      <Home />
+    </RootLayout>,
   );
-
-  it("allows only the Fathom CDN for script, image collection and departure beacons", () => {
-    const policy = firebaseConfig.hosting.headers
-      .find((entry) => entry.source === "**")
-      ?.headers.find(
-        (header) => header.key === "Content-Security-Policy",
-      )?.value;
-    const directives = new Map(
-      policy?.split(";").map((directive) => {
-        const [name, ...sources] = directive.trim().split(/\s+/);
-        return [name, sources];
-      }),
-    );
-    for (const name of ["script-src", "img-src", "connect-src"])
-      expect(directives.get(name)).toContain("https://cdn.usefathom.com");
-    expect(policy).not.toContain("https://*.usefathom.com");
-    expect(policy).not.toContain("'unsafe-eval'");
-    expect(directives.get("object-src")).toEqual(["'none'"]);
-    expect(directives.get("frame-ancestors")).toEqual(["'none'"]);
-  });
+  expect(html).not.toContain("<header");
+  expect(html).not.toContain("<nav");
+  expect(html.match(/<footer/g)).toHaveLength(1);
+  expect(html).toContain(`© ${new Date().getFullYear()} Quantile LLC`);
+  expect(html).not.toContain('aria-label="Quantile home"');
+  expect(html).toContain('id="main-content"');
+  expect(html).toContain('href="#main-content"');
+  expect(html).not.toContain('href="/newsletter');
+  expect(html).not.toContain('href="/consulting"');
+  expect(html).not.toContain("<form");
+  expect(html).toContain("Hi, I&#x27;m AJ.");
+  expect(html.match(/data-site-cta="booking"/g)).toHaveLength(1);
+  expect(html).toContain("Select a display theme");
+  expect(html).toContain("data-analytics-integration");
 });

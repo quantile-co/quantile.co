@@ -1,286 +1,201 @@
 import "@fontsource-variable/outfit";
 import "@/app/globals.css";
 import { MantineProvider } from "@mantine/core";
-import type { ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { page, userEvent } from "vitest/browser";
-import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
-import { FaqSection } from "@/components/FaqSection/FaqSection";
-import { HeroAnimation } from "@/components/HeroAnimation/HeroAnimation";
-import { HeroSection } from "@/components/HeroSection/HeroSection";
-import { PricingSection } from "@/components/PricingSection/PricingSection";
-import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
-import { CompactSocialProof } from "@/components/SocialProofSection/SocialProofSection";
+import proofClasses from "@/components/SocialProofSection/SocialProofSection.module.css";
+import layoutClasses from "./layout.module.css";
+import Home from "./page";
 import { theme } from "./theme";
-
-function PreviewCheckoutForm({ children }: { children: ReactNode }) {
-  return (
-    <form action="/storybook-checkout-preview" method="post">
-      {children}
-    </form>
-  );
-}
-
-const previewCheckoutActions = {
-  desktop: (
-    <PreviewCheckoutForm>
-      <button type="submit">Start building</button>
-    </PreviewCheckoutForm>
-  ),
-  mobile: (
-    <PreviewCheckoutForm>
-      <button type="submit">Start building</button>
-    </PreviewCheckoutForm>
-  ),
-};
 
 let container: HTMLDivElement;
 let root: Root;
-let initialViewport: { width: number; height: number };
+const initialViewport = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+};
 
-beforeAll(async () => {
-  initialViewport = { width: window.innerWidth, height: window.innerHeight };
-  container = document.createElement("div");
-  document.body.appendChild(container);
-  root = createRoot(container);
-  root.render(
-    <MantineProvider theme={theme}>
-      <HeroSection
-        description="Fast, flexible, senior data + AI engineering capacity without expensive hires or agency headaches."
-        CheckoutForm={PreviewCheckoutForm}
-        title={"Fractional data\nand AI engineering"}
-        visual={<HeroAnimation />}
-      />
-    </MantineProvider>,
-  );
-  await vi.waitFor(() => expect(container.querySelector("h1")).not.toBeNull());
-  await document.fonts.ready;
-});
-
-afterAll(async () => {
-  root.unmount();
-  container.remove();
+afterEach(async () => {
+  root?.unmount();
+  container?.remove();
+  window.scrollTo(0, 0);
   await page.viewport(initialViewport.width, initialViewport.height);
 });
 
-describe("homepage hero layout", () => {
-  it("keeps the two-line headline and subtitle clear of the animation", async () => {
-    const title = container.querySelector("h1");
-    expect(title).not.toBeNull();
-    expect(title?.textContent).toBe("Fractional data\nand AI engineering");
-    const description = container.querySelector("section p");
-    const visual = container.querySelector<HTMLElement>(
-      'section [class*="visual"]',
-    );
-    expect(visual).not.toBeNull();
-    const fileIcon = container.querySelector<SVGElement>(
-      "svg.tabler-icon-file-text",
-    );
-    const fileName = container.querySelector<HTMLElement>(
-      '[class*="fileName"]',
-    );
-    expect(fileIcon).not.toBeNull();
-    expect(fileName?.textContent).toBe("evals.py");
-    expect(description?.textContent).toBe(
-      "Fast, flexible, senior data + AI engineering capacity without expensive hires or agency headaches.",
-    );
-    const form = container.querySelector("form");
-    expect(form?.getAttribute("action")).toBe("/storybook-checkout-preview");
-    expect(form?.getAttribute("method")).toBe("post");
-    expect(form?.querySelector('button[type="submit"]')?.textContent).toBe(
-      "Start building",
-    );
-
-    for (const width of [
-      320, 328, 360, 390, 425, 446, 447, 466, 467, 480, 767, 768, 850, 900, 960,
-      1024, 1088, 1089, 1100, 1161, 1162, 1200, 1201, 1365, 1920,
-    ]) {
-      await page.viewport(width, 900);
-      await new Promise<void>((resolve) =>
-        requestAnimationFrame(() => resolve()),
-      );
-      const heading = title as HTMLElement;
-      const height = heading.getBoundingClientRect().height;
-      const lineHeight = Number.parseFloat(
-        getComputedStyle(heading).lineHeight,
-      );
-      expect(Math.round(height / lineHeight), `at ${width}px`).toBe(2);
-      expect(heading.scrollWidth, `at ${width}px`).toBeLessThanOrEqual(
-        heading.clientWidth + 1,
-      );
-      if (width === 390 && fileIcon) {
-        expect(getComputedStyle(fileIcon).display).not.toBe("none");
-      }
-      if ([320, 390, 768, 1024].includes(width) && fileName) {
-        expect(fileName.scrollWidth, `file at ${width}px`).toBeLessThanOrEqual(
-          fileName.clientWidth + 1,
-        );
-      }
-      if (description) {
-        const descriptionStyle = getComputedStyle(description);
-        if (width === 320) {
-          expect(descriptionStyle.fontSize).toBe("15px");
-          const firstLine = "Fast, flexible, senior data + AI engineering";
-          expect(description.textContent?.startsWith(firstLine)).toBe(true);
-          const textRange = document.createRange();
-          textRange.setStart(description.firstChild as Text, 0);
-          textRange.setEnd(description.firstChild as Text, firstLine.length);
-          expect(textRange.getClientRects()).toHaveLength(1);
-        }
-        const descriptionLineHeight = Number.parseFloat(
-          descriptionStyle.lineHeight,
-        );
-        const descriptionLines = Math.round(
-          description.getBoundingClientRect().height / descriptionLineHeight,
-        );
-        expect(descriptionStyle.textWrap, `at ${width}px`).toBe(
-          descriptionLines >= 3 ? "pretty" : "balance",
-        );
-        expect(
-          description.scrollWidth,
-          `description at ${width}px`,
-        ).toBeLessThanOrEqual(description.clientWidth + 1);
-        if (width >= 768 && visual) {
-          const visualBounds = visual.getBoundingClientRect();
-          const descriptionText = document.createRange();
-          descriptionText.selectNodeContents(description);
-          for (const line of descriptionText.getClientRects()) {
-            if (
-              line.bottom > visualBounds.top &&
-              line.top < visualBounds.bottom
-            ) {
-              expect(
-                line.right,
-                `subtitle/animation gap at ${width}px`,
-              ).toBeLessThanOrEqual(visualBounds.left + 1);
-            }
-          }
-        }
-        if (width === 1024) {
-          expect(descriptionLines).toBe(2);
-        }
-      }
-    }
-  });
-
-  it("keeps mobile drawer semantics and keyboard handling while submitting a same-origin form", async () => {
-    await page.viewport(390, 844);
+for (const colorScheme of ["light", "dark"] as const) {
+  it(`keeps the consulting-only homepage responsive in ${colorScheme} mode`, async () => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
     root.render(
-      <MantineProvider theme={theme}>
-        <SiteHeader
-          bookCallHref="#book-a-call"
-          checkoutActions={previewCheckoutActions}
-          homeHref="/"
-          logo={<span>Quantile</span>}
-          sections={[]}
-        />
+      <MantineProvider forceColorScheme={colorScheme} theme={theme}>
+        <div className={layoutClasses.page}>
+          <Home />
+        </div>
       </MantineProvider>,
     );
-    const toggle = await vi.waitFor(() => {
-      const button = container.querySelector<HTMLButtonElement>(
-        'button[aria-label="Toggle navigation"]',
-      );
-      expect(button).not.toBeNull();
-      return button as HTMLButtonElement;
-    });
-    toggle.focus();
-    toggle.click();
-    const form = await vi.waitFor(() => {
-      const element = document.querySelector<HTMLFormElement>(
-        "#mobile-navigation-drawer form",
-      );
-      expect(element).not.toBeNull();
-      return element as HTMLFormElement;
-    });
-    expect(form.getAttribute("action")).toBe("/storybook-checkout-preview");
-    expect(form.getAttribute("method")).toBe("post");
-
-    const dialog = form.closest('[role="dialog"]');
-    expect(dialog?.getAttribute("aria-modal")).toBe("true");
-    expect(dialog?.querySelector("header")?.getAttribute("role")).toBe(
-      "presentation",
+    await vi.waitFor(() =>
+      expect(container.querySelector("h1")).not.toBeNull(),
     );
-    const titleId = dialog?.getAttribute("aria-labelledby");
-    expect(titleId && document.getElementById(titleId)?.textContent).toBe(
-      "Quantile",
+    await document.fonts.ready;
+    const main = container.querySelector("main") as HTMLElement;
+    const letter = main.querySelector(
+      "article[aria-labelledby]",
+    ) as HTMLElement;
+    const title = main.querySelector("h1") as HTMLElement;
+    const heading = title.parentElement as HTMLElement;
+    const portrait = heading.querySelector("img") as HTMLImageElement;
+    const opening = letter.querySelector(":scope > p") as HTMLElement;
+    const proof = letter.querySelector("section") as HTMLElement;
+    const email = letter.querySelector(
+      'a[href="mailto:aj@quantile.co"]',
+    ) as HTMLAnchorElement;
+    const booking = letter.querySelector(
+      '[data-site-cta="booking"]',
+    ) as HTMLAnchorElement;
+
+    expect(container.querySelector("header, nav, form, aside")).toBeNull();
+    expect(container.textContent).not.toMatch(
+      /newsletter|P\.S\.|Video coming soon/i,
+    );
+    expect(title.textContent).toBe("Hi, I'm AJ.");
+    expect(opening.textContent).toBe(
+      "I've been a software and data engineer for over 15 years at:",
     );
     expect(
-      document.querySelectorAll('header:not([role="presentation"])'),
+      container.querySelectorAll('img[alt="Portrait of AJ Welch"]'),
     ).toHaveLength(1);
-    await vi.waitFor(() =>
-      expect(dialog?.contains(document.activeElement)).toBe(true),
-    );
-    // Traverse past both ends, including the logo and close button. Removing
-    // the header landmark must not remove its descendants from keyboard use.
-    for (let index = 0; index < 8; index += 1) {
-      await userEvent.keyboard("{Tab}");
-      expect(dialog?.contains(document.activeElement)).toBe(true);
+    expect(proof.querySelectorAll("[data-company]")).toHaveLength(3);
+    expect(booking.href).toBe("https://cal.com/aj-welch/book-a-call");
+    expect(letter.querySelector("table")).toBeNull();
+    expect(letter.textContent).not.toMatch(/Lorem ipsum|Ut enim/);
+    const paragraphs = letter.querySelectorAll(":scope > p");
+    expect(
+      paragraphs[1].querySelector('a[href="https://dspy.ai/"]')?.textContent,
+    ).toBe("DSPy");
+    expect(
+      paragraphs[1].querySelector('a[href="https://gepa-ai.github.io/gepa/"]')
+        ?.textContent,
+    ).toBe("GEPA");
+    for (const link of paragraphs[1].querySelectorAll("a")) {
+      expect(link.target).toBe("_blank");
+      expect(link.relList.contains("noopener")).toBe(true);
+      expect(link.relList.contains("noreferrer")).toBe(true);
     }
-    for (let index = 0; index < 8; index += 1) {
-      await userEvent.keyboard("{Shift>}{Tab}{/Shift}");
-      expect(dialog?.contains(document.activeElement)).toBe(true);
-    }
 
-    let submitted = false;
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      submitted = true;
-    });
-    form.querySelector<HTMLButtonElement>('button[type="submit"]')?.click();
-    expect(submitted).toBe(true);
-    await userEvent.keyboard("{Escape}");
-    await vi.waitFor(() =>
-      expect(document.querySelector('[role="dialog"]')).toBeNull(),
-    );
-    await vi.waitFor(() => expect(document.activeElement).toBe(toggle));
-    expect(toggle.getAttribute("aria-expanded")).toBe("false");
-  });
-});
-
-describe("homepage navigation anchors", () => {
-  it("places Benefits, Pricing, and FAQ at the same distance below the header", async () => {
-    await page.viewport(1200, 900);
-    const anchorContainer = document.createElement("div");
-    document.body.appendChild(anchorContainer);
-    const anchorRoot = createRoot(anchorContainer);
-
-    try {
-      anchorRoot.render(
-        <MantineProvider theme={theme}>
-          <div style={{ height: "100vh" }} />
-          <BenefitsSection CheckoutForm={PreviewCheckoutForm} />
-          <PricingSection CheckoutForm={PreviewCheckoutForm} />
-          <FaqSection
-            billingPortalLoginUrl="/portal-preview"
-            compactProof={<CompactSocialProof />}
-            CheckoutForm={PreviewCheckoutForm}
-          />
-          <div style={{ height: "100vh" }} />
-        </MantineProvider>,
+    for (const width of [
+      320, 375, 425, 575, 576, 577, 767, 768, 800, 992, 1440, 1920,
+    ]) {
+      await page.viewport(width, 900);
+      const letterBox = letter.getBoundingClientRect();
+      const portraitBox = portrait.getBoundingClientRect();
+      const titleBox = title.getBoundingClientRect();
+      expect(main.getBoundingClientRect().width).toBeLessThanOrEqual(800);
+      if (width >= 992) expect(letterBox.width).toBe(752);
+      expect(main.getBoundingClientRect().top).toBe(64);
+      expect(portraitBox.left).toBe(letterBox.left);
+      expect(titleBox.left).toBe(letterBox.left);
+      const titleSize = parseFloat(getComputedStyle(title).fontSize);
+      expect(portraitBox.width).toBeCloseTo(titleSize * 2, 1);
+      expect(portraitBox.height).toBeCloseTo(titleSize * 2, 1);
+      expect(titleBox.top - portraitBox.bottom).toBeCloseTo(20, 1);
+      expect(opening.getBoundingClientRect().top - titleBox.bottom).toBeCloseTo(
+        20,
+        1,
       );
-      await vi.waitFor(() =>
-        expect(anchorContainer.querySelector("#faq")).not.toBeNull(),
+      const bodySize = width >= 768 ? 20 : 18;
+      expect(getComputedStyle(opening).fontSize).toBe(`${bodySize}px`);
+      expect(parseFloat(getComputedStyle(opening).lineHeight)).toBeCloseTo(
+        bodySize * 1.55,
       );
-      await document.fonts.ready;
+      expect(getComputedStyle(opening).letterSpacing).toBe("normal");
 
-      const anchorTops = [];
-      for (const id of ["benefits", "pricing", "faq"]) {
-        const anchor = anchorContainer.querySelector<HTMLElement>(`#${id}`);
-        if (!anchor) throw new Error(`Missing ${id} anchor`);
-        anchor.scrollIntoView();
-        await new Promise<void>((resolve) =>
-          requestAnimationFrame(() => resolve()),
+      const footer = container.querySelector("footer") as HTMLElement;
+      const copyright = footer.querySelector("p") as HTMLElement;
+      const themeControl = copyright.nextElementSibling as HTMLElement;
+      expect(copyright.textContent).toBe(
+        `© ${new Date().getFullYear()} Quantile LLC`,
+      );
+      expect(footer.querySelector('[aria-label="Quantile home"]')).toBeNull();
+      for (const element of [copyright, themeControl]) {
+        const box = element.getBoundingClientRect();
+        const footerBox = footer.getBoundingClientRect();
+        expect(box.left + box.width / 2).toBeCloseTo(
+          footerBox.left + footerBox.width / 2,
+          1,
         );
-        anchorTops.push(anchor.getBoundingClientRect().top);
+      }
+      expect(themeControl.getBoundingClientRect().top).toBeGreaterThan(
+        copyright.getBoundingClientRect().bottom,
+      );
+      expect(footer.getBoundingClientRect().bottom).toBeGreaterThanOrEqual(
+        window.innerHeight,
+      );
+      const textColor = getComputedStyle(opening).color;
+      for (const element of proof.querySelectorAll("*")) {
+        expect(getComputedStyle(element).color).toBe(textColor);
+      }
+      for (const logo of proof.querySelectorAll(
+        `.${proofClasses.companyMarkImage}, .${proofClasses.customerLogo}`,
+      )) {
+        expect(getComputedStyle(logo).backgroundColor).toBe(textColor);
+      }
+      for (const frame of proof.querySelectorAll(
+        `.${proofClasses.mediaSquare}`,
+      )) {
+        expect(getComputedStyle(frame).borderTopColor).toBe(textColor);
+      }
+      for (const card of proof.querySelectorAll("[data-company]")) {
+        const [companyHeader, details] = card.children;
+        const [byline, clients] = details.children;
+        expect(
+          byline.getBoundingClientRect().top -
+            companyHeader.getBoundingClientRect().bottom,
+        ).toBeCloseTo(3, 1);
+        expect(
+          clients.getBoundingClientRect().top -
+            byline.getBoundingClientRect().bottom,
+        ).toBeCloseTo(3, 1);
       }
 
-      expect(anchorTops[0]).toBeCloseTo(anchorTops[1], 0);
-      expect(anchorTops[1]).toBeCloseTo(anchorTops[2], 0);
-    } finally {
-      anchorRoot.unmount();
-      anchorContainer.remove();
-      window.scrollTo(0, 0);
+      const columns = [
+        ...letter.querySelectorAll(":scope > div > section[aria-labelledby]"),
+      ];
+      expect(columns).toHaveLength(2);
+      expect(
+        columns.map((column) => column.querySelector("h2")?.textContent),
+      ).toEqual(["AI", "Data"]);
+      for (const column of columns) {
+        const columnHeading = column.querySelector("h2") as HTMLElement;
+        const list = column.querySelector("ul") as HTMLElement;
+        expect(column.getAttribute("aria-labelledby")).toBe(columnHeading.id);
+        expect(list.children).toHaveLength(5);
+        expect(getComputedStyle(list).fontSize).toBe("18px");
+        expect(columnHeading.getBoundingClientRect().bottom).toBeLessThan(
+          list.getBoundingClientRect().top,
+        );
+      }
+      const [first, second] = columns.map((column) =>
+        column.getBoundingClientRect(),
+      );
+      if (width >= 576) {
+        expect(first.top).toBe(second.top);
+        expect(first.right).toBeLessThan(second.left);
+      } else {
+        expect(second.top).toBeGreaterThanOrEqual(first.bottom);
+      }
+      expect(booking.getBoundingClientRect().right).toBeCloseTo(
+        letterBox.right,
+        1,
+      );
+      expect(email.getBoundingClientRect().top).toBeLessThan(
+        booking.getBoundingClientRect().bottom,
+      );
+      expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
     }
+    email.focus();
+    await userEvent.tab();
+    expect(document.activeElement).toBe(booking);
   });
-});
+}

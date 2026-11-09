@@ -1,11 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
 import sitemap from "./sitemap";
 
-describe("sitemap", () => {
-  it("lists the public canonical pages but not the checkout return page", () => {
-    expect(sitemap().map(({ url }) => url)).toEqual([
-      "https://quantile.co",
-      "https://quantile.co/brand",
-    ]);
-  });
+it("lists only the consulting homepage and brand page", () => {
+  expect(sitemap()).toEqual([
+    { url: "https://quantile.co" },
+    { url: "https://quantile.co/brand" },
+  ]);
 });

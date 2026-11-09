@@ -1,124 +1,105 @@
-import type { Metadata } from "next";
-import { BenefitsAnimation1 } from "@/components/BenefitsAnimation/BenefitsAnimation1";
-import { BenefitsAnimation2 } from "@/components/BenefitsAnimation/BenefitsAnimation2";
-import { BenefitsAnimation3 } from "@/components/BenefitsAnimation/BenefitsAnimation3";
-import { BenefitsSection } from "@/components/BenefitsSection/BenefitsSection";
-import { BookACallSection } from "@/components/BookACallSection/BookACallSection";
-import { BrandLogo } from "@/components/BrandLogo/BrandLogo";
-import { CalendlyEmbed } from "@/components/CalendlyEmbed/CalendlyEmbed";
-import {
-  CheckoutAction,
-  CheckoutForm,
-} from "@/components/CheckoutForm/CheckoutForm";
-import { FaqSection } from "@/components/FaqSection/FaqSection";
-import { HeroAnimation } from "@/components/HeroAnimation/HeroAnimation";
-import { HeroSection } from "@/components/HeroSection/HeroSection";
-import { PricingSection } from "@/components/PricingSection/PricingSection";
-import { SiteFooter } from "@/components/SiteFooter/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader/SiteHeader";
-import { SkipLink } from "@/components/SkipLink/SkipLink";
-import {
-  CompactSocialProof,
-  SocialProofSection,
-} from "@/components/SocialProofSection/SocialProofSection";
+import { Title } from "@mantine/core";
+import Image from "next/image";
+import { CTAButton } from "@/components/CTAButton/CTAButton";
+import { LandingPage } from "@/components/LandingPage/LandingPage";
+import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
-import { billingPortalLoginUrl } from "@/lib/stripe/portal";
+import {
+  createPageMetadata,
+  organization,
+  site,
+  website,
+} from "@/lib/metadata";
+import classes from "./page.module.css";
 
-const pageTitle = "Quantile | Fractional data and AI engineering";
-const heroDescription =
-  "Fast, flexible, senior data + AI engineering capacity without expensive hires or agency headaches.";
+const pageTitle = "Data and AI Engineering";
 
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
   title: pageTitle,
-  description: heroDescription,
-  alternates: { canonical: "/" },
-  openGraph: {
-    title: pageTitle,
-    description: heroDescription,
-    siteName: "Quantile",
-    type: "website",
-    url: "/",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: pageTitle,
-    description: heroDescription,
-  },
-};
-
-const organizationStructuredData = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Quantile",
-  url: "https://quantile.co",
-  logo: "https://quantile.co/apple-icon.png",
-  description: heroDescription,
-  founder: {
-    "@type": "Person",
-    name: "AJ Welch",
-    sameAs: ["https://www.linkedin.com/in/ajwelch4/", "https://x.com/AJWelch"],
-  },
-};
-
-const homeSections = [
-  { href: "#benefits", label: "Benefits" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#faq", label: "FAQ" },
-] as const;
-
-const headerCheckoutActions = {
-  desktop: <CheckoutAction size="xs" />,
-  mobile: <CheckoutAction size="md" siteCta="section" />,
-};
+  description: site.description,
+  pathname: "/",
+});
 
 export default function Home() {
   return (
-    <div>
-      <SkipLink href="#main-content">Skip to content</SkipLink>
-      <SiteHeader
-        bookCallHref="#book-a-call"
-        homeHref="#top"
-        logo={<BrandLogo />}
-        sections={homeSections}
-        checkoutActions={headerCheckoutActions}
-      />
-      <main id="main-content" tabIndex={-1}>
-        <HeroSection
-          description={heroDescription}
-          id="top-hero"
-          CheckoutForm={CheckoutForm}
-          title={"Fractional data\nand AI engineering"}
-          visual={<HeroAnimation />}
-        />
-        <SocialProofSection ariaLabel="AJ Welch's experience and client work" />
-        <BenefitsSection
-          CheckoutForm={CheckoutForm}
-          onboardingVisual={<BenefitsAnimation1 />}
-          expertiseVisual={<BenefitsAnimation2 />}
-          capacityVisual={<BenefitsAnimation3 />}
-        />
-        <PricingSection
-          mobileProof={<SocialProofSection embedded />}
-          CheckoutForm={CheckoutForm}
-        />
-        <SocialProofSection hideOnMobile />
-        <FaqSection
-          billingPortalLoginUrl={billingPortalLoginUrl}
-          compactProof={<CompactSocialProof />}
-          CheckoutForm={CheckoutForm}
-        />
-      </main>
-      <SiteFooter
-        billingPortalLoginUrl={billingPortalLoginUrl}
-        callToAction={<BookACallSection calendar={<CalendlyEmbed />} />}
-        homeHref="#top"
-        logo={<BrandLogo />}
-        sections={homeSections}
-        themeSwitcher={<ThemeSwitcher />}
-      />
+    <>
+      <LandingPage
+        className={classes.page}
+        containerProps={{ size: 800, px: "var(--site-page-padding)" }}
+        heading={
+          <div className={classes.heading}>
+            <span className={classes.portraitRow}>
+              <Image
+                src="/images/contributors/aj-welch.webp"
+                alt="Portrait of AJ Welch"
+                width={128}
+                height={128}
+                sizes="(max-width: 50em) 64px, (max-width: 75em) 8vw, 96px"
+                className={classes.portrait}
+              />
+            </span>
+            <Title order={1} id="founder-letter-title">
+              Hi, I'm AJ.
+            </Title>
+          </div>
+        }
+        introduction="I've been a software and data engineer for over 15 years at:"
+        proof={
+          <SocialProofSection ariaLabel="Company experience and client work" />
+        }
+        action={<CTAButton />}
+      >
+        <p>
+          Nowadays, I work with small data teams at companies under 500 people.
+          In particular, I've been helping teams use{" "}
+          <a href="https://dspy.ai/" target="_blank" rel="noopener noreferrer">
+            DSPy
+          </a>{" "}
+          and{" "}
+          <a
+            href="https://gepa-ai.github.io/gepa/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GEPA
+          </a>{" "}
+          to optimize both the AI layer and the data platform beneath it.
+        </p>
+        <p>More broadly, I focus on:</p>
+        <div className={classes.bulletColumns}>
+          <section aria-labelledby="ai-services-title">
+            <h2 id="ai-services-title">AI</h2>
+            <ul>
+              <li>Agents, workflows and automation</li>
+              <li>Context engineering and RAG</li>
+              <li>Optimization and fine-tuning</li>
+              <li>Evals and dataset engineering</li>
+              <li>Observability, guardrails and cost control</li>
+            </ul>
+          </section>
+          <section aria-labelledby="data-services-title">
+            <h2 id="data-services-title">Data</h2>
+            <ul>
+              <li>Semantic layer modeling and analytics</li>
+              <li>Pipeline orchestration and ELT/ETL</li>
+              <li>Ingestion, integration and streaming</li>
+              <li>Performance and cost optimization</li>
+              <li>Observability, quality and governance</li>
+            </ul>
+          </section>
+        </div>
+        <p>
+          If you're interested in working together, please feel free to email me
+          or book a call. Retainers start at $15k for 80 hours a month.
+        </p>
+      </LandingPage>
+      <footer className={classes.footer}>
+        <p>© {new Date().getFullYear()} Quantile LLC</p>
+        <ThemeSwitcher />
+      </footer>
       <script type="application/ld+json">
-        {JSON.stringify(organizationStructuredData).replace(/</g, "\\u003c")}
+        {JSON.stringify([organization, website]).replace(/</g, "\\u003c")}
       </script>
-    </div>
+    </>
   );
 }

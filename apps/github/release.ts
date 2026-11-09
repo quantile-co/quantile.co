@@ -127,8 +127,6 @@ export async function publishRelease(
     "tsconfig.json",
     "apps/web/package.json",
     "apps/web/tsconfig.json",
-    "apps/web/firebase.json",
-    "apps/web/firestore.rules",
     "apps/web/next.config.ts",
     "apps/web/postcss.config.cjs",
   ])

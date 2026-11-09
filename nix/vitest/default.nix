@@ -14,7 +14,6 @@
     pkgs.writeText "vitest.config.mts" ''
       import path from "node:path";
       import { fileURLToPath } from "node:url";
-      import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
       import { playwright } from "@vitest/browser-playwright";
       import { defineConfig } from "vitest/config";
 
@@ -26,7 +25,8 @@
       const browser = () => ({
         enabled: true,
         headless: true,
-        provider: playwright({ launchOptions: { executablePath } }),
+        // Native scrollbars must participate in layout, just as in a real browser.
+        provider: playwright({ launchOptions: { executablePath, ignoreDefaultArgs: ["--hide-scrollbars"] } }),
         instances: [{ browser: "chromium" as const }],
       });
 
@@ -42,31 +42,17 @@
                 include: [
                   "app/**/*.test.{ts,tsx}",
                   "components/**/*.test.{ts,tsx}",
-                  "lib/**/*.test.{ts,tsx}",
+                  "lib/**/*.test.ts",
+                  "*.test.ts",
                 ],
-                exclude: ["**/*.integration.test.{ts,tsx}", "**/*.browser.test.{ts,tsx}"],
+                exclude: ["**/*.browser.test.{ts,tsx}"],
               },
             },
             {
               extends: true,
-              test: {
-                name: "integration",
-                environment: "node",
-                include: ["app/**/*.integration.test.{ts,tsx}"],
-                fileParallelism: false,
-              },
-            },
-            {
-              extends: true,
-              optimizeDeps: { include: ["react-dom/server", "react-email"] },
-              plugins: [storybookTest({ configDir: path.join(dirname, ".storybook") })],
-              test: { name: "storybook", browser: browser() },
-            },
-            {
-              extends: true,
-              resolve: { alias: { "next/image": path.join(dirname, "lib/browser/test.tsx") } },
+              resolve: { alias: { "next/image": fileURLToPath(import.meta.resolve("@quantile-co/quantile.co-testing/next-image")) } },
               optimizeDeps: {
-                include: ["@mantine/hooks", "@tabler/icons-react", "fathom-client", "next/navigation", "react-dom/client"],
+                include: ["@mantine/hooks", "@tabler/icons-react", "fathom-client", "next/navigation", "react-dom", "react-dom/client"],
               },
               test: {
                 name: "browser",

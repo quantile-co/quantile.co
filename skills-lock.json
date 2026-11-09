@@ -17,6 +17,14 @@
       "computedHash": "ca00ef2671d65a7442bc796e8744cd3d759f92c01640f2fbcab638889c494424",
       "via": "@quantile-co/factory-pi"
     },
+    "copy-editing": {
+      "source": "coreyhaines31/marketingskills",
+      "ref": "6b9e9387265d9e3049258f7eae3f746d3c3ddf87",
+      "sourceType": "github",
+      "skillPath": "skills/copy-editing/SKILL.md",
+      "computedHash": "d755d5546c8ccd2b6a77695230a1d54869635cbd52e53545b0ce5bd367850432",
+      "via": "."
+    },
     "core-web-vitals": {
       "source": "addyosmani/web-quality-skills",
       "ref": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",

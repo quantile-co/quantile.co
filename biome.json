@@ -27,50 +27,15 @@
   "overrides": [
     {
       "includes": [
-        "apps/web/app/**/route.ts",
         "apps/web/app/**/page.tsx",
         "apps/web/app/**/layout.tsx",
-        "apps/web/lib/**/run.ts",
-        "apps/web/lib/env/env.ts",
+        "apps/web/components/FathomAnalytics/FathomAnalytics.tsx",
         "apps/*/cli.ts",
-        "apps/web/dev.ts",
-        "apps/web/assets.ts",
         "**/*.test.{ts,tsx}",
         "**/test.ts",
         "**/*.config.{ts,js,mjs,cjs,mts,cts}"
       ],
       "linter": { "rules": { "style": { "noProcessEnv": "off" } } }
-    },
-    {
-      "includes": [
-        "apps/web/lib/**/*.{ts,tsx}",
-        "!apps/web/lib/**/run.ts",
-        "!apps/web/lib/**/*.test.{ts,tsx}",
-        "!apps/web/lib/**/test.ts"
-      ],
-      "linter": {
-        "rules": {
-          "style": {
-            "noRestrictedImports": {
-              "level": "error",
-              "options": {
-                "patterns": [
-                  {
-                    "group": [
-                      "@/app/**",
-                      "**/route",
-                      "**/route.ts",
-                      "**/run",
-                      "**/run.ts"
-                    ],
-                    "message": "Library modules must not import application entrypoints. Inject dependencies from the composition root."
-                  }
-                ]
-              }
-            }
-          }
-        }
-      }
     },
     {
       "includes": ["apps/web/components/**/*.{ts,tsx}"],

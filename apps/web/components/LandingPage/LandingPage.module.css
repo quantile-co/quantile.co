@@ -1,0 +1,108 @@
+.page {
+  container-type: inline-size;
+}
+
+.main {
+  width: 100%;
+  margin-inline: auto;
+}
+
+.proof {
+  --site-page-padding: 0px;
+
+  min-width: 0;
+  margin-bottom: 1em;
+}
+
+.letter {
+  width: 100%;
+  margin-inline: auto;
+  color: var(--site-text-primary);
+  font-family: var(--mantine-font-family-headings);
+  font-size: var(--letter-font-size);
+  font-weight: 400;
+  letter-spacing: var(--letter-tracking, normal);
+  line-height: var(--letter-line-height, 1.55);
+  overflow-wrap: break-word;
+}
+
+.letter > p {
+  margin: 0 0 1em;
+  text-box-edge: cap alphabetic;
+}
+
+.letter > p:first-child {
+  text-box-trim: trim-start;
+}
+
+.letter strong {
+  font-weight: 500;
+}
+
+.letter :where(p:not(.signature), li) a {
+  color: var(--site-text-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.letterClosing {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.letter .signature {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.signature a {
+  font-size: max(1rem, 0.9375em);
+  line-height: 1.5;
+  width: fit-content;
+  border-radius: var(--mantine-radius-xs);
+  color: var(--site-text-secondary);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+@media (hover: hover) {
+  .letter :where(p:not(.signature), li) a:hover {
+    color: var(--site-text-secondary);
+  }
+
+  .signature a:hover {
+    color: var(--site-text-primary);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .letter :where(p:not(.signature), li) a,
+  .signature a {
+    transition: none;
+  }
+}
+
+.letterAction {
+  display: flex;
+}
+
+.letterAction > a {
+  min-width: calc(var(--letter-font-size) * 5.2);
+  height: auto;
+  min-height: 32px;
+  margin-block: 2px;
+  padding-inline: 1em;
+  font-size: max(1rem, calc(var(--letter-font-size) * 0.875));
+}
+
+@media (max-width: 47.9375em) {
+  .letterClosing {
+    gap: 0.25rem;
+  }
+}

@@ -9,20 +9,26 @@
   },
   "scripts": {
     "prepare": "husky",
-    "dev": "tsx apps/repo/cli.ts dev",
-    "dev:storybook": "pnpm --filter @quantile-co/quantile.co-web run dev:storybook",
+    "dev": "pnpm --filter @quantile-co/quantile.co-web run dev",
     "check": "TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run check",
     "fix": "TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run fix",
     "test": "pnpm run check && TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run test",
-    "test:integration": "pnpm --filter @quantile-co/quantile.co-web run test:integration",
     "build": "TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run build",
-    "build:assets": "tsx apps/repo/cli.ts assets",
-    "build:storybook": "TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run build:storybook",
+    "build:assets": "pnpm --filter @quantile-co/quantile.co-web run build:assets",
     "github:build": "tsx apps/github/cli.ts build",
     "github:plan": "tsx apps/github/cli.ts plan",
     "github:apply": "tsx apps/github/cli.ts apply",
-    "skills:sync": "skills experimental_sync --agent pi --copy --yes --include @quantile-co/factory-pi#deploy @quantile-co/factory-pi#day-zero-deploy @quantile-co/factory-pi#seo-audit @quantile-co/factory-pi#web-design-guidelines @quantile-co/factory-pi#web-perf @quantile-co/factory-pi#web-quality-audit @quantile-co/factory-pi#webapp-testing @quantile-co/factory-pi#performance @quantile-co/factory-pi#core-web-vitals @quantile-co/factory-pi#accessibility @quantile-co/factory-pi#seo @quantile-co/factory-pi#best-practices"
+    "skills:sync": "skills experimental_sync --agent pi --copy --yes --include @quantile-co/factory-pi#deploy @quantile-co/factory-pi#day-zero-deploy @quantile-co/factory-pi#seo-audit @quantile-co/factory-pi#web-design-guidelines @quantile-co/factory-pi#web-perf @quantile-co/factory-pi#web-quality-audit @quantile-co/factory-pi#webapp-testing @quantile-co/factory-pi#performance @quantile-co/factory-pi#core-web-vitals @quantile-co/factory-pi#accessibility @quantile-co/factory-pi#seo @quantile-co/factory-pi#best-practices .#copy-editing"
   },
+  "skills": [
+    {
+      "source": "coreyhaines31/marketingskills/skills/copy-editing",
+      "ref": "6b9e9387265d9e3049258f7eae3f746d3c3ddf87",
+      "skills": [
+        "copy-editing"
+      ]
+    }
+  ],
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@quantile-co/factory-pi": "0.1.0",
@@ -33,7 +39,6 @@
     "tsx": "4.23.15",
     "turbo": "2.11.10",
     "typescript": "5.9.3",
-    "vite": "8.3.5",
     "vitest": "4.1.11"
   }
 }
