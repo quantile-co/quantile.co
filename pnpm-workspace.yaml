@@ -11,6 +11,4 @@ minimumReleaseAgeExclude:
 
 allowBuilds:
   esbuild: false
-  protobufjs: true
-  re2: false
   sharp: true

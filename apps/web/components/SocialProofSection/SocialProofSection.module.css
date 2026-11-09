@@ -105,8 +105,14 @@
 }
 
 .customerLogo {
-  width: min(calc(1rem * var(--proof-scale)), calc(var(--company-logo-size) * 0.55));
-  height: min(calc(1rem * var(--proof-scale)), calc(var(--company-logo-size) * 0.55));
+  width: min(
+    calc(1rem * var(--proof-scale)),
+    calc(var(--company-logo-size) * 0.55)
+  );
+  height: min(
+    calc(1rem * var(--proof-scale)),
+    calc(var(--company-logo-size) * 0.55)
+  );
   background-color: var(--proof-foreground);
   mask: var(--logo-image) left center / contain no-repeat;
 }

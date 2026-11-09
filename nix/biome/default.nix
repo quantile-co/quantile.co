@@ -10,7 +10,6 @@
             "!.next"
             "!dist"
             "!build"
-            "!apps/web/components/**/*.module.css"
             "!!.pi/skills"
             "!!.semgrep"
           ];
@@ -25,6 +24,13 @@
           };
           assist.actions.source.organizeImports = "on";
           overrides = [
+            {
+              includes = [ "apps/web/components/ThemeSwitcher/ThemeSwitcher.module.css" ];
+              linter.rules.suspicious.noUnknownAtRules = {
+                level = "error";
+                options.ignore = [ "mixin" ];
+              };
+            }
             {
               includes = [
                 "apps/web/app/**/page.tsx"
