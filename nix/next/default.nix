@@ -11,10 +11,6 @@
         // Workspace guidance stays in the root AGENTS.md.
         agentRules: false,
         outputFileTracingRoot: workspace,
-        outputFileTracingIncludes: {
-          "/": ["./content/newsletter/*.md"],
-          "/newsletter": ["./content/newsletter/*.md"],
-        },
         turbopack: { root: workspace },
         async headers() {
           const development = process.env.NODE_ENV === "development";

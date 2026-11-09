@@ -1,5 +1,5 @@
 .page {
-  /* Match the article container's and article's combined vertical padding. */
+  /* Preserve the consulting letter's spacing without site chrome. */
   padding-block: calc(var(--mantine-spacing-xl) * 2)
     calc(var(--mantine-spacing-xl) + var(--mantine-spacing-md));
 }
@@ -44,7 +44,7 @@
 
 .portrait {
   display: inline-block;
-  /* Preserve the article title’s leading; align the image top to its cap height. */
+  /* Preserve title leading and align the image top to its cap height. */
   vertical-align: calc(1cap - var(--consulting-title-size) * 2);
   width: calc(var(--consulting-title-size) * 2);
   height: calc(var(--consulting-title-size) * 2);
@@ -62,9 +62,22 @@
   padding-inline-start: 1.1em;
 }
 
-.page footer {
-  /* Article Stack gap plus the shared subscription footer's top margin. */
-  margin-top: calc(var(--mantine-spacing-xl) * 2);
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  margin-top: auto;
+  padding: var(--mantine-spacing-xl) var(--site-page-padding);
+}
+
+.footer p {
+  margin: 0;
+  color: var(--site-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
 }
 
 /* Mantine xs: 576px. */

@@ -17,12 +17,9 @@
     "@mantine/hooks": "9.6.1",
     "@tabler/icons-react": "3.49.0",
     "fathom-client": "3.7.2",
-    "gray-matter": "4.0.3",
     "next": "16.4.1",
     "react": "19.3.1",
-    "react-dom": "19.3.1",
-    "react-markdown": "10.1.0",
-    "server-only": "0.0.1"
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
     "@quantile-co/quantile.co-brand": "workspace:*",

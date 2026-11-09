@@ -14,150 +14,60 @@ related changes without recurring note-only validation cycles.
 
 ## Application and UI
 
-This branch contains a newsletter homepage/archive, Markdown articles,
-consulting and campaign letters, brand downloads and a minimal 404, with optional
-Fathom analytics. Checkout, webhooks, welcome email, database access, provider
-integration tooling and Storybook are removed. This source state is not evidence
-of a deployed rollout or external-resource retirement. Preserve approved copy;
-the campaign letter's closing invitation and video remain placeholders.
+This branch contains a consulting letter at `/`, `/brand` downloads and a minimal
+404, with optional Fathom analytics. Newsletter, archive, Markdown article,
+subscription and campaign UI/routes are removed. `/consulting`, `/newsletter`
+and `/lp/*` now return 404 rather than redirects. Checkout, webhooks, welcome
+email, database access, provider integration tooling and Storybook remain absent.
+This source state is not evidence of a deployed rollout or external-resource
+retirement. Preserve approved copy; the letter body remains placeholder lorem ipsum.
 
-Preserve the current responsive design, light/dark themes, keyboard access,
-reduced-motion behavior and semantic structure. Components receive siblings
-through props; avoid service locators and unnecessary abstractions. Keep focused
-tests for current behavior rather than retaining coverage for deleted features.
+Preserve responsive design, light/dark themes, keyboard access, reduced-motion
+behavior and semantic structure. Components receive behavior and siblings through
+props; avoid service locators and unnecessary abstractions. Keep focused tests
+for current behavior rather than retaining coverage for deleted features.
 
-Landing pages use explicit `app/(lp)/lp/<slug>/page.tsx` routes, starting with
-`/lp/data-quality`. Campaign routes are temporarily disabled: the `(lp)` layout
-calls `notFound()` before rendering its children, producing HTTP 404 responses.
-Their page components, copy and tests remain intact. Restore the layout’s children
-passthrough to re-enable them; retain noindex and sitemap/navigation exclusions. Each route owns its copy and
-metadata and composes `components/LandingPage` with social proof and a booking
-action through props. Its newsletter P.S. is part of the letter after the signature/booking row;
-routes inject `newsletterForm` with `NewsletterSubscribeForm`. That form supports
-stacked/inline layouts, a compact input with an inset arrow submit control, and
-presentation-only button props. The submit button is enabled
-for interaction preview, with native email validation and prevented submission. No dynamic registry or CMS is needed.
+The homepage lives directly in `app/page.tsx` and has no header or full site
+footer. Its bottom controls are a centered stack of copyright then theme switcher,
+with auto top margin to stay at the bottom on tall viewports and no wordmark or
+divider.
+The top-level layout owns providers, analytics and the skip link. Shared
+`app/site-layout.tsx` composes the header and footer only for brand (through its
+`(root)` group layout) and 404 (explicitly). The header pairs the home wordmark
+with the shared arrow-free “Book a call” CTA injected through props. Its 32px CTA
+is vertically centered within the 35px wordmark box. The footer retains its theme
+control; the homepage uses its own compact theme control and the same saved or
+system theme.
 
-The `(root)` layout adds `components/Header` to normal site pages. The header
-links to `/newsletter` and `/consulting`, with no booking CTA. The root 404 includes
-the same header explicitly. The top-level layout owns providers, analytics and
-the shared footer with its always-visible theme control. Header, footer and widest
-page content use Mantine `xl` containers with matching horizontal padding;
-reading layouts remain narrower. Campaign landing pages
-have no header; header visibility is structural, not pathname-based.
-
-The homepage and newsletter archive share `NewsletterHero` with the title
-"The AI newsletter for data leaders." and an injected `NewsletterSubscribeForm`
-with a compact, labeled “Subscribe →” control.
-The homepage displays up to twelve items in a responsive 1/2/3-column grid,
-without dates: eleven articles and one consulting preview. Article cards show title,
-summary, then contributor portrait/name without “By”. The archive displays
-up to ten horizontal items with Newest/Oldest sorting: nine articles
-and one consulting preview. Both use URL-based pagination and place the consulting
-preview as close to the midpoint of each page as possible, including partial pages.
-Consulting previews also show AJ Welch's contributor byline, without a date.
-Their wordmark tiles invert the surrounding theme: light-on-dark in light mode,
-dark-on-light in dark mode.
-Articles and the consulting item share `NewsletterArticleListItem`; routes supply
-links, titles, subtitles, image/wordmark slots and optional dates, byline slots or labels.
-Archive articles show date, title, summary, then contributor portrait/name without “By”.
-`PaginationControls` contains only generic pagination controls, not the collection;
-routes supply its pathname, optional query parameters, anchor and accessible label.
-Components stay in flat, per-component directories; newsletter components use the
-`Newsletter` prefix.
-
-`lib/newsletter.ts` reads Markdown/frontmatter from `content/newsletter/*.md`
-on the server; no content API or CMS is needed. Article filenames define
-`/newsletter/<slug>` routes, statically generated from those files. The initial
-14 articles/images are explicitly marked placeholders, noindexed on detail pages
-and excluded from the sitemap. Replace their content and remove `placeholder: true`
-when publishing real articles. The subscription form has no provider integration
-and only previews form interactions; it does not collect or send addresses.
-Each article requires a `contributor` ID in frontmatter, resolved through the small
-typed map in `lib/newsletter.ts`; missing or unknown IDs fail loading.
-AJ Welch (`aj-welch`) is the current contributor. The shared portrait lives at
-`public/images/contributors/aj-welch.webp` and is also used by consulting.
-`NewsletterArticleByline` receives a contributor and optional date through props and renders the
-portrait and name, without “By” on any page. Article pages include the semantic
-publication date within a horizontal byline, ordered contributor then date. The article header keeps
-that row close beneath the summary, with space for future right-aligned sharing
-controls. Archive dates sit above their titles, and homepage cards omit dates.
-Article prose, summary and forwarded-newsletter prompt use Mantine `lg` (18px)
-below `sm` (768px) and `xl` (20px) from `sm`, with the standard `md` line-height
-(1.55). The 800px outer container
-retains 752px of desktop reading width; title and Markdown heading sizes are unchanged.
-Article pages reuse the existing subscription form in two places: a forwarded-newsletter
-prompt between the byline and cover, bounded by horizontal rules, and the footer.
-The forwarded prompt stays left-aligned. Article-width container queries keep it
-on one line when wide and split its two sentences into a content-sized column at
-intermediate widths. The adjacent input fills remaining width with an 8px gap.
-At article widths of 28rem or less, each prompt sentence gets its own line with
-balanced wrapping, and the input stacks below at full width. Keep this CSS-only; there is no
-inline form sizing, text measurement or resize observer.
-Balanced text alone does not shrink its containing box; do not compensate by
-right-aligning it.
-There are no contributor profile routes, multi-contributor arrays, share controls
-or additional publishing dependencies.
-
-Newsletter editorial skills are selected by the root package's native `skills`
-declarations and installed explicitly with `pnpm run skills:sync`: `copy-editing`
-(Corey Haines), `blog-editor` (Daniela Baron), and `blog-writing-guide` (Sentry).
-The direct full-commit pins work independently of Factory's published catalog.
-The blog editor uses its self-contained revision before the additional `clarity`
-dependency. Use these for specific, justified rewrites and technical review;
-preserve the contributor's meaning and verify claims rather than inventing evidence.
-Sentry's company voice and SEO prescriptions are not Quantile publication
-requirements. Keep this site's frontmatter schema and shared contributor/byline components.
-
-`lib/metadata.ts` supplies shared metadata defaults; routes retain their own copy
-and canonical URLs. Homepage positioning covers newsletter and consulting. Open
-Graph and Twitter share explicit images; placeholders use the branded PNG fallback,
-while published articles use their cover. Brand keeps its route-specific file-based
-social images. The homepage emits Organization and WebSite JSON-LD; published
-articles emit BlogPosting JSON-LD with a Person author; article metadata also names
-the contributor using the standard SEO `authors` and Schema.org `author` fields.
-Ordinary pagination stays self-canonical; alternative archive sorting is noindex. Sitemaps
-exclude placeholders, campaigns and query variants, without synthetic update dates.
-
-`/consulting` uses the letter layout without video or sidebar. At every viewport,
-a single portrait sits above “Hi, I’m AJ.”, without a name/email caption and with
-a shared left edge. Its size is twice the responsive title font size (64–96px).
-Portrait-to-title and title-to-opening gaps are both 20px. The H1 matches newsletter article title
-typography, with cap-height trimming. “I’ve been a software engineer for over
-15 years at:” starts the full-width letter below that heading in ordinary body text.
-Consulting and articles use the same 800px container and responsive page padding,
-retaining 752px of desktop content width. Both use 64px of outer top spacing below the site header. The portrait row
-preserves article-title font leading and aligns the image to its cap height,
-so the portrait matches the article’s visible title top rather than its line-box top. Body text is 18px below `sm`, 20px from `sm`, with 1.55 line-height
-and normal tracking. Consulting bullets use 18px, forming two columns from
-576px and stacking below it. The body remains placeholder lorem ipsum.
-
-Consulting and articles share `NewsletterSubscribeFooter`: a divider, centered
-newsletter title and compact signup form, injected through props. Consulting
-has one form below the letter and no P.S.; its closing signature/email and booking
-CTA remain. Article forwarded signup is unchanged. Shared compact controls retain
-their border/focus behavior and preview-only submission.
-`LandingPage` accepts container sizing/padding and composed heading/footer slots;
-the obsolete sidebar API/styles are removed. The retained campaign keeps its
-existing headline, video, P.S. and signup styling. Consulting copy remains
-independent of `/lp/data-quality`; do not extract a shared letter-content component.
+The consulting homepage uses `components/LandingPage` without video, sidebar,
+newsletter form or P.S. A single portrait sits above “Hi, I’m AJ.” without a
+name/email caption, sharing the letter's left edge. Its size is twice the
+responsive title font size (64–96px). Portrait-to-title and title-to-opening gaps
+are both 20px. The portrait row preserves title leading and aligns the image to
+its cap height. The 800px container retains 752px of desktop reading width,
+with 64px of outer top spacing. Body text is 18px below 768px and 20px from
+768px, with 1.55 line-height and normal tracking. Bullets remain 18px, forming
+two columns from 576px and stacking below it. The shared portrait lives at
+`public/images/contributors/aj-welch.webp`.
 
 The letter uses an external booking link and a mailto link, not an embedded
-calendar or local form. Social proof shows Google, CompilerWorks and Chartio in
-three static columns at every viewport down to 320px. Company names stay beside
-their square marks. Full, unwrapped bylines and “· Clients:” share a left-aligned
-line below. A shared 3px gap separates the company header, byline and client-logo
-row. CompilerWorks has a wider column so its name stays on one line.
-Smaller client logos use evenly spaced slots within each company column, with
-left-aligned names underneath. Fluid sizing replaces carousel state and
-social-proof layout breakpoints.
-The signature and closing CTA share a row. The reusable landing component owns
-the responsive letter styles; brand markup/styles remain alongside its route.
+calendar or local form. Signature and booking CTA share a row. Social proof shows
+Google, CompilerWorks and Chartio in three static columns down to 320px. Company
+names stay beside their square marks. Full, unwrapped bylines and “· Clients:”
+share a left-aligned line below. A shared 3px gap separates company header, byline
+and client logos. CompilerWorks has a wider column. Smaller client logos use
+evenly spaced slots with left-aligned names underneath. Banner text, logos and
+borders inherit the letter color through `currentColor`.
+
+`lib/metadata.ts` supplies consulting-focused shared metadata; routes retain
+their own canonical URLs. The homepage emits Organization and WebSite JSON-LD.
+The sitemap lists only `/` and `/brand`, without synthetic update dates.
 
 Keep `/brand`, its downloads, sitemap entry and generated assets. Its source and
 generated social images live under `app/(root)/brand`; `packages/brand/assets.ts`
-owns those output paths. The 404 retains its central home button. README edits
-require explicit approval.
+owns those output paths. The 404 retains its central home button. Header, footer
+and widest page content use Mantine `xl` containers with matching horizontal
+padding; the letter remains narrower. README edits require explicit approval.
 
 ## Factory and workspace tooling
 

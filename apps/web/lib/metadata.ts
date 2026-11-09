@@ -4,7 +4,7 @@ export const site = {
   name: "Quantile",
   url: "https://quantile.co",
   description:
-    "AI insights for data leaders. Hands-on engineering for data and AI teams.",
+    "Fast, flexible, senior data + AI engineering capacity without expensive hires or agency headaches.",
 };
 
 export const organization = {

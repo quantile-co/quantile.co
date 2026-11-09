@@ -8,14 +8,13 @@ authoritative, not historical guides or generated prompt excerpts.
 **README edits require explicit approval.** Preserve approved marketing copy.
 Keep this root index; do not recreate nested `AGENTS.md` files.
 
-The application has a newsletter homepage/archive, Markdown article pages,
-a consulting letter, retained campaign pages (currently disabled), `/brand`
-downloads and a minimal 404.
-Newsletter content lives in `apps/web/content/newsletter/`; its server-only
-loader is `apps/web/lib/newsletter.ts`. Subscription is not connected to a
-provider. There is no Checkout, webhook, transactional email, welcome route or
-application database. Preserve approved copy. Source cleanup does not establish
-production retirement.
+The application has a consulting letter at `/`, `/brand` downloads and a minimal
+404. The homepage has no header and only centered, stacked copyright/theme
+controls at the bottom. Brand and 404 share a header pairing
+the home wordmark with an arrow-free “Book a call” CTA, plus the theme footer. Newsletter, article, subscription and campaign UI/routes are removed.
+There is no Checkout, webhook, transactional email, welcome route or application
+database. Preserve approved copy. Source cleanup does not establish production
+retirement.
 
 Public Check, manual immutable-source Build, protected-main Plan and exact Apply
 are distinct workflows. A source merge or passing Check does **not** authorize

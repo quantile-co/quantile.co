@@ -1,27 +1,21 @@
 import { MantineProvider } from "@mantine/core";
-import { usePathname } from "next/navigation";
 import { renderToStaticMarkup } from "react-dom/server";
-import { expect, it, vi } from "vitest";
+import { expect, it } from "vitest";
 import { Header } from "./Header";
 
-vi.mock("next/navigation", () => ({ usePathname: vi.fn() }));
-
-it.each([
-  ["/", "/"],
-  ["/newsletter", "/newsletter"],
-  ["/newsletter/placeholder-01", null],
-  ["/consulting", "/consulting"],
-  ["/brand", null],
-  ["/newsletter-other", null],
-])("marks the current navigation destination for %s", (pathname, href) => {
-  vi.mocked(usePathname).mockReturnValue(pathname);
+it("links the wordmark home and renders the injected action", () => {
   const html = renderToStaticMarkup(
     <MantineProvider>
-      <Header />
+      <Header
+        action={<a href="https://cal.com/aj-welch/book-a-call">Book a call</a>}
+      />
     </MantineProvider>,
   );
-  const currentLinks =
-    html.match(/<a\b[^>]*aria-current="(?:page|location)"[^>]*>/g) ?? [];
-  expect(currentLinks).toHaveLength(href ? 1 : 0);
-  if (href) expect(currentLinks[0]).toContain(`href="${href}"`);
+  expect(html).toContain('aria-label="Quantile home"');
+  expect(html).toContain('href="/"');
+  expect(html).toContain(
+    'href="https://cal.com/aj-welch/book-a-call">Book a call</a>',
+  );
+  expect(html).not.toContain("Newsletter");
+  expect(html).not.toContain(">Consulting</a>");
 });

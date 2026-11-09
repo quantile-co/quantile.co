@@ -11,8 +11,11 @@ it("offers a way home and theme controls", () => {
   );
   expect(html).toContain(">Page not found.</h1>");
   expect(html).toContain("<header");
+  expect(html).toContain('href="https://cal.com/aj-welch/book-a-call"');
+  expect(html).toContain("Book a call");
+  expect(html).not.toContain("Newsletter");
   expect(html).toContain("<footer");
-  expect(html).not.toContain('data-site-cta="booking"');
+  expect(html.match(/data-site-cta="booking"/g)).toHaveLength(1);
   expect(html.match(/aria-label="Quantile home"/g)).toHaveLength(2);
   expect(html).toContain("Select a display theme");
   expect(html).toContain('href="/">Back to home');

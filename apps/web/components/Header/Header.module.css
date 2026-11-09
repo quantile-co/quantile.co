@@ -19,47 +19,6 @@
   justify-content: space-between;
 }
 
-.link {
-  display: inline-flex;
-  min-height: 36px;
-  align-items: center;
-  padding: 8px;
-  border-radius: var(--mantine-radius-xs);
-  color: var(--site-text-secondary);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  line-height: 1;
-  text-decoration: none;
-  transition: color 150ms ease;
-}
-
-.link:last-child {
-  padding-inline-end: 0;
-}
-
-.link[aria-current] {
-  color: var(--site-text-primary);
-}
-
-@media (hover: hover) {
-  .link:hover {
-    color: var(--site-text-primary);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .link {
-    transition: none;
-  }
-}
-
-@media (forced-colors: active) {
-  .link[aria-current] {
-    outline: 1px solid Highlight;
-    outline-offset: -2px;
-  }
-}
-
 .homeLink {
   display: block;
   width: fit-content;

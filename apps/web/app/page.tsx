@@ -2,10 +2,9 @@ import { Title } from "@mantine/core";
 import Image from "next/image";
 import { CTAButton } from "@/components/CTAButton/CTAButton";
 import { LandingPage } from "@/components/LandingPage/LandingPage";
-import { NewsletterSubscribeFooter } from "@/components/NewsletterSubscribeFooter/NewsletterSubscribeFooter";
-import { NewsletterSubscribeForm } from "@/components/NewsletterSubscribeForm/NewsletterSubscribeForm";
 import { SocialProofSection } from "@/components/SocialProofSection/SocialProofSection";
-import { createPageMetadata, organization } from "@/lib/metadata";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher/ThemeSwitcher";
+import { createPageMetadata, organization, website } from "@/lib/metadata";
 import classes from "./page.module.css";
 
 const pageTitle = "Data & AI Engineering Consulting";
@@ -15,18 +14,17 @@ const heroDescription =
 export const metadata = createPageMetadata({
   title: pageTitle,
   description: heroDescription,
-  pathname: "/consulting",
+  pathname: "/",
 });
 
-export default function ConsultingPage() {
+export default function Home() {
   return (
     <>
       <LandingPage
         className={classes.page}
         containerProps={{ size: 800, px: "var(--site-page-padding)" }}
-        showVideo={false}
         heading={
-          <header className={classes.heading}>
+          <div className={classes.heading}>
             <span className={classes.portraitRow}>
               <Image
                 src="/images/contributors/aj-welch.webp"
@@ -40,24 +38,13 @@ export default function ConsultingPage() {
             <Title order={1} id="founder-letter-title">
               Hi, I’m AJ.
             </Title>
-          </header>
+          </div>
         }
         introduction="I’ve been a software engineer for over 15 years at:"
         proof={
           <SocialProofSection ariaLabel="Company experience and client work" />
         }
         action={<CTAButton />}
-        newsletterFooter={
-          <NewsletterSubscribeFooter
-            titleId="consulting-subscribe-title"
-            form={
-              <NewsletterSubscribeForm
-                layout="compact"
-                buttonProps={{ children: "Subscribe" }}
-              />
-            }
-          />
-        }
       >
         <p>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
@@ -86,8 +73,12 @@ export default function ConsultingPage() {
           pariatur.
         </p>
       </LandingPage>
+      <footer className={classes.footer}>
+        <p>© {new Date().getFullYear()} Quantile LLC</p>
+        <ThemeSwitcher />
+      </footer>
       <script type="application/ld+json">
-        {JSON.stringify(organization).replace(/</g, "\\u003c")}
+        {JSON.stringify([organization, website]).replace(/</g, "\\u003c")}
       </script>
     </>
   );

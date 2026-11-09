@@ -1,10 +1,9 @@
-import { Header } from "@/components/Header/Header";
 import classes from "./not-found.module.css";
+import SiteLayout from "./site-layout";
 
 export default function NotFound() {
   return (
-    <>
-      <Header />
+    <SiteLayout>
       <main className={classes.main} id="main-content" tabIndex={-1}>
         <div className={classes.content}>
           <p className={classes.code}>404</p>
@@ -15,6 +14,6 @@ export default function NotFound() {
           </a>
         </div>
       </main>
-    </>
+    </SiteLayout>
   );
 }

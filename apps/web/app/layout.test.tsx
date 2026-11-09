@@ -1,28 +1,30 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, it, vi } from "vitest";
-import SiteLayout from "./(root)/layout";
-import Home from "./(root)/page";
 import RootLayout from "./layout";
+import Home from "./page";
 
-vi.mock("server-only", () => ({}));
 vi.mock("@/components/FathomAnalytics/FathomAnalytics", () => ({
   FathomAnalytics: () => <span data-analytics-integration="" />,
 }));
 
-it("composes the newsletter homepage with navigation and shared chrome", async () => {
-  const home = await Home({ searchParams: Promise.resolve({}) });
+it("composes the consulting homepage with only compact copyright and theme controls", () => {
   const html = renderToStaticMarkup(
     <RootLayout>
-      <SiteLayout>{home}</SiteLayout>
+      <Home />
     </RootLayout>,
   );
-  expect(html.match(/<header/g)).toHaveLength(1);
+  expect(html).not.toContain("<header");
+  expect(html).not.toContain("<nav");
   expect(html.match(/<footer/g)).toHaveLength(1);
+  expect(html).toContain(`© ${new Date().getFullYear()} Quantile LLC`);
+  expect(html).not.toContain('aria-label="Quantile home"');
   expect(html).toContain('id="main-content"');
   expect(html).toContain('href="#main-content"');
-  expect(html).toContain('href="/newsletter"');
-  expect(html).toContain('href="/consulting"');
-  expect(html).not.toContain("data-site-cta");
+  expect(html).not.toContain('href="/newsletter');
+  expect(html).not.toContain('href="/consulting"');
+  expect(html).not.toContain("<form");
+  expect(html).toContain("Hi, I’m AJ.");
+  expect(html.match(/data-site-cta="booking"/g)).toHaveLength(1);
   expect(html).toContain("Select a display theme");
   expect(html).toContain("data-analytics-integration");
 });

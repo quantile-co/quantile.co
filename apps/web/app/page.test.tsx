@@ -2,7 +2,8 @@ import { expect, it } from "vitest";
 import { site } from "@/lib/metadata";
 import { metadata } from "./page";
 
-it("gives consulting matching explicit Open Graph and Twitter images", () => {
+it("gives the consulting homepage its canonical URL and matching social images", () => {
+  expect(metadata.alternates?.canonical).toBe(`${site.url}/`);
   expect(metadata.openGraph?.images).toEqual(metadata.twitter?.images);
   expect(metadata.openGraph?.images).toEqual([
     {
