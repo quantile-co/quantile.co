@@ -27,21 +27,3 @@ it("uses absolute canonical URLs and matching branded social images by default",
   expect(metadata.twitter?.images).toEqual(metadata.openGraph?.images);
   expect(metadata.robots).toBeUndefined();
 });
-
-it("supports article metadata, explicit cover images and noindex", () => {
-  const metadata = createPageMetadata({
-    title: "Article",
-    description: "Article description.",
-    pathname: "/newsletter/example",
-    publishedTime: "2026-10-01",
-    image: { url: "/images/example.png", alt: "Article cover" },
-    noindex: true,
-  });
-  expect(metadata.openGraph).toMatchObject({
-    type: "article",
-    publishedTime: "2026-10-01",
-    images: [{ url: `${site.url}/images/example.png`, alt: "Article cover" }],
-  });
-  expect(metadata.twitter?.images).toEqual(metadata.openGraph?.images);
-  expect(metadata.robots).toEqual({ index: false, follow: true });
-});

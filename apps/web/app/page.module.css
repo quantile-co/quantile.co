@@ -54,11 +54,22 @@
 }
 
 .bulletColumns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1em clamp(1.5rem, 3vw, 3rem);
+  margin-bottom: var(--letter-font-size);
   font-size: var(--mantine-font-size-lg);
 }
 
-.bulletColumns > ul {
-  margin: 0 0 1em;
+.bulletColumns h2 {
+  margin: 0 0 0.35em;
+  font-size: inherit;
+  font-weight: 600;
+  line-height: inherit;
+}
+
+.bulletColumns ul {
+  margin: 0;
   padding-inline-start: 1.1em;
 }
 
@@ -83,14 +94,7 @@
 /* Mantine xs: 576px. */
 @media (min-width: 36em) {
   .bulletColumns {
-    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1em clamp(1.5rem, 3vw, 3rem);
-    margin-bottom: var(--letter-font-size);
-  }
-
-  .bulletColumns > ul {
-    margin: 0;
   }
 }
 

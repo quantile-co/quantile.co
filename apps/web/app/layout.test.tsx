@@ -23,7 +23,7 @@ it("composes the consulting homepage with only compact copyright and theme contr
   expect(html).not.toContain('href="/newsletter');
   expect(html).not.toContain('href="/consulting"');
   expect(html).not.toContain("<form");
-  expect(html).toContain("Hi, I’m AJ.");
+  expect(html).toContain("Hi, I&#x27;m AJ.");
   expect(html.match(/data-site-cta="booking"/g)).toHaveLength(1);
   expect(html).toContain("Select a display theme");
   expect(html).toContain("data-analytics-integration");

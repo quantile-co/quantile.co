@@ -22,7 +22,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "outputs": [".next/**", "!.next/cache/**"],
       "env": [
         "NEXT_PUBLIC_FATHOM_SITE_ID",
         "NEXT_PUBLIC_FATHOM_ALLOWED_DOMAINS"

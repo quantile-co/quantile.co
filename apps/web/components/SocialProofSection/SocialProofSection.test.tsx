@@ -18,6 +18,10 @@ describe("social proof", () => {
     expect(html).toContain("Duolingo");
     expect(html.match(/>Clients:<\/span>/g)).toHaveLength(3);
     expect(html).not.toContain("| Clients:");
+    expect(html).not.toContain("·");
+    expect(html).toContain("Google Cloud. BigQuery");
+    expect(html).toContain("YC S10. Acquired by Atlassian");
+    expect(html.match(/\. <span>Clients:/g)).toHaveLength(3);
     expect(html).not.toContain("<a ");
   });
 });

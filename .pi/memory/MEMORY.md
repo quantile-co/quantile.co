@@ -20,7 +20,11 @@ subscription and campaign UI/routes are removed. `/consulting`, `/newsletter`
 and `/lp/*` now return 404 rather than redirects. Checkout, webhooks, welcome
 email, database access, provider integration tooling and Storybook remain absent.
 This source state is not evidence of a deployed rollout or external-resource
-retirement. Preserve approved copy; the letter body remains placeholder lorem ipsum.
+retirement. Preserve the approved letter copy: software and data engineering
+experience, small data teams at companies under 500 people, DSPy and GEPA across
+AI and data platforms, AI/Data service lists, and an email/booking invitation.
+The approved offer is “Retainers start at $15k for 80 hours a month.” Do not infer
+additional availability, rollover, support, refund or billing policies.
 
 Preserve responsive design, light/dark themes, keyboard access, reduced-motion
 behavior and semantic structure. Components receive behavior and siblings through
@@ -46,15 +50,16 @@ responsive title font size (64–96px). Portrait-to-title and title-to-opening g
 are both 20px. The portrait row preserves title leading and aligns the image to
 its cap height. The 800px container retains 752px of desktop reading width,
 with 64px of outer top spacing. Body text is 18px below 768px and 20px from
-768px, with 1.55 line-height and normal tracking. Bullets remain 18px, forming
-two columns from 576px and stacking below it. The shared portrait lives at
+768px, with 1.55 line-height and normal tracking. Bullets remain 18px, grouped into semantic sections with “AI” and “Data” H2
+headings, forming two columns from 576px and stacking below it; never use a table. The shared portrait lives at
 `public/images/contributors/aj-welch.webp`.
 
 The letter uses an external booking link and a mailto link, not an embedded
 calendar or local form. Signature and booking CTA share a row. Social proof shows
 Google, CompilerWorks and Chartio in three static columns down to 320px. Company
-names stay beside their square marks. Full, unwrapped bylines and “· Clients:”
-share a left-aligned line below. A shared 3px gap separates company header, byline
+names stay beside their square marks. Full, unwrapped bylines and “Clients:”
+share a left-aligned line below, with periods rather than middle-dot separators.
+A shared 3px gap separates company header, byline
 and client logos. CompilerWorks has a wider column. Smaller client logos use
 evenly spaced slots with left-aligned names underneath. Banner text, logos and
 borders inherit the letter color through `currentColor`.
@@ -83,7 +88,7 @@ orchestrate pnpm/Turbo workspaces. Keep app semantics and approved copy unchange
 Apps consume it as a workspace dependency. The CLI writes/checks the calling
 app directory; library functions accept an explicit output directory.
 `packages/testing` exports the Next Image browser-test stub; it is not production
-UI. Both packages stay flat. The web app's `lib/` holds server-side content loading.
+UI. Both packages stay flat. The web app's `lib/` holds shared page metadata.
 The root AGENTS index remains canonical. Next's documented `agentRules: false`
 prevents `next dev` from creating a nested guide after relocation; agents still
 read version-matched documentation from the web workspace's installed Next package.
@@ -91,7 +96,9 @@ read version-matched documentation from the web workspace's installed Next packa
 `apps/repo/` owns repository checks/fixes. Development runs native `next dev`;
 ordinary tests run Vitest unit/browser projects directly, with no emulator,
 provider credentials or tunnel. Direct TypeScript scripts and the asset CLI run
-through `tsx`.
+through `tsx`; repository and release CLIs have no bundle-build step. Blog-specific
+skills and article/form/pagination configuration are removed; copy-editing remains
+available for the consulting letter.
 
 Factory is composed through explicit `lib.evalModules`, package/file selections,
 and Files then Pi shell hooks. `.envrc` sources optional ignored `.envrc.local`

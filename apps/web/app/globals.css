@@ -4,18 +4,9 @@
 @import "@mantine/core/styles/UnstyledButton.css";
 @import "@mantine/core/styles/VisuallyHidden.css";
 @import "@mantine/core/styles/Button.css";
-@import "@mantine/core/styles/ActionIcon.css";
 @import "@mantine/core/styles/Container.css";
 @import "@mantine/core/styles/Text.css";
 @import "@mantine/core/styles/Title.css";
-@import "@mantine/core/styles/Anchor.css";
-@import "@mantine/core/styles/Group.css";
-@import "@mantine/core/styles/Flex.css";
-@import "@mantine/core/styles/Stack.css";
-@import "@mantine/core/styles/SimpleGrid.css";
-@import "@mantine/core/styles/Input.css";
-@import "@mantine/core/styles/Pagination.css";
-@import "@mantine/core/styles/Typography.css";
 
 :root {
   --site-zinc-50: #fafafa;
@@ -38,11 +29,6 @@
   --site-control-shadow: 0 1px 2px
     color-mix(in srgb, var(--site-text-primary) 8%, transparent);
   --site-focus-ring: var(--site-zinc-950);
-  --site-control-focus-border: color-mix(
-    in srgb,
-    var(--site-surface-outline) 65%,
-    var(--site-text-secondary)
-  );
   --site-surface-outline: var(--site-zinc-300);
   --site-surface-raised: var(--site-zinc-50);
   --site-surface-raised-hover: var(--site-zinc-100);

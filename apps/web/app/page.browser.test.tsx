@@ -59,15 +59,37 @@ for (const colorScheme of ["light", "dark"] as const) {
     expect(container.textContent).not.toMatch(
       /newsletter|P\.S\.|Video coming soon/i,
     );
-    expect(title.textContent).toBe("Hi, I’m AJ.");
+    expect(title.textContent).toBe("Hi, I'm AJ.");
     expect(opening.textContent).toBe(
-      "I’ve been a software engineer for over 15 years at:",
+      "I've been a software and data engineer for over 15 years at:",
     );
     expect(
       container.querySelectorAll('img[alt="Portrait of AJ Welch"]'),
     ).toHaveLength(1);
     expect(proof.querySelectorAll("[data-company]")).toHaveLength(3);
     expect(booking.href).toBe("https://cal.com/aj-welch/book-a-call");
+    expect(letter.querySelector("table")).toBeNull();
+    expect(letter.textContent).not.toMatch(/Lorem ipsum|Ut enim/);
+    const paragraphs = letter.querySelectorAll(":scope > p");
+    expect(paragraphs[1].textContent).toBe(
+      "Nowadays, I work with small data teams at companies under 500 people. In particular, I've been helping teams use DSPy and GEPA to optimize both the AI layer and the data platform beneath it.",
+    );
+    expect(
+      paragraphs[1].querySelector('a[href="https://dspy.ai/"]')?.textContent,
+    ).toBe("DSPy");
+    expect(
+      paragraphs[1].querySelector('a[href="https://gepa-ai.github.io/gepa/"]')
+        ?.textContent,
+    ).toBe("GEPA");
+    for (const link of paragraphs[1].querySelectorAll("a")) {
+      expect(link.target).toBe("_blank");
+      expect(link.relList.contains("noopener")).toBe(true);
+      expect(link.relList.contains("noreferrer")).toBe(true);
+    }
+    expect(paragraphs[2].textContent).toBe("More broadly, I focus on:");
+    expect(paragraphs[3].textContent).toBe(
+      "If you're interested in working together, please feel free to email me or book a call. Retainers start at $15k for 80 hours a month.",
+    );
 
     for (const width of [
       320, 375, 425, 575, 576, 577, 767, 768, 800, 992, 1440, 1920,
@@ -144,11 +166,22 @@ for (const colorScheme of ["light", "dark"] as const) {
         ).toBeCloseTo(3, 1);
       }
 
-      const columns = [...letter.querySelectorAll(":scope > div > ul")];
+      const columns = [
+        ...letter.querySelectorAll(":scope > div > section[aria-labelledby]"),
+      ];
       expect(columns).toHaveLength(2);
+      expect(
+        columns.map((column) => column.querySelector("h2")?.textContent),
+      ).toEqual(["AI", "Data"]);
       for (const column of columns) {
-        expect(column.children).toHaveLength(5);
-        expect(getComputedStyle(column).fontSize).toBe("18px");
+        const columnHeading = column.querySelector("h2") as HTMLElement;
+        const list = column.querySelector("ul") as HTMLElement;
+        expect(column.getAttribute("aria-labelledby")).toBe(columnHeading.id);
+        expect(list.children).toHaveLength(5);
+        expect(getComputedStyle(list).fontSize).toBe("18px");
+        expect(columnHeading.getBoundingClientRect().bottom).toBeLessThan(
+          list.getBoundingClientRect().top,
+        );
       }
       const [first, second] = columns.map((column) =>
         column.getBoundingClientRect(),

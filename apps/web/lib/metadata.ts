@@ -31,21 +31,10 @@ export function createPageMetadata({
   title,
   description,
   pathname,
-  image = {
-    url: "/opengraph-image.png",
-    alt: "Quantile wordmark",
-    width: 1200,
-    height: 630,
-  },
-  noindex = false,
-  publishedTime,
 }: {
   title: string;
   description: string;
   pathname: string;
-  image?: { url: string; alt: string; width?: number; height?: number };
-  noindex?: boolean;
-  publishedTime?: string;
 }): Metadata {
   const pageTitle = `${title} | ${site.name}`;
   const social = {
@@ -53,16 +42,20 @@ export function createPageMetadata({
     description,
     url: new URL(pathname, site.url).href,
     siteName: site.name,
-    images: [{ ...image, url: new URL(image.url, site.url).href }],
+    images: [
+      {
+        url: `${site.url}/opengraph-image.png`,
+        alt: "Quantile wordmark",
+        width: 1200,
+        height: 630,
+      },
+    ],
   };
   return {
     title: pageTitle,
     description,
     alternates: { canonical: social.url },
-    robots: noindex ? { index: false, follow: true } : undefined,
-    openGraph: publishedTime
-      ? { ...social, type: "article", publishedTime }
-      : { ...social, type: "website" },
+    openGraph: { ...social, type: "website" },
     twitter: {
       card: "summary_large_image",
       title: pageTitle,

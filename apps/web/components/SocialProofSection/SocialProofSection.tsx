@@ -6,7 +6,7 @@ import classes from "./SocialProofSection.module.css";
 const experience = [
   {
     company: "Google",
-    byline: "Google Cloud · BigQuery",
+    byline: "Google Cloud. BigQuery",
     customers: [
       {
         name: "Palo Alto",
@@ -42,7 +42,7 @@ const experience = [
   },
   {
     company: "Chartio",
-    byline: "YC S10 · Acquired by Atlassian",
+    byline: "YC S10. Acquired by Atlassian",
     customers: [
       {
         name: "Reddit",
@@ -98,7 +98,7 @@ function CompanyCard({ item }: { item: ExperienceItem }) {
       </div>
       <div className={classes.customerLogos}>
         <div className={classes.experienceContext}>
-          {item.byline} · <span>Clients:</span>
+          {item.byline}. <span>Clients:</span>
         </div>
         <div className={classes.customers}>
           {item.customers.map((customer) => (

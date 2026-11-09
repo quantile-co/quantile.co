@@ -1,15 +1,7 @@
 "use client";
 
 // Keep virtualColor's non-enumerable light/dark data out of RSC prop serialization.
-import {
-  Anchor,
-  Button,
-  colorsTuple,
-  createTheme,
-  Input,
-  Pagination,
-  virtualColor,
-} from "@mantine/core";
+import { Button, colorsTuple, createTheme, virtualColor } from "@mantine/core";
 import classes from "./theme.module.css";
 
 const fontFamily =
@@ -37,18 +29,9 @@ export const theme = createTheme({
   headings: { fontFamily },
   primaryColor: "primary",
   components: {
-    Anchor: Anchor.extend({ defaultProps: { underline: "never" } }),
     Button: Button.extend({
       defaultProps: { radius: "xl" },
       classNames: { root: classes.button },
-    }),
-    Input: Input.extend({
-      defaultProps: { radius: "md" },
-      classNames: { input: classes.input },
-    }),
-    Pagination: Pagination.extend({
-      defaultProps: { size: "lg" },
-      classNames: { control: classes.pagination },
     }),
   },
 });
