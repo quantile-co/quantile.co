@@ -10,6 +10,7 @@ export function LandingPage({
   proof,
   action,
   children,
+  footer,
 }: {
   className?: string;
   containerProps?: Pick<ContainerProps, "size" | "px">;
@@ -18,6 +19,7 @@ export function LandingPage({
   proof: ReactNode;
   action: ReactNode;
   children: ReactNode;
+  footer?: ReactNode;
 }) {
   return (
     <div className={`${classes.page} ${className ?? ""}`} id="top">
@@ -46,6 +48,7 @@ export function LandingPage({
             <div className={classes.letterAction}>{action}</div>
           </div>
         </article>
+        {footer}
       </Container>
     </div>
   );

@@ -48,6 +48,12 @@ export default function Home() {
           <SocialProofSection ariaLabel="Company experience and client work" />
         }
         action={<CTAButton />}
+        footer={
+          <footer className={classes.footer}>
+            <p>© {new Date().getFullYear()} Quantile LLC</p>
+            <ThemeSwitcher size="sm" />
+          </footer>
+        }
       >
         <p>
           Nowadays, I work with small data teams at companies under 500 people.
@@ -93,10 +99,6 @@ export default function Home() {
           or book a call. Retainers start at $15k for 80 hours a month.
         </p>
       </LandingPage>
-      <footer className={classes.footer}>
-        <p>© {new Date().getFullYear()} Quantile LLC</p>
-        <ThemeSwitcher size="sm" />
-      </footer>
       <script type="application/ld+json">
         {JSON.stringify([organization, website]).replace(/</g, "\\u003c")}
       </script>

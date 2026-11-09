@@ -93,7 +93,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       const titleBox = title.getBoundingClientRect();
       expect(main.getBoundingClientRect().width).toBeLessThanOrEqual(800);
       if (width >= 992) expect(letterBox.width).toBe(752);
-      expect(main.getBoundingClientRect().top).toBe(width >= 1024 ? 48 : 64);
+      expect(main.getBoundingClientRect().top).toBe(64);
       expect(portraitBox.left).toBe(letterBox.left);
       expect(titleBox.left).toBe(letterBox.left);
       const titleSize = parseFloat(getComputedStyle(title).fontSize);
@@ -139,8 +139,11 @@ for (const colorScheme of ["light", "dark"] as const) {
         textBox(email.previousElementSibling as Element).bottom,
         booking.getBoundingClientRect().bottom,
       );
+      expect(main.contains(footer)).toBe(true);
       expect(
-        Math.abs(textBox(copyright).top - signatureBottom - portraitBox.top),
+        Math.abs(
+          textBox(copyright).top - signatureBottom - (width >= 1024 ? 16 : 32),
+        ),
       ).toBeLessThan(1);
       const textColor = getComputedStyle(opening).color;
       for (const element of proof.querySelectorAll("*")) {

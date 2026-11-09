@@ -33,8 +33,9 @@ for current behavior rather than retaining coverage for deleted features.
 
 The homepage lives directly in `app/page.tsx` and has no header or full site
 footer. Its bottom controls are a centered stack of copyright then theme switcher,
-with no wordmark or divider. Its visible signature-to-copyright gap matches
-the portrait's visible top inset, without auto-pushing the footer on tall views.
+with no wordmark or divider. They are in the homepage main-content flow through
+LandingPage's optional footer slot, not the shared site footer. The gap is 32px,
+or 16px on shorter desktop viewports, without auto-pushing on tall views.
 Only the homepage requests ThemeSwitcher size sm (26px versus the 32px default).
 The top-level layout owns providers, analytics and the skip link. Shared
 `app/(root)/layout.tsx` composes the header and footer only for brand and is also
@@ -50,8 +51,9 @@ name/email caption, sharing the letter's left edge. Its size is twice the
 responsive title font size (64–96px). Portrait-to-title and title-to-opening gaps
 are both 20px. The portrait row preserves title leading and aligns the image to
 its cap height. The 800px container retains 752px of desktop reading width,
-with 64px of outer top spacing. Desktop-width viewports up to 1120px high use
-48px outer spacing and a reduced footer bottom inset; typography is unchanged. Body text is 18px below 768px and 20px from
+with 64px of outer top spacing at every viewport. Desktop-width viewports up
+to 1120px high reduce only the controls gap and bottom inset; typography and
+portrait position stay unchanged. Body text is 18px below 768px and 20px from
 768px, with 1.55 line-height and normal tracking. Bullets and the bold “AI”/“Data” H2 headings inherit the body's responsive
 18px/20px size. The semantic sections form two columns from 576px and stack
 below it; never use a table. The shared portrait lives at

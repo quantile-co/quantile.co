@@ -1,11 +1,5 @@
-.page,
-.footer {
-  --consulting-title-size: clamp(2rem, 4vw, 3rem);
-  --letter-edge-space: calc(var(--mantine-spacing-xl) * 2);
-}
-
 .page {
-  padding-block: var(--letter-edge-space) 0;
+  padding-block: calc(var(--mantine-spacing-xl) * 2) var(--mantine-spacing-xl);
 }
 
 .page main {
@@ -17,6 +11,8 @@
 }
 
 .heading {
+  --consulting-title-size: clamp(2rem, 4vw, 3rem);
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -37,8 +33,7 @@
   text-wrap: balance;
 }
 
-.portraitRow,
-.footer {
+.portraitRow {
   font-family: var(--mantine-font-family-headings);
   font-size: var(--consulting-title-size);
   font-weight: var(--mantine-h1-font-weight);
@@ -80,9 +75,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--mantine-spacing-sm);
-  /* Match the portrait's visible top inset, including its cap-height leading. */
-  padding: calc(var(--letter-edge-space) + (1lh - 1cap) / 2)
-    var(--site-page-padding) var(--mantine-spacing-xl);
+  margin-top: var(--mantine-spacing-xl);
 }
 
 .footer p {
@@ -110,13 +103,12 @@
 
 /* Keep ordinary desktop-height viewports compact without changing typography. */
 @media (min-width: 64em) and (max-height: 70em) {
-  .page,
-  .footer {
-    --letter-edge-space: calc(var(--mantine-spacing-xl) * 1.5);
+  .page {
+    padding-bottom: var(--mantine-spacing-lg);
   }
 
   .footer {
-    padding-bottom: var(--mantine-spacing-lg);
+    margin-top: var(--mantine-spacing-md);
   }
 }
 
