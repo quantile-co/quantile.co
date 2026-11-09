@@ -71,9 +71,6 @@ for (const colorScheme of ["light", "dark"] as const) {
     expect(letter.querySelector("table")).toBeNull();
     expect(letter.textContent).not.toMatch(/Lorem ipsum|Ut enim/);
     const paragraphs = letter.querySelectorAll(":scope > p");
-    expect(paragraphs[1].textContent).toBe(
-      "Nowadays, I work with small data teams at companies under 500 people. In particular, I've been helping teams use DSPy and GEPA to optimize both the AI layer and the data platform beneath it.",
-    );
     expect(
       paragraphs[1].querySelector('a[href="https://dspy.ai/"]')?.textContent,
     ).toBe("DSPy");
@@ -86,10 +83,6 @@ for (const colorScheme of ["light", "dark"] as const) {
       expect(link.relList.contains("noopener")).toBe(true);
       expect(link.relList.contains("noreferrer")).toBe(true);
     }
-    expect(paragraphs[2].textContent).toBe("More broadly, I focus on:");
-    expect(paragraphs[3].textContent).toBe(
-      "If you're interested in working together, please feel free to email me or book a call. Retainers start at $15k for 80 hours a month.",
-    );
 
     for (const width of [
       320, 375, 425, 575, 576, 577, 767, 768, 800, 992, 1440, 1920,

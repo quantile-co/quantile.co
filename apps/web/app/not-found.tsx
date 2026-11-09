@@ -1,5 +1,5 @@
+import SiteLayout from "./(root)/layout";
 import classes from "./not-found.module.css";
-import SiteLayout from "./site-layout";
 
 export default function NotFound() {
   return (

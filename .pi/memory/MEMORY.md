@@ -36,8 +36,8 @@ footer. Its bottom controls are a centered stack of copyright then theme switche
 with auto top margin to stay at the bottom on tall viewports and no wordmark or
 divider.
 The top-level layout owns providers, analytics and the skip link. Shared
-`app/site-layout.tsx` composes the header and footer only for brand (through its
-`(root)` group layout) and 404 (explicitly). The header pairs the home wordmark
+`app/(root)/layout.tsx` composes the header and footer only for brand and is also
+used explicitly by 404, without a separate chrome wrapper file. The header pairs the home wordmark
 with the shared arrow-free “Book a call” CTA injected through props. Its 32px CTA
 is vertically centered within the 35px wordmark box. The footer retains its theme
 control; the homepage uses its own compact theme control and the same saved or
