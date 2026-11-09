@@ -1,7 +1,11 @@
+.page,
+.footer {
+  --consulting-title-size: clamp(2rem, 4vw, 3rem);
+  --letter-edge-space: calc(var(--mantine-spacing-xl) * 2);
+}
+
 .page {
-  /* Preserve the consulting letter's spacing without site chrome. */
-  padding-block: calc(var(--mantine-spacing-xl) * 2)
-    calc(var(--mantine-spacing-xl) + var(--mantine-spacing-md));
+  padding-block: var(--letter-edge-space) 0;
 }
 
 .page main {
@@ -13,8 +17,6 @@
 }
 
 .heading {
-  --consulting-title-size: clamp(2rem, 4vw, 3rem);
-
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -35,7 +37,8 @@
   text-wrap: balance;
 }
 
-.portraitRow {
+.portraitRow,
+.footer {
   font-family: var(--mantine-font-family-headings);
   font-size: var(--consulting-title-size);
   font-weight: var(--mantine-h1-font-weight);
@@ -58,7 +61,6 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 1em clamp(1.5rem, 3vw, 3rem);
   margin-bottom: var(--letter-font-size);
-  font-size: var(--mantine-font-size-lg);
 }
 
 .bulletColumns h2 {
@@ -78,8 +80,9 @@
   flex-direction: column;
   align-items: center;
   gap: var(--mantine-spacing-sm);
-  margin-top: auto;
-  padding: var(--mantine-spacing-xl) var(--site-page-padding);
+  /* Match the portrait's visible top inset, including its cap-height leading. */
+  padding: calc(var(--letter-edge-space) + (1lh - 1cap) / 2)
+    var(--site-page-padding) var(--mantine-spacing-xl);
 }
 
 .footer p {
@@ -102,6 +105,18 @@
 @media (min-width: 48em) {
   .page main {
     --letter-font-size: var(--mantine-font-size-xl);
+  }
+}
+
+/* Keep ordinary desktop-height viewports compact without changing typography. */
+@media (min-width: 64em) and (max-height: 70em) {
+  .page,
+  .footer {
+    --letter-edge-space: calc(var(--mantine-spacing-xl) * 1.5);
+  }
+
+  .footer {
+    padding-bottom: var(--mantine-spacing-lg);
   }
 }
 

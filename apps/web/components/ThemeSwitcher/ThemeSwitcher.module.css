@@ -42,6 +42,15 @@
   }
 }
 
+.root[data-size="sm"] {
+  height: 26px;
+}
+
+.root[data-size="sm"] .label {
+  width: 24px;
+  height: 24px;
+}
+
 .input:checked + .label {
   color: var(--site-text-primary);
 }

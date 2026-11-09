@@ -93,7 +93,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       const titleBox = title.getBoundingClientRect();
       expect(main.getBoundingClientRect().width).toBeLessThanOrEqual(800);
       if (width >= 992) expect(letterBox.width).toBe(752);
-      expect(main.getBoundingClientRect().top).toBe(64);
+      expect(main.getBoundingClientRect().top).toBe(width >= 1024 ? 48 : 64);
       expect(portraitBox.left).toBe(letterBox.left);
       expect(titleBox.left).toBe(letterBox.left);
       const titleSize = parseFloat(getComputedStyle(title).fontSize);
@@ -129,9 +129,19 @@ for (const colorScheme of ["light", "dark"] as const) {
       expect(themeControl.getBoundingClientRect().top).toBeGreaterThan(
         copyright.getBoundingClientRect().bottom,
       );
-      expect(footer.getBoundingClientRect().bottom).toBeGreaterThanOrEqual(
-        window.innerHeight,
+      const textBox = (element: Element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return range.getBoundingClientRect();
+      };
+      const signatureBottom = Math.max(
+        textBox(email).bottom,
+        textBox(email.previousElementSibling as Element).bottom,
+        booking.getBoundingClientRect().bottom,
       );
+      expect(
+        Math.abs(textBox(copyright).top - signatureBottom - portraitBox.top),
+      ).toBeLessThan(1);
       const textColor = getComputedStyle(opening).color;
       for (const element of proof.querySelectorAll("*")) {
         expect(getComputedStyle(element).color).toBe(textColor);
@@ -171,7 +181,8 @@ for (const colorScheme of ["light", "dark"] as const) {
         const list = column.querySelector("ul") as HTMLElement;
         expect(column.getAttribute("aria-labelledby")).toBe(columnHeading.id);
         expect(list.children).toHaveLength(5);
-        expect(getComputedStyle(list).fontSize).toBe("18px");
+        expect(getComputedStyle(list).fontSize).toBe(`${bodySize}px`);
+        expect(getComputedStyle(columnHeading).fontSize).toBe(`${bodySize}px`);
         expect(columnHeading.getBoundingClientRect().bottom).toBeLessThan(
           list.getBoundingClientRect().top,
         );

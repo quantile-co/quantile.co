@@ -19,12 +19,12 @@ const options = [
   value: MantineColorScheme;
 }>;
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ size = "md" }: { size?: "sm" | "md" }) {
   const id = useId();
   const { colorScheme, setColorScheme } = useMantineColorScheme();
 
   return (
-    <fieldset className={classes.root}>
+    <fieldset className={classes.root} data-size={size}>
       <VisuallyHidden component="legend">Select a display theme</VisuallyHidden>
       {options.map((option) => {
         const optionId = `${id}-${option.value}`;
@@ -41,7 +41,11 @@ export function ThemeSwitcher() {
               value={option.value}
             />
             <label className={classes.label} htmlFor={optionId}>
-              <option.icon aria-hidden="true" size={13} stroke={1.75} />
+              <option.icon
+                aria-hidden="true"
+                size={size === "sm" ? 10 : 13}
+                stroke={1.75}
+              />
             </label>
           </span>
         );
