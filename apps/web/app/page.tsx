@@ -56,7 +56,7 @@ export default function Home() {
         }
       >
         <p>
-          Nowadays, I work with small data teams at companies under 500 people.
+          I work with small data teams at companies with fewer than 500 employees.
           In particular, I've been helping teams use{" "}
           <a href="https://dspy.ai/" target="_blank" rel="noopener noreferrer">
             DSPy
