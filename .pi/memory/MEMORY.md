@@ -79,6 +79,33 @@ owns those output paths. The 404 retains its central home button. Header, footer
 and widest page content use Mantine `xl` containers with matching horizontal
 padding; the letter remains narrower. README edits require explicit approval.
 
+## Server request tracing
+
+`apps/web/instrumentation.ts` registers native OpenTelemetry only in Node, with
+OTLP/HTTP directly to fully managed ClickStack (no sidecar). Runtime contract:
+`CLICKSTACK_OTLP_ENDPOINT` is an HTTPS base OTLP URL, without credentials, query,
+fragment or signal suffix; the app appends `/v1/traces`. `CLICKSTACK_API_KEY` is the
+raw ingestion key, sent as `authorization: Bearer <key>`. Both absent disables
+tracing without an exporter; partial/invalid configuration fails startup without
+echoing values.
+Hosting must provide both with RUNTIME-only availability in `apphosting.yaml`,
+using a numeric-pinned Secret Manager reference for the key. No hosting values or
+secrets belong in public source. Fathom remains BUILD-only and independent.
+
+Service name is `quantile.co-web`. Only Next server-request spans are sampled;
+before batching, a strict projection retains timings, status, known HTTP methods
+and allowlisted public routes. Names are fixed; unknown paths, URLs, query strings,
+headers, bodies, exception text, events and links are excluded. No fetch spans,
+resource detectors, incoming propagation, logs or metrics are installed.
+Registration is process-idempotent and refuses existing global provider/context
+ownership.
+Export is bounded, in-memory and best-effort. A batch size of one starts export
+at span end without an idle timer, but request-based Cloud Run may suspend CPU
+after responses and delay network work until another request. Termination can
+lose queued or in-flight spans. There is no durable queue or request-lifecycle
+flush guarantee. This implementation does not establish ingestion or authorize
+publication/deployment.
+
 ## Factory and workspace tooling
 
 JS/TS workspace names include organization and repository:
