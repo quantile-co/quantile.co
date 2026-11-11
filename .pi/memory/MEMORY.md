@@ -81,6 +81,10 @@ padding; the letter remains narrower. README edits require explicit approval.
 
 ## Server request tracing
 
+Website tracing targets GCP App Hosting. This is source implementation only,
+not a deployed integration or verified production ingestion. Publication and
+deployment still require separate authorization.
+
 `apps/web/instrumentation.ts` registers native OpenTelemetry only in Node, with
 OTLP/HTTP directly to fully managed ClickStack (no sidecar). Runtime contract:
 `CLICKSTACK_OTLP_ENDPOINT` is an HTTPS base OTLP URL, without credentials, query,
