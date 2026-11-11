@@ -85,30 +85,47 @@ Website tracing targets GCP App Hosting. This is source implementation only,
 not a deployed integration or verified production ingestion. Publication and
 deployment still require separate authorization.
 
-`apps/web/instrumentation.ts` registers native OpenTelemetry only in Node, with
-OTLP/HTTP directly to fully managed ClickStack (no sidecar). Runtime contract:
-`CLICKSTACK_OTLP_ENDPOINT` is an HTTPS base OTLP URL, without credentials, query,
-fragment or signal suffix; the app appends `/v1/traces`. `CLICKSTACK_API_KEY` is the
-raw ingestion key, sent as `authorization: Bearer <key>`. Both absent disables
-tracing without an exporter; partial/invalid configuration fails startup without
-echoing values.
-Hosting must provide both with RUNTIME-only availability in `apphosting.yaml`,
-using a numeric-pinned Secret Manager reference for the key. No hosting values or
-secrets belong in public source. Fathom remains BUILD-only and independent.
+`apps/web/instrumentation.ts` is a Node-only entry to `lib/tracing.ts`, which
+supplies application-owned sampling, fixed span name and attribute policy to
+published `@quantile-co/factory-otel@0.1.0` via `/tracing`. Factory owns SDK setup,
+export, sanitization and bounded flush; do not copy its implementation here.
+OTLP/HTTP goes directly to fully managed ClickStack, without a website sidecar.
 
-Service name is `quantile.co-web`. Only Next server-request spans are sampled;
-before batching, a strict projection retains timings, status, known HTTP methods
-and allowlisted public routes. Names are fixed; unknown paths, URLs, query strings,
-headers, bodies, exception text, events and links are excluded. No fetch spans,
-resource detectors, incoming propagation, logs or metrics are installed.
-Registration is process-idempotent and refuses existing global provider/context
-ownership.
-Export is bounded, in-memory and best-effort. A batch size of one starts export
-at span end without an idle timer, but request-based Cloud Run may suspend CPU
-after responses and delay network work until another request. Termination can
-lose queued or in-flight spans. There is no durable queue or request-lifecycle
-flush guarantee. This implementation does not establish ingestion or authorize
-publication/deployment.
+Shared runtime contract: `CLICKSTACK_OTLP_ENDPOINT` is an HTTPS origin (ports
+allowed), with no credentials, path prefix, query or fragment; Factory appends
+`/v1/traces`. `CLICKSTACK_API_KEY` is the raw ingestion key, sent as
+`authorization: Bearer <key>`. Absent configuration disables tracing without an
+exporter. Partial/invalid configuration, ambient OTLP headers or existing global
+provider/context ownership leave tracing unavailable with sanitized diagnostics,
+not a website startup failure. Existing providers remain untouched. Hosting must
+supply both values with RUNTIME-only availability in `apphosting.yaml`, using a
+numeric-pinned Secret Manager reference for the key. No hosting values or secrets
+belong in public source. Fathom remains BUILD-only and independent.
+
+Service name remains `quantile.co-web`; only Next server-request spans are sampled.
+The fixed `HTTP request` name and allowlisted methods, integer status codes and
+static routes exclude unknown paths, URLs, queries, headers and bodies. Factory
+projects spans before batching, dropping error text, events, links, parent context
+and raw scope/resource fields. Registration and passive lifecycle listeners are
+process-idempotent. SIGINT, SIGTERM and beforeExit explicitly request the shared
+bounded flush without taking Next's shutdown/exit ownership. Export starts at span
+end, but Cloud Run CPU suspension or termination can still delay or lose data.
+No durable queue or request-lifecycle delivery guarantee is implied.
+
+## Protected Test collector
+
+The Factory flake input is pinned to
+`f7bf8fd002bc1df2f6a1b51ec17e0db4079f0bfa`; Terraform module refs remain independently
+pinned and unchanged. `github.workflows.otelJobs = [ "test" ]` opts only protected,
+main-only manual Test into `pnpm otel -- pnpm run github:test`. The exact published
+`@quantile-co/factory-otel@0.1.0` bin backs `pnpm otel`; `github:test` runs ordinary
+checks/tests. Check/PRs and Build/Plan/Apply receive no collector credentials.
+The shell selects the upstream contrib collector and host/Docker configuration
+paths through nonsecret `OTEL_COLLECTOR_*` variables; shell entry starts nothing.
+Docker scraping is not enabled by default. Credentials remain shell-local during
+Nix/direnv setup and frozen installation, then reach the wrapper, which strips
+them from the workload. Workflow vars/secrets provisioning and live ingestion
+verification remain separate operations, not consequences of source adoption.
 
 ## Factory and workspace tooling
 

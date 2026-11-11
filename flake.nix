@@ -2,7 +2,7 @@
   description = "Quantile marketing site";
 
   inputs = {
-    factory.url = "github:quantile-co/factory/main";
+    factory.url = "github:quantile-co/factory/f7bf8fd002bc1df2f6a1b51ec17e0db4079f0bfa";
     nixpkgs.follows = "factory/nixpkgs";
   };
 
@@ -28,14 +28,20 @@
         in
         {
           quantile-co.factory = {
-            github.workflows.layers = [ "infrastructure" ];
-            github.workflows.build.layers = [ "application" ];
+            github.workflows = {
+              layers = [ "infrastructure" ];
+              otelJobs = [ "test" ];
+              build.layers = [ "application" ];
+            };
             flake.packages.direnv = pkgs.direnv;
             flake.devShell = {
               shellHook = lib.concatStringsSep "\n" [
                 factory.files.shellHook
                 factory.pi.shellHook
                 ''
+                  export OTEL_COLLECTOR_BINARY="${factory.otelcol-contrib.package}/bin/otelcol-contrib"
+                  export OTEL_COLLECTOR_CONFIG="${factory.otelcol-contrib.hostConfigFile}"
+                  export OTEL_COLLECTOR_DOCKER_CONFIG="${factory.otelcol-contrib.dockerConfigFile}"
                   export NEXT_TELEMETRY_DISABLED=1
                   export PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="${factory.playwright.withVersion (builtins.fromJSON (builtins.readFile ./apps/web/package.json)).devDependencies.playwright}/bin/chromium-headless-shell"
                 ''
@@ -71,6 +77,7 @@
                 agents.amp
                 agents.antigravity-cli
                 agents.hunk
+                factory.otelcol-contrib.package
                 factory.langfuse.package
                 factory.pi.package
                 factory.qmd.package
