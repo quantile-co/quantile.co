@@ -29,6 +29,13 @@ test("CLI retains the backend and saved bytes while isolating provider credentia
       chmodSync(path, 0o755);
     };
     executable(
+      "git",
+      `
+if (process.env.HINDSIGHT_API_TOKEN || process.env.TF_VAR_hindsight_api_token) throw new Error("Git inherited a Hindsight credential");
+console.log(${JSON.stringify(fileURLToPath(new URL("../../", import.meta.url)))});
+`,
+    );
+    executable(
       "tofu",
       `
 const fs = require("node:fs"), a = process.argv.slice(2);
@@ -52,7 +59,7 @@ else if(a[0] === "storage" && a[1] === "cp" && a[2].endsWith("#42")) fs.copyFile
 else if(a[0] !== "storage" || a[1] !== "cp") process.exit(82);
 `,
     );
-    const invoke = (phase: "plan" | "apply") =>
+    const invoke = (phase: "plan" | "apply", withHindsightToken = true) =>
       spawnSync(
         process.execPath,
         [
@@ -74,6 +81,10 @@ else if(a[0] !== "storage" || a[1] !== "cp") process.exit(82);
             ...process.env,
             PATH: `${bin}:${process.env.PATH}`,
             GH_REPO_TOKEN: "fixture-credential",
+            HINDSIGHT_API_TOKEN: withHindsightToken
+              ? "fixture-hindsight-token"
+              : undefined,
+            TF_VAR_hindsight_api_token: "unapproved-hindsight-token",
             GITHUB_TOKEN: "unapproved-native",
             REST_API_BEARER: "unapproved-native",
             TF_VAR_unapproved: "must-not-leak",
@@ -88,11 +99,18 @@ else if(a[0] !== "storage" || a[1] !== "cp") process.exit(82);
         },
       );
     for (const phase of ["plan", "apply"] as const) {
+      const missingToken = invoke(phase, false);
+      assert.notEqual(missingToken.status, 0);
+      assert.match(missingToken.stderr, /Missing HINDSIGHT_API_TOKEN/);
+      assert.equal(existsSync(providerLog), false);
+      assert.equal(existsSync(storageLog), false);
+    }
+    for (const phase of ["plan", "apply"] as const) {
       const result = invoke(phase);
       assert.equal(result.status, 0, result.stderr);
       assert.doesNotMatch(
         result.stdout + result.stderr,
-        /fixture-credential|private-provider-diagnostic/,
+        /fixture-credential|fixture-hindsight-token|private-provider-diagnostic/,
       );
     }
     assert.match(readFileSync(join(root, "summary"), "utf8"), /456\/1\/42/);
@@ -121,6 +139,11 @@ else if(a[0] !== "storage" || a[1] !== "cp") process.exit(82);
       assert.equal(call.env.GITHUB_TOKEN, "fixture-credential");
       assert.equal(call.env.REST_API_BEARER, "fixture-credential");
       assert.equal(call.env.TF_VAR_gcp_wif_pool, "approved-pool");
+      assert.equal(
+        call.env.TF_VAR_hindsight_api_token,
+        "fixture-hindsight-token",
+      );
+      assert.equal(call.env.HINDSIGHT_API_TOKEN, undefined);
       assert.equal(call.env.TF_VAR_unapproved, undefined);
       assert.equal(call.env.TF_BACKEND_PREFIX, undefined);
     }
@@ -138,13 +161,15 @@ else if(a[0] !== "storage" || a[1] !== "cp") process.exit(82);
       assert.equal(call.env.GITHUB_TOKEN, undefined);
       assert.equal(call.env.REST_API_BEARER, undefined);
       assert.equal(call.env.TF_VAR_gcp_wif_pool, undefined);
+      assert.equal(call.env.TF_VAR_hindsight_api_token, undefined);
+      assert.equal(call.env.HINDSIGHT_API_TOKEN, undefined);
     }
     writeFileSync(fail, "fail");
     const failed = invoke("plan");
     assert.equal(failed.status, 7);
     assert.doesNotMatch(
       failed.stdout + failed.stderr,
-      /fixture-credential|private-provider-diagnostic/,
+      /fixture-credential|fixture-hindsight-token|private-provider-diagnostic/,
     );
     assert.equal(existsSync(join(root, "saved-plan")), false);
   } finally {

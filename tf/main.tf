@@ -3,6 +3,17 @@ locals {
   project_members = []
 }
 
+module "hindsight" {
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/hindsight?ref=7d3121912d8a28a9ab85c7005f3ab7ff4ef9e481"
+
+  providers = {
+    restapi = restapi.hindsight
+  }
+
+  bank_id = "quantile-co--quantile-co"
+  name    = "quantile-co/quantile.co"
+}
+
 # trivy:ignore:AVD-GIT-0001
 module "gh" {
   source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=a2205ee819a322ff03d4ff6de93120ec80165f79"

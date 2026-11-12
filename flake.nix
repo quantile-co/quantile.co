@@ -2,7 +2,8 @@
   description = "Quantile marketing site";
 
   inputs = {
-    factory.url = "github:quantile-co/factory/f7bf8fd002bc1df2f6a1b51ec17e0db4079f0bfa";
+    # Provisioning only: retain legacy memory until separately approved cutover.
+    factory.url = "github:quantile-co/factory/ff56f2509b64b56eb485f54e59bc20b4802a4a64";
     nixpkgs.follows = "factory/nixpkgs";
   };
 
@@ -32,6 +33,7 @@
             github.workflows = {
               layers = [ "infrastructure" ];
               otelJobs = [ "test" ];
+              hindsight = true;
               build.layers = [ "application" ];
             };
             flake.packages.direnv = pkgs.direnv;

@@ -96,6 +96,7 @@ for (const phase of ["plan", "apply"] as const) {
     process.chdir(
       execFileSync("git", ["rev-parse", "--show-toplevel"], {
         encoding: "utf8",
+        env: environment,
       }).trim(),
     );
     const transport: TransportOptions = {
@@ -114,6 +115,7 @@ for (const phase of ["plan", "apply"] as const) {
       GITHUB_TOKEN: options.ghRepoToken,
       REST_API_BEARER: options.ghRepoToken,
       TF_VAR_gcp_wif_pool: options.gcpWifPool,
+      TF_VAR_hindsight_api_token: required("HINDSIGHT_API_TOKEN"),
     });
     const action: Action = async ({ planFile, logFile, signal }) => {
       await provider(
