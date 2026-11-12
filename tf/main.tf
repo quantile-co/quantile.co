@@ -5,7 +5,7 @@ locals {
 
 # trivy:ignore:AVD-GIT-0001
 module "gh" {
-  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=8f966fb1d6062a52754a3d47b9f2791a617e2849"
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=a2205ee819a322ff03d4ff6de93120ec80165f79"
 
   repo_name       = "quantile.co"
   description     = "Quantile marketing site."
