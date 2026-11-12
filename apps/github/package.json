@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "tsc --noEmit -p ../../tsconfig.json && vitest run --config ../../vitest.config.mts"
+    "check": "tsc --noEmit -p ../../tsconfig.json && vitest run --config ../../vitest.config.mts apps/github"
   },
   "dependencies": {
     "@quantile-co/factory-github": "0.1.0",

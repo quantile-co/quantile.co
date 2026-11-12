@@ -17,6 +17,7 @@
     "build:assets": "pnpm --filter @quantile-co/quantile.co-web run build:assets",
     "otel": "factory-otel",
     "github:test": "pnpm test",
+    "amp": "tsx apps/amp/cli.ts",
     "github:build": "tsx apps/github/cli.ts build",
     "github:plan": "tsx apps/github/cli.ts plan",
     "github:apply": "tsx apps/github/cli.ts apply",
@@ -34,7 +35,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@quantile-co/factory-otel": "0.1.0",
-    "@quantile-co/factory-pi": "0.1.0",
+    "@quantile-co/factory-pi": "0.1.4",
     "@types/node": "26.6.5",
     "husky": "9.1.7",
     "knip": "6.41.0",

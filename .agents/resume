@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+set +x
+[[ ${AMP_ORB:-} == 1 ]] || {
+    echo 'This hook is only for an Amp orb.' >&2
+    exit 1
+}
+cd -- "$(dirname -- "$0")/.."
+umask 077
+# Keep optional runtime ingestion credentials out of Nix evaluation.
+export -n CLICKSTACK_OTLP_ENDPOINT CLICKSTACK_API_KEY OTEL_DOCKER_STATS
+source .agents/nix-env
+shell=$(nix print-dev-env)
+eval "$shell"
+unset shell
+export CLICKSTACK_OTLP_ENDPOINT CLICKSTACK_API_KEY OTEL_DOCKER_STATS
+pnpm amp resume --directory "$PWD"

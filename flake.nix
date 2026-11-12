@@ -20,6 +20,7 @@
         let
           factory = config.quantile-co.factory;
           agents = inputs.factory.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+          tailscale = inputs.factory.packages.${pkgs.stdenv.hostPlatform.system}.tailscale;
           copy = source: {
             inherit source;
             mode = "copy";
@@ -54,6 +55,8 @@
                 pkgs.git
                 pkgs.git-lfs
                 pkgs.jq
+                pkgs.openssh
+                tailscale
                 pkgs.nix
                 pkgs.nodejs_24
                 pkgs.pnpm
@@ -172,6 +175,7 @@
                     types = [ "node" ];
                   };
                   include = [
+                    "apps/amp/**/*.ts"
                     "apps/github/**/*.ts"
                     "apps/repo/**/*.ts"
                   ];

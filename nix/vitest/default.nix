@@ -6,7 +6,7 @@
       import { defineConfig } from "vitest/config";
       export default defineConfig({
         root: fileURLToPath(new URL(".", import.meta.url)),
-        test: { include: ["apps/github/**/*.test.ts"] },
+        test: { include: ["apps/{amp,github}/**/*.test.ts"] },
       });
     ''
   );

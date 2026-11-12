@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+set +x
+[[ ${AMP_ORB:-} == 1 ]] || {
+    echo 'This hook is only for an Amp orb.' >&2
+    exit 1
+}
+unset CLICKSTACK_OTLP_ENDPOINT CLICKSTACK_API_KEY OTEL_DOCKER_STATS
+cd -- "$(dirname -- "$0")/.."
+source .agents/nix-env
+# Install the published runtime; no website build or model login in snapshots.
+nix develop --command bash -euo pipefail -c '
+  pnpm install --frozen-lockfile
+  pnpm amp setup
+'

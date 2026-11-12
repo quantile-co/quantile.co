@@ -66,6 +66,7 @@ Do not add scans to shell hooks, checks or CI.
 - [apps/web/](apps/web/): Next application, configuration, assets and tests.
 - [apps/repo/](apps/repo/): repository checks and fixes.
 - [apps/github/](apps/github/): immutable source publication and saved-plan transport.
+- [apps/amp/](apps/amp/) and [.agents/](.agents/): explicit manual-orb CLI and lifecycle hooks.
 - [packages/brand/](packages/brand/): shared asset generator and CLI.
 - [packages/testing/](packages/testing/): reusable browser-test support.
 - [apps/web/next.config.ts](apps/web/next.config.ts): Next configuration and headers.

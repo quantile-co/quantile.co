@@ -189,11 +189,41 @@ unchanged. Other profiles are not implicitly warm. Temporary diagnostics were
 removed. The rejected separate-environment plans are obsolete and must not be applied.
 
 Exact published `@quantile-co/factory-github@0.1.0` and
-`@quantile-co/factory-pi@0.1.0` replace copied runtime code. Pi loads the prebuilt
+`@quantile-co/factory-pi@0.1.4` replace copied runtime code. Pi loads the prebuilt
 extension through native settings. `pnpm run skills:sync` explicitly installs
 the selected deploy and web-quality catalog into ignored native skill locations;
 the committed skills lock records provenance. Do not recreate shared extensions,
 copied skills or a consumer `etc/` tree.
+
+## Manual Amp orbs
+
+The repository-owned `pnpm amp` CLI delegates lifecycle and connection to exact
+published `@quantile-co/factory-amp@0.1.0`. It fixes repository identity to
+`quantile-co/quantile.co`; resume takes the explicit disposable checkout root.
+The setup hook installs frozen dependencies and the packaged keep-awake plugin,
+not a website build, model login or copied Factory runtime. Resume uses the
+runtime Amp thread identity, native Tailscale SSH and the shared Herdr `orb`
+session without prompting an agent. Strict host-key checking stays enabled.
+
+Hooks load the same signed public caches as `.envrc` before Nix evaluation,
+without loading `.envrc.local`, granting trust or exposing runtime ingestion
+credentials to Nix. The existing Factory flake pin supplies patched Tailscale
+1.104.5; this adoption adds no second nixpkgs input or Factory/Herdr/Pi binary
+upgrade. Existing optional collector paths are preserved: setup may prepare a
+dormant collector unit, but this adoption supplies no ingestion credentials or
+telemetry plugin and starts no collector without explicit runtime configuration.
+
+Live activation remains separate from source preparation. A project needs its
+approved workspace `TAILSCALE_CLIENT_ID` and `TAILSCALE_AUDIENCE`; no enrollment
+secret or SSH authorized key belongs in source. Use manual launches initially:
+these hooks neither create an Amp project/spawner nor enable issue-triggered
+spawning. Each billed qualification orb needs approval. Model login and credentials
+remain user-controlled, and existing pilots must not be migrated or overwritten.
+
+Published `factory-pi@0.1.4` supplies the disposable-orb checkout exception. It
+requires both `AMP_ORB=1` and the canonical `FACTORY_AMP_REPOSITORY` path set by
+the runtime; ordinary checkouts and Git metadata remain protected. Do not disable
+the guard, copy extension code, or claim live qualification from source tests.
 
 ## Source release and infrastructure boundaries
 
