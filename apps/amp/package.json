@@ -1,0 +1,12 @@
+{
+  "name": "@quantile-co/quantile.co-amp-cli",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "vitest run --config ../../vitest.config.mts apps/amp"
+  },
+  "dependencies": {
+    "@quantile-co/factory-amp": "0.1.0",
+    "commander": "15.0.0"
+  }
+}

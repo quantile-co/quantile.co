@@ -147,6 +147,35 @@ the selected deploy and web-quality catalog into ignored native skill locations;
 the committed skills lock records provenance. Do not recreate shared extensions,
 copied skills or a consumer `etc/` tree.
 
+## Manual Amp orbs
+
+The repository-owned `pnpm amp` CLI delegates lifecycle and connection to exact
+published `@quantile-co/factory-amp@0.1.0`. It fixes repository identity to
+`quantile-co/quantile.co`; resume takes the explicit disposable checkout root.
+The setup hook installs frozen dependencies and the packaged keep-awake plugin,
+not a website build, model login or copied Factory runtime. Resume uses the
+runtime Amp thread identity, native Tailscale SSH and the shared Herdr `orb`
+session without prompting an agent. Strict host-key checking stays enabled.
+
+Hooks load the same signed public caches as `.envrc` before Nix evaluation,
+without loading `.envrc.local`, granting trust or exposing runtime ingestion
+credentials to Nix. A scoped `tailscale-nixpkgs` input pins stable 1.104.5 while
+leaving the existing Factory, Pi, Herdr and application toolchain pins unchanged.
+Retire that extra input only when the selected baseline supplies patched
+Tailscale >=1.104.4. No observability collector or telemetry plugin is enabled.
+
+Live activation remains separate from source preparation. A project needs its
+approved workspace `TAILSCALE_CLIENT_ID` and `TAILSCALE_AUDIENCE`; no enrollment
+secret or SSH authorized key belongs in source. Use manual launches initially:
+these hooks neither create an Amp project/spawner nor enable issue-triggered
+spawning. Each billed qualification orb needs approval. Model login and credentials
+remain user-controlled, and existing pilots must not be migrated or overwritten.
+
+The current `factory-pi@0.1.0` pin predates the disposable-orb checkout exception.
+A compatible published Pi package is required before qualifying Pi editing in
+the shared orb checkout. Do not disable its checkout guard, copy unreleased
+extension code, or claim downstream live qualification from hook/unit tests.
+
 ## Source release and infrastructure boundaries
 
 `apps/github/` owns workflow entry points and immutable source publication.

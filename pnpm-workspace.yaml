@@ -6,8 +6,10 @@ verifyDepsBeforeRun: false
 
 # Reviewed initial Factory releases; normal release-age protection stays enabled.
 minimumReleaseAgeExclude:
+  - '@quantile-co/factory-amp@0.1.0'
   - '@quantile-co/factory-github@0.1.0'
   - '@quantile-co/factory-pi@0.1.0'
+  - '@quantile-co/factory-otel@0.1.0'
 
 allowBuilds:
   esbuild: false

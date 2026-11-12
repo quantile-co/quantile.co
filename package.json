@@ -15,6 +15,7 @@
     "test": "pnpm run check && TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run test",
     "build": "TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run build",
     "build:assets": "pnpm --filter @quantile-co/quantile.co-web run build:assets",
+    "amp": "tsx apps/amp/cli.ts",
     "github:build": "tsx apps/github/cli.ts build",
     "github:plan": "tsx apps/github/cli.ts plan",
     "github:apply": "tsx apps/github/cli.ts apply",

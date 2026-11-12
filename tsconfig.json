@@ -10,5 +10,5 @@
     "types": ["node"]
   },
   "exclude": ["**/dist/**", "**/node_modules/**"],
-  "include": ["apps/github/**/*.ts", "apps/repo/**/*.ts"]
+  "include": ["apps/amp/**/*.ts", "apps/github/**/*.ts", "apps/repo/**/*.ts"]
 }

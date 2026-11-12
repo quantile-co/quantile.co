@@ -4,6 +4,8 @@
   inputs = {
     factory.url = "github:quantile-co/factory/main";
     nixpkgs.follows = "factory/nixpkgs";
+    # Scoped SSH security pin; preserve the existing Factory/tooling baseline.
+    tailscale-nixpkgs.url = "github:NixOS/nixpkgs/f4a03c008967841f2a0b3cb7c436fc6fc31671f6";
   };
 
   outputs =
@@ -20,6 +22,10 @@
         let
           factory = config.quantile-co.factory;
           agents = inputs.factory.inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+          tailscale =
+            (import inputs.tailscale-nixpkgs {
+              inherit (pkgs.stdenv.hostPlatform) system;
+            }).tailscale;
           copy = source: {
             inherit source;
             mode = "copy";
@@ -48,6 +54,8 @@
                 pkgs.git
                 pkgs.git-lfs
                 pkgs.jq
+                pkgs.openssh
+                tailscale
                 pkgs.nix
                 pkgs.nodejs_24
                 pkgs.pnpm
@@ -165,6 +173,7 @@
                     types = [ "node" ];
                   };
                   include = [
+                    "apps/amp/**/*.ts"
                     "apps/github/**/*.ts"
                     "apps/repo/**/*.ts"
                   ];
