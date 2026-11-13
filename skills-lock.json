@@ -47,6 +47,13 @@
       "version": "0.1.0",
       "computedHash": "6f4396c6e477a4ade35b90bc3749ccb259c4cac952ec64af8c93eda5dcb7a0ce"
     },
+    "hindsight": {
+      "source": "@quantile-co/factory-pi",
+      "sourceType": "node_modules",
+      "skillPath": "skills/hindsight/SKILL.md",
+      "version": "0.1.4",
+      "computedHash": "78f62b76c2208f9739e02cc746ee7fba26fadab4ca12ca5a44bd9cf6f57e86b4"
+    },
     "performance": {
       "source": "addyosmani/web-quality-skills",
       "ref": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",

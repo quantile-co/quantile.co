@@ -8,8 +8,9 @@ set +x
 unset CLICKSTACK_OTLP_ENDPOINT CLICKSTACK_API_KEY OTEL_DOCKER_STATS
 cd -- "$(dirname -- "$0")/.."
 source .agents/nix-env
-# Install the published runtime; no website build or model login in snapshots.
+# Install dependencies, skills and runtime; no website build or model login in snapshots.
 nix develop --command bash -euo pipefail -c '
   pnpm install --frozen-lockfile
+  pnpm run skills:sync
   pnpm amp setup
 '

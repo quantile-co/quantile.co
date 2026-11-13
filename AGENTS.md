@@ -1,9 +1,11 @@
 # Project knowledge index
 
-This is **public** `quantile-co/quantile.co`. Read the complete
-[MEMORY.md](.pi/memory/MEMORY.md) and affected source/tests before changes.
+This is **public** `quantile-co/quantile.co`. Read affected source/tests before
+changes. Native Hindsight uses bank `quantile-co--quantile-co`, configured in
+[.pi/hindsight.json](.pi/hindsight.json) through the pinned development shell.
+Use the `hindsight` skill selected by `pnpm run skills:sync`.
 Never copy private infrastructure or DNS guidance here. Current source is
-authoritative, not historical guides or generated prompt excerpts.
+authoritative, not recalled memory or historical guides.
 
 **README edits require explicit approval.** Preserve approved marketing copy.
 Keep this root index; do not recreate nested `AGENTS.md` files.
@@ -22,10 +24,11 @@ Build, Plan or Apply; require separate explicit review before each production
 phase. Preserve WIF, state locks, provenance and release immutability. Do not
 commit credentials, state, saved plans or customer payloads.
 
-Update MEMORY.md only with branch-verified durable public project facts.
-Do not store personal preferences, local machine/network details, credentials,
-raw transcripts, routine validation diaries or automatic handoffs.
-Review and sanitize memory changes before staging or sharing.
+Do not write Markdown memory files or memory commits. Legacy `.pi/memory/`
+and `.qmd/index.yml` remain preserved for separately approved cleanup; their
+instructions to maintain Markdown memory are superseded. Runtime activation
+requires separate approval and a fresh session, not resuming legacy transcripts.
+Never retain credentials, state, saved plans or customer payloads.
 
 Human setup: [README.md](README.md). Development: `pnpm dev`.
 Checks and tests: `pnpm test`. Build: `pnpm run build`.

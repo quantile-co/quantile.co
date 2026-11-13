@@ -1,14 +1,19 @@
-import { SpanKind } from "@opentelemetry/api";
-import type { Tracing, TracingPolicy } from "@quantile-co/factory-otel/tracing";
+import type { Configuration } from "@vercel/otel";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { register } from "./instrumentation";
 
-const shared = vi.hoisted(() => ({
-  initialize: vi.fn<(policy: TracingPolicy) => Promise<Tracing | undefined>>(),
+const native = vi.hoisted(() => ({
+  register: vi.fn<(config: Configuration) => void>(),
   flush: vi.fn<() => Promise<void>>(),
 }));
-vi.mock("@quantile-co/factory-otel/tracing", () => ({
-  initializeTracing: shared.initialize,
+vi.mock("@vercel/otel", () => ({
+  registerOTel: native.register,
+  OTLPHttpJsonTraceExporter: class {},
+}));
+vi.mock("@opentelemetry/sdk-trace-base", () => ({
+  SimpleSpanProcessor: class {
+    forceFlush = native.flush;
+  },
 }));
 const events = ["SIGINT", "SIGTERM", "beforeExit"] as const;
 const originalListeners = new Map(
@@ -17,8 +22,12 @@ const originalListeners = new Map(
 
 beforeEach(() => {
   vi.stubEnv("NEXT_RUNTIME", "nodejs");
-  shared.flush.mockResolvedValue();
-  shared.initialize.mockResolvedValue({ flush: shared.flush });
+  vi.stubEnv("NEXT_OTEL_VERBOSE", undefined);
+  vi.stubEnv("CLICKSTACK_OTLP_ENDPOINT", "https://ingest.example.invalid");
+  vi.stubEnv("CLICKSTACK_API_KEY", "fixture-key");
+  vi.stubEnv("OTEL_EXPORTER_OTLP_HEADERS", undefined);
+  vi.stubEnv("OTEL_EXPORTER_OTLP_TRACES_HEADERS", undefined);
+  native.flush.mockResolvedValue();
 });
 afterEach(() => {
   for (const event of events)
@@ -36,16 +45,22 @@ it.each(["edge", undefined])(
   async (runtime) => {
     vi.stubEnv("NEXT_RUNTIME", runtime);
     await register();
-    expect(shared.initialize).not.toHaveBeenCalled();
+    expect(native.register).not.toHaveBeenCalled();
   },
 );
 
-it("delegates once across concurrent registration and module reloads, with explicit lifecycle flush", async () => {
+it("registers the native framework once without projection or duplicate fetch instrumentation", async () => {
   await Promise.all([register(), register()]);
   vi.resetModules();
   await (await import("./instrumentation")).register();
-  expect(shared.initialize).toHaveBeenCalledTimes(1);
-  expect(shared.flush).not.toHaveBeenCalled();
+  expect(native.register).toHaveBeenCalledTimes(1);
+  expect(native.register.mock.calls[0][0]).toEqual({
+    serviceName: "quantile.co-web",
+    spanProcessors: [expect.anything()],
+    instrumentations: [],
+    propagators: ["tracecontext", "baggage"],
+  });
+  expect(process.env.NEXT_OTEL_VERBOSE).toBe("1");
   for (const event of events) {
     const added = process
       .listeners(event)
@@ -53,64 +68,14 @@ it("delegates once across concurrent registration and module reloads, with expli
     expect(added).toHaveLength(1);
     added[0](0);
   }
-  expect(shared.flush).toHaveBeenCalledTimes(3);
+  expect(native.flush).toHaveBeenCalledTimes(3);
 });
 
-it("does not install lifecycle listeners when shared tracing is disabled or unavailable", async () => {
-  shared.initialize.mockResolvedValue(undefined);
+it("remains disabled without ingestion configuration", async () => {
+  vi.stubEnv("CLICKSTACK_OTLP_ENDPOINT", undefined);
+  vi.stubEnv("CLICKSTACK_API_KEY", undefined);
   await register();
+  expect(native.register).not.toHaveBeenCalled();
   for (const event of events)
     expect(process.listeners(event)).toEqual(originalListeners.get(event));
-});
-
-it("owns the service, fixed name, and request-only sampling policy", async () => {
-  await register();
-  const policy = shared.initialize.mock.calls[0][0];
-  expect(policy.serviceName).toBe("quantile.co-web");
-  expect(policy.spanName).toBe("HTTP request");
-  for (const kind of [SpanKind.SERVER, SpanKind.CLIENT, SpanKind.INTERNAL])
-    for (const type of [
-      "BaseServer.handleRequest",
-      "AppRender.fetch",
-      "AppRender.getBodyResult",
-      "unknown",
-    ])
-      expect(
-        policy.sample({
-          kind,
-          name: "private request name",
-          attributes: { "next.span_type": type },
-        }),
-      ).toBe(kind === SpanKind.SERVER && type === "BaseServer.handleRequest");
-});
-
-it("retains only known methods, integer status codes and static route dimensions", async () => {
-  await register();
-  const policy = shared.initialize.mock.calls[0][0];
-  expect(
-    policy.attributes({
-      "http.method": "GET",
-      "http.status_code": 503,
-      "next.route": "/brand",
-      "http.target": "/brand?secret=query",
-      "http.url": "https://private.test/secret",
-      "http.request.header.cookie": "secret-cookie",
-      "http.request.header.authorization": "secret-auth",
-      "http.request.body": "secret-body",
-      "next.span_name": "secret-name",
-    }),
-  ).toEqual({
-    "http.method": "GET",
-    "http.status_code": 503,
-    "http.route": "/brand",
-  });
-  for (const route of ["/private", "/brand?secret=query", ["/brand"]])
-    for (const status of [99, 600, 200.5, "200", Number.NaN])
-      expect(
-        policy.attributes({
-          "http.method": "SECRET",
-          "http.status_code": status,
-          "http.route": route,
-        }),
-      ).toEqual({});
 });

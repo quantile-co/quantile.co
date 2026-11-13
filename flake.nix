@@ -2,8 +2,7 @@
   description = "Quantile marketing site";
 
   inputs = {
-    # Provisioning only: retain legacy memory until separately approved cutover.
-    factory.url = "github:quantile-co/factory/ff56f2509b64b56eb485f54e59bc20b4802a4a64";
+    factory.url = "github:quantile-co/factory/136c0975625d5246dbbaca59e9a123e33e30b789";
     nixpkgs.follows = "factory/nixpkgs";
   };
 
@@ -30,9 +29,11 @@
         in
         {
           quantile-co.factory = {
+            hindsight.bankId = "quantile-co--quantile-co";
             github.workflows = {
               layers = [ "infrastructure" ];
               otelJobs = [ "test" ];
+              otelActionRef = "38aedb9583cdd78d121f949ff94f603982f39eee";
               hindsight = true;
               build.layers = [ "application" ];
             };
@@ -40,7 +41,7 @@
             flake.devShell = {
               shellHook = lib.concatStringsSep "\n" [
                 factory.files.shellHook
-                factory.pi.shellHook
+                factory.hindsight.shellHook
                 ''
                   export OTEL_COLLECTOR_BINARY="${factory.otelcol-contrib.package}/bin/otelcol-contrib"
                   export OTEL_COLLECTOR_CONFIG="${factory.otelcol-contrib.hostConfigFile}"
@@ -85,7 +86,7 @@
                 factory.otelcol-contrib.package
                 factory.langfuse.package
                 factory.pi.package
-                factory.qmd.package
+                factory.hindsight.package
                 factory.prek.package
                 factory.prek.tools.package
                 factory.dependabot.check.package
@@ -194,11 +195,12 @@
               ".github/workflows/plan.yaml" = copy site.github.workflows.plan.configFile;
               ".github/workflows/apply.yaml" = copy site.github.workflows.apply.configFile;
               ".github/dependabot.yml" = copy site.dependabot.configFile;
-              ".pi/settings.json" = copy factory.pi.settingsFile;
-              ".qmd/index.yml" = {
-                source = factory.qmd.configFile;
-                mode = "seed";
-              };
+              ".pi/settings.json" = copy (
+                factory.biome.formatFile "settings.json" factory.hindsight.piSettingsFile
+              );
+              ".pi/hindsight.json" = copy (
+                factory.biome.formatFile "hindsight.json" factory.hindsight.configFile
+              );
               ".semgrep/tf" = copy (factory.semgrep.rulesDir + "/tf");
               ".semgrep/tests/tf" = copy (factory.semgrep.test.fixturesDir + "/tf");
               ".semgrep/packs/typescript.yaml" = copy factory.semgrep.packs.typescript;
