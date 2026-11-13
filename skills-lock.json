@@ -37,15 +37,15 @@
       "source": "@quantile-co/factory-pi",
       "sourceType": "node_modules",
       "skillPath": "skills/day-zero-deploy/SKILL.md",
-      "version": "0.1.0",
-      "computedHash": "8d0a567b1400fd326e8d66cca1342209b811d64fa870885d58b585c9d079b1c2"
+      "version": "0.1.4",
+      "computedHash": "8993eca7032082d214652aac7df2cf3254296477044557b731b381fa2b23030f"
     },
     "deploy": {
       "source": "@quantile-co/factory-pi",
       "sourceType": "node_modules",
       "skillPath": "skills/deploy/SKILL.md",
-      "version": "0.1.0",
-      "computedHash": "6f4396c6e477a4ade35b90bc3749ccb259c4cac952ec64af8c93eda5dcb7a0ce"
+      "version": "0.1.4",
+      "computedHash": "babcb28d4e1554d4eafcfcc246b942bedf36984ca8f8441f80595617194349c8"
     },
     "hindsight": {
       "source": "@quantile-co/factory-pi",
