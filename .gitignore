@@ -23,11 +23,9 @@ backend_override.tf
 plan.json
 crash.log
 
-# Commit reviewed MEMORY.md and daily logs; only scratchpad and recovery stay local.
+# Legacy memory is preserved read-only; keep local recovery and indexes private.
 /.pi/memory/SCRATCHPAD.md
 /.pi/memory/recovery/
-
-# Keep QMD's writable search index and lock worktree-local.
 /.qmd/index.sqlite*
 /.qmd/.qmd-embed.lock
 
