@@ -209,8 +209,8 @@ importers:
   apps/github:
     dependencies:
       '@quantile-co/factory-github':
-        specifier: 0.1.0
-        version: 0.1.0
+        specifier: 0.1.1
+        version: 0.1.1
       commander:
         specifier: 15.0.0
         version: 15.0.0
@@ -1251,8 +1251,8 @@ packages:
     resolution: {integrity: sha512-b9GcVlEElYdFzq+MtFilXjNerg9hOtaeHekIC9SbdGoALpApsSXw4M1sX0V6uhdrQbEBq+AfWaHm2RvzEyPajg==}
     engines: {node: '>=24'}
 
-  '@quantile-co/factory-github@0.1.0':
-    resolution: {integrity: sha512-/I3ZKmhxpkEvqURj9ibT0G2g+t8R0SLHTirhHccW1DhjaQNs1cqOgi6/4IZ1TOcm3wSbwHsnxBD48OSd3blVmA==}
+  '@quantile-co/factory-github@0.1.1':
+    resolution: {integrity: sha512-tZ06wsi0Xs2nBCR45uS7inL0RtxnJQwZa5BK2LzfDYoAhsh7vSj4Oc0/xTBucfzgWGV14fXsx6UxZh4u5FBrdA==}
     engines: {node: '>=24'}
 
   '@quantile-co/factory-otel@0.2.0':
@@ -3079,7 +3079,7 @@ snapshots:
     dependencies:
       '@quantile-co/factory-otel': 0.2.0
 
-  '@quantile-co/factory-github@0.1.0': {}
+  '@quantile-co/factory-github@0.1.1': {}
 
   '@quantile-co/factory-otel@0.2.0':
     dependencies:

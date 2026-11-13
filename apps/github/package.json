@@ -6,7 +6,7 @@
     "check": "tsc --noEmit -p ../../tsconfig.json && vitest run --config ../../vitest.config.mts apps/github"
   },
   "dependencies": {
-    "@quantile-co/factory-github": "0.1.0",
+    "@quantile-co/factory-github": "0.1.1",
     "commander": "15.0.0"
   }
 }
