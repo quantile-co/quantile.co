@@ -18,6 +18,15 @@ module "hindsight" {
 module "gh" {
   source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=a2205ee819a322ff03d4ff6de93120ec80165f79"
 
+  allowed_action_patterns = [
+    "quantile-co/factory/.github/workflows/*@*",
+    "cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24",
+    "cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866",
+    "namespacelabs/nscloud-cache-action@1124a6f3ce44e5cf84cc22111530961f4d2a15f9",
+    "cachix/install-nix-action@448cde739abec1eaf0646249e3d25bb8d9bc7702",
+    "cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b",
+  ]
+
   repo_name       = "quantile.co"
   description     = "Quantile marketing site."
   visibility      = "public"
@@ -28,7 +37,7 @@ module "gh" {
 }
 
 module "gcp" {
-  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/gcp?ref=8f966fb1d6062a52754a3d47b9f2791a617e2849"
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/gcp?ref=2826c590904defc48baf3f34df81218420da18b7"
 
   project_prefix    = "quantile-co"
   folder_id         = "145094075590"
