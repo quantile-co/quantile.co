@@ -15,7 +15,6 @@
     "test": "pnpm run check && TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run test",
     "build": "TURBO_CACHE=\"${TURBO_CACHE:-local:rw}\" turbo run build",
     "build:assets": "pnpm --filter @quantile-co/quantile.co-web run build:assets",
-    "otel": "factory-otel",
     "github:test": "pnpm test",
     "amp": "tsx apps/amp/cli.ts",
     "github:build": "tsx apps/github/cli.ts build",
@@ -34,7 +33,6 @@
   ],
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
-    "@quantile-co/factory-otel": "0.1.0",
     "@quantile-co/factory-pi": "0.1.4",
     "@types/node": "26.6.5",
     "husky": "9.1.7",

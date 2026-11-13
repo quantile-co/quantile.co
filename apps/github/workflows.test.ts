@@ -40,7 +40,7 @@ it("provisions the repository bank with ephemeral credentials only in protected 
     );
 });
 
-it("opts only protected manual main Test into the published collector wrapper", () => {
+it("opts only protected manual main Test into the published Collector action", () => {
   const workflow = read(".github/workflows/test.yaml");
   expect(workflow).toContain("on:\n  workflow_dispatch:");
   expect(workflow).toContain(
@@ -54,29 +54,30 @@ it("opts only protected manual main Test into the published collector wrapper", 
   expect(workflow).toContain(
     "CLICKSTACK_API_KEY: ${{ secrets.CLICKSTACK_API_KEY }}",
   );
-  expect(workflow).toContain("pnpm otel -- pnpm run github:test");
+  expect(workflow).toContain(
+    "quantile-co/factory/.github/actions/otel@38aedb9583cdd78d121f949ff94f603982f39eee",
+  );
+  expect(workflow).not.toContain("pnpm otel");
   for (const phase of ["check", "build", "plan", "apply"])
     expect(read(`.github/workflows/${phase}.yaml`)).not.toMatch(
       /CLICKSTACK_|pnpm otel/,
     );
   const { scripts, devDependencies } = JSON.parse(read("package.json"));
-  expect(scripts.otel).toBe("factory-otel");
+  expect(scripts.otel).toBeUndefined();
   expect(scripts["github:test"]).toBe("pnpm test");
-  expect(devDependencies["@quantile-co/factory-otel"]).toBe("0.1.0");
+  expect(devDependencies["@quantile-co/factory-otel"]).toBeUndefined();
 });
 
-it("keeps collector credentials shell-local until after shell setup and frozen installation", () => {
+it("starts the Collector before checkout and keeps its credentials out of the workload", () => {
   const workflow = read(".github/workflows/test.yaml");
   const markers = [
-    "export -n CLICKSTACK_OTLP_ENDPOINT CLICKSTACK_API_KEY",
+    "- name: Start OpenTelemetry Collector",
+    "CLICKSTACK_API_KEY:",
+    "- name: Check out repository",
     'direnv="$(nix build',
     '"$direnv" allow .',
     '"$direnv" exec . pnpm install --frozen-lockfile',
-    'shell=$(env -u NIX_CACHE_PRIVATE_KEY "$direnv" export bash)',
-    'eval "$shell"',
-    "unset shell",
-    "export CLICKSTACK_OTLP_ENDPOINT CLICKSTACK_API_KEY",
-    "pnpm otel -- pnpm run github:test",
+    '"$direnv" exec . pnpm run github:test',
   ];
   let previous = -1;
   for (const marker of markers) {
@@ -84,6 +85,9 @@ it("keeps collector credentials shell-local until after shell setup and frozen i
     expect(index).toBeGreaterThan(previous);
     previous = index;
   }
+  expect(workflow.split("- name: Run checks, then tests")[1]).not.toContain(
+    "CLICKSTACK_",
+  );
   const flake = read("flake.nix");
   expect(flake).toContain('otelJobs = [ "test" ];');
   expect(flake).not.toMatch(/CLICKSTACK_API_KEY|CLICKSTACK_OTLP_ENDPOINT/);

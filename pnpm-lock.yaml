@@ -169,9 +169,6 @@ importers:
       '@biomejs/biome':
         specifier: 2.5.15
         version: 2.5.15
-      '@quantile-co/factory-otel':
-        specifier: 0.1.0
-        version: 0.1.0
       '@quantile-co/factory-pi':
         specifier: 0.1.4
         version: 0.1.4
@@ -203,8 +200,8 @@ importers:
   apps/amp:
     dependencies:
       '@quantile-co/factory-amp':
-        specifier: 0.1.2
-        version: 0.1.2
+        specifier: 0.1.3
+        version: 0.1.3
       commander:
         specifier: 15.0.0
         version: 15.0.0
@@ -238,8 +235,8 @@ importers:
         specifier: 2.12.1
         version: 2.12.1(@opentelemetry/api@1.9.1)
       '@quantile-co/factory-otel':
-        specifier: 0.1.0
-        version: 0.1.0
+        specifier: 0.2.0
+        version: 0.2.0
       '@tabler/icons-react':
         specifier: 3.49.0
         version: 3.49.0(react@19.3.1)
@@ -1246,18 +1243,17 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@quantile-co/factory-amp@0.1.2':
-    resolution: {integrity: sha512-6qT8+0qq+10jPlf8gtnLS0g11FoqfW+Ys+o77PwlZ7cHBVBH/KrHvMMlagmfXDSyWjkjpL8L0YmPncDuwpn+bw==}
+  '@quantile-co/factory-amp@0.1.3':
+    resolution: {integrity: sha512-b9GcVlEElYdFzq+MtFilXjNerg9hOtaeHekIC9SbdGoALpApsSXw4M1sX0V6uhdrQbEBq+AfWaHm2RvzEyPajg==}
     engines: {node: '>=24'}
 
   '@quantile-co/factory-github@0.1.0':
     resolution: {integrity: sha512-/I3ZKmhxpkEvqURj9ibT0G2g+t8R0SLHTirhHccW1DhjaQNs1cqOgi6/4IZ1TOcm3wSbwHsnxBD48OSd3blVmA==}
     engines: {node: '>=24'}
 
-  '@quantile-co/factory-otel@0.1.0':
-    resolution: {integrity: sha512-c41h5FFBZh0tFykJi5EiMnpTsvgb94FZt+FBYEbz0sfPm+grmitW6lQaxZJlMrot6T0Po+wjddJcBPs+1uOprQ==}
+  '@quantile-co/factory-otel@0.2.0':
+    resolution: {integrity: sha512-OhnieLoEpctsmQnI6XdFuNgD3u+dAt5F0wA0UrGODXseiDNFSRaMMx5n1THJ49q+7Jp7FBoNzguQwk8Zvx+/Qg==}
     engines: {node: '>=24'}
-    hasBin: true
 
   '@quantile-co/factory-pi@0.1.4':
     resolution: {integrity: sha512-xSePBwb+X7+pz9neTxI9vwYw5I6u5YPwnIaNW5VzIhWpz++liajMJReB42IfO/ji1AOgSswfoH0WPw/P4tTh2w==}
@@ -2958,13 +2954,13 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@quantile-co/factory-amp@0.1.2':
+  '@quantile-co/factory-amp@0.1.3':
     dependencies:
-      '@quantile-co/factory-otel': 0.1.0
+      '@quantile-co/factory-otel': 0.2.0
 
   '@quantile-co/factory-github@0.1.0': {}
 
-  '@quantile-co/factory-otel@0.1.0':
+  '@quantile-co/factory-otel@0.2.0':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/context-async-hooks': 2.12.1(@opentelemetry/api@1.9.1)
