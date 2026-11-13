@@ -25,8 +25,7 @@ phase. Preserve WIF, state locks, provenance and release immutability. Do not
 commit credentials, state, saved plans or customer payloads.
 
 Do not write Markdown memory files or memory commits. Legacy `.pi/memory/`
-and `.qmd/index.yml` remain preserved for separately approved cleanup; their
-instructions to maintain Markdown memory are superseded. Runtime activation
+and its memory-only QMD collection are retired; do not recreate them. Runtime activation
 requires separate approval and a fresh session, not resuming legacy transcripts.
 Never retain credentials, state, saved plans or customer payloads.
 
