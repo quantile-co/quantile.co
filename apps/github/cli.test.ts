@@ -14,6 +14,29 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "vitest";
 
+test("central metrics enrollment is explicit and preserves downstream identity", () => {
+  const source = readFileSync(
+    new URL("../../tf/main.tf", import.meta.url),
+    "utf8",
+  );
+  const gcp = source.match(/module "gcp" \{([\s\S]*?)^\}/m)?.[1];
+  assert.ok(gcp);
+  assert.equal(
+    gcp.match(/source\s*=\s*"([^"]+)"/)?.[1],
+    "git::https://github.com/quantile-co/factory.git//tf/modules/project/gcp?ref=8aaa95a7e46377bbc6b56b5855ab38ba8d2903fa",
+  );
+  assert.equal(
+    gcp.match(/metrics_enrollment_member\s*=\s*"([^"]+)"/)?.[1],
+    "principalSet://iam.googleapis.com/projects/86084514682/locations/global/workloadIdentityPools/github/attribute.main_branch_repository_actor_id/1458437080_218666448",
+  );
+  assert.match(gcp, /gh_repo_id\s*=\s*module\.gh\.repo_id/);
+  assert.match(gcp, /gh_owner_ids\s*=\s*module\.gh\.owner_ids/);
+  assert.doesNotMatch(
+    source,
+    /resource\s+"google_monitoring_monitored_project"/,
+  );
+});
+
 test("CLI retains the backend and saved bytes while isolating provider credentials", () => {
   const root = mkdtempSync(join(tmpdir(), "site-cli-"));
   try {

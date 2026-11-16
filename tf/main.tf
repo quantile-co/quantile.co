@@ -37,7 +37,10 @@ module "gh" {
 }
 
 module "gcp" {
-  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/gcp?ref=2826c590904defc48baf3f34df81218420da18b7"
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/gcp?ref=8aaa95a7e46377bbc6b56b5855ab38ba8d2903fa"
+
+  # The central otel deployment owns enrollment; this pipeline gets no reverse grant.
+  metrics_enrollment_member = "principalSet://iam.googleapis.com/projects/86084514682/locations/global/workloadIdentityPools/github/attribute.main_branch_repository_actor_id/1458437080_218666448"
 
   project_prefix    = "quantile-co"
   folder_id         = "145094075590"
