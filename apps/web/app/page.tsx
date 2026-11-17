@@ -58,6 +58,14 @@ export default function Home() {
         <p>
           I work with small data teams at companies with fewer than 500
           employees. In particular, I've been helping teams use{" "}
+          <a
+            href="https://langfuse.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Langfuse
+          </a>
+          ,{" "}
           <a href="https://dspy.ai/" target="_blank" rel="noopener noreferrer">
             DSPy
           </a>{" "}

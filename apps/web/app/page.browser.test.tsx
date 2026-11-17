@@ -72,6 +72,16 @@ for (const colorScheme of ["light", "dark"] as const) {
     expect(letter.textContent).not.toMatch(/Lorem ipsum|Ut enim/);
     const paragraphs = letter.querySelectorAll(":scope > p");
     expect(
+      [...paragraphs[1].querySelectorAll("a")].map((link) => [
+        link.textContent,
+        link.href,
+      ]),
+    ).toEqual([
+      ["Langfuse", "https://langfuse.com/"],
+      ["DSPy", "https://dspy.ai/"],
+      ["GEPA", "https://gepa-ai.github.io/gepa/"],
+    ]);
+    expect(
       paragraphs[1].querySelector('a[href="https://dspy.ai/"]')?.textContent,
     ).toBe("DSPy");
     expect(
