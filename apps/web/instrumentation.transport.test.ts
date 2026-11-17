@@ -25,8 +25,8 @@ beforeEach(() => {
   registration = vi.spyOn(trace, "setGlobalTracerProvider");
   vi.stubEnv("NEXT_RUNTIME", "nodejs");
   vi.stubEnv("NEXT_OTEL_VERBOSE", undefined);
-  vi.stubEnv("CLICKSTACK_OTLP_ENDPOINT", "https://ingest.example.test:4318");
-  vi.stubEnv("CLICKSTACK_API_KEY", "synthetic-ingestion-key");
+  vi.stubEnv("QUANTILE_OTLP_ENDPOINT", "https://ingest.example.test:4318");
+  vi.stubEnv("QUANTILE_OTLP_INGEST_TOKEN", "synthetic-ingestion-key");
   vi.stubEnv("OTEL_EXPORTER_OTLP_HEADERS", undefined);
   vi.stubEnv("OTEL_EXPORTER_OTLP_TRACES_HEADERS", undefined);
 });
@@ -59,10 +59,11 @@ it.each(["path", "partial", "headers", "trace-headers", "existing-provider"])(
     const diagnostics = vi.spyOn(console, "error").mockImplementation(() => {});
     if (scenario === "path")
       vi.stubEnv(
-        "CLICKSTACK_OTLP_ENDPOINT",
+        "QUANTILE_OTLP_ENDPOINT",
         "https://ingest.example.test/private-path",
       );
-    if (scenario === "partial") vi.stubEnv("CLICKSTACK_API_KEY", undefined);
+    if (scenario === "partial")
+      vi.stubEnv("QUANTILE_OTLP_INGEST_TOKEN", undefined);
     if (scenario === "headers")
       vi.stubEnv(
         "OTEL_EXPORTER_OTLP_HEADERS",

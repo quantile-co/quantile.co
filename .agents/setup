@@ -5,8 +5,16 @@ set +x
     echo 'This hook is only for an Amp orb.' >&2
     exit 1
 }
-unset CLICKSTACK_OTLP_ENDPOINT CLICKSTACK_API_KEY OTEL_DOCKER_STATS
+unset CLICKSTACK_OTLP_ENDPOINT CLICKSTACK_API_KEY QUANTILE_OTLP_ENDPOINT QUANTILE_OTLP_INGEST_TOKEN OTEL_DOCKER_STATS
 cd -- "$(dirname -- "$0")/.."
+umask 077
+# Retain early output; close the writer and drain tee when the hook exits.
+amp_logs="$HOME/.local/share/factory-amp/logs"
+mkdir -p "$amp_logs"
+exec > >(tee -a "$amp_logs/setup.log") 2>&1
+amp_log_pid=$!
+trap 'exec 1>&- 2>&-; wait "$amp_log_pid"' EXIT
+unset amp_logs
 source .agents/nix-env
 # Install dependencies, skills and runtime; no website build or model login in snapshots.
 nix develop --command bash -euo pipefail -c '

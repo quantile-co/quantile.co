@@ -7,11 +7,19 @@ set +x
 }
 cd -- "$(dirname -- "$0")/.."
 umask 077
-# Keep optional runtime ingestion credentials out of Nix evaluation.
-export -n CLICKSTACK_OTLP_ENDPOINT CLICKSTACK_API_KEY OTEL_DOCKER_STATS
+# Amp uses short-lived workload identity, never a shared ingestion token.
+unset CLICKSTACK_OTLP_ENDPOINT CLICKSTACK_API_KEY QUANTILE_OTLP_INGEST_TOKEN
+export -n QUANTILE_OTLP_ENDPOINT OTEL_DOCKER_STATS
+# Retain early output; close the writer and drain tee when the hook exits.
+amp_logs="$HOME/.local/share/factory-amp/logs"
+mkdir -p "$amp_logs"
+exec > >(tee -a "$amp_logs/resume.log") 2>&1
+amp_log_pid=$!
+trap 'exec 1>&- 2>&-; wait "$amp_log_pid"' EXIT
+unset amp_logs
 source .agents/nix-env
 shell=$(nix print-dev-env)
 eval "$shell"
 unset shell
-export CLICKSTACK_OTLP_ENDPOINT CLICKSTACK_API_KEY OTEL_DOCKER_STATS
+export QUANTILE_OTLP_ENDPOINT OTEL_DOCKER_STATS
 pnpm amp resume --directory "$PWD"

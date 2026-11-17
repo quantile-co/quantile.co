@@ -49,18 +49,18 @@ it("opts only protected manual main Test into the published Collector action", (
   expect(workflow).toContain("    environment: prod");
   expect(workflow).toContain("    runs-on: namespace-profile-quantile-4x8");
   expect(workflow).toContain(
-    "CLICKSTACK_OTLP_ENDPOINT: ${{ vars.CLICKSTACK_OTLP_ENDPOINT }}",
+    "QUANTILE_OTLP_ENDPOINT: ${{ vars.QUANTILE_OTLP_ENDPOINT }}",
   );
   expect(workflow).toContain(
-    "CLICKSTACK_API_KEY: ${{ secrets.CLICKSTACK_API_KEY }}",
+    "QUANTILE_OTLP_INGEST_TOKEN: ${{ steps.otel-token.outputs.token }}",
   );
   expect(workflow).toContain(
-    "quantile-co/factory/.github/actions/otel@38aedb9583cdd78d121f949ff94f603982f39eee",
+    "quantile-co/factory/.github/actions/otel@96b659232f4b92620433d21a6eb06f9209e5a487",
   );
   expect(workflow).not.toContain("pnpm otel");
   for (const phase of ["check", "build", "plan", "apply"])
     expect(read(`.github/workflows/${phase}.yaml`)).not.toMatch(
-      /CLICKSTACK_|pnpm otel/,
+      /CLICKSTACK_|QUANTILE_OTLP_|pnpm otel/,
     );
   const { scripts, devDependencies } = JSON.parse(read("package.json"));
   expect(scripts.otel).toBeUndefined();
@@ -68,12 +68,16 @@ it("opts only protected manual main Test into the published Collector action", (
   expect(devDependencies["@quantile-co/factory-otel"]).toBeUndefined();
 });
 
-it("starts the Collector before checkout and keeps its credentials out of the workload", () => {
+it("authenticates before starting the Collector and keeps its token out of the workload", () => {
   const workflow = read(".github/workflows/test.yaml");
   const markers = [
-    "- name: Start OpenTelemetry Collector",
-    "CLICKSTACK_API_KEY:",
     "- name: Check out repository",
+    "- name: Authenticate to Google Cloud",
+    "- name: Read Collector ingestion token",
+    "secrets: token:${{ vars.QUANTILE_OTLP_INGEST_SECRET }}",
+    "export_to_environment: false",
+    "- name: Start OpenTelemetry Collector",
+    "QUANTILE_OTLP_INGEST_TOKEN:",
     'direnv="$(nix build',
     '"$direnv" allow .',
     '"$direnv" exec . pnpm install --frozen-lockfile',
@@ -86,11 +90,11 @@ it("starts the Collector before checkout and keeps its credentials out of the wo
     previous = index;
   }
   expect(workflow.split("- name: Run checks, then tests")[1]).not.toContain(
-    "CLICKSTACK_",
+    "QUANTILE_OTLP_",
   );
   const flake = read("flake.nix");
   expect(flake).toContain('otelJobs = [ "test" ];');
   expect(flake).not.toMatch(/CLICKSTACK_API_KEY|CLICKSTACK_OTLP_ENDPOINT/);
-  for (const name of ["BINARY", "CONFIG", "DOCKER_CONFIG"])
+  for (const name of ["BINARY", "CONFIG", "DOCKER_CONFIG", "JOURNAL_CONFIG"])
     expect(flake).toContain(`export OTEL_COLLECTOR_${name}=`);
 });

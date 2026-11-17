@@ -2,7 +2,7 @@
   description = "Quantile marketing site";
 
   inputs = {
-    factory.url = "github:quantile-co/factory/2a0ce9668b2b355c8a9d32affddb33ea72dbfdc0";
+    factory.url = "github:quantile-co/factory/5a1f0543d5a4a66236b57f22bcc9d82fb97fcd72";
     nixpkgs.follows = "factory/nixpkgs";
   };
 
@@ -33,7 +33,7 @@
             github.workflows = {
               layers = [ "infrastructure" ];
               otelJobs = [ "test" ];
-              otelActionRef = "38aedb9583cdd78d121f949ff94f603982f39eee";
+              otelActionRef = "96b659232f4b92620433d21a6eb06f9209e5a487";
               hindsight = true;
               build.layers = [ "application" ];
             };
@@ -46,6 +46,7 @@
                   export OTEL_COLLECTOR_BINARY="${factory.otelcol-contrib.package}/bin/otelcol-contrib"
                   export OTEL_COLLECTOR_CONFIG="${factory.otelcol-contrib.hostConfigFile}"
                   export OTEL_COLLECTOR_DOCKER_CONFIG="${factory.otelcol-contrib.dockerConfigFile}"
+                  export OTEL_COLLECTOR_JOURNAL_CONFIG="${factory.otelcol-contrib.journalConfigFile}"
                   export NEXT_TELEMETRY_DISABLED=1
                   export PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="${factory.playwright.withVersion (builtins.fromJSON (builtins.readFile ./apps/web/package.json)).devDependencies.playwright}/bin/chromium-headless-shell"
                 ''
