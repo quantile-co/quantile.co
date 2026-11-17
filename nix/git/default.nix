@@ -17,6 +17,7 @@
       out/
       build/
       coverage/
+      storybook-static/
       **/__screenshots__/
       .vitest-attachments/
       .DS_Store

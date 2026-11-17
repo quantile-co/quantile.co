@@ -32,6 +32,15 @@ Never retain credentials, state, saved plans or customer payloads.
 Human setup: [README.md](README.md). Development: `pnpm dev`.
 Checks and tests: `pnpm test`. Build: `pnpm run build`.
 Brand asset generation: `pnpm run build:assets`.
+Local component explorer: `pnpm storybook`; static build: `pnpm build:storybook`;
+pinned-browser stories: `pnpm test:storybook`. Configuration lives in
+[apps/web/.storybook/](apps/web/.storybook/). Stories are colocated and match the
+source basename/case (`Header.stories.tsx`, reserved `page.stories.tsx`). React
+components use PascalCase; framework-reserved filenames stay unchanged.
+Stories import production UI/theme/assets; the preview replaces only root document
+and provider mounting, omitting analytics. Fathom remains covered by its browser
+tests, not a visual story. Theme, responsive and interaction stories are not a
+complete visual regression baseline; no hosted visual service is configured.
 
 ## Writing audit MCP servers
 

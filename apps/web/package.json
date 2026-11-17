@@ -6,6 +6,9 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
+    "storybook": "storybook dev --port 6006 --host 127.0.0.1 --no-open",
+    "build:storybook": "storybook build",
+    "test:storybook": "vitest run --project storybook",
     "check": "next typegen && tsc --noEmit --incremental false && quantile-brand-assets --check",
     "test": "vitest run",
     "build": "next build",
@@ -28,6 +31,10 @@
   "devDependencies": {
     "@quantile-co/quantile.co-brand": "workspace:*",
     "@quantile-co/quantile.co-testing": "workspace:*",
+    "@storybook/addon-a11y": "10.6.7",
+    "@storybook/addon-docs": "10.6.7",
+    "@storybook/addon-vitest": "10.6.7",
+    "@storybook/nextjs-vite": "10.6.7",
     "@types/node": "^26.6.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -35,6 +42,7 @@
     "playwright": "1.64.1",
     "postcss": "8.5.32",
     "postcss-preset-mantine": "1.18.0",
+    "storybook": "10.6.7",
     "typescript": "^7",
     "vitest": "5.1.0"
   },
