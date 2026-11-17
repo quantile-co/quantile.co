@@ -200,8 +200,8 @@ importers:
   apps/amp:
     dependencies:
       '@quantile-co/factory-amp':
-        specifier: 0.2.0
-        version: 0.2.0
+        specifier: 0.3.0
+        version: 0.3.0
       commander:
         specifier: 15.0.0
         version: 15.0.0
@@ -1532,8 +1532,8 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@quantile-co/factory-amp@0.2.0':
-    resolution: {integrity: sha512-1JhgZYWRbdUO22bwVIme0d6f08NksE3b28J8UizA+gObMqqnaguFgozfqWHi4Y2MVg39KoKLA8gmEROnhP0suA==}
+  '@quantile-co/factory-amp@0.3.0':
+    resolution: {integrity: sha512-pPyS5zpqsf3P/STHgEAxwro4S/ARtC8kadZiSSG3mwSmLsht9r5vJsITtvW0mnti1Z7ODPGyBpT8EVaxi/WbVw==}
     engines: {node: '>=24'}
 
   '@quantile-co/factory-github@0.1.1':
@@ -4029,7 +4029,7 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@quantile-co/factory-amp@0.2.0':
+  '@quantile-co/factory-amp@0.3.0':
     dependencies:
       '@quantile-co/factory-otel': 0.3.0
 

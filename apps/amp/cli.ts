@@ -1,4 +1,4 @@
-import { chmodSync, copyFileSync, mkdirSync } from "node:fs";
+import { chmodSync, copyFileSync, mkdirSync, rmSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,12 +19,14 @@ cli.command("setup").action(() => {
     "amp/plugins",
   );
   mkdirSync(directory, { recursive: true });
-  const plugin = join(directory, "factory-orb-awake.js");
+  const plugin = join(directory, "quantile-co-factory-amp.js");
   copyFileSync(
     fileURLToPath(import.meta.resolve("@quantile-co/factory-amp/plugin")),
     plugin,
   );
   chmodSync(plugin, 0o644);
+  rmSync(join(directory, "factory-orb-awake.js"), { force: true });
+  rmSync(join(directory, "factory-observability.js"), { force: true });
 });
 cli
   .command("resume")

@@ -1,4 +1,12 @@
-import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, it, vi } from "vitest";
@@ -13,13 +21,21 @@ vi.mock("@quantile-co/factory-amp", () => ({
 import { connect, resume, setup } from "@quantile-co/factory-amp";
 import { cli } from "./cli";
 
-it("delegates the explicit repository/path and installs only the packaged keep-awake plugin", async () => {
+it("delegates this repository and replaces only retired Factory plugins with its unified bundle", async () => {
   const temporary = mkdtempSync(join(tmpdir(), "site-amp-"));
   vi.stubEnv("XDG_CONFIG_HOME", temporary);
   try {
+    const directory = join(temporary, "amp/plugins");
+    mkdirSync(directory, { recursive: true });
+    for (const name of [
+      "factory-orb-awake.js",
+      "factory-observability.js",
+      "unrelated.js",
+    ])
+      writeFileSync(join(directory, name), "unrelated");
     await cli.parseAsync(["setup"], { from: "user" });
     expect(setup).toHaveBeenCalledOnce();
-    const plugin = join(temporary, "amp/plugins/factory-orb-awake.js");
+    const plugin = join(directory, "quantile-co-factory-amp.js");
     expect(readFileSync(plugin, "utf8")).toBe(
       readFileSync(
         new URL(import.meta.resolve("@quantile-co/factory-amp/plugin")),
@@ -27,6 +43,11 @@ it("delegates the explicit repository/path and installs only the packaged keep-a
       ),
     );
     expect(statSync(plugin).mode & 0o777).toBe(0o644);
+    expect(existsSync(join(directory, "factory-orb-awake.js"))).toBe(false);
+    expect(existsSync(join(directory, "factory-observability.js"))).toBe(false);
+    expect(readFileSync(join(directory, "unrelated.js"), "utf8")).toBe(
+      "unrelated",
+    );
     await cli.parseAsync(
       ["resume", "--directory", "/disposable/repo", "--thread", "test-thread"],
       { from: "user" },
