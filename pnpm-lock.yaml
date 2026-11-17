@@ -170,8 +170,8 @@ importers:
         specifier: 2.5.15
         version: 2.5.15
       '@quantile-co/factory-pi':
-        specifier: 0.1.4
-        version: 0.1.4
+        specifier: 0.1.5
+        version: 0.1.5
       '@types/node':
         specifier: 26.6.5
         version: 26.6.5
@@ -892,8 +892,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
 
-  '@langfuse/tracing@6.0.1':
-    resolution: {integrity: sha512-jh+Kx4HZOyzvzPAjakU9VdJXCzPruJ7U4fCHF0DDygv0xwSjvXhLcP01+yesWFSNaFfo89lEdmhn2Bku0aOfqQ==}
+  '@langfuse/tracing@6.1.1':
+    resolution: {integrity: sha512-+pYnZLGwsET/gG2kmsg/kFyoRE3k2Sd8lUKCPkXo6oWyWyyAdhHEVhk6ix7nZ97ehqkV5VO/9X99Tm3aayYc+Q==}
     engines: {node: '>=22'}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
@@ -1544,16 +1544,19 @@ packages:
     resolution: {integrity: sha512-5kUkJ6qISrpjCkUUaGATaC2ZiyMGoxQyy0lIcXQKhpE+8uhYB2QwpHzLYFVirTL5aVGKaLsiW7352JW5lZlSrQ==}
     engines: {node: '>=24'}
 
-  '@quantile-co/factory-pi@0.1.4':
-    resolution: {integrity: sha512-xSePBwb+X7+pz9neTxI9vwYw5I6u5YPwnIaNW5VzIhWpz++liajMJReB42IfO/ji1AOgSswfoH0WPw/P4tTh2w==}
+  '@quantile-co/factory-pi@0.1.5':
+    resolution: {integrity: sha512-DLqIUhzpaxXSNLnNTe1PM7zoIyLvfaMlilHOLnZW0imBaZZBRglqJFJMt/9jhyN3HRMwBX6uk17xv/WRh4os8A==}
     engines: {node: '>=24'}
     peerDependencies:
       '@earendil-works/pi-ai': '*'
       '@earendil-works/pi-coding-agent': '*'
+      typebox: '*'
     peerDependenciesMeta:
       '@earendil-works/pi-ai':
         optional: true
       '@earendil-works/pi-coding-agent':
+        optional: true
+      typebox:
         optional: true
 
   '@rolldown/binding-android-arm-eabi@1.2.15':
@@ -3612,7 +3615,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@langfuse/tracing@6.0.1(@opentelemetry/api@1.9.1)':
+  '@langfuse/tracing@6.1.1(@opentelemetry/api@1.9.1)':
     dependencies:
       '@langfuse/core': 6.1.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/api': 1.9.1
@@ -4043,9 +4046,9 @@ snapshots:
       '@opentelemetry/resources': 2.12.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace': 2.12.1(@opentelemetry/api@1.9.1)
 
-  '@quantile-co/factory-pi@0.1.4':
+  '@quantile-co/factory-pi@0.1.5':
     dependencies:
-      '@langfuse/tracing': 6.0.1(@opentelemetry/api@1.9.1)
+      '@langfuse/tracing': 6.1.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/api': 1.9.1
 
   '@rolldown/binding-android-arm-eabi@1.2.15':
