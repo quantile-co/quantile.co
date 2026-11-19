@@ -56,7 +56,7 @@ it("opts only protected manual main Test into the published Collector action", (
     /QUANTILE_OTLP_INGEST_|get-secretmanager-secrets/,
   );
   expect(workflow).toContain(
-    "quantile-co/factory/.github/actions/otel@f2de4c22cd6e8a85ff14759e73017e7de712f904",
+    "quantile-co/factory/.github/actions/otel@ac68f2d8ea763f3957bf524af86d26e412b65b6f",
   );
   expect(workflow).not.toContain("pnpm otel");
   for (const phase of ["check", "build", "plan", "apply"])
