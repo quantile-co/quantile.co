@@ -54,7 +54,7 @@ it("registers the native framework once without projection or duplicate fetch in
   await (await import("./instrumentation")).register();
   expect(native.register).toHaveBeenCalledTimes(1);
   expect(native.register.mock.calls[0][0]).toEqual({
-    serviceName: "quantile.co-web",
+    serviceName: "@quantile-co/quantile.co-web",
     spanProcessors: [expect.anything()],
     instrumentations: [],
     propagators: ["tracecontext", "baggage"],
