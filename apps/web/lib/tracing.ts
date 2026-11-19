@@ -99,8 +99,6 @@ function googleTraceExporter(audience: string): SpanExporter {
   };
 }
 
-const serviceName = "@quantile-co/quantile.co-web";
-
 const state = globalThis as typeof globalThis & {
   __quantileTracingRegistration?: Promise<void>;
 };
@@ -122,15 +120,24 @@ export async function registerTracing() {
       const provider = trace.getTracerProvider();
       if (
         !(provider instanceof ProxyTracerProvider) ||
-        provider.getDelegateTracer(serviceName)
+        provider.getDelegateTracer("next")
       )
         throw new Error("A tracing provider is already registered");
       // Start exporting on span end; request-based Cloud Run can suspend CPU
       // before a batch timer runs. Delivery remains best-effort, not guaranteed.
       const processor = new SimpleSpanProcessor(googleTraceExporter(endpoint));
       env.NEXT_OTEL_VERBOSE ??= "1";
+      const runtime = Object.fromEntries(
+        ["K_SERVICE", "K_REVISION", "K_CONFIGURATION"]
+          .filter((key) => env[key] !== undefined)
+          .map((key) => [key, env[key]]),
+      );
       registerOTel({
-        serviceName,
+        ...(Object.keys(runtime).length && {
+          attributes: {
+            "quantile.metadata": JSON.stringify([{ [Date.now()]: runtime }]),
+          },
+        }),
         spanProcessors: [processor],
         // Next already instruments fetch; retain its native spans rather than
         // installing a second fetch wrapper or an ambient/default exporter.

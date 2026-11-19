@@ -119,6 +119,12 @@ it("exports intact native spans with parent correlation through the maintained s
       expect(String(url)).toBe(audience + "/gcp/v1/traces");
       return Response.json({});
     });
+  vi.stubEnv("K_SERVICE", "application");
+  vi.stubEnv("K_REVISION", "application-fixture");
+  vi.stubEnv(
+    "OTEL_RESOURCE_ATTRIBUTES",
+    "service.namespace=quantile-q1,service.name=quantile.co",
+  );
   vi.stubEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://unrelated.example.test");
   vi.stubEnv(
     "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
@@ -168,7 +174,25 @@ it("exports intact native spans with parent correlation through the maintained s
       );
       const body = String(options?.body);
       expect(body).not.toContain(id);
-      return JSON.parse(body).resourceSpans.flatMap(
+      const groups = JSON.parse(body).resourceSpans;
+      const attrs = groups[0].resource.attributes;
+      expect(attrs).toContainEqual({
+        key: "service.name",
+        value: { stringValue: "quantile.co" },
+      });
+      expect(attrs).toContainEqual({
+        key: "service.namespace",
+        value: { stringValue: "quantile-q1" },
+      });
+      const metadata = attrs.find(
+        (a: { key: string }) => a.key === "quantile.metadata",
+      );
+      const [entry] = JSON.parse(metadata.value.stringValue);
+      expect(Object.values(entry)[0]).toMatchObject({
+        K_SERVICE: "application",
+        K_REVISION: "application-fixture",
+      });
+      return groups.flatMap(
         (resource: { scopeSpans: { spans: Record<string, unknown>[] }[] }) =>
           resource.scopeSpans.flatMap((scope) => scope.spans),
       );

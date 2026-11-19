@@ -49,15 +49,27 @@ it.each(["edge", undefined])(
 );
 
 it("registers the native framework once without projection or duplicate fetch instrumentation", async () => {
+  vi.stubEnv("K_SERVICE", "application");
+  vi.stubEnv("K_REVISION", "application-fixture");
   await Promise.all([register(), register()]);
   vi.resetModules();
   await (await import("./instrumentation")).register();
   expect(native.register).toHaveBeenCalledTimes(1);
   expect(native.register.mock.calls[0][0]).toEqual({
-    serviceName: "@quantile-co/quantile.co-web",
+    attributes: { "quantile.metadata": expect.any(String) },
     spanProcessors: [expect.anything()],
     instrumentations: [],
     propagators: ["tracecontext", "baggage"],
+  });
+  const metadata =
+    native.register.mock.calls[0][0].attributes?.["quantile.metadata"];
+  if (typeof metadata !== "string")
+    throw new Error("Expected serialized resource metadata");
+  const [entry] = JSON.parse(metadata);
+  expect(Object.keys(entry)).toEqual([expect.stringMatching(/^\d{13}$/)]);
+  expect(Object.values(entry)[0]).toMatchObject({
+    K_SERVICE: "application",
+    K_REVISION: "application-fixture",
   });
   expect(process.env.NEXT_OTEL_VERBOSE).toBe("1");
   for (const event of events) {

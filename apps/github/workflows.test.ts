@@ -56,7 +56,7 @@ it("opts only protected manual main Test into the published Collector action", (
     /QUANTILE_OTLP_INGEST_|get-secretmanager-secrets/,
   );
   expect(workflow).toContain(
-    "quantile-co/factory/.github/actions/otel@ac68f2d8ea763f3957bf524af86d26e412b65b6f",
+    "quantile-co/factory/.github/actions/otel@6be9414260216afaf5315d5ec03c2f151eef14b4",
   );
   expect(workflow).not.toContain("pnpm otel");
   for (const phase of ["check", "build", "plan", "apply"])
@@ -92,5 +92,5 @@ it("starts the job-identity Collector before the workload", () => {
   expect(flake).toContain('otelJobs = [ "test" ];');
   expect(flake).not.toMatch(/CLICKSTACK_API_KEY|CLICKSTACK_OTLP_ENDPOINT/);
   for (const name of ["BINARY", "CONFIG", "DOCKER_CONFIG", "JOURNAL_CONFIG"])
-    expect(flake).toContain(`export OTEL_COLLECTOR_${name}=`);
+    expect(flake).toContain(`export QUANTILE_OTELCOL_${name}=`);
 });
