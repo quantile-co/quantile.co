@@ -1,7 +1,8 @@
 import { ProxyTracerProvider, trace } from "@opentelemetry/api";
 import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
-import { managedConfig } from "@quantile-co/factory-otel/config";
-import { OTLPHttpJsonTraceExporter, registerOTel } from "@vercel/otel";
+import { collectorEndpoint } from "@quantile-co/factory-otel/config";
+import { registerOTel } from "@vercel/otel";
+import { googleTraceExporter } from "./google-trace-exporter";
 
 const state = globalThis as typeof globalThis & {
   __quantileTracingRegistration?: Promise<void>;
@@ -10,8 +11,8 @@ const state = globalThis as typeof globalThis & {
 export async function registerTracing() {
   state.__quantileTracingRegistration ??= (async () => {
     try {
-      const config = managedConfig();
-      if (!config) return;
+      const endpoint = collectorEndpoint();
+      if (!endpoint) return;
       // biome-ignore lint/style/noProcessEnv: server-only runtime configuration.
       const env = process.env;
       if (
@@ -29,12 +30,7 @@ export async function registerTracing() {
         throw new Error("A tracing provider is already registered");
       // Start exporting on span end; request-based Cloud Run can suspend CPU
       // before a batch timer runs. Delivery remains best-effort, not guaranteed.
-      const processor = new SimpleSpanProcessor(
-        new OTLPHttpJsonTraceExporter({
-          url: `${config.endpoint}/v1/traces`,
-          headers: { authorization: `Bearer ${config.key}` },
-        }),
-      );
+      const processor = new SimpleSpanProcessor(googleTraceExporter(endpoint));
       env.NEXT_OTEL_VERBOSE ??= "1";
       registerOTel({
         serviceName: "quantile.co-web",

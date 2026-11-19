@@ -26,7 +26,6 @@ beforeEach(() => {
   vi.stubEnv("NEXT_RUNTIME", "nodejs");
   vi.stubEnv("NEXT_OTEL_VERBOSE", undefined);
   vi.stubEnv("QUANTILE_OTLP_ENDPOINT", "https://ingest.example.test:4318");
-  vi.stubEnv("QUANTILE_OTLP_INGEST_TOKEN", "synthetic-ingestion-key");
   vi.stubEnv("OTEL_EXPORTER_OTLP_HEADERS", undefined);
   vi.stubEnv("OTEL_EXPORTER_OTLP_TRACES_HEADERS", undefined);
 });
@@ -48,7 +47,7 @@ afterEach(async () => {
   vi.unstubAllEnvs();
 });
 
-it.each(["path", "partial", "headers", "trace-headers", "existing-provider"])(
+it.each(["path", "headers", "trace-headers", "existing-provider"])(
   "disables %s without replacing providers or exposing credentials",
   async (scenario) => {
     const previous = trace.getTracer("existing");
@@ -62,8 +61,6 @@ it.each(["path", "partial", "headers", "trace-headers", "existing-provider"])(
         "QUANTILE_OTLP_ENDPOINT",
         "https://ingest.example.test/private-path",
       );
-    if (scenario === "partial")
-      vi.stubEnv("QUANTILE_OTLP_INGEST_TOKEN", undefined);
     if (scenario === "headers")
       vi.stubEnv(
         "OTEL_EXPORTER_OTLP_HEADERS",
@@ -87,9 +84,41 @@ it.each(["path", "partial", "headers", "trace-headers", "existing-provider"])(
 
 it("exports intact native spans with parent correlation through the maintained serializer", async () => {
   // Intercept fetch, not the exporter or serializer; no network connection opens.
+  const audience = "https://ingest.example.test:4318";
+  const id =
+    "fixture." +
+    Buffer.from(
+      JSON.stringify({
+        aud: audience,
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      }),
+    ).toString("base64url") +
+    ".fixture";
   const transport = vi
     .spyOn(globalThis, "fetch")
-    .mockResolvedValue(new Response("{}", { status: 200 }));
+    .mockImplementation(async (url, init) => {
+      if (String(url).startsWith("http://metadata.google.internal/")) {
+        expect(new Headers(init?.headers).get("Metadata-Flavor")).toBe(
+          "Google",
+        );
+        return String(url).endsWith("/email")
+          ? new Response("site@fixture.iam.gserviceaccount.com")
+          : Response.json({ access_token: "fixture-access" });
+      }
+      if (String(url).startsWith("https://iamcredentials.googleapis.com/")) {
+        expect(new Headers(init?.headers).get("authorization")).toBe(
+          "Bearer fixture-access",
+        );
+        expect(JSON.parse(String(init?.body))).toEqual({
+          audience,
+          includeEmail: true,
+          organizationNumberIncluded: true,
+        });
+        return Response.json({ token: id });
+      }
+      expect(String(url)).toBe(audience + "/gcp/v1/traces");
+      return Response.json({});
+    });
   vi.stubEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://unrelated.example.test");
   vi.stubEnv(
     "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
@@ -128,20 +157,22 @@ it("exports intact native spans with parent correlation through the maintained s
     .end();
   root.end();
   // No forceFlush or batch timer is needed to begin export on span end.
-  await vi.waitFor(() => expect(transport).toHaveBeenCalledTimes(2));
-  const spans = transport.mock.calls.flatMap(([url, options]) => {
-    expect(String(url)).toBe("https://ingest.example.test:4318/v1/traces");
-    expect(options?.method).toBe("POST");
-    expect(new Headers(options?.headers).get("authorization")).toBe(
-      "Bearer synthetic-ingestion-key",
-    );
-    const body = String(options?.body);
-    expect(body).not.toContain("synthetic-ingestion-key");
-    return JSON.parse(body).resourceSpans.flatMap(
-      (resource: { scopeSpans: { spans: Record<string, unknown>[] }[] }) =>
-        resource.scopeSpans.flatMap((scope) => scope.spans),
-    );
-  });
+  await vi.waitFor(() => expect(transport).toHaveBeenCalledTimes(5));
+  const spans = transport.mock.calls
+    .filter(([url]) => String(url).startsWith(audience))
+    .flatMap(([url, options]) => {
+      expect(String(url)).toBe(audience + "/gcp/v1/traces");
+      expect(options?.method).toBe("POST");
+      expect(new Headers(options?.headers).get("authorization")).toBe(
+        "Bearer " + id,
+      );
+      const body = String(options?.body);
+      expect(body).not.toContain(id);
+      return JSON.parse(body).resourceSpans.flatMap(
+        (resource: { scopeSpans: { spans: Record<string, unknown>[] }[] }) =>
+          resource.scopeSpans.flatMap((scope) => scope.spans),
+      );
+    });
   expect(spans).toHaveLength(2);
   const exported = spans.find(
     (span: { name: string }) => span.name === "GET /brand?fixture=query",

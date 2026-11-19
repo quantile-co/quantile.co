@@ -51,11 +51,12 @@ it("opts only protected manual main Test into the published Collector action", (
   expect(workflow).toContain(
     "QUANTILE_OTLP_ENDPOINT: ${{ vars.QUANTILE_OTLP_ENDPOINT }}",
   );
-  expect(workflow).toContain(
-    "QUANTILE_OTLP_INGEST_TOKEN: ${{ steps.otel-token.outputs.token }}",
+  expect(workflow).toContain("id-token: write");
+  expect(workflow).not.toMatch(
+    /QUANTILE_OTLP_INGEST_|get-secretmanager-secrets/,
   );
   expect(workflow).toContain(
-    "quantile-co/factory/.github/actions/otel@96b659232f4b92620433d21a6eb06f9209e5a487",
+    "quantile-co/factory/.github/actions/otel@f2de4c22cd6e8a85ff14759e73017e7de712f904",
   );
   expect(workflow).not.toContain("pnpm otel");
   for (const phase of ["check", "build", "plan", "apply"])
@@ -68,16 +69,11 @@ it("opts only protected manual main Test into the published Collector action", (
   expect(devDependencies["@quantile-co/factory-otel"]).toBeUndefined();
 });
 
-it("authenticates before starting the Collector and keeps its token out of the workload", () => {
+it("starts the job-identity Collector before the workload", () => {
   const workflow = read(".github/workflows/test.yaml");
   const markers = [
     "- name: Check out repository",
-    "- name: Authenticate to Google Cloud",
-    "- name: Read Collector ingestion token",
-    "secrets: token:${{ vars.QUANTILE_OTLP_INGEST_SECRET }}",
-    "export_to_environment: false",
     "- name: Start OpenTelemetry Collector",
-    "QUANTILE_OTLP_INGEST_TOKEN:",
     'direnv="$(nix build',
     '"$direnv" allow .',
     '"$direnv" exec . pnpm install --frozen-lockfile',

@@ -24,7 +24,6 @@ beforeEach(() => {
   vi.stubEnv("NEXT_RUNTIME", "nodejs");
   vi.stubEnv("NEXT_OTEL_VERBOSE", undefined);
   vi.stubEnv("QUANTILE_OTLP_ENDPOINT", "https://ingest.example.invalid");
-  vi.stubEnv("QUANTILE_OTLP_INGEST_TOKEN", "fixture-key");
   vi.stubEnv("OTEL_EXPORTER_OTLP_HEADERS", undefined);
   vi.stubEnv("OTEL_EXPORTER_OTLP_TRACES_HEADERS", undefined);
   native.flush.mockResolvedValue();
@@ -73,7 +72,6 @@ it("registers the native framework once without projection or duplicate fetch in
 
 it("remains disabled without ingestion configuration", async () => {
   vi.stubEnv("QUANTILE_OTLP_ENDPOINT", undefined);
-  vi.stubEnv("QUANTILE_OTLP_INGEST_TOKEN", undefined);
   await register();
   expect(native.register).not.toHaveBeenCalled();
   for (const event of events)

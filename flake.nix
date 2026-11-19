@@ -2,7 +2,7 @@
   description = "Quantile marketing site";
 
   inputs = {
-    factory.url = "github:quantile-co/factory/240fbe898be33d376a092e734bebc3e56a464710";
+    factory.url = "github:quantile-co/factory/e126fbaa67fbea638ce515c4efdce5addfc05f76";
     nixpkgs.follows = "factory/nixpkgs";
   };
 
@@ -33,7 +33,7 @@
             github.workflows = {
               layers = [ "infrastructure" ];
               otelJobs = [ "test" ];
-              otelActionRef = "96b659232f4b92620433d21a6eb06f9209e5a487";
+              otelActionRef = "f2de4c22cd6e8a85ff14759e73017e7de712f904";
               hindsight = true;
               build.layers = [ "application" ];
             };
