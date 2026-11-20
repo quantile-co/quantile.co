@@ -30,6 +30,9 @@ concurrency:
   group: source-release
   cancel-in-progress: false
 
+env:
+  OTEL_RESOURCE_ATTRIBUTES: service.namespace=${{ github.repository_owner }},service.name=${{ github.event.repository.name }}
+
 jobs:
   application:
     name: Application
