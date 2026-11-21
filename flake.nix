@@ -30,8 +30,8 @@
         {
           quantile-co.factory = {
             pi.settingsFile = pkgs.fetchurl {
-              url = "https://raw.githubusercontent.com/quantile-co/factory/e8a64bdbe209f8f3f5677ff8aba73f2c57ad6eed/etc/pi/settings.json";
-              hash = "sha256-Zbv2+aAgT1TT+hE9JW77BtNenwKeodJU3KrfFH20OrA=";
+              url = "https://raw.githubusercontent.com/quantile-co/factory/1ead65dc2696e4d6647be54ab11124f3a8897e27/etc/pi/settings.json";
+              hash = "sha256-FWmgtrJoSpNpp28SHFqsjn32XqZdjgawKeW2qaOePA0=";
             };
             hindsight.bankId = "quantile-co--quantile-co";
             github.workflows = {
