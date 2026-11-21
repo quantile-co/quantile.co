@@ -29,6 +29,10 @@
         in
         {
           quantile-co.factory = {
+            pi.settingsFile = pkgs.fetchurl {
+              url = "https://raw.githubusercontent.com/quantile-co/factory/e8a64bdbe209f8f3f5677ff8aba73f2c57ad6eed/etc/pi/settings.json";
+              hash = "sha256-Zbv2+aAgT1TT+hE9JW77BtNenwKeodJU3KrfFH20OrA=";
+            };
             hindsight.bankId = "quantile-co--quantile-co";
             github.workflows = {
               layers = [ "infrastructure" ];
