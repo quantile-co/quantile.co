@@ -1,9 +1,12 @@
 { pkgs, factory }:
+let
+  base = builtins.fromJSON (builtins.readFile factory.biome.configFile);
+in
 {
   configFile = factory.biome.formatFile "biome.json" (
     pkgs.writeText "biome.json" (
       builtins.toJSON (
-        pkgs.lib.recursiveUpdate (builtins.fromJSON (builtins.readFile factory.biome.configFile)) {
+        pkgs.lib.recursiveUpdate base {
           files.includes = [
             "**"
             "!node_modules"
@@ -12,6 +15,8 @@
             "!build"
             "!!.pi/skills"
             "!!.semgrep"
+            "!!.biome"
+            "!**/*.{yml,yaml}"
           ];
           formatter.indentWidth = 2;
           linter = {
@@ -23,7 +28,7 @@
             };
           };
           assist.actions.source.organizeImports = "on";
-          overrides = [
+          overrides = base.overrides ++ [
             {
               includes = [ "apps/web/components/ThemeSwitcher/ThemeSwitcher.module.css" ];
               linter.rules.suspicious.noUnknownAtRules = {

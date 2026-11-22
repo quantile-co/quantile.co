@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "files": {
     "ignoreUnknown": true,
@@ -10,7 +10,9 @@
       "!dist",
       "!build",
       "!!.pi/skills",
-      "!!.semgrep"
+      "!!.semgrep",
+      "!!.biome",
+      "!**/*.{yml,yaml}"
     ]
   },
   "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2 },
@@ -18,12 +20,50 @@
     "domains": { "next": "recommended", "react": "recommended" },
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "style": { "noProcessEnv": "error" },
       "suspicious": { "noImportCycles": "error" }
     }
   },
   "overrides": [
+    {
+      "includes": ["**/*.{ts,tsx,mts,cts}"],
+      "linter": {
+        "rules": {
+          "complexity": { "noBannedTypes": "error" },
+          "nursery": {
+            "noMisleadingReturnType": "error",
+            "noUselessTypeAssertion": "error",
+            "useExhaustiveSwitchCases": {
+              "level": "error",
+              "options": { "requireExplicitCase": true }
+            },
+            "useStrictBooleanExpressions": "error"
+          },
+          "style": {
+            "noEnum": "error",
+            "noInferrableTypes": "error",
+            "noNamespace": "error",
+            "noParameterProperties": "error",
+            "useAsConstAssertion": "error",
+            "useReadonlyClassProperties": "error",
+            "useReduceTypeParameter": "error"
+          },
+          "suspicious": {
+            "noExplicitAny": "error",
+            "noExtraNonNullAssertion": "error",
+            "noNonNullAssertedOptionalChain": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/*.{ts,tsx,mts,cts}",
+        "!**/*.{test,spec}.{ts,tsx,mts,cts}"
+      ],
+      "linter": { "rules": { "nursery": { "noUnsafeReturn": "error" } } }
+    },
     {
       "includes": [
         "apps/web/components/ThemeSwitcher/ThemeSwitcher.module.css"
@@ -70,6 +110,15 @@
           }
         }
       }
+    }
+  ],
+  "plugins": [
+    {
+      "includes": [
+        "**/*.{ts,tsx,mts,cts}",
+        "!**/*.{test,spec}.{ts,tsx,mts,cts}"
+      ],
+      "path": "./.biome/no-literal-type-assertions.grit"
     }
   ],
   "vcs": { "clientKind": "git", "enabled": true, "useIgnoreFile": true }

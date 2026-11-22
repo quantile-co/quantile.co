@@ -31,6 +31,10 @@
     "check": {
       "cache": false
     },
+    "@quantile-co/quantile.co-repo-cli#check": {
+      "cache": false,
+      "passThroughEnv": ["SONAR_HOST_URL", "SONAR_TOKEN"]
+    },
     "fix": {
       "cache": false
     },

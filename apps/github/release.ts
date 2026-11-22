@@ -4,13 +4,19 @@ import { setTimeout } from "node:timers/promises";
 import { promisify } from "node:util";
 import { CommandFailure } from "@quantile-co/factory-github";
 
+function object(value: unknown): Record<string, unknown> {
+  return value !== null && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
 export async function publishRelease(
   env: NodeJS.ProcessEnv,
   signal: AbortSignal,
 ) {
   const required = (name: string) => {
     const value = env[name];
-    if (!value) throw new Error(`Missing ${name}`);
+    if (value === undefined || value === "") throw new Error(`Missing ${name}`);
     return value;
   };
   required("GH_TOKEN");
@@ -45,7 +51,8 @@ export async function publishRelease(
     } catch (error) {
       signal.throwIfAborted();
       const failure = error as ExecFileException & { stderr?: string };
-      if (failure.stderr) console.error(failure.stderr.trim());
+      if (failure.stderr !== undefined && failure.stderr !== "")
+        console.error(failure.stderr.trim());
       throw new CommandFailure(
         typeof failure.code === "number" ? failure.code : 1,
         `${command} failed`,
@@ -54,25 +61,31 @@ export async function publishRelease(
   };
   const git = (...args: string[]) => execute("git", args);
   const gh = (...args: string[]) => execute("gh", args);
-  const api = async (path: string) =>
-    JSON.parse(await gh("api", `repos/${repository}/${path}`));
+  const api = async (path: string): Promise<unknown> => {
+    const response: unknown = JSON.parse(
+      await gh("api", `repos/${repository}/${path}`),
+    );
+    return response;
+  };
   if ((await git("rev-parse", "HEAD")) !== sha)
     throw new Error("Candidate checkout differs from reviewed SHA");
-  const checked = await api(`actions/runs/${check}`);
+  const checked = object(await api(`actions/runs/${check}`));
+  const attempt = checked.run_attempt;
   if (
-    checked.repository?.full_name !== repository ||
-    checked.head_repository?.full_name !== repository ||
+    object(checked.repository).full_name !== repository ||
+    object(checked.head_repository).full_name !== repository ||
     checked.path !== ".github/workflows/check.yaml" ||
     checked.event !== "push" ||
     checked.head_sha !== sha ||
     checked.status !== "completed" ||
     checked.conclusion !== "success" ||
-    !Number.isSafeInteger(checked.run_attempt) ||
-    checked.run_attempt <= 0
+    typeof attempt !== "number" ||
+    !Number.isSafeInteger(attempt) ||
+    attempt <= 0
   )
     throw new Error("Check does not qualify the reviewed source");
-  const jobs = await api(
-    `actions/runs/${check}/attempts/${checked.run_attempt}/jobs?per_page=100`,
+  const jobs = object(
+    await api(`actions/runs/${check}/attempts/${attempt}/jobs?per_page=100`),
   );
   if (
     !Array.isArray(jobs.jobs) ||
@@ -85,10 +98,10 @@ export async function publishRelease(
     )
   )
     throw new Error("Check attempt has no successful exact-source All job");
-  const comparison = await api(`compare/${sha}...main`);
+  const comparison = object(await api(`compare/${sha}...main`));
   if (
-    !["ahead", "identical"].includes(comparison.status) ||
-    comparison.merge_base_commit?.sha !== sha
+    (comparison.status !== "ahead" && comparison.status !== "identical") ||
+    object(comparison.merge_base_commit).sha !== sha
   )
     throw new Error("Reviewed source is not on main ancestry");
   // Failed API reads are errors, never evidence that a tag or draft is absent.
@@ -154,7 +167,8 @@ export async function publishRelease(
     ".databaseId",
   );
   if (!/^[1-9][0-9]*$/.test(id)) throw new Error("Invalid release identity");
-  const verify = (release: Record<string, unknown>, draft: boolean) => {
+  const verify = (response: unknown, draft: boolean) => {
+    const release = object(response);
     if (
       release.id !== Number(id) ||
       release.name !== version ||
@@ -172,7 +186,7 @@ export async function publishRelease(
   let published: Record<string, unknown> | undefined;
   // Retry reads only, never publication writes.
   for (let attempt = 0; attempt < 12; attempt++) {
-    const release = await api(`releases/${id}`);
+    const release = object(await api(`releases/${id}`));
     if (release.draft === false && release.immutable === true) {
       published = release;
       break;
@@ -184,8 +198,9 @@ export async function publishRelease(
       "Immutability verification failed; inspect before proceeding",
     );
   verify(published, false);
-  const tag = await api(`git/ref/tags/${version}`);
-  if (tag.object?.type !== "commit" || tag.object?.sha !== sha)
+  const tag = object(await api(`git/ref/tags/${version}`));
+  const target = object(tag.object);
+  if (target.type !== "commit" || target.sha !== sha)
     throw new Error("Published tag differs from reviewed source");
   await appendFile(
     summary,

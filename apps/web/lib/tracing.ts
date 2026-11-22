@@ -107,12 +107,12 @@ export async function registerTracing() {
   state.__quantileTracingRegistration ??= (async () => {
     try {
       const endpoint = collectorEndpoint();
-      if (!endpoint) return;
+      if (endpoint === undefined || endpoint === "") return;
       // biome-ignore lint/style/noProcessEnv: server-only runtime configuration.
       const env = process.env;
       if (
-        env.OTEL_EXPORTER_OTLP_HEADERS ||
-        env.OTEL_EXPORTER_OTLP_TRACES_HEADERS
+        (env.OTEL_EXPORTER_OTLP_HEADERS ?? "") !== "" ||
+        (env.OTEL_EXPORTER_OTLP_TRACES_HEADERS ?? "") !== ""
       )
         throw new Error("Ambiguous exporter authentication");
       // The pinned OTel 1.x API exposes its unregistered proxy. Do not let the

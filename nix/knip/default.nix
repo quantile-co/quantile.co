@@ -10,6 +10,8 @@
             ignoreDependencies = [ "tsx" ];
           };
           "." = {
+            # Semgrep runs these fixtures outside the TypeScript module graph.
+            ignore = [ ".semgrep/tests/**" ];
             ignoreDependencies = [
               "@biomejs/biome"
               "@quantile-co/factory-pi"

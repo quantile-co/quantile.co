@@ -62,6 +62,10 @@ const experience = [
 
 type ExperienceItem = (typeof experience)[number];
 
+function logoStyle(url: string): CSSProperties & { "--logo-image": string } {
+  return { "--logo-image": `url("${url}")` };
+}
+
 function CompanyMark({ company }: { company: ExperienceItem["company"] }) {
   if (company === "Google") {
     return (
@@ -82,7 +86,7 @@ function CompanyMark({ company }: { company: ExperienceItem["company"] }) {
     <span
       aria-hidden="true"
       className={classes.companyMarkImage}
-      style={{ "--logo-image": `url("${logo}")` } as CSSProperties}
+      style={logoStyle(logo)}
     />
   );
 }
@@ -106,9 +110,7 @@ function CompanyCard({ item }: { item: ExperienceItem }) {
               <span
                 aria-hidden="true"
                 className={classes.customerLogo}
-                style={
-                  { "--logo-image": `url("${customer.logo}")` } as CSSProperties
-                }
+                style={logoStyle(customer.logo)}
               />
               <span className={classes.customerName}>{customer.name}</span>
             </div>

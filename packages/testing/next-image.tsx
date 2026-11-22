@@ -12,7 +12,7 @@ export default function BrowserImage({
       alt={alt ?? ""}
       {...props}
       style={
-        fill
+        fill === true
           ? {
               ...props.style,
               position: "absolute",

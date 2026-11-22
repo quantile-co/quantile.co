@@ -3,6 +3,8 @@ import { execFileSync, spawnSync } from "node:child_process";
 const root = execFileSync("git", ["rev-parse", "--show-toplevel"], {
   encoding: "utf8",
 }).trim();
+const { SONAR_HOST_URL, SONAR_TOKEN, ...repoEnv } = process.env;
+
 function run(
   command: string,
   args: string[] = [],
@@ -10,7 +12,7 @@ function run(
 ) {
   const result = spawnSync(command, args, {
     cwd: root,
-    env: { ...process.env, ...extra },
+    env: { ...repoEnv, ...extra },
     stdio: "inherit",
   });
   if (result.error) throw result.error;
@@ -62,6 +64,7 @@ switch (action) {
       run(command, [], { TF_DIR: "tf" });
     run("pnpm", ["exec", "biome", "check", "."]);
     run("pnpm", ["exec", "knip"]);
+    run("check-sonarqube", [], { SONAR_HOST_URL, SONAR_TOKEN });
     break;
   case "fix":
     run("factory-files", ["write"]);
