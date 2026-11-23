@@ -4,10 +4,10 @@ locals {
 }
 
 module "hindsight" {
-  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/hindsight?ref=7d3121912d8a28a9ab85c7005f3ab7ff4ef9e481"
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/hindsight?ref=cfd80679d22a7f0c6c6c4a259f65c6d357058963"
 
   providers = {
-    restapi = restapi.hindsight
+    restful = restful.hindsight
   }
 
   bank_id = "quantile-co--quantile-co"

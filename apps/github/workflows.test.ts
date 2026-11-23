@@ -14,13 +14,13 @@ it("provisions the repository bank with ephemeral credentials only in protected 
   expect(variable).toMatch(/ephemeral\s*=\s*true/);
   expect(variable).not.toMatch(/default\s*=/);
   expect(read("tf/providers.tf")).toMatch(
-    /alias\s*=\s*"hindsight"\s+uri\s*=\s*"https:\/\/api\.hindsight\.vectorize\.io"\s+bearer_token\s*=\s*var\.hindsight_api_token/,
+    /alias\s*=\s*"hindsight"\s+base_url\s*=\s*"https:\/\/api\.hindsight\.vectorize\.io"\s+security\s*=\s*\{\s*http\s*=\s*\{\s*token\s*=\s*\{\s*token\s*=\s*var\.hindsight_api_token/,
   );
   const main = read("tf/main.tf");
   expect(main).toContain(
-    "tf/modules/project/hindsight?ref=7d3121912d8a28a9ab85c7005f3ab7ff4ef9e481",
+    "tf/modules/project/hindsight?ref=cfd80679d22a7f0c6c6c4a259f65c6d357058963",
   );
-  expect(main).toMatch(/restapi\s*=\s*restapi\.hindsight/);
+  expect(main).toMatch(/restful\s*=\s*restful\.hindsight/);
   expect(main).toMatch(/bank_id\s*=\s*"quantile-co--quantile-co"/);
   expect(main).toMatch(/name\s*=\s*"quantile-co\/quantile\.co"/);
   for (const phase of ["plan", "apply"]) {
