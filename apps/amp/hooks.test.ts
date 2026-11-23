@@ -45,6 +45,17 @@ if (${JSON.stringify(tool)} === "pnpm" && args.join(" ") === process.env.FAIL_CO
       );
       chmodSync(path, 0o755);
     }
+    const bootstrap = spawnSync(
+      "bash",
+      [
+        "-c",
+        'strict_env() { set -eu; }; source_env_if_exists() { :; }; use() { printf %s "$NIX_CONFIG"; }; source "$1"',
+        "fixture",
+        join(root, ".envrc"),
+      ],
+      { encoding: "utf8", env: { PATH: `${temporary}:${process.env.PATH}` } },
+    );
+    expect(bootstrap.status, bootstrap.stderr).toBe(0);
     for (const phase of ["setup", "resume"]) {
       const invoke = (orb: string, failCommand = "") =>
         spawnSync("bash", [join(root, ".agents", phase)], {
@@ -69,16 +80,7 @@ if (${JSON.stringify(tool)} === "pnpm" && args.join(" ") === process.env.FAIL_CO
         .map((line) => JSON.parse(line));
       const nix = calls.filter((call) => call.tool === "nix");
       expect(nix.every((call) => !call.endpoint && !call.docker)).toBe(true);
-      for (const prefix of [
-        "extra-substituters",
-        "extra-trusted-public-keys",
-      ]) {
-        const expected = readFileSync(join(root, ".envrc"), "utf8")
-          .split("\n")
-          .find((line) => line.startsWith(prefix))
-          ?.replace(/"$/, "");
-        expect(nix.at(-1).config).toContain(expected);
-      }
+      expect(nix.at(-1).config).toBe(bootstrap.stdout);
       if (phase === "resume") {
         expect(calls.at(-1)).toMatchObject({
           tool: "pnpm",
