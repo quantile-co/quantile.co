@@ -2,7 +2,7 @@
   description = "Quantile marketing site";
 
   inputs = {
-    factory.url = "github:quantile-co/factory/31ab079ad923e7f2cd78eb02c950e432d25b7065";
+    factory.url = "github:quantile-co/factory/fb895afe4c87b59b1525b4ab912ca87d7e923b63";
     nixpkgs.follows = "factory/nixpkgs";
   };
 
@@ -46,11 +46,8 @@
               shellHook = lib.concatStringsSep "\n" [
                 factory.files.shellHook
                 factory.hindsight.shellHook
+                factory.otelcol-contrib.shellHook
                 ''
-                  export QUANTILE_OTELCOL_BINARY="${factory.otelcol-contrib.package}/bin/otelcol-contrib"
-                  export QUANTILE_OTELCOL_CONFIG="${factory.otelcol-contrib.hostConfigFile}"
-                  export QUANTILE_OTELCOL_DOCKER_CONFIG="${factory.otelcol-contrib.dockerConfigFile}"
-                  export QUANTILE_OTELCOL_JOURNAL_CONFIG="${factory.otelcol-contrib.journalConfigFile}"
                   export NEXT_TELEMETRY_DISABLED=1
                   export PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="${factory.playwright.withVersion (builtins.fromJSON (builtins.readFile ./apps/web/package.json)).devDependencies.playwright}/bin/chromium-headless-shell"
                 ''
