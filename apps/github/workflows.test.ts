@@ -43,7 +43,7 @@ it("provisions the repository bank with ephemeral credentials only in protected 
 it("runs the workload on the managed runner without a per-job collector", () => {
   const workflow = read(".github/workflows/test.yaml");
   expect(workflow).toContain(
-    "runs-on: namespace-profile-quantile-4x8;tailscale.spec=quantile",
+    "runs-on: namespace-profile-factory-4x8;tailscale.spec=quantile",
   );
   expect(workflow).toContain('"$direnv" exec . pnpm run github:test');
   expect(workflow).not.toMatch(/QUANTILE_OTLP_|actions\/otel@|id-token: write/);
