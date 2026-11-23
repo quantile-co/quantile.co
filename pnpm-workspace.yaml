@@ -9,7 +9,6 @@ minimumReleaseAgeExclude:
   - '@quantile-co/factory-amp@0.3.0'
   - '@quantile-co/factory-github@0.1.0'
   - '@quantile-co/factory-pi@0.1.11'
-  - '@quantile-co/factory-otel@0.4.0'
 
 allowBuilds:
   esbuild: false

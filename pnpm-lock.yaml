@@ -234,9 +234,6 @@ importers:
       '@opentelemetry/sdk-trace-base':
         specifier: 2.12.1
         version: 2.12.1(@opentelemetry/api@1.9.1)
-      '@quantile-co/factory-otel':
-        specifier: 0.4.0
-        version: 0.4.0
       '@tabler/icons-react':
         specifier: 3.49.0
         version: 3.49.0(react@19.3.1)
@@ -1554,10 +1551,6 @@ packages:
 
   '@quantile-co/factory-otel@0.3.0':
     resolution: {integrity: sha512-5kUkJ6qISrpjCkUUaGATaC2ZiyMGoxQyy0lIcXQKhpE+8uhYB2QwpHzLYFVirTL5aVGKaLsiW7352JW5lZlSrQ==}
-    engines: {node: '>=24'}
-
-  '@quantile-co/factory-otel@0.4.0':
-    resolution: {integrity: sha512-ZEN0C3RWea7soto/q1MzuH2Ec0ZGZvDIkC9M1sNqSHFARHFJppBGZigtMa/A/OWR8i5pscBCJvxtVFgWHGFUXw==}
     engines: {node: '>=24'}
 
   '@quantile-co/factory-pi@0.1.11':
@@ -4069,8 +4062,6 @@ snapshots:
       '@opentelemetry/exporter-trace-otlp-http': 0.223.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.12.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace': 2.12.1(@opentelemetry/api@1.9.1)
-
-  '@quantile-co/factory-otel@0.4.0': {}
 
   '@quantile-co/factory-pi@0.1.11':
     dependencies:

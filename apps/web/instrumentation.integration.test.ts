@@ -25,7 +25,10 @@ beforeEach(() => {
   registration = vi.spyOn(trace, "setGlobalTracerProvider");
   vi.stubEnv("NEXT_RUNTIME", "nodejs");
   vi.stubEnv("NEXT_OTEL_VERBOSE", undefined);
-  vi.stubEnv("QUANTILE_OTLP_ENDPOINT", "https://ingest.example.test:4318");
+  vi.stubEnv(
+    "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
+    "https://ingest.example.test:4318/otel/v1/traces",
+  );
   vi.stubEnv("OTEL_EXPORTER_OTLP_HEADERS", undefined);
   vi.stubEnv("OTEL_EXPORTER_OTLP_TRACES_HEADERS", undefined);
 });
@@ -58,8 +61,8 @@ it.each(["path", "headers", "trace-headers", "existing-provider"])(
     const diagnostics = vi.spyOn(console, "error").mockImplementation(() => {});
     if (scenario === "path")
       vi.stubEnv(
-        "QUANTILE_OTLP_ENDPOINT",
-        "https://ingest.example.test/private-path",
+        "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
+        "http://ingest.example.test/private-path",
       );
     if (scenario === "headers")
       vi.stubEnv(
@@ -116,7 +119,7 @@ it("exports intact native spans with parent correlation through the maintained s
         });
         return Response.json({ token: id });
       }
-      expect(String(url)).toBe(audience + "/gcp/v1/traces");
+      expect(String(url)).toBe(audience + "/otel/v1/traces");
       return Response.json({});
     });
   vi.stubEnv("K_SERVICE", "application");
@@ -126,10 +129,6 @@ it("exports intact native spans with parent correlation through the maintained s
     "service.namespace=quantile-q1,service.name=quantile.co",
   );
   vi.stubEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://unrelated.example.test");
-  vi.stubEnv(
-    "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
-    "https://unrelated.example.test/traces",
-  );
   await register();
   const tracer = trace.getTracer("fixture-scope");
   const root = tracer.startSpan("GET /brand?fixture=query", {
@@ -167,7 +166,7 @@ it("exports intact native spans with parent correlation through the maintained s
   const spans = transport.mock.calls
     .filter(([url]) => String(url).startsWith(audience))
     .flatMap(([url, options]) => {
-      expect(String(url)).toBe(audience + "/gcp/v1/traces");
+      expect(String(url)).toBe(audience + "/otel/v1/traces");
       expect(options?.method).toBe("POST");
       expect(new Headers(options?.headers).get("authorization")).toBe(
         "Bearer " + id,

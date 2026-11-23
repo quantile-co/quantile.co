@@ -3,7 +3,6 @@ import {
   SimpleSpanProcessor,
   type SpanExporter,
 } from "@opentelemetry/sdk-trace-base";
-import { collectorEndpoint } from "@quantile-co/factory-otel/config";
 import { OTLPHttpJsonTraceExporter, registerOTel } from "@vercel/otel";
 
 const account =
@@ -20,7 +19,8 @@ async function request(url: string, init: RequestInit) {
   return response;
 }
 
-async function mint(audience: string) {
+async function mint(endpoint: URL) {
+  const audience = endpoint.origin;
   const headers = { "Metadata-Flavor": "Google" };
   const [email, access] = await Promise.all([
     request(account + "/email", { headers }).then((r) => r.text()),
@@ -64,7 +64,8 @@ async function mint(audience: string) {
   return {
     until: claims.exp * 1000 - 60_000,
     exporter: new OTLPHttpJsonTraceExporter({
-      url: audience + "/gcp/v1/traces",
+      url: endpoint.href,
+      timeoutMillis: 5000,
       headers: { authorization: `Bearer ${token}` },
     }),
   };
@@ -72,14 +73,14 @@ async function mint(audience: string) {
 
 // Refresh on demand (Cloud Run may suspend CPU between requests). Coalesce
 // concurrent span exports and never fall back to an unauthenticated request.
-function googleTraceExporter(audience: string): SpanExporter {
+function googleTraceExporter(endpoint: URL): SpanExporter {
   let cached: Awaited<ReturnType<typeof mint>> | undefined;
   let pending: ReturnType<typeof mint> | undefined;
   return {
     export(spans, callback) {
       if (cached && cached.until > Date.now())
         return cached.exporter.export(spans, callback);
-      pending ??= mint(audience)
+      pending ??= mint(endpoint)
         .then((entry) => (cached = entry))
         .finally(() => {
           pending = undefined;
@@ -103,11 +104,18 @@ const state = globalThis as typeof globalThis & {
   __quantileTracingRegistration?: Promise<void>;
 };
 
-export async function registerTracing() {
+export async function registerTracing(endpoint: string) {
   state.__quantileTracingRegistration ??= (async () => {
     try {
-      const endpoint = collectorEndpoint();
-      if (endpoint === undefined || endpoint === "") return;
+      const url = new URL(endpoint);
+      if (
+        url.protocol !== "https:" ||
+        url.username ||
+        url.password ||
+        url.search ||
+        url.hash
+      )
+        throw new Error("Invalid trace endpoint");
       // biome-ignore lint/style/noProcessEnv: server-only runtime configuration.
       const env = process.env;
       if (
@@ -125,7 +133,7 @@ export async function registerTracing() {
         throw new Error("A tracing provider is already registered");
       // Start exporting on span end; request-based Cloud Run can suspend CPU
       // before a batch timer runs. Delivery remains best-effort, not guaranteed.
-      const processor = new SimpleSpanProcessor(googleTraceExporter(endpoint));
+      const processor = new SimpleSpanProcessor(googleTraceExporter(url));
       env.NEXT_OTEL_VERBOSE ??= "1";
       const runtime = Object.fromEntries(
         ["K_SERVICE", "K_REVISION", "K_CONFIGURATION"]

@@ -42,6 +42,8 @@ and provider mounting, omitting analytics. Fathom remains covered by its browser
 tests, not a visual story. Theme, responsive and interaction stories are not a
 complete visual regression baseline; no hosted visual service is configured.
 
+Server tracing uses the full `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` URL when supplied. Deployment packaging and endpoint selection do not belong in this repository.
+
 ## Writing audit MCP servers
 
 [.pi/mcp.json](.pi/mcp.json) shares the official hosted Pangram and Copyleaks
