@@ -200,8 +200,8 @@ importers:
   apps/amp:
     dependencies:
       '@quantile-co/factory-amp':
-        specifier: 0.3.1
-        version: 0.3.1
+        specifier: 0.3.2
+        version: 0.3.2
       commander:
         specifier: 15.1.0
         version: 15.1.0
@@ -1547,8 +1547,8 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@quantile-co/factory-amp@0.3.1':
-    resolution: {integrity: sha512-3nXY7lQLnSSI59Y2kgafietpu3g84cfYVaz2BKS3YXLkn7EZ4LDJt5yPpsBrhnf2fQknjbEstiJs/gFpOy1Aqw==}
+  '@quantile-co/factory-amp@0.3.2':
+    resolution: {integrity: sha512-DGJp0VOAeJ6Zwx7ltD2k9iRKEzYI3jTlsIDK5cTk6392Sr2Oe0qA19Sb1Ipse8JoQm2VO4Jk2CJcog4LjKfvag==}
     engines: {node: '>=24'}
 
   '@quantile-co/factory-github@0.1.1':
@@ -4067,7 +4067,7 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@quantile-co/factory-amp@0.3.1':
+  '@quantile-co/factory-amp@0.3.2':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@quantile-co/factory-otel': 0.5.0
