@@ -1,4 +1,6 @@
 # Remove after the protected handoff has verified the original bank ID.
+# OpenTofu resolves this alias from the old state address, not from source.
+# tflint-ignore: terraform_unused_declarations
 provider "restapi" {
   alias        = "hindsight"
   uri          = "https://api.hindsight.vectorize.io"
