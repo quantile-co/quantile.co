@@ -170,8 +170,8 @@ importers:
         specifier: 2.6.5
         version: 2.6.5
       '@quantile-co/factory-pi':
-        specifier: 0.1.11
-        version: 0.1.11
+        specifier: 0.1.12
+        version: 0.1.12
       '@types/node':
         specifier: 26.6.5
         version: 26.6.5
@@ -1553,8 +1553,8 @@ packages:
     resolution: {integrity: sha512-5kUkJ6qISrpjCkUUaGATaC2ZiyMGoxQyy0lIcXQKhpE+8uhYB2QwpHzLYFVirTL5aVGKaLsiW7352JW5lZlSrQ==}
     engines: {node: '>=24'}
 
-  '@quantile-co/factory-pi@0.1.11':
-    resolution: {integrity: sha512-M7RZPYueKqm/0DM/6Z10gRfQigPMlgRlytaDUjRrqdhFFJzzb6Dyhc77tiM1Wrl/iqqeEiw+47cKyev3yP7x1g==}
+  '@quantile-co/factory-pi@0.1.12':
+    resolution: {integrity: sha512-4T37+Y+WFezyOrOug0f/AhKA0YaGk6xFbPqKzFnYeKXGh+nuHO4Sq8mQz+5SjJ9rQg/b0GNVwSMfjo4IFMK8fQ==}
     engines: {node: '>=24'}
     peerDependencies:
       '@earendil-works/pi-ai': '*'
@@ -4063,7 +4063,7 @@ snapshots:
       '@opentelemetry/resources': 2.12.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace': 2.12.1(@opentelemetry/api@1.9.1)
 
-  '@quantile-co/factory-pi@0.1.11':
+  '@quantile-co/factory-pi@0.1.12':
     dependencies:
       '@langfuse/tracing': 6.1.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/api': 1.9.1
