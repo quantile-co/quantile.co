@@ -40,57 +40,11 @@ it("provisions the repository bank with ephemeral credentials only in protected 
     );
 });
 
-it("opts only protected manual main Test into the published Collector action", () => {
+it("runs the workload on the managed runner without a per-job collector", () => {
   const workflow = read(".github/workflows/test.yaml");
-  expect(workflow).toContain("on:\n  workflow_dispatch:");
   expect(workflow).toContain(
-    "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
+    "runs-on: namespace-profile-quantile-4x8;tailscale.spec=quantile",
   );
-  expect(workflow).toContain("    environment: prod");
-  expect(workflow).toContain("    runs-on: namespace-profile-quantile-4x8");
-  expect(workflow).toContain(
-    "QUANTILE_OTLP_ENDPOINT: ${{ vars.QUANTILE_OTLP_ENDPOINT }}",
-  );
-  expect(workflow).toContain("id-token: write");
-  expect(workflow).not.toMatch(
-    /QUANTILE_OTLP_INGEST_|get-secretmanager-secrets/,
-  );
-  expect(workflow).toContain(
-    "quantile-co/factory/.github/actions/otel@fc58a07d1184b9216f0a27e5b36bec80cf5a6b0b",
-  );
-  expect(workflow).not.toContain("pnpm otel");
-  for (const phase of ["check", "build", "plan", "apply"])
-    expect(read(`.github/workflows/${phase}.yaml`)).not.toMatch(
-      /CLICKSTACK_|QUANTILE_OTLP_|pnpm otel/,
-    );
-  const { scripts, devDependencies } = JSON.parse(read("package.json"));
-  expect(scripts.otel).toBeUndefined();
-  expect(scripts["github:test"]).toBe("pnpm test");
-  expect(devDependencies["@quantile-co/factory-otel"]).toBeUndefined();
-});
-
-it("starts the job-identity Collector before the workload", () => {
-  const workflow = read(".github/workflows/test.yaml");
-  const markers = [
-    "- name: Check out repository",
-    "- name: Start OpenTelemetry Collector",
-    'direnv="$(nix build',
-    '"$direnv" allow .',
-    '"$direnv" exec . pnpm install --frozen-lockfile',
-    '"$direnv" exec . pnpm run github:test',
-  ];
-  let previous = -1;
-  for (const marker of markers) {
-    const index = workflow.indexOf(marker);
-    expect(index).toBeGreaterThan(previous);
-    previous = index;
-  }
-  expect(workflow.split("- name: Run checks, then tests")[1]).not.toContain(
-    "QUANTILE_OTLP_",
-  );
-  const flake = read("flake.nix");
-  expect(flake).toContain('otelJobs = [ "test" ];');
-  expect(flake).not.toMatch(/CLICKSTACK_API_KEY|CLICKSTACK_OTLP_ENDPOINT/);
-  for (const name of ["BINARY", "CONFIG", "DOCKER_CONFIG", "JOURNAL_CONFIG"])
-    expect(flake).toContain(`export QUANTILE_OTELCOL_${name}=`);
+  expect(workflow).toContain('"$direnv" exec . pnpm run github:test');
+  expect(workflow).not.toMatch(/QUANTILE_OTLP_|actions\/otel@|id-token: write/);
 });
