@@ -10,6 +10,10 @@ minimumReleaseAgeExclude:
   - '@quantile-co/factory-pi@0.1.12'
   - '@quantile-co/factory-otel@0.5.0'
 
+# Remove when the Storybook docgen plugin updates its glob dependency.
+overrides:
+  '@joshwooding/vite-plugin-react-docgen-typescript@0.7.0>glob': 14.0.6
+
 allowBuilds:
   esbuild: false
   sharp: true
