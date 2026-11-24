@@ -38,7 +38,7 @@ module "gh" {
 }
 
 module "gcp" {
-  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/gcp?ref=8aaa95a7e46377bbc6b56b5855ab38ba8d2903fa"
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/gcp?ref=e1441f06d03e20fee36ede23a32c7bcc4d2446e2"
 
   project_prefix    = "quantile-co"
   folder_id         = "145094075590"
