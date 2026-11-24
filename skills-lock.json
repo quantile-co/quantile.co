@@ -1,136 +1,149 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "accessibility": {
       "source": "addyosmani/web-quality-skills",
       "ref": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
+      "commit": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
       "sourceType": "github",
       "skillPath": "skills/accessibility/SKILL.md",
-      "computedHash": "612f913bcb03f0787b103c848cd7664b676a9aaf31f25d3270cc69cf5caaab95",
+      "computedHash": "c668809f5df57feb87cc06f1bc37fb340d1d92e26bacb6edbeab9258d22e76a5",
       "via": "@quantile-co/factory-pi"
     },
     "best-practices": {
       "source": "addyosmani/web-quality-skills",
       "ref": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
+      "commit": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
       "sourceType": "github",
       "skillPath": "skills/best-practices/SKILL.md",
-      "computedHash": "ca00ef2671d65a7442bc796e8744cd3d759f92c01640f2fbcab638889c494424",
+      "computedHash": "071ad7608cf92ad980330a6b1646f6bc568f5651d615e4c4a9fde225ceb9360c",
       "via": "@quantile-co/factory-pi"
     },
     "break-glass": {
       "source": "@quantile-co/factory-pi",
       "sourceType": "node_modules",
       "skillPath": "skills/break-glass/SKILL.md",
-      "version": "0.1.12",
-      "computedHash": "ba3f2e012250d479b81a91e5e25f240bda0c10d3200cc1a30a7cca17c4cfb831"
+      "version": "0.1.13",
+      "computedHash": "29013b98ff5eb912b7956a0b5f5779e24514f593d696a50b0c1390a243b26b59"
     },
     "copy-editing": {
       "source": "coreyhaines31/marketingskills",
       "ref": "6b9e9387265d9e3049258f7eae3f746d3c3ddf87",
+      "commit": "6b9e9387265d9e3049258f7eae3f746d3c3ddf87",
       "sourceType": "github",
       "skillPath": "skills/copy-editing/SKILL.md",
-      "computedHash": "d755d5546c8ccd2b6a77695230a1d54869635cbd52e53545b0ce5bd367850432",
+      "computedHash": "3b57cc771fb60bdf85c66dc54fea9600d8639e49d941f2d4fd699911e2529b81",
       "via": "."
     },
     "core-web-vitals": {
       "source": "addyosmani/web-quality-skills",
       "ref": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
+      "commit": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
       "sourceType": "github",
       "skillPath": "skills/core-web-vitals/SKILL.md",
-      "computedHash": "601b2cbb920fb0ea9814a3f11232d7883e1eb0923865218502ab1d73e9fc5172",
+      "computedHash": "de50c203aa9dafa8dee9dd8c06782e3fc610704b83c1c408e4c5ee2337c4cd2a",
       "via": "@quantile-co/factory-pi"
     },
     "day-zero-deploy": {
       "source": "@quantile-co/factory-pi",
       "sourceType": "node_modules",
       "skillPath": "skills/day-zero-deploy/SKILL.md",
-      "version": "0.1.12",
-      "computedHash": "1caf78230b8034b76478b0c70db52e2fd6007957fb9327b76d63d6fdd863422c"
+      "version": "0.1.13",
+      "computedHash": "bc4bdd9d930537ad202187f6b08fe23cfec9c87c9f5382173e7b83f36a07e402"
     },
     "deploy": {
       "source": "@quantile-co/factory-pi",
       "sourceType": "node_modules",
       "skillPath": "skills/deploy/SKILL.md",
-      "version": "0.1.12",
-      "computedHash": "a32a4a6f4f8b479ad5db763964da95187f481f6e5fe5e76f27411eeca7725b79"
+      "version": "0.1.13",
+      "computedHash": "6f133abddfb3bc7ced4ae6bbd29a9ea420d736b9fe75caf946a9515e11eddba3"
     },
     "herdr": {
       "source": "herdrdev/herdr",
       "ref": "2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01",
+      "commit": "2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01",
       "sourceType": "github",
       "skillPath": "skills/herdr/SKILL.md",
-      "computedHash": "72177e911f55467de8737174072ec6bb08e30bbf62bceabcb69678e944398b18",
+      "computedHash": "344ecec0a92a8e56ae86c2bc4cd30d94478a4fb85790e0c8de35cb7cd7ef48a9",
       "via": "@quantile-co/factory-pi"
     },
     "hindsight": {
       "source": "@quantile-co/factory-pi",
       "sourceType": "node_modules",
       "skillPath": "skills/hindsight/SKILL.md",
-      "version": "0.1.12",
-      "computedHash": "dea65b8c0b282058c9b3aacaec26df2625a120bfae96e0957d40219f456b886e"
+      "version": "0.1.13",
+      "computedHash": "39c134a6e3694d0a3a86f16379a4db5583417c7a56ed55373030b177f35cb598"
     },
     "modern-web-guidance": {
       "source": "GoogleChrome/modern-web-guidance",
       "ref": "64a6d708f5a43f2cd3fde5d4d7db3905ba1bdf65",
+      "commit": "64a6d708f5a43f2cd3fde5d4d7db3905ba1bdf65",
       "sourceType": "github",
       "skillPath": "skills/modern-web-guidance/SKILL.md",
-      "computedHash": "40c0b08c2e3103aa83002cff019fe94926cc5e64ad94adbab808736b8947d8f8",
+      "computedHash": "d9f3ceba8b5c77b12ae6f852932a349843ce086d03ce76ab5e2257e7e5acd16d",
       "via": "@quantile-co/factory-pi"
     },
     "performance": {
       "source": "addyosmani/web-quality-skills",
       "ref": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
+      "commit": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
       "sourceType": "github",
       "skillPath": "skills/performance/SKILL.md",
-      "computedHash": "ce9d36f139a1b2a6a8ac2cb222698963b8076d2dd8b41685e8e8ae589cdcf1e4",
+      "computedHash": "06902ebc4a8b91bfb8d1a99a03f186f0535b03d1a776ef751206104ef9b86c4c",
       "via": "@quantile-co/factory-pi"
     },
     "seo": {
       "source": "addyosmani/web-quality-skills",
       "ref": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
+      "commit": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
       "sourceType": "github",
       "skillPath": "skills/seo/SKILL.md",
-      "computedHash": "01a735ac18ceb15536ac40b11a5712b3ab8f78ebe94748b3ebc3afc7f58a6f2f",
+      "computedHash": "fa30e94756c5c40663f4527e8220a985393abbe3a6256e43d02589948027467e",
       "via": "@quantile-co/factory-pi"
     },
     "seo-audit": {
       "source": "coreyhaines31/marketingskills",
       "ref": "6b9e9387265d9e3049258f7eae3f746d3c3ddf87",
+      "commit": "6b9e9387265d9e3049258f7eae3f746d3c3ddf87",
       "sourceType": "github",
       "skillPath": "skills/seo-audit/SKILL.md",
-      "computedHash": "928ca75d9899be7d17d7cbfa21aee28cc2e66681b2f4e19e6c9bd2a8330daa24",
+      "computedHash": "225caa84fe9e47ee23eb94ce6e1202a3dac203dd7ccb30b7b8fdf7675833d75a",
       "via": "@quantile-co/factory-pi"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",
       "ref": "ba46938889d4e58635362fb8f618e1178ac3ec46",
+      "commit": "ba46938889d4e58635362fb8f618e1178ac3ec46",
       "sourceType": "github",
       "skillPath": "skills/web-design-guidelines/SKILL.md",
-      "computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a",
+      "computedHash": "4f68ae07187fb0d1fb78c88b503d089da4cf5a9d9625d1f2e425b1590bf96d92",
       "via": "@quantile-co/factory-pi"
     },
     "web-perf": {
       "source": "cloudflare/skills",
       "ref": "3af2c77450c91af61384887def098fbfd247bbad",
+      "commit": "3af2c77450c91af61384887def098fbfd247bbad",
       "sourceType": "github",
       "skillPath": "skills/web-perf/SKILL.md",
-      "computedHash": "72d0dd9706147e19bf3c1a36fdc02570f77685541d89d901a3a2f570824ba3cb",
+      "computedHash": "6a3d1d5c19cd30d770d7b01ea63c0736a70152b4a3894a5e12755bc9cbd62e98",
       "via": "@quantile-co/factory-pi"
     },
     "web-quality-audit": {
       "source": "addyosmani/web-quality-skills",
       "ref": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
+      "commit": "c6b06ad1285cd6b129b58455b2eec96ab6b67fa7",
       "sourceType": "github",
       "skillPath": "skills/web-quality-audit/SKILL.md",
-      "computedHash": "9be796fc70ff05cf9842327d234b019376dc1abad8d7e3c4e3ea2dab8d8d3deb",
+      "computedHash": "fed16ecc3591b557381b15f4c1659b5536f064cecea851799c2dad4668b325b4",
       "via": "@quantile-co/factory-pi"
     },
     "webapp-testing": {
       "source": "anthropics/skills",
       "ref": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "commit": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
       "sourceType": "github",
       "skillPath": "skills/webapp-testing/SKILL.md",
-      "computedHash": "ad5b1fc52807e9afa4635e59218a026b164dc58b6c3f41b0f7c644dcd6ccf572",
+      "computedHash": "48cd9a742a59250edec6db89cf081ef5465f365e2133f6d6c5e29c380b754b7d",
       "via": "@quantile-co/factory-pi"
     }
   }
