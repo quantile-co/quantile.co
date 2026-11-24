@@ -16,7 +16,7 @@ module "hindsight" {
 
 # trivy:ignore:AVD-GIT-0001
 module "gh" {
-  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=a2205ee819a322ff03d4ff6de93120ec80165f79"
+  source = "git::https://github.com/quantile-co/factory.git//tf/modules/project/github?ref=d11aca2ddb613ba40699f75df42e2c597b543688"
 
   allowed_action_patterns = [
     "quantile-co/factory/.github/workflows/*@*",
