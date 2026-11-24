@@ -2,7 +2,7 @@
   description = "Quantile marketing site";
 
   inputs = {
-    factory.url = "github:quantile-co/factory/74a7e9b2eff3d5bf26923a545c0ff44aac3ef4b9";
+    factory.url = "github:quantile-co/factory/cbcc2a802236a4085c00f3ae87b024ccbf84506d";
     nixpkgs.follows = "factory/nixpkgs";
   };
 
