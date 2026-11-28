@@ -1,6 +1,7 @@
 name: Check
 
 on:
+  # GitHub fork approval must admit the revision before allocating a runner.
   pull_request:
   push:
     # Dependabot branches are checked by their pull requests, not twice.
@@ -17,8 +18,7 @@ env:
 jobs:
   all:
     name: All
-    # A successful main check also populates the profile’s main-only cache volume.
-    runs-on: namespace-profile-factory-4x8;tailscale.spec=quantile
+    runs-on: namespace-profile-factory-8x16;tailscale.spec=quantile
     timeout-minutes: 30
     steps:
       - name: Check out repository
@@ -26,17 +26,6 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0 # Full-history Gitleaks rejects shallow checkouts.
-
-      - name: Mount workflow caches
-        id: volume
-        uses: namespacelabs/nscloud-cache-action@1124a6f3ce44e5cf84cc22111530961f4d2a15f9 # v1
-        with:
-          path: |
-            /nix
-            /home/runner/.cache/pnpm-store
-            .turbo/cache
-          spacectl-version: 0.12.3
-          spacectl-system-binary: ignore
 
       - name: Install Nix
         uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
@@ -47,7 +36,7 @@ jobs:
             build-dir = ${{ runner.temp }}
 
       # GitHub's workflow-job webhook exports these step durations to ClickStack.
-      - name: Prepare dev shell (volume restored = ${{ steps.volume.outputs.cache-hit }})
+      - name: Prepare dev shell
         run: |
           direnv_bin="$(nix build --no-link --print-out-paths '.#direnv')/bin"
           "$direnv_bin/direnv" allow .
@@ -59,15 +48,6 @@ jobs:
 
       - name: Run checks
         env:
-          TURBO_TOKEN: >-
-            ${{ (github.event_name != 'pull_request' ||
-              (github.event.pull_request.head.repo.full_name == github.repository &&
-                contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'),
-                  github.event.pull_request.author_association))) &&
-              secrets.TURBO_TOKEN || '' }}
+          TURBO_CACHE: local:rw
         run: |
-          export TURBO_CACHE=local:rw
-          if [ -n "$TURBO_TOKEN" ]; then
-            export TURBO_CACHE=local:rw,remote:r
-          fi
           direnv exec . pnpm run check

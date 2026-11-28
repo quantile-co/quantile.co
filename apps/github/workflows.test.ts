@@ -40,8 +40,45 @@ it("provisions the repository bank with ephemeral credentials only in protected 
     );
 });
 
-it("runs the workload on the managed runner without a per-job collector", () => {
+it.each(["check", "test"])(
+  "keeps public %s read-only with job-local caches",
+  (phase) => {
+    const workflow = read(`.github/workflows/${phase}.yaml`);
+    expect(workflow.match(/^ *permissions:.*$/gm)).toEqual(["permissions:"]);
+    expect(workflow).toContain("permissions:\n  contents: read\n\n");
+    expect(workflow).toContain("persist-credentials: false");
+    expect(workflow).toContain("TURBO_CACHE: local:rw");
+    expect(workflow).not.toMatch(
+      /environment:|\bsecrets\b|id-token:|remote:|nscloud-cache-action|actions\/cache@|cachix\/cachix-action@/,
+    );
+  },
+);
+
+it("limits publication permissions to the Build application job", () => {
+  const [build, rejection] = read(".github/workflows/build.yaml").split(
+    "\n  reject-ref:\n",
+  );
+  expect(build).toContain(
+    "permissions:\n      contents: write\n      actions: read",
+  );
+  expect(rejection).toContain("permissions: {}");
+  expect(rejection).not.toContain("contents: write");
+});
+
+it("runs the required Check job for push and pull_request without bypassing fork approval", () => {
+  const workflow = read(".github/workflows/check.yaml");
+  expect(workflow).toContain("  pull_request:\n");
+  expect(workflow).not.toContain("pull_request_target");
+  expect(workflow).toContain("  push:\n");
+  expect(workflow).toContain("  all:\n    name: All\n");
+  expect(workflow).toContain("direnv exec . pnpm run check");
+});
+
+it("runs manual main Test on the managed runner without a per-job collector", () => {
   const workflow = read(".github/workflows/test.yaml");
+  expect(workflow).toContain(
+    "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
+  );
   expect(workflow).toContain(
     "runs-on: namespace-profile-factory-4x8;tailscale.spec=quantile",
   );

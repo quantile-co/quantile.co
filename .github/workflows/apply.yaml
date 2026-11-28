@@ -92,3 +92,12 @@ jobs:
             --gcp-tf-state-bucket '${{ vars.GCP_TF_STATE_BUCKET }}' \
             --gcp-wif-pool '${{ vars.GCP_WIF_POOL }}' \
             --gh-plan-ref "$GH_PLAN_REF"
+
+  reject-ref:
+    if: github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
+    environment: prod
+    permissions: {}
+    runs-on: namespace-profile-factory-4x8;tailscale.spec=quantile
+    steps:
+      - name: Refuse non-main dispatch
+        run: exit 1

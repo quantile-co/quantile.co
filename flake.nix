@@ -2,7 +2,7 @@
   description = "Quantile marketing site";
 
   inputs = {
-    factory.url = "github:quantile-co/factory/cbcc2a802236a4085c00f3ae87b024ccbf84506d";
+    factory.url = "github:quantile-co/factory/f038b5f9d06666e553f094583e6c965be783b4bf";
     nixpkgs.follows = "factory/nixpkgs";
   };
 
@@ -35,6 +35,7 @@
             };
             hindsight.bankId = "quantile-co--quantile-co";
             github.workflows = {
+              context = "public";
               layers = [ "infrastructure" ];
               build.layers = [ "application" ];
             };

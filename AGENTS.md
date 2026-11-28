@@ -18,8 +18,14 @@ There is no Checkout, webhook, transactional email, welcome route or application
 database. Preserve approved copy. Source cleanup does not establish production
 retirement.
 
-Public Check, manual immutable-source Build, protected-main Plan and exact Apply
-are distinct workflows. A source merge or passing Check does **not** authorize
+Check and manual main-only Test use Factory’s public context: read-only contents,
+no job environment or reusable secrets, and only job-local writable caches. Fork
+pull requests require GitHub approval for all external contributors before Check
+gets a runner. Keep the required `All` job in Check; the release verifier reads
+that exact job from the successful push run for the reviewed SHA.
+
+Manual immutable-source Build, protected-main Plan and exact Apply are distinct
+from these checks. A source merge or passing Check does **not** authorize
 Build, Plan or Apply; require separate explicit review before each production
 phase. Preserve WIF, state locks, provenance and release immutability. Do not
 commit credentials, state, saved plans or customer payloads.

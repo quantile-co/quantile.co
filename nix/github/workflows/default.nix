@@ -16,6 +16,7 @@ let
   from = [
     "    inputs:\n"
     "group: factory-production"
+    "    name: Application\n"
     "      - name: Check out repository\n"
     "          persist-credentials: false\n"
     "            .turbo/cache\n"
@@ -38,6 +39,7 @@ let
           type: string
     '')
     "group: source-release"
+    "    name: Application\n    permissions:\n      contents: write\n      actions: read\n"
     "      - name: Check out trusted release tooling\n"
     (indent "          " ''
       ref: ''${{ github.sha }}
@@ -71,10 +73,5 @@ in
     assert lib.assertMsg (lib.all (
       text: lib.hasInfix text source
     ) from) "Source release Build template lost a patch point";
-    builtins.toFile "build.yaml" (
-      builtins.replaceStrings
-        [ "    environment: prod\n" ]
-        [ "    environment: prod\n    permissions:\n      contents: write\n      actions: read\n" ]
-        (builtins.replaceStrings from to source)
-    );
+    builtins.toFile "build.yaml" (builtins.replaceStrings from to source);
 }

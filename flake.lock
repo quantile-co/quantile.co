@@ -46,17 +46,17 @@
         "tailscale-nixpkgs": "tailscale-nixpkgs"
       },
       "locked": {
-        "lastModified": 1795479861,
-        "narHash": "sha256-olo2rtfZ2KWt7qggSmdu7FCQIXoEmeONdUUWAB76t1I=",
+        "lastModified": 1795888272,
+        "narHash": "sha256-gkCFWHfOkG5ZWSxg08j4KlsidAK8Aej29DID3M+kjKU=",
         "owner": "quantile-co",
         "repo": "factory",
-        "rev": "cbcc2a802236a4085c00f3ae87b024ccbf84506d",
+        "rev": "f038b5f9d06666e553f094583e6c965be783b4bf",
         "type": "github"
       },
       "original": {
         "owner": "quantile-co",
         "repo": "factory",
-        "rev": "cbcc2a802236a4085c00f3ae87b024ccbf84506d",
+        "rev": "f038b5f9d06666e553f094583e6c965be783b4bf",
         "type": "github"
       }
     },
@@ -123,11 +123,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1794386569,
-        "narHash": "sha256-x9sADJvoVG0L6RejZB+/BB4YiGZFBZrfTlhF4uBq1tQ=",
+        "lastModified": 1794537146,
+        "narHash": "sha256-Wpz/7x/YWnDIBu7yj6ixe8j6fIMsidd9Y+o1PqPF3iM=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d4f25a3e562008648d45bcf2d70bcc7422cad84e",
+        "rev": "d5cc6833999746cffdfe0598f7bc801a57b887a9",
         "type": "github"
       },
       "original": {

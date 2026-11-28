@@ -19,7 +19,6 @@ jobs:
     name: All
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: namespace-profile-factory-4x8;tailscale.spec=quantile
-    environment: prod
     timeout-minutes: 30
     steps:
       - name: Check out repository
@@ -27,16 +26,6 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0 # Tests run the full-history checks first.
-
-      - name: Mount workflow caches
-        uses: namespacelabs/nscloud-cache-action@1124a6f3ce44e5cf84cc22111530961f4d2a15f9 # v1
-        with:
-          path: |
-            /nix
-            /home/runner/.cache/pnpm-store
-            .turbo/cache
-          spacectl-version: 0.12.3
-          spacectl-system-binary: ignore
 
       - name: Install Nix
         uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
@@ -46,21 +35,10 @@ jobs:
             require-sigs = true
             build-dir = ${{ runner.temp }}
 
-      - name: Set up Cachix
-        uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
-        with:
-          name: ${{ github.repository_owner }}
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-          useDaemon: false
-
       - name: Run checks, then tests
         env:
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_CACHE: local:rw
         run: |
-          export TURBO_CACHE=local:rw
-          if [ -n "$TURBO_TOKEN" ]; then
-            export TURBO_CACHE=local:rw,remote:rw
-          fi
           direnv="$(nix build --no-link --print-out-paths '.#direnv')/bin/direnv"
           "$direnv" allow .
           "$direnv" exec . pnpm install --frozen-lockfile
